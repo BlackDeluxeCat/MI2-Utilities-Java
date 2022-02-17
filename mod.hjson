@@ -1,23 +1,26 @@
 #the mod name as displayed in-game
-displayName: "Java Mod Template"
+displayName: "MI2-Utilities Java"
 
 #the internal name of your mod
-name: "example-java-mod"
+name: "MI2-Utilities-Java"
 
 #your name
-author: "You"
+author: "BlackDeluxeCat"
 
 #the fully qualified main class of the mod
-main: "example.ExampleJavaMod"
+main: "mi2u.MI2Utilities"
 
 #the mod description as seen in the mod dialog
-description: "A Mindustry Java mod template."
+description: "A Mindustry Java mod. Useful tools built in Mindustry-window."
 
 #the mod version
-version: 1.0
+version: 0.0.1
 
 #the minimum game build required to run this mod
-minGameVersion: 129
+minGameVersion: 132
 
 #this is a java mod
 java: true
+
+hidden: true
+hideBrowser: true
