@@ -17,9 +17,10 @@ public class MI2Utilities extends Mod{
 
         //listen for game load event
         Events.on(ClientLoadEvent.class, e -> {
-            Time.runTask(10f, () -> {
+            Time.runTask(20f, () -> {
                 MI2UVars.init();
                 mi2ui.addTo(Core.scene.root);
+                logicHelper.addTo(ui.logic);
             });
         });
 
