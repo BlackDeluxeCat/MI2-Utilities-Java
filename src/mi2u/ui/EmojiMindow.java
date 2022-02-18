@@ -23,7 +23,7 @@ public class EmojiMindow extends Mindow2{
     private int tmpindex = 0;
 
     public EmojiMindow() {
-        super("@emoji.MI2U", "@emoji.info");
+        super("@emoji.MI2U", "@emoji.help");
     }
 
     @Override

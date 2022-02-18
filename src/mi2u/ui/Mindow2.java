@@ -12,11 +12,11 @@ import arc.scene.ui.*;
 import arc.scene.ui.Label.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
-import mi2u.MI2UVars;
 import mindustry.gen.*;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
 
+import static mi2u.MI2UVars.*;
 /**  
  * Mindow2 is a dragable Table that partly works like a window. 
  * cont is a container for user items. 
@@ -90,16 +90,18 @@ public class Mindow2 extends Table{
         });
         titleBar.add(title).pad(0, 1, 0, 1).growX();
 
-        titleBar.button("" + Iconc.info, Styles.clearToggleMenut, () -> {
+        titleBar.button("" + Iconc.info, textb, () -> {
             showHelp();
             rebuild();
-        }).size(MI2UVars.titleButtonSize);
+        }).size(titleButtonSize);
 
+        /*
         titleBar.button("" + Iconc.refresh, Styles.cleart, () -> {
             rebuild();
-        }).size(MI2UVars.titleButtonSize);
+        }).size(titleButtonSize);
+        */
 
-        titleBar.button("" + Iconc.lock, Styles.clearToggleMenut, () -> {
+        titleBar.button("" + Iconc.lock, textbtoggle, () -> {
             topmost = !topmost;
             if(topmost){
                 currTopmost = this;
@@ -107,12 +109,12 @@ public class Mindow2 extends Table{
                 if(currTopmost == this) currTopmost = null;
             }
             rebuild();
-        }).size(MI2UVars.titleButtonSize).update(b -> {
+        }).size(titleButtonSize).update(b -> {
             topmost = currTopmost == this;
             b.setChecked(topmost);
         });
 
-        titleBar.button("-", Styles.clearToggleMenut, () -> {
+        titleBar.button("-", textbtoggle, () -> {
             minimized = !minimized;
             if(minimized){
                 cury += cont.getHeight();
@@ -120,13 +122,13 @@ public class Mindow2 extends Table{
                 cury -= cont.getHeight();
             }
             rebuild();
-        }).size(MI2UVars.titleButtonSize).update(b -> {
+        }).size(titleButtonSize).update(b -> {
             b.setChecked(minimized);
         });
 
-        titleBar.button("X", Styles.cleart, () -> {
+        titleBar.button("X", textb, () -> {
             remove();
-        }).size(MI2UVars.titleButtonSize).update(b -> {
+        }).size(titleButtonSize).update(b -> {
             b.setDisabled(!closable);
         });
 

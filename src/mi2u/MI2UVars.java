@@ -31,6 +31,7 @@ public class MI2UVars {
     public static MI2UI mi2ui = new MI2UI();
     public static EmojiMindow emojis = new EmojiMindow();
     public static CoreInfoMindow coreInfo = new CoreInfoMindow();
+    public static LogicHelperMindow logicHelper = new LogicHelperMindow();
 
     public static void init(){
         Mindow2.init();
@@ -51,7 +52,7 @@ public class MI2UVars {
         if(Math.abs(unit.x - Core.camera.position.x) > (Core.camera.width / 2) || Math.abs(unit.y - Core.camera.position.y) > (Core.camera.height / 2)) return;
         //display healthbar by MI2
         Draw.z(Layer.shields + 6f);
-        if(Core.settings.getBool("unitHealthBar")){
+        if(enUnitHealthBar){
             Draw.reset();
             if(unit.hitTime > 0f){
                 Lines.stroke(4f + Mathf.lerp(0f, 2f, Mathf.clamp(unit.hitTime)));

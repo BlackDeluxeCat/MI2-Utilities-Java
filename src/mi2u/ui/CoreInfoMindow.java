@@ -21,7 +21,7 @@ public class CoreInfoMindow extends Mindow2{
     private CoreBuild core;
     
     public CoreInfoMindow(){
-        super("@coreInfo.MI2U", "coreInfo.help");
+        super("@coreInfo.MI2U", "@coreInfo.help");
     }
 
     public void resetUsed(){
