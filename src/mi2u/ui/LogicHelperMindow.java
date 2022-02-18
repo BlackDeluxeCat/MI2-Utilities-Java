@@ -1,7 +1,6 @@
 package mi2u.ui;
 
 import java.lang.reflect.*;
-import java.util.regex.Pattern;
 
 import arc.*;
 import arc.scene.ui.*;
@@ -21,9 +20,8 @@ public class LogicHelperMindow extends Mindow2{
     Table varsTable; 
     TextField f;
     LExecutor exec = null, lastexec = null;
-    String rawSplit = "", split = "";
+    String split = "";
     int depth = 6;
-    boolean regex = false;
 
     public LogicHelperMindow(){
         super("@logicHelper.MI2U", "@logicHelper.help");
@@ -38,22 +36,11 @@ public class LogicHelperMindow extends Mindow2{
             t.clear();
             t.table(tt -> {
                 f = tt.field(split, Styles.nodeField, s -> {
-                    rawSplit = s;
-                    if(!cookSplit()) return;
+                    split = s;
                     rebuildVars(varsTable);
                 }).fillX().get();
                 f.setMessageText("@logicHelper.splitField.msg");
-                f.setValidator(s -> {
-                    return cookSplit();
-                });
 
-                tt.button("@logicHelper.reg", textbtoggle, () -> {
-                    regex = !regex;
-                    rebuildVars(varsTable);
-                }).height(titleButtonSize).update(b -> {
-                    b.setChecked(regex);
-                    b.getLabel().setWrap(false);
-                });
             });
 
             t.row();
@@ -92,7 +79,7 @@ public class LogicHelperMindow extends Mindow2{
                         Core.app.setClipboardText(s);
                     }).size(36,24);
             
-                    String[] blocks = s.split(split, depth);
+                    String[] blocks = s.split(cookSplit(split), depth);
                     for(int bi = 0; bi < Math.min(depth, blocks.length); bi++){
                         //if(blocks[bi] == "") continue;
                         String str = blocks[bi] + (bi == blocks.length - 1 ? "":split);
@@ -118,29 +105,13 @@ public class LogicHelperMindow extends Mindow2{
             }
         }
     }
-    private boolean cookSplit(){
+
+    private String cookSplit(String raw){
         String cooking = "";
-        if(regex){
-            /*
-            for(int si = 0; si < rawSplit.length(); si++){
-                if("\\".indexOf(rawSplit.charAt(si)) != -1) cooking = cooking + "\\";
-                cooking = cooking + rawSplit.charAt(si);
-            }
-            */
-            cooking = rawSplit;
-        }else{
-            for(int si = 0; si < rawSplit.length(); si++){
-                if(".$|()[{^?*+\\".indexOf(rawSplit.charAt(si)) != -1) cooking = cooking + '\\';
-                cooking = cooking + rawSplit.charAt(si);
-            }
+        for(int si = 0; si < raw.length(); si++){
+            if(".$|()[{^?*+\\".indexOf(raw.charAt(si)) != -1) cooking = cooking + "\\";
+            cooking = cooking + raw.charAt(si);
         }
-        try{
-            Pattern.compile(cooking);
-            split = cooking;
-            return true;
-        }catch(Exception e){
-            return false;
-        }
+        return "(" + cooking + ")";
     }
-    
 }
