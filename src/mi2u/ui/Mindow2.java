@@ -12,6 +12,7 @@ import arc.scene.ui.*;
 import arc.scene.ui.Label.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
+import mi2u.io.MI2USettings;
 import mindustry.gen.*;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
@@ -31,7 +32,7 @@ public class Mindow2 extends Table{
 
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
     public boolean topmost = false, minimized = false, closable = true;
-    public String titleText = "", helpInfo = "";
+    public String titleText = "", helpInfo = "", mindowName;
     private Table titleBar = new Table();
     private Table cont = new Table();
     @Nullable public Element aboveSnap;
@@ -92,14 +93,11 @@ public class Mindow2 extends Table{
 
         titleBar.button("" + Iconc.info, textb, () -> {
             showHelp();
-            rebuild();
         }).size(titleButtonSize);
 
-        /*
-        titleBar.button("" + Iconc.refresh, Styles.cleart, () -> {
-            rebuild();
+        titleBar.button("" + Iconc.save, textb, () -> {
+            saveSettings();
         }).size(titleButtonSize);
-        */
 
         titleBar.button("" + Iconc.lock, textbtoggle, () -> {
             topmost = !topmost;
@@ -174,6 +172,37 @@ public class Mindow2 extends Table{
                 show();
             }
         };
+    }
+
+    /** Override this method for custom settings load
+     * rebuild() called once finished loading
+     */
+    public boolean loadSettingsRaw(){
+        //it is a not-named mindow2, no settings can be loaded.
+        if(mindowName == null || mindowName.equals("")) return false;
+        minimized = MI2USettings.getBool(mindowName + ".minimized");
+        topmost = MI2USettings.getBool(mindowName + ".topmost");
+        if(topmost) currTopmost = this;
+        curx = (float)MI2USettings.getInt(mindowName + ".curx");
+        cury = (float)MI2USettings.getInt(mindowName + ".cury");
+        return true;
+    }
+
+    public void loadSettings(){
+        loadSettingsRaw();
+        rebuild();
+    }
+
+    /** Override this method for custom settings load
+     */
+    public boolean saveSettings(){
+        //it is a not-named mindow2, no settings can be saved.
+        if(mindowName == null || mindowName.equals("")) return false;
+        MI2USettings.putBool(mindowName + ".minimized", minimized);
+        MI2USettings.putBool(mindowName + ".topmost", topmost);
+        MI2USettings.putInt(mindowName + ".curx", (int)curx);
+        MI2USettings.putInt(mindowName + ".cury", (int)cury);
+        return true;
     }
 
     public static void init(){

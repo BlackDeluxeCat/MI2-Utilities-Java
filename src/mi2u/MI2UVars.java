@@ -4,10 +4,9 @@ import arc.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
-import arc.scene.ui.*;
 import arc.scene.ui.TextButton.*;
 import arc.util.*;
-import mi2u.*;
+import mi2u.io.*;
 import mi2u.ui.*;
 import mindustry.ai.*;
 import mindustry.ai.types.*;
@@ -18,13 +17,11 @@ import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.ui.*;
-import mindustry.world.Tile;
+import mindustry.world.*;
 
 import static mindustry.Vars.*;
 
 public class MI2UVars {
-    public static boolean enUnitHealthBar = false, enUnitLogic = false, enUnitLogicTimer = false, enUnitPath = false;
-
     public static float titleButtonSize = 28f;
     public static TextButtonStyle textb = Styles.cleart, textbtoggle = Styles.clearToggleMenut;
 
@@ -32,9 +29,14 @@ public class MI2UVars {
     public static EmojiMindow emojis = new EmojiMindow();
     public static CoreInfoMindow coreInfo = new CoreInfoMindow();
     public static LogicHelperMindow logicHelper = new LogicHelperMindow();
+    public static CustomContainerMindow container = new CustomContainerMindow();
 
     public static void init(){
         Mindow2.init();
+        mi2ui.loadSettings();
+        emojis.loadSettings();
+        coreInfo.loadSettings();
+        logicHelper.loadSettings();
     }
 
     public static void unitRebuildBlocks(){
@@ -52,7 +54,7 @@ public class MI2UVars {
         if(Math.abs(unit.x - Core.camera.position.x) > (Core.camera.width / 2) || Math.abs(unit.y - Core.camera.position.y) > (Core.camera.height / 2)) return;
         //display healthbar by MI2
         Draw.z(Layer.shields + 6f);
-        if(enUnitHealthBar){
+        if(MI2USettings.getBool("enUnitHpBar")){
             Draw.reset();
             if(unit.hitTime > 0f){
                 Lines.stroke(4f + Mathf.lerp(0f, 2f, Mathf.clamp(unit.hitTime)));
@@ -110,7 +112,7 @@ public class MI2UVars {
         if(unit.controller() instanceof LogicAI logicai){
             Draw.reset();
             //if(Core.settings.getBool("unitLogicMoveLine") && Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) <= 1200f){
-            if(enUnitLogic && Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) <= 1200f){
+            if(MI2USettings.getBool("enUnitLogic") && Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) <= 1200f){
                 Lines.stroke(1f);
                 Draw.color(0.2f, 0.2f, 1f, 0.9f);
                 Lines.dashLine(unit.x, unit.y, logicai.moveX, logicai.moveY, (int)(Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) / 8));
@@ -120,7 +122,7 @@ public class MI2UVars {
             
             //logicai timers
             //if(Core.settings.getBool("unitLogicTimerBars")){
-            if(enUnitLogicTimer){
+            if(MI2USettings.getBool("enUnitLogicTimer")){
                 Lines.stroke(2f);
                 Draw.color(Pal.heal);
                 Lines.line(unit.x - (unit.hitSize() / 2f), unit.y - (unit.hitSize() / 2f), unit.x - (unit.hitSize() / 2f), unit.y + unit.hitSize() * (logicai.controlTimer / LogicAI.logicControlTimeout - 0.5f));
@@ -139,7 +141,7 @@ public class MI2UVars {
 
         //Pathfind Renderer
         //if(Core.settings.getBool("unitPathLine") && Core.settings.getInt("unitPathLineLength") > 0){
-        if(enUnitPath){
+        if(MI2USettings.getBool("enUnitPath")){
             Draw.z(Layer.power - 4f);
             Tile tile = unit.tileOn();
             Draw.reset();

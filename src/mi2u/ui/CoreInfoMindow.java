@@ -14,19 +14,13 @@ import static mindustry.Vars.*;
 
 public class CoreInfoMindow extends Mindow2{
     private Interval interval = new Interval();
-    private ObjectSet<Item> usedItems = new ObjectSet<>();
     private ObjectIntMap<Item> lastItemsAmt = new ObjectIntMap<>(); 
     private ObjectIntMap<Item> lastLastItemsAmt = new ObjectIntMap<>(); 
-    private ObjectSet<UnitType> usedUnits = new ObjectSet<>();
     private CoreBuild core;
     
     public CoreInfoMindow(){
         super("@coreInfo.MI2U", "@coreInfo.help");
-    }
-
-    public void resetUsed(){
-        usedItems.clear();
-        background(null);
+        mindowName = "CoreInfo";
     }
 
     @Override

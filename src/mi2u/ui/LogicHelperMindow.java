@@ -26,6 +26,7 @@ public class LogicHelperMindow extends Mindow2{
     public LogicHelperMindow(){
         super("@logicHelper.MI2U", "@logicHelper.help");
         closable = false;
+        mindowName = "LogicHelper";
     }
 
     @Override
