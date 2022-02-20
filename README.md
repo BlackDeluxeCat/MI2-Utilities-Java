@@ -1,4 +1,22 @@
-# Mindustry Java Mod Template
+# MI2-Utilities Testing
+A Mindustry Java mod. Useful vanilla tools built in Mindustry-window. MI2-Client sublimation.
+
+Mindustry Java模组，添加实用原版工具，以特殊窗体承载。MI2端的升华。
+
+From [BlackDeluxeCat/MI2-Utilities](https://github.com/BlackDeluxeCat/MI2-Utilities)（MI2端的终极目标是Mod化，将会更高、更强。）
+
+# Features 特性列表（won't timely update 不会即时更新）
+
+1. UI Frame: Mindow2. Window with a powerful title bar, making it possible to drag & move, minimize, form snap links, add custom helpinfo, ect. Most of the config of Mindow2 can be saved to file, and loaded on each start. 
+   ("Mindow2" has been used, so "Mindow2" is much more reasonable, not just representing author name MyIndustry2,,,)
+2. Function Mindow2s: Main UI, Logic Helper, Core Info, Emojis Table, etc. Check helpinfo.
+==
+
+1. 特色窗体框架：Mindow2。窗体具有功能丰富的标题栏，可以拖拽移动、最小化内容、形成吸附链、附代帮助信息等。大部分窗体配置可保存供启动使用。
+   （恰好其他Modder使用过"Mindow"一词，因此命名"Mindow2"情理之中，绝不仅仅是为了映射作者MyIndustry2名字。）
+2. 基于Mindow2的功能窗体：主UI、逻辑辅助、进阶核心资源栏、Emojis键入器等。具体功能请查看帮助信息。
+
+# Gen From Mindustry Java Mod Template
 A Java Mindustry mod template that works on Android and PC. The Kotlin version of this mod can be seen [here](https://github.com/Anuken/MindustryKotlinModTemplate).
 
 ## Building for Desktop Testing
