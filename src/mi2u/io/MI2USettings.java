@@ -42,7 +42,7 @@ public class MI2USettings {
         modified = true;
     }
 
-    public static void putString(String name, String value){
+    public static void putStr(String name, String value){
         MI2USetting ss = map.find(s -> {return s.name.equals(name);});
         if(ss != null){
             ss.value = value;
@@ -62,23 +62,34 @@ public class MI2USettings {
         modified = true;
     }
 
-    @Nullable
-    public static int getInt(String name){
+    public static int getInt(String name, int def){
         MI2USetting obj = map.find(s -> {return s.name.equals(name);});
-        if(obj == null) return 0;
+        if(obj == null) return def;
         return Strings.parseInt(obj.value, 0);
     }
 
-    public static String getStr(String name){
+    public static int getInt(String name){
+        return getInt(name, 0);
+    }
+
+    public static String getStr(String name, String def){
         MI2USetting obj = map.find(s -> {return s.name.equals(name);});
-        if(obj == null) return "";
+        if(obj == null) return def;
         return obj.value;
     }
 
-    public static boolean getBool(String name){
+    public static String getStr(String name){
+        return getStr(name, "");
+    }
+
+    public static boolean getBool(String name, boolean def){
         MI2USetting obj = map.find(s -> {return s.name.equals(name);});
-        if(obj == null) return false;
+        if(obj == null) return def;
         return obj.value.equals("true");
+    }
+
+    public static boolean getBool(String name){
+        return getBool(name, false);
     }
 
     public static boolean load(){

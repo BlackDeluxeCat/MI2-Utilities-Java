@@ -21,6 +21,8 @@ public class MI2Utilities extends Mod{
                 MI2UVars.init();
                 mi2ui.addTo(Core.scene.root);
                 logicHelper.addTo(ui.logic);
+                if(MI2USettings.getBool("showEmojis")) emojis.addTo(emojis.hasParent() ? emojis.parent : Core.scene.root);
+                if(MI2USettings.getBool("showCoreInfo")) coreInfo.addTo(coreInfo.hasParent() ? coreInfo.parent : Core.scene.root);
             });
         });
 

@@ -33,10 +33,10 @@ public class MI2UVars {
 
     public static void init(){
         Mindow2.init();
-        mi2ui.loadSettings();
-        emojis.loadSettings();
-        coreInfo.loadSettings();
-        logicHelper.loadSettings();
+        mi2ui.loadUISettings();
+        emojis.loadUISettings();
+        coreInfo.loadUISettings();
+        logicHelper.loadUISettings();
     }
 
     public static void unitRebuildBlocks(){
