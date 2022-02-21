@@ -82,7 +82,7 @@ public class CoreInfoMindow extends Mindow2{
 
         if(MI2USettings.getBool(mindowName + ".showPowerGraphs")){
             cont.row();
-            cont.add(pg).width(cont.getWidth() - 20);
+            cont.add(pg).fillX();
         }
 
     }
