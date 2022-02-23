@@ -5,6 +5,8 @@ Mindustry Java模组，添加实用原版工具，以特殊窗体承载。MI2端
 
 From [BlackDeluxeCat/MI2-Utilities](https://github.com/BlackDeluxeCat/MI2-Utilities)（MI2端的终极目标是Mod化，将会更高、更强。）
 
+中文讨论群：875035496
+
 # Features 特性列表（won't timely update 不会即时更新）
 
 1. UI Frame: Mindow2. Window with a powerful title bar, making it possible to drag & move, minimize, form snap links, add custom helpinfo, ect. Most of the config of Mindow2 can be saved to file, and loaded on each start. 
