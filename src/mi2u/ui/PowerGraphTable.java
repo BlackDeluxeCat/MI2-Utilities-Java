@@ -3,6 +3,7 @@ package mi2u.ui;
 import arc.*;
 import arc.func.*;
 import arc.graphics.*;
+import arc.math.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
@@ -74,10 +75,10 @@ public class PowerGraphTable extends Table{
                 newBar.set(powertext, () -> p.getLastPowerStored() / p.getLastCapacity(), Pal.accent);
                 newBar.blink(Color.white).outline(new Color(0.3f, 0.3f, 0.6f, 0.3f), 2f);
                 newBar.addListener(new Tooltip(tt -> {
+                    tt.background(Styles.black6);
                     tt.label(() -> "" + UI.formatAmount((long)((PowerGraph)newBar.userObject).getLastPowerStored()) + "/" + UI.formatAmount((long)((PowerGraph)newBar.userObject).getLastCapacity()) + "  " + (((PowerGraph)newBar.userObject).getPowerBalance() >= 0 ? "+" : "") + UI.formatAmount((long)(((PowerGraph)newBar.userObject).getPowerBalance() * 60)));
                     tt.row();
                     tt.table(ttt ->{
-                        ttt.background(Styles.black6);
                         ttt.update(() -> {
                             ttt.clear();
                             ttt.add("Prod");
@@ -90,7 +91,7 @@ public class PowerGraphTable extends Table{
                                 
                                 for(Building producer : ppp.producers){
                                     blocks.put(producer.block, (blocks.containsKey(producer.block) ? blocks.get(producer.block):0f) + 1f);
-                                    values.put(producer.block, (values.containsKey(producer.block) ? values.get(producer.block):0f) + producer.getPowerProduction() * producer.delta() * 60f);
+                                    values.put(producer.block, (values.containsKey(producer.block) ? values.get(producer.block):0f) + producer.getPowerProduction() * producer.timeScale() * 60f);
                                 }
 
                                 int cols = (int)(blocks.size / (Core.scene.getHeight() / 36f));
@@ -113,7 +114,7 @@ public class PowerGraphTable extends Table{
                                 for(Building consumer : ppp.consumers){
                                     if(!consumer.block.consumes.hasPower()) continue;
                                     blocks.put(consumer.block, (blocks.containsKey(consumer.block) ? blocks.get(consumer.block):0f) + 1f);
-                                    values.put(consumer.block, (values.containsKey(consumer.block) ? values.get(consumer.block):0f) + consumer.power.status * consumer.block.consumes.getPower().usage * 60 * consumer.timeScale());
+                                    values.put(consumer.block, (values.containsKey(consumer.block) ? values.get(consumer.block):0f) + Mathf.num(consumer.shouldConsume()) * consumer.power.status * consumer.block.consumes.getPower().usage * 60 * consumer.timeScale());
                                 }
 
                                 int cols = (int)(blocks.size / (Core.scene.getHeight() / 48f));
