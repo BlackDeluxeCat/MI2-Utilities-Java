@@ -22,7 +22,6 @@ import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.distribution.BufferedItemBridge.*;
 import mindustry.world.blocks.distribution.ItemBridge.*;
 import mindustry.world.blocks.distribution.Junction.*;
-import mindustry.world.blocks.distribution.Router.*;
 import mindustry.world.blocks.storage.*;
 import mindustry.world.blocks.storage.Unloader.*;
 import mindustry.world.blocks.storage.Unloader.UnloaderBuild.*;
@@ -164,37 +163,72 @@ public class MI2UFuncs{
     public static void drawBlackboxBuilding(){
         Draw.reset();
         Lines.stroke(0.5f);
-        Lines.rect(new Rect().setSize(120f).setCenter(Core.input.mouseWorld()));
+        Lines.rect(new Rect().setSize(240f).setCenter(Core.input.mouseWorld()));
 
         Groups.build.each(b -> {
             Rect rect = new Rect();
             Core.camera.bounds(rect);
             if(!rect.contains(b.tile().worldx(), b.tile().worldy())) return;
-            rect.setSize(120f).setCenter(Core.input.mouseWorld());
+            rect.setSize(240f).setCenter(Core.input.mouseWorld());
             if(!rect.contains(b.tile().worldx(), b.tile().worldy())) return;
 
-            if(b instanceof JunctionBuild jb){
-                drawJunciton(jb);
-            }
-
-            if(b instanceof ItemBridgeBuild ib){
-                drawItemBridge(ib);
-            }
-
-            if(b instanceof BufferedItemBridgeBuild bb){
-                drawBufferedItemBridge(bb);
-            }
-
-            if(b instanceof UnloaderBuild ub){
-                drawUnloader(ub);
-            }
-
-            if(b instanceof RouterBuild rb){
-                
-            }
+            if(b instanceof JunctionBuild jb) drawJunciton(jb);
+            if(b instanceof ItemBridgeBuild ib) drawItemBridge(ib);
+            if(b instanceof BufferedItemBridgeBuild bb) drawBufferedItemBridge(bb);
+            if(b instanceof UnloaderBuild ub) drawUnloader(ub);
         });
     }
+    public static void drawJunciton(JunctionBuild jb){
+        try{
+            int cap = ((Junction)jb.block).capacity;
+            float speed = ((Junction)jb.block).speed;
 
+            Field f = jb.getClass().getDeclaredField("buffer");
+            f.setAccessible(true);
+            DirectionalItemBuffer buffer = (DirectionalItemBuffer)f.get(jb);
+            f = buffer.getClass().getDeclaredField("buffers");
+            f.setAccessible(true);
+            long[][] bufferbuffers = (long[][])f.get(buffer);
+            f = buffer.getClass().getDeclaredField("indexes");
+            f.setAccessible(true);
+            int[] indexes = (int[])f.get(buffer);
+
+            Item[][] items = new Item[4][bufferbuffers[0].length];
+            for(int i = 0; i < 4; i++){
+                for(int ii = 0; ii < bufferbuffers[i].length; ii++){
+                    items[i][ii] = (ii < indexes[i])? content.item(BufferItem.item(bufferbuffers[i][ii])) : null;
+                }
+            }
+            float[][] times = new float[4][bufferbuffers[0].length];
+            for(int i = 0; i < 4; i++){
+                for(int ii = 0; ii < bufferbuffers[i].length; ii++){
+                    times[i][ii] = (ii < indexes[i])? BufferItem.time(bufferbuffers[i][ii]) : 9999999999999f;
+                }
+            }
+            
+            float begx, begy, endx, endy;
+            for(int i = 0; i < 4; i++){
+                endx = jb.x + Geometry.d4(i).x * tilesize / 2f + Geometry.d4(Math.floorMod(i + 1, 4)).x * tilesize / 4f;
+                endy = jb.y + Geometry.d4(i).y * tilesize / 2f + Geometry.d4(Math.floorMod(i + 1, 4)).y * tilesize / 4f;
+                begx = jb.x - Geometry.d4(i).x * tilesize / 4f + Geometry.d4(Math.floorMod(i + 1, 4)).x * tilesize / 4f;
+                begy = jb.y - Geometry.d4(i).y * tilesize / 4f + Geometry.d4(Math.floorMod(i + 1, 4)).y * tilesize / 4f;
+                if(buffer.indexes[i] > 0){
+                    float loti = 0f;
+                    for(int idi = 0; idi < buffer.indexes[i]; idi++){
+                        if(items[i][idi] != null){
+                            Draw.alpha(0.9f);
+                            Draw.rect(items[i][idi].fullIcon, 
+                            begx + ((endx - begx) / (float)cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale / speed) * cap, cap - loti)), 
+                            begy + ((endy - begy) / (float)cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale / speed) * cap, cap - loti)),
+                            4f, 4f);
+                        }
+                        loti++;
+                    }
+                }
+            }
+        }catch(Exception e){if(!interval.get(30)) return; Log.err(e.toString());}
+    }
+        
     public static void drawItemBridge(ItemBridgeBuild ib){
         Draw.reset();
         Draw.z(Layer.power);
@@ -268,57 +302,6 @@ public class MI2UFuncs{
         }catch(Exception e){if(!interval.get(30)) return; Log.err(e.toString());}
     }
 
-    public static void drawJunciton(JunctionBuild jb){
-        try{
-            int cap = ((Junction)jb.block).capacity;
-            float speed = ((Junction)jb.block).speed;
-
-            Field f = jb.getClass().getDeclaredField("buffer");
-            f.setAccessible(true);
-            DirectionalItemBuffer buffer = (DirectionalItemBuffer)f.get(jb);
-            f = buffer.getClass().getDeclaredField("buffers");
-            f.setAccessible(true);
-            long[][] bufferbuffers = (long[][])f.get(buffer);
-            f = buffer.getClass().getDeclaredField("indexes");
-            f.setAccessible(true);
-            int[] indexes = (int[])f.get(buffer);
-
-            Item[][] items = new Item[4][bufferbuffers[0].length];
-            for(int i = 0; i < 4; i++){
-                for(int ii = 0; ii < bufferbuffers[i].length; ii++){
-                    items[i][ii] = (ii < indexes[i])? content.item(BufferItem.item(bufferbuffers[i][ii])) : null;
-                }
-            }
-            float[][] times = new float[4][bufferbuffers[0].length];
-            for(int i = 0; i < 4; i++){
-                for(int ii = 0; ii < bufferbuffers[i].length; ii++){
-                    times[i][ii] = (ii < indexes[i])? BufferItem.time(bufferbuffers[i][ii]) : 9999999999999f;
-                }
-            }
-            
-            float begx, begy, endx, endy;
-            for(int i = 0; i < 4; i++){
-                endx = jb.x + Geometry.d4(i).x * tilesize / 2f + Geometry.d4(Math.floorMod(i + 1, 4)).x * tilesize / 4f;
-                endy = jb.y + Geometry.d4(i).y * tilesize / 2f + Geometry.d4(Math.floorMod(i + 1, 4)).y * tilesize / 4f;
-                begx = jb.x - Geometry.d4(i).x * tilesize / 4f + Geometry.d4(Math.floorMod(i + 1, 4)).x * tilesize / 4f;
-                begy = jb.y - Geometry.d4(i).y * tilesize / 4f + Geometry.d4(Math.floorMod(i + 1, 4)).y * tilesize / 4f;
-                if(buffer.indexes[i] > 0){
-                    float loti = 0f;
-                    for(int idi = 0; idi < buffer.indexes[i]; idi++){
-                        if(items[i][idi] != null){
-                            Draw.alpha(0.9f);
-                            Draw.rect(items[i][idi].fullIcon, 
-                            begx + ((endx - begx) / (float)cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale / speed) * cap, cap - loti)), 
-                            begy + ((endy - begy) / (float)cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale / speed) * cap, cap - loti)),
-                            4f, 4f);
-                        }
-                        loti++;
-                    }
-                }
-            }
-        }catch(Exception e){if(!interval.get(30)) return; Log.err(e.toString());}
-    }
-        
     public static void drawUnloader(UnloaderBuild ub){
         //ContainerStat[] possibleBlocks sorted + rotations updated on each update
         try{

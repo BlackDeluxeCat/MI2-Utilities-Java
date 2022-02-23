@@ -35,7 +35,7 @@ public class MI2Utilities extends Mod{
                     drawUnit(unit);
                 });
             }); 
-            drawBlackboxBuilding();
+            if(enDistributionReveal) drawBlackboxBuilding();
         });
     }
 }

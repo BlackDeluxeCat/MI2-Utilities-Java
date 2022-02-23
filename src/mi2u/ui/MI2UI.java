@@ -35,6 +35,12 @@ public class MI2UI extends Mindow2{
             tt.button("@main.buttons.rebuild", textb, () -> {
                 unitRebuildBlocks();
             }).with(funcSetTextb);
+
+            tt.button("" + Iconc.zoom + Iconc.blockJunction, textbtoggle, () -> {
+                enDistributionReveal = !enDistributionReveal;
+            }).update(b -> {
+                b.setChecked(enDistributionReveal);
+            }).with(funcSetTextb);
         });
         
         cont.row();
@@ -47,7 +53,6 @@ public class MI2UI extends Mindow2{
 
         cont.row();
 
-        //mindow buttons
         cont.table(tt -> {
             tt.button("@main.buttons.container", textbtoggle, () -> {
                 container.addTo(container.hasParent() ? null : Core.scene.root);

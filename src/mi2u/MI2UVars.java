@@ -19,6 +19,8 @@ public class MI2UVars {
     public static CustomContainerMindow container = new CustomContainerMindow();
     public static MinimapMindow mindowmap = new MinimapMindow();
 
+    public static boolean enDistributionReveal = false;
+
     public static void init(){
         //Styles
         Mindow2.init();
