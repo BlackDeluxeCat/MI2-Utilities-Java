@@ -164,8 +164,10 @@ public class Mindow2 extends Table{
         interval.reset(1, 1);
         titleBar.update(() -> {
             title.setStyle(aboveSnap == null ? titleStyleNormal : titleStyleSnapped);
+            titleBar.setBackground(aboveSnap == null ? titleBarbgNormal : titleBarbgSnapped);
+            //don't collapse when minimized
+            if(minimized) titleScale = 1f;
             if((interval.check(0, 180) && titleBar.scaleY > 0.95f) || (interval.check(1, 15) && titleBar.scaleY < 0.95f)){
-                titleBar.setBackground(aboveSnap == null ? titleBarbgNormal : titleBarbgSnapped);
                 titleBar.toFront();
                 titleBar.setScale(1, Mathf.lerpDelta(titleBar.scaleY, titleScale, 0.3f));
                 titleBar.keepInStage();
@@ -270,26 +272,26 @@ public class Mindow2 extends Table{
      * UISetting will be shown to, but not configurable
     */
     public void showSettings(){
-        new BaseDialog("@mindow2.settingsTitle"){
+        new BaseDialog("@mindow2.settings.title"){
             {
                 addCloseButton();
                 this.cont.pane(t -> {
-                    t.add(mindowName != null && !mindowName.equals("") ? "Current Mindow2 Name is: \n" + mindowName : "Mindow2 Has No Name, \nUI settings Not Available.").fontScale(1.2f).get().setAlignment(Align.center);
+                    t.add(mindowName != null && !mindowName.equals("") ? Core.bundle.format("mindow2.settings.curMindowName") + mindowName: "@mindow2.settings.noMindowNameWarning").fontScale(1.2f).get().setAlignment(Align.center);
                     t.row();
                     settings.each(st -> {
                         t.add(st.getF()).width(Math.min(500, Core.graphics.getWidth())).left();
                         t.row();
                     });
                     t.table(tt -> {
-                        tt.button("Reload This UI", textb, () -> {
+                        tt.button("@mindow2.settings.reloadUI", textb, () -> {
                             loadUISettings();
                         }).width(100).get().getLabel().setColor(1, 1, 0, 1);
     
-                        tt.button("Save This UI", textb, () -> {
+                        tt.button("@mindow2.settings.cacheUI", textb, () -> {
                             saveUISettings();
                         }).width(100).get().getLabel().setColor(1, 1, 0, 1);
     
-                        tt.button("Write All Settings to File", textb, () -> {
+                        tt.button("@mindow2.settings.writeToFile", textb, () -> {
                             MI2USettings.save();
                         }).width(100);
                     }).self(c -> {
@@ -312,12 +314,12 @@ public class Mindow2 extends Table{
         settings.add(new SettingEntry(mindowName + ".cury", true));
         var f = new FieldSettingEntry(SettingType.Int, mindowName + ".edgesnap", s -> {
             return Strings.canParseInt(s) && Strings.parseInt(s) <= 7 && Strings.parseInt(s) >= -1;
-        }, "0 1 2\n7   3\n6 5 4\n-1 to disable edge-snap");
+        }, "@settings.mindow.edgesnap");
         f.isUI = true;
         settings.add(f);
         f = new FieldSettingEntry(SettingType.Str, mindowName + ".abovesnapTarget", s -> {
             return mindow2s.contains(mi2 -> mi2.mindowName.equals(s)) || s.equals("null");
-        }, "Typein target Mindow's name for mindow-snap\nnull to clear");
+        }, "@settings.mindow.abovesnapTarget");
         f.isUI = true;
         settings.add(f);
     }
@@ -445,8 +447,11 @@ public class Mindow2 extends Table{
     }
 
     public class FieldSettingEntry extends SettingEntry{
-        public FieldSettingEntry(SettingType ty, String name, TextFieldValidator val , String help){
+        Cons<String> changed;
+        /** be careful that {@code Cons<String> changed} input a string */
+        public FieldSettingEntry(SettingType ty, String name, TextFieldValidator val , String help, Cons<String> changed){
             super(name);
+            this.changed = changed;
             cont.clear();
             type = ty;
             TextField tf = new TextField("", Styles.nodeField);
@@ -464,6 +469,9 @@ public class Mindow2 extends Table{
                             MI2USettings.putStr(this.name, tf.getText() != null ? tf.getText():"");
                             break;
                     }
+                    if(this.changed != null){
+                        changed.get(MI2USettings.getStr(this.name));
+                    }
                 }
             });
             cont.table(tt -> {
@@ -479,6 +487,10 @@ public class Mindow2 extends Table{
             }).update(t -> {
                 t.setColor(1,1,this.isUI?0:1,1);
             });
+        }
+
+        public FieldSettingEntry(SettingType ty, String name, TextFieldValidator val , String help){
+            this(ty, name, val , help, null);
         }
     }
 
