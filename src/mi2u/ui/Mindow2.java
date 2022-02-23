@@ -1,7 +1,7 @@
 package mi2u.ui;
 
 import arc.*;
-import arc.func.Boolc;
+import arc.func.*;
 import arc.graphics.*;
 import arc.input.*;
 import arc.math.*;
@@ -34,12 +34,13 @@ public class Mindow2 extends Table{
     public static LabelStyle titleStyleNormal, titleStyleSnapped;
     public static Drawable titleBarbgNormal, titleBarbgSnapped;
 
-    public float fromx = 0, fromy = 0, curx = 0, cury = 0;
+    public float fromx = 0, fromy = 0, curx = 0, cury = 0, titleScale = 1f;
     public boolean topmost = false, minimized = false, closable = true;
     public String titleText = "", helpInfo = "", mindowName;
-    private Table titleBar = new Table();
-    private Table cont = new Table();
+    protected Table titleBar = new Table();
+    protected Table cont = new Table();
     protected Seq<SettingEntry> settings = new Seq<>();
+    protected Interval interval = new Interval(2);
     @Nullable public Element aboveSnap; public int edgesnap = -1;
 
     public Mindow2(String title){
@@ -65,8 +66,16 @@ public class Mindow2 extends Table{
     }
 
     /** called when rebuild Mindow2, should be overrided */
-    public void setupCont(Table cont){
+    public void setupCont(Table cont){}
 
+    /** called when click minimize-button, can be overrided */
+    public void minimize(){
+        rebuild();
+    }
+
+    /** called when click close-button, can be overrided */
+    public void close(){
+        remove();
     }
 
     public void setupTitle(){
@@ -125,59 +134,87 @@ public class Mindow2 extends Table{
             }else{
                 cury -= cont.getHeight();
             }
-            rebuild();
+            minimize();
         }).size(titleButtonSize).update(b -> {
             b.setChecked(minimized);
         });
 
         titleBar.button("X", textb, () -> {
-            remove();
+            close();
         }).size(titleButtonSize).update(b -> {
             b.setDisabled(!closable);
         });
 
-        add(titleBar).update(tb -> {
+        touchable = Touchable.enabled;
+        addListener(new InputListener(){
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Element fromActor){
+                titleScale = 1f;
+                interval.get(1, 1);
+            }
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Element toActor){
+                titleScale = 0f;
+                interval.get(0, 1);
+            }
+        });
+
+        titleBar.setTransform(true);
+        interval.reset(0, 1);
+        interval.reset(1, 1);
+        titleBar.update(() -> {
+            title.setStyle(aboveSnap == null ? titleStyleNormal : titleStyleSnapped);
+            if((interval.check(0, 180) && titleBar.scaleY > 0.95f) || (interval.check(1, 15) && titleBar.scaleY < 0.95f)){
+                titleBar.setBackground(aboveSnap == null ? titleBarbgNormal : titleBarbgSnapped);
+                titleBar.toFront();
+                titleBar.setScale(1, Mathf.lerpDelta(titleBar.scaleY, titleScale, 0.3f));
+                titleBar.keepInStage();
+                titleBar.invalidateHierarchy();
+                titleBar.pack();
+                titleBar.touchable = Touchable.enabled;
+            }else if(titleBar.scaleY < 0.95f){
+                titleBar.touchable = Touchable.disabled;
+            }
             edgesnap = MI2USettings.getInt(mindowName + ".edgesnap", -1);
             if(this == currTopmost || shouldTopMost()) setZIndex(1000);
-            title.setStyle(aboveSnap == null ? titleStyleNormal : titleStyleSnapped);
-            titleBar.setBackground(aboveSnap == null ? titleBarbgNormal : titleBarbgSnapped);
 
             if(aboveSnap != null){
                 curx = aboveSnap.x;
-                cury = aboveSnap.y - getHeight();
+                cury = aboveSnap.y - getRealHeight();
+                setPosition(curx, cury);
+                keepInStage();
             }else if(edgesnap != -1 && hasParent()){
                 edgeSnap(edgesnap);
+                setPosition(curx, cury);
             }else{
                 curx = Mathf.clamp(curx, 0, (hasParent() ? parent.getWidth() : Core.graphics.getWidth()) - getWidth());
-                cury = Mathf.clamp(cury, 0, (hasParent() ? parent.getHeight() : Core.graphics.getHeight()) - getHeight());
-                
+                cury = Mathf.clamp(cury, 0, (hasParent() ? parent.getHeight() : Core.graphics.getHeight()) -getRealHeight());
+                setPosition(curx, cury);
+                keepInStage();
             }
-            setPosition(curx, cury);
-
-            keepInStage();
             invalidateHierarchy();
             pack();
-
-        }).growX().fillY();
+        });
+        add(titleBar).growX();
     }
 
     protected void edgeSnap(int s){
         switch(s){
             case 0://lefttop
                 curx = 0;
-                cury = parent.getHeight() - getHeight();
+                cury = parent.getHeight() -getRealHeight();
                 break;
             case 1://top
                 curx = (parent.getWidth() - getWidth())/2f;
-                cury = (parent.getHeight() - getHeight());
+                cury = (parent.getHeight() -getRealHeight());
                 break;
             case 2://righttop
                 curx = (parent.getWidth() - getWidth());
-                cury = (parent.getHeight() - getHeight());
+                cury = (parent.getHeight() -getRealHeight());
                 break;
             case 3://right
                 curx = (parent.getWidth() - getWidth());
-                cury = (parent.getHeight() - getHeight())/2f;
+                cury = (parent.getHeight() -getRealHeight())/2f;
                 break;
             case 4://rightbottom
                 curx = (parent.getWidth() - getWidth());
@@ -193,7 +230,7 @@ public class Mindow2 extends Table{
                 break;
             case 7://left
                 curx = 0;
-                cury = (parent.getHeight() - getHeight())/2f;
+                cury = (parent.getHeight() -getRealHeight())/2f;
                 break;
         }
     }
@@ -207,8 +244,26 @@ public class Mindow2 extends Table{
         return true;
     }
 
+    public float getRealHeight(){
+        return getHeight() - titleBar.getHeight() *  (1 - titleBar.scaleY);
+    }
+
     public boolean shouldTopMost(){
         return (topmost || (aboveSnap !=null && aboveSnap != this && aboveSnap instanceof Mindow2 m && m.shouldTopMost()));
+    }
+    
+    public void showHelp(){
+        new BaseDialog("@mindow2.helpInfoTitle"){
+            {
+                addCloseButton();
+                this.cont.pane(t -> {
+                    t.add(helpInfo).padBottom(60f).left().width(Core.graphics.getWidth() / 1.5f).get().setWrap(true);
+                    t.row();
+                    t.add("@mindow2.uiHelp").left().width(Core.graphics.getWidth() / 1.5f).get().setWrap(true);
+                });
+                show();
+            }
+        };
     }
 
     /** Settings shoulded be set in Seq: settings, will be shown and configurable in SettingsDialog 
@@ -219,6 +274,8 @@ public class Mindow2 extends Table{
             {
                 addCloseButton();
                 this.cont.pane(t -> {
+                    t.add(mindowName != null && !mindowName.equals("") ? "Current Mindow2 Name is: \n" + mindowName : "Mindow2 Has No Name, \nUI settings Not Available.").fontScale(1.2f).get().setAlignment(Align.center);
+                    t.row();
                     settings.each(st -> {
                         t.add(st.getF()).width(Math.min(500, Core.graphics.getWidth())).left();
                         t.row();
@@ -235,6 +292,8 @@ public class Mindow2 extends Table{
                         tt.button("Write All Settings to File", textb, () -> {
                             MI2USettings.save();
                         }).width(100);
+                    }).self(c -> {
+                        c.width(Math.min(530, Core.graphics.getWidth()));
                     });
 
                 });
@@ -253,23 +312,14 @@ public class Mindow2 extends Table{
         settings.add(new SettingEntry(mindowName + ".cury", true));
         var f = new FieldSettingEntry(SettingType.Int, mindowName + ".edgesnap", s -> {
             return Strings.canParseInt(s) && Strings.parseInt(s) <= 7 && Strings.parseInt(s) >= -1;
-        } ,"0 1 2\n7   3\n6 5 4\n-1 to disable");
+        }, "0 1 2\n7   3\n6 5 4\n-1 to disable edge-snap");
         f.isUI = true;
         settings.add(f);
-    }
-
-    public void showHelp(){
-        new BaseDialog("@mindow2.helpInfoTitle"){
-            {
-                addCloseButton();
-                this.cont.pane(t -> {
-                    t.add(helpInfo).padBottom(60f).left().width(Core.graphics.getWidth() / 1.5f).get().setWrap(true);
-                    t.row();
-                    t.add("@mindow2.uiHelp").left().width(Core.graphics.getWidth() / 1.5f).get().setWrap(true);
-                });
-                show();
-            }
-        };
+        f = new FieldSettingEntry(SettingType.Str, mindowName + ".abovesnapTarget", s -> {
+            return mindow2s.contains(mi2 -> mi2.mindowName.equals(s)) || s.equals("null");
+        }, "Typein target Mindow's name for mindow-snap\nnull to clear");
+        f.isUI = true;
+        settings.add(f);
     }
 
     /** Override this method for custom UI settings load
@@ -284,6 +334,16 @@ public class Mindow2 extends Table{
         edgesnap = MI2USettings.getInt(mindowName + ".edgesnap", -1);
         curx = (float)MI2USettings.getInt(mindowName + ".curx");
         cury = (float)MI2USettings.getInt(mindowName + ".cury");
+        if(MI2USettings.getStr(mindowName + ".abovesnapTarget").equals("null")){
+            aboveSnap = null;
+        }else{
+            mindow2s.each(m -> {
+                if(m.mindowName.equals(MI2USettings.getStr(mindowName + ".abovesnapTarget"))){
+                    aboveSnap = m;
+                    Log.info(mindowName + " snaps to " + m.mindowName);
+                }
+            });
+        }
         return true;
     }
 
@@ -306,6 +366,14 @@ public class Mindow2 extends Table{
             MI2USettings.putInt(mindowName + ".cury", (int)cury);
         }
         return true;
+    }
+
+    public boolean registerName(){
+        if(mindowName != null && !mindowName.equals("") && !mindow2s.contains(m -> m.mindowName.equals(this.mindowName))){
+            mindow2s.add(this);
+            return true;
+        }
+        return false;
     }
 
     public static void init(){

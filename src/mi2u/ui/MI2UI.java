@@ -8,6 +8,7 @@ import arc.util.*;
 import mindustry.gen.*;
 
 import static mi2u.MI2UVars.*;
+import static mi2u.MI2UFuncs.*;
 
 public class MI2UI extends Mindow2{
 
@@ -62,6 +63,7 @@ public class MI2UI extends Mindow2{
         super.initSettings();
         settings.add(new CheckSettingEntry("showEmojis", "@settings.main.emoji", b -> emojis.addTo(b?Core.scene.root:null)));
         settings.add(new CheckSettingEntry("showCoreInfo", "@settings.main.coreInfo", b -> coreInfo.addTo(b?Core.scene.root:null)));
+        settings.add(new CheckSettingEntry("showMindowMap", "@settings.main.mindowMap", b -> mindowmap.addTo(b?Core.scene.root:null)));
         settings.add(new CheckSettingEntry("enUnitHpBar", "@settings.main.unitHpBar"));
         settings.add(new CheckSettingEntry("enUnitLogic", "@settings.main.unitLogic"));
         settings.add(new CheckSettingEntry("enUnitLogicTimer", "@settings.main.unitLogicTimer"));
