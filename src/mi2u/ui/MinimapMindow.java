@@ -11,13 +11,14 @@ import arc.scene.event.*;
 import arc.scene.ui.layout.*;
 import arc.struct.Seq;
 import arc.util.*;
-import arc.util.pooling.Pools;
+import arc.util.pooling.*;
+import mi2u.io.*;
 import mindustry.entities.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.input.*;
-import mindustry.io.MapIO;
-import mindustry.ui.Fonts;
+import mindustry.io.*;
+import mindustry.ui.*;
 import mindustry.world.*;
 
 import static mindustry.Vars.*;
@@ -33,7 +34,25 @@ public class MinimapMindow extends Mindow2{
     @Override
     public void setupCont(Table cont){
         cont.clear();
+        m.setMapSize(MI2USettings.getInt(mindowName + ".size", 200));
         cont.add(m).fill();
+    }
+
+    @Override
+    public void initSettings(){
+        super.initSettings();
+        settings.add(new FieldSettingEntry(SettingType.Int, mindowName + ".size", s -> {
+            return Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 600;
+        }, "@settings.mindowMap.size", s -> rebuild()));
+    }
+
+    @Override
+    public boolean loadUISettingsRaw(){
+        if(!super.loadUISettingsRaw()) return false;
+        int size = MI2USettings.getInt(mindowName + ".size");
+        m.setMapSize(size);
+        rebuild();
+        return true;
     }
     
     public static class Minimap2 extends Table{
@@ -145,7 +164,12 @@ public class MinimapMindow extends Mindow2{
 
             add(map).size(size);
         }
-        
+
+        public void setMapSize(float size){
+            clearChildren();
+            map.setSize(Scl.scl(size));
+            add(map).size(size);
+        }
     }
 
     public static class MinimapRenderer2{
