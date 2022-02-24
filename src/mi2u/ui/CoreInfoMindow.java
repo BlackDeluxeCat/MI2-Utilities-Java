@@ -38,8 +38,10 @@ public class CoreInfoMindow extends Mindow2{
                 }
             }
         });
-
-        
+        if(!MI2USettings.getBool(mindowName + ".showCoreItems")){
+            cont.add().size(80f,20f);
+            cont.row();
+        }
         
             cont.table(iut -> {
                 int i = 0;
