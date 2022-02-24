@@ -145,7 +145,6 @@ public class Mindow2 extends Table{
             b.setDisabled(!closable);
         });
 
-        touchable = Touchable.enabled;
         addListener(new InputListener(){
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Element fromActor){
@@ -160,9 +159,11 @@ public class Mindow2 extends Table{
         });
 
         titleBar.setTransform(true);
+        titleBar.setClip(true);
         interval.reset(0, 1);
         interval.reset(1, 1);
         titleBar.update(() -> {
+            cont.touchable = Touchable.enabled;
             title.setStyle(aboveSnap == null ? titleStyleNormal : titleStyleSnapped);
             titleBar.setBackground(aboveSnap == null ? titleBarbgNormal : titleBarbgSnapped);
             //don't collapse when minimized
