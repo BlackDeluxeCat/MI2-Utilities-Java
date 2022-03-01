@@ -22,6 +22,7 @@ import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.distribution.BufferedItemBridge.*;
 import mindustry.world.blocks.distribution.ItemBridge.*;
 import mindustry.world.blocks.distribution.Junction.*;
+import mindustry.world.blocks.distribution.Router.RouterBuild;
 import mindustry.world.blocks.storage.*;
 import mindustry.world.blocks.storage.Unloader.*;
 import mindustry.world.blocks.storage.Unloader.UnloaderBuild.*;
@@ -176,6 +177,7 @@ public class MI2UFuncs{
             if(b instanceof ItemBridgeBuild ib) drawItemBridge(ib);
             if(b instanceof BufferedItemBridgeBuild bb) drawBufferedItemBridge(bb);
             if(b instanceof UnloaderBuild ub) drawUnloader(ub);
+            if(b instanceof RouterBuild rb) drawRouter(rb);
         });
     }
     public static void drawJunciton(JunctionBuild jb){
@@ -409,5 +411,87 @@ public class MI2UFuncs{
                 Draw.reset();
             }
         }catch(Exception e){if(!interval.get(30)) return; Log.err(e.toString());}
+    }
+
+    public static void drawRouter(RouterBuild rb){
+        Router block = (Router)rb.block;
+        Building fromb = rb.lastInput == null ? null : rb.lastInput.build;
+        Building tob = rb.proximity.size == 0 ? null : rb.proximity.get(((rb.rotation) % rb.proximity.size - 1 + rb.proximity.size) % rb.proximity.size);
+
+        Draw.color();
+        Draw.z(Layer.block + 1f);
+        float x1 = 0f, x2 = 0f, y1 = 0f, y2 = 0f;
+        if(tob != null){
+            //0> 1^ 2< 3\/
+            switch(Mathf.mod(((int)Angles.angle(tob.x - rb.x, tob.y - rb.y) + 45) / 90, 4)){
+                case 0 -> {
+                    x1 = rb.x + World.unconv(block.size) / 2f;
+                    x2 = rb.x + World.unconv(block.size) / 2f;
+                    y1 = Math.min(rb.y + World.unconv(block.size) / 2f, tob.y + World.unconv(tob.block.size) / 2f);
+                    y2 = Math.max(rb.y - World.unconv(block.size) / 2f, tob.y - World.unconv(tob.block.size) / 2f);
+                }
+                case 1 -> {
+                    y1 = rb.y + World.unconv(block.size) / 2f;
+                    y2 = rb.y + World.unconv(block.size) / 2f;
+                    x1 = Math.min(rb.x + World.unconv(block.size) / 2f, tob.x + World.unconv(tob.block.size) / 2f);
+                    x2 = Math.max(rb.x - World.unconv(block.size) / 2f, tob.x - World.unconv(tob.block.size) / 2f);
+                }
+                case 2 -> {
+                    x1 = rb.x - World.unconv(block.size) / 2f;
+                    x2 = rb.x - World.unconv(block.size) / 2f;
+                    y1 = Math.min(rb.y + World.unconv(block.size) / 2f, tob.y + World.unconv(tob.block.size) / 2f);
+                    y2 = Math.max(rb.y - World.unconv(block.size) / 2f, tob.y - World.unconv(tob.block.size) / 2f);
+                }
+                case 3 -> {
+                    y1 = rb.y - World.unconv(block.size) / 2f;
+                    y2 = rb.y - World.unconv(block.size) / 2f;
+                    x1 = Math.min(rb.x + World.unconv(block.size) / 2f, tob.x + World.unconv(tob.block.size) / 2f);
+                    x2 = Math.max(rb.x - World.unconv(block.size) / 2f, tob.x - World.unconv(tob.block.size) / 2f);
+                }
+            }
+            Draw.color(Pal.placing, 1 - rb.time);
+            Lines.stroke(1.5f);
+            Lines.line(x1, y1, x2, y2);
+        }
+
+        if(fromb != null){
+            float rmargin = World.unconv(block.size) / 2f - 2f;
+            float fmargin = World.unconv(fromb.block.size) / 2f + 2f;
+            switch(Mathf.mod(((int)Angles.angle(fromb.x - rb.x, fromb.y - rb.y) + 45) / 90, 4)){
+                case 0 -> {
+                    x1 = rb.x + rmargin;
+                    x2 = rb.x + rmargin;
+                    y1 = Math.min(rb.y + rmargin, fromb.y + fmargin);
+                    y2 = Math.max(rb.y - rmargin, fromb.y - fmargin);
+                }
+                case 1 -> {
+                    y1 = rb.y + rmargin;
+                    y2 = rb.y + rmargin;
+                    x1 = Math.min(rb.x + rmargin, fromb.x + fmargin);
+                    x2 = Math.max(rb.x - rmargin, fromb.x - fmargin);
+                }
+                case 2 -> {
+                    x1 = rb.x - rmargin;
+                    x2 = rb.x - rmargin;
+                    y1 = Math.min(rb.y + rmargin, fromb.y + fmargin);
+                    y2 = Math.max(rb.y - rmargin, fromb.y - fmargin);
+                }
+                case 3 -> {
+                    y1 = rb.y - rmargin;
+                    y2 = rb.y - rmargin;
+                    x1 = Math.min(rb.x + rmargin, fromb.x + fmargin);
+                    x2 = Math.max(rb.x - rmargin, fromb.x - fmargin);
+                }
+            }
+            Draw.color(Pal.remove, 1 - rb.time);
+            Lines.stroke(1.5f);
+            Lines.line(x1, y1, x2, y2);
+        }
+
+        if(rb.lastItem != null){
+            Draw.color();
+            Draw.rect(rb.lastItem.uiIcon, rb.x, rb.y, 4f, 4f);
+        }
+        Draw.reset();
     }
 }
