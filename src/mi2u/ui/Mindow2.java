@@ -167,7 +167,7 @@ public class Mindow2 extends Table{
             title.setStyle(aboveSnap == null ? titleStyleNormal : titleStyleSnapped);
             titleBar.setBackground(aboveSnap == null ? titleBarbgNormal : titleBarbgSnapped);
             //don't collapse when minimized
-            if(minimized) titleScale = 1f;
+            if(minimized || !MI2USettings.getBool(mindowName + ".autoHideTitle", false)) titleScale = 1f;
             if((interval.check(0, 180) && titleBar.scaleY > 0.95f) || (interval.check(1, 15) && titleBar.scaleY < 0.95f)){
                 titleBar.toFront();
                 titleBar.setScale(1, Mathf.lerpDelta(titleBar.scaleY, titleScale, 0.3f));
@@ -323,6 +323,7 @@ public class Mindow2 extends Table{
         }, "@settings.mindow.abovesnapTarget");
         f.isUI = true;
         settings.add(f);
+        settings.add(new CheckSettingEntry(mindowName + ".autoHideTitle", "@settings.mindow.autoHideTitle"));
     }
 
     /** Override this method for custom UI settings load
