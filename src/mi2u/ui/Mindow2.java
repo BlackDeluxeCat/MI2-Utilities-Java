@@ -163,7 +163,7 @@ public class Mindow2 extends Table{
             }
         });
 
-        titleBar.setTransform(true);
+        //titleBar.setTransform(true);
         //titleBar.setClip(true);
         interval.reset(0, 1);
         interval.reset(1, 1);
