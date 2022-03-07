@@ -23,9 +23,14 @@ import mindustry.ui.dialogs.*;
 import static mi2u.MI2UVars.*;
 /**  
  * Mindow2 is a dragable Table that partly works like a window. 
- * cont is a container for user items. 
- * setupCont() should be overrided, which will be called when rebuild().
- * for custom settings, initSettings() should be overrided 
+ * @param titleText is text shown on titleBar, set in constructor.
+ * @param mindowName is inner name, used for window-specific settings, set in overrided constructor.
+ * @param helpInfo is text shown in window-specific help dialog, set in constructor.
+ * @param cont is a container for user items. 
+ * @param settings is a SettingEntry seq.
+ * <p>
+ * {@code setupCont(Table cont)}for cont rebuild, should be overrided.<p>
+ * {@code initSettings()}for customize settings, should start with settings.clear()
  * @author BlackDeluxeCat
  */
 
