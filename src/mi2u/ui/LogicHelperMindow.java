@@ -70,7 +70,7 @@ public class LogicHelperMindow extends Mindow2{
     private void rebuildVars(Table tt){
         if(exec != null){
             tt.clear();
-            if(split != ""){
+            if(!split.equals("")){
                 Seq<String> seq = new Seq<>();
                 new Seq<Var>(exec.vars).each(v -> {if(!v.constant && !v.name.startsWith("___")) seq.add(v.name);});
                 Sort.instance().sort(seq);
