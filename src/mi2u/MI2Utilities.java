@@ -35,7 +35,7 @@ public class MI2Utilities extends Mod{
                 if(MI2USettings.getBool("showMapInfo")) mapinfo.addTo(coreInfo.hasParent() ? coreInfo.parent : Core.scene.root);
             });
 
-            Time.runTask(40f, () -> {
+            Time.runTask(140f, () -> {
                 checkUpdate();
             });
         });
@@ -72,32 +72,33 @@ public class MI2Utilities extends Mod{
             }
             @Override
             public void setupCont(Table cont){
-                cont.add(gitRepo).get().setColor(0.8f, 1f, 0.8f, 1f);
-                cont.row();
                 cont.table(t -> {
+                    t.add(gitRepo);
                     t.button("" + Iconc.paste, textb, () -> {
                         Core.app.setClipboardText(gitRepo);
                     }).size(titleButtonSize);
                     t.button("" + Iconc.github, textb, () -> {
                         Core.app.setClipboardText(gitURL);
                     }).size(titleButtonSize);
-                    t.label(() -> "Close At " + Strings.fixed((delay - in.getTime(0))/60 , 1)+ "s");
                 });
                 cont.row();
-
+                cont.button("", textb, () -> this.addTo(null)).growX().height(50f).update(b -> {
+                    b.setText("Close At " + Strings.fixed((delay - in.getTime(0))/60 , 1)+ "s");
+                });
+                cont.row();
                 Http.get(ghApi + "/repos/" + gitRepo + "/releases/latest", res -> {
                     var json = Jval.read(res.getResultAsString());
                     cont.pane(t -> {
                         if(!MOD.meta.version.equals(json.getString("name"))){
                             t.add("New Release Available!").align(Align.left).fillX().pad(5f).get().setColor(0f, 1f, 0.3f, 1f);
+                            t.row(); 
+                            t.add(json.getString("name")).align(Align.left).fillX().pad(5f).get().setColor(1f, 1f, 0.3f, 1f);
+                            t.row();
+                            t.labelWrap(json.getString("body")).align(Align.left).growX();
                         }else{
                             delay = 150f;
                             t.add("Current Is Latest!").align(Align.left).fillX().pad(5f).get().setColor(0.75f, 0.25f, 1f, 1f); 
                         }
-                        t.row(); 
-                        t.add(json.getString("name")).align(Align.left).fillX().pad(5f).get().setColor(1f, 1f, 0.3f, 1f);
-                        t.row();
-                        t.labelWrap(json.getString("body")).align(Align.left).growX();
                     }).width(400f).maxHeight(600f);
                     //Log.info(json.toString());
                 }, e -> {
