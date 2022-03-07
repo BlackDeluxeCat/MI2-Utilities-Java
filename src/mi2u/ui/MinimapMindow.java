@@ -13,6 +13,7 @@ import arc.struct.Seq;
 import arc.util.*;
 import arc.util.pooling.*;
 import mi2u.io.*;
+import mindustry.core.*;
 import mindustry.entities.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
@@ -36,6 +37,10 @@ public class MinimapMindow extends Mindow2{
         cont.clear();
         m.setMapSize(MI2USettings.getInt(mindowName + ".size", 200));
         cont.add(m).fill();
+        cont.row();
+        cont.label(() -> Strings.fixed(World.conv(player.x), 1) + ", "+ Strings.fixed(World.conv(player.y), 1));
+        cont.row();
+        cont.label(() -> Iconc.commandAttack + "  " + Strings.fixed(World.conv(Core.input.mouseWorldY()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1));
     }
 
     @Override
@@ -172,7 +177,9 @@ public class MinimapMindow extends Mindow2{
         }
     }
 
+    //may cause some problems about ui color
     public static class MinimapRenderer2{
+        public static final Color tmpc = new Color();
         private static final float baseSize = 16f;
         private final Seq<Unit> units = new Seq<>();
         private Pixmap pixmap;
@@ -186,7 +193,6 @@ public class MinimapMindow extends Mindow2{
                 reset();
                 updateAll();
             });
-    
             Events.on(TileChangeEvent.class, event -> {
                 //TODO don't update when the minimap is off?
                 if(!ui.editor.isShown()){
@@ -342,7 +348,7 @@ public class MinimapMindow extends Mindow2{
         private int colorFor(Tile tile){
             if(tile == null) return 0;
             int bc = tile.block().minimapColor(tile);
-            Color color = Tmp.c4.set(bc == 0 ? MapIO.colorFor(tile.block(), tile.floor(), tile.overlay(), tile.team()) : bc);
+            Color color = tmpc.set(bc == 0 ? MapIO.colorFor(tile.block(), tile.floor(), tile.overlay(), tile.team()) : bc);
             color.mul(1f - Mathf.clamp(world.getDarkness(tile.x, tile.y) / 4f));
     
             return color.rgba();
