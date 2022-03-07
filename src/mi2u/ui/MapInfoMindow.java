@@ -27,6 +27,7 @@ public class MapInfoMindow extends Mindow2{
     };
 
     public boolean showMapAtts = true, showWaves = true, showWaveBars = true;
+    private boolean syncCurWave = true;
     public int curWave = 0; //state.wave is display number, spawner number should sub 1
     public WaveBarTable wavebars = new WaveBarTable();
     private Interval timer = new Interval();
@@ -133,27 +134,37 @@ public class MapInfoMindow extends Mindow2{
         t.table(tt -> {
             tt.label(() -> "Wave: " + curWave).get().setFontScale(0.7f);
             tt.button("<<", textb, () -> {
+                syncCurWave = false;
                 curWave -= 10;
                 curWave = Math.max(curWave, 1);
             }).with(funcSetTextb).size(titleButtonSize);
             tt.button("<", textb, () -> {
+                syncCurWave = false;
                 curWave -= 1;
                 curWave = Math.max(curWave, 1);
             }).with(funcSetTextb).size(titleButtonSize);
-            tt.button("O", textb, () -> {
-                curWave = state.wave;
-            }).with(funcSetTextb).size(titleButtonSize);
+            tt.button("O", textbtoggle, () -> {
+                syncCurWave = !syncCurWave;
+            }).with(funcSetTextb).size(titleButtonSize).update(b -> {
+                b.setChecked(syncCurWave);
+                if(syncCurWave) curWave = state.wave;
+            });
             tt.button(">", textb, () -> {
+                syncCurWave = false;
                 curWave += 1;
                 curWave = Math.max(curWave, 1);
             }).with(funcSetTextb).size(titleButtonSize);
             tt.button(">>", textb, () -> {
+                syncCurWave = false;
                 curWave += 10;
                 curWave = Math.max(curWave, 1);
             }).with(funcSetTextb).size(titleButtonSize);
             TextField tf = new TextField();
             tf.changed(() -> {
-                if(Strings.canParseInt(tf.getText()) && Strings.parseInt(tf.getText()) > 0) curWave = Strings.parseInt(tf.getText());
+                if(Strings.canParseInt(tf.getText()) && Strings.parseInt(tf.getText()) > 0){
+                    syncCurWave = false;
+                    curWave = Strings.parseInt(tf.getText());
+                }
             });
             tt.add(tf).width(80f).height(28f);
             tt.button("" + Iconc.redo, textb, () -> {
