@@ -4,13 +4,9 @@ import arc.func.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
-import arc.math.geom.*;
 import arc.scene.*;
-import arc.scene.style.*;
 import arc.scene.ui.layout.*;
-import arc.util.Log;
 import arc.util.pooling.*;
-import mindustry.gen.*;
 import mindustry.ui.Fonts;
 
 public class MI2Bar extends Element{
