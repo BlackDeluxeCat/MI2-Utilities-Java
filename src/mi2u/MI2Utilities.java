@@ -1,9 +1,13 @@
 package mi2u;
 
 import arc.*;
+import arc.scene.ui.layout.*;
 import arc.util.*;
+import arc.util.serialization.*;
 import mi2u.io.*;
+import mi2u.ui.*;
 import mindustry.game.EventType.*;
+import mindustry.gen.*;
 import mindustry.mod.*;
 
 import static mindustry.Vars.*;
@@ -11,6 +15,9 @@ import static mi2u.MI2UVars.*;
 import static mi2u.MI2UFuncs.*;
 
 public class MI2Utilities extends Mod{
+    public static final String gitURL = "https://github.com/BlackDeluxeCat/MI2-Utilities-Java";
+    public static final String gitRepo = "BlackDeluxeCat/MI2-Utilities-Java";
+    public static Mods.LoadedMod MOD;
 
     public MI2Utilities(){
         Log.info("Loaded MI2Utilities constructor.");
@@ -25,6 +32,11 @@ public class MI2Utilities extends Mod{
                 if(MI2USettings.getBool("showEmojis")) emojis.addTo(emojis.hasParent() ? emojis.parent : Core.scene.root);
                 if(MI2USettings.getBool("showCoreInfo")) coreInfo.addTo(coreInfo.hasParent() ? coreInfo.parent : Core.scene.root);
                 if(MI2USettings.getBool("showMindowMap")) mindowmap.addTo(coreInfo.hasParent() ? coreInfo.parent : Core.scene.root);
+                if(MI2USettings.getBool("showMapInfo")) mapinfo.addTo(coreInfo.hasParent() ? coreInfo.parent : Core.scene.root);
+            });
+
+            Time.runTask(40f, () -> {
+                checkUpdate();
             });
         });
 
@@ -37,5 +49,65 @@ public class MI2Utilities extends Mod{
             }); 
             if(enDistributionReveal) drawBlackboxBuilding();
         });
+    }
+
+    public void checkUpdate(){
+        MOD = mods.getMod(getClass());
+        new Mindow2("Update Check"){
+            Interval in = new Interval();
+            float delay = 900f;
+            {
+                addTo(Core.scene.root);
+                curx = (Core.graphics.getWidth() - getPrefWidth()) / 2;
+                cury = (Core.graphics.getHeight() - getRealHeight()) / 2;
+                
+                update(() -> {
+                    toFront();
+                    if(in.check(0, delay)) addTo(null);
+                });
+                
+                hovered(() -> {
+                    in.get(1);
+                });
+            }
+            @Override
+            public void setupCont(Table cont){
+                cont.add(gitRepo).get().setColor(0.8f, 1f, 0.8f, 1f);
+                cont.row();
+                cont.table(t -> {
+                    t.button("" + Iconc.paste, textb, () -> {
+                        Core.app.setClipboardText(gitRepo);
+                    }).size(titleButtonSize);
+                    t.button("" + Iconc.github, textb, () -> {
+                        Core.app.setClipboardText(gitURL);
+                    }).size(titleButtonSize);
+                    t.label(() -> "Close At " + Strings.fixed((delay - in.getTime(0))/60 , 1)+ "s");
+                });
+                cont.row();
+
+                Http.get(ghApi + "/repos/" + gitRepo + "/releases/latest", res -> {
+                    var json = Jval.read(res.getResultAsString());
+                    cont.pane(t -> {
+                        if(!MOD.meta.version.equals(json.getString("name"))){
+                            t.add("New Release Available!").align(Align.left).fillX().pad(5f).get().setColor(0f, 1f, 0.3f, 1f);
+                        }else{
+                            delay = 150f;
+                            t.add("Current Is Latest!").align(Align.left).fillX().pad(5f).get().setColor(0.75f, 0.25f, 1f, 1f); 
+                        }
+                        t.row(); 
+                        t.add(json.getString("name")).align(Align.left).fillX().pad(5f).get().setColor(1f, 1f, 0.3f, 1f);
+                        t.row();
+                        t.labelWrap(json.getString("body")).align(Align.left).growX();
+                    }).width(400f).maxHeight(600f);
+                    //Log.info(json.toString());
+                }, e -> {
+                    delay = 150f;
+                    cont.add("Failed to check update.");
+                    Log.err(e);
+                });
+
+            }
+            
+        };
     }
 }
