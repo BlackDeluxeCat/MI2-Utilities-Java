@@ -62,6 +62,16 @@ public class MI2Bar extends Element{
         update(() -> this.name = name.get());
     }
 
+    public void set(Prov<String> name, Floatp fraction, Prov<Color> color){
+        this.fraction = fraction;
+        this.lastValue = fraction.get();
+        update(() -> {
+            this.name = name.get();
+            this.blinkColor.set(color.get());
+            setColor(color.get());
+        });
+    }
+
     public MI2Bar setVertical(boolean v){
         vertical = v; 
         return this;

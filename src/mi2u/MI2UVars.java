@@ -18,6 +18,7 @@ public class MI2UVars {
     public static LogicHelperMindow logicHelper = new LogicHelperMindow();
     public static CustomContainerMindow container = new CustomContainerMindow();
     public static MinimapMindow mindowmap = new MinimapMindow();
+    public static MapInfoMindow mapinfo = new MapInfoMindow();
 
     public static boolean enDistributionReveal = false;
 
@@ -31,6 +32,7 @@ public class MI2UVars {
         coreInfo.registerName();
         logicHelper.registerName();
         mindowmap.registerName();
+        mapinfo.registerName();
 
         //load ui
         mi2ui.loadUISettings();
@@ -38,5 +40,6 @@ public class MI2UVars {
         coreInfo.loadUISettings();
         logicHelper.loadUISettings();
         mindowmap.loadUISettings();
+        mapinfo.loadUISettings();
     }
 }

@@ -45,14 +45,6 @@ public class MI2UI extends Mindow2{
         
         cont.row();
 
-        cont.table(rqb -> {      
-            rqb.button("@main.buttons.mapInfo", textb, () -> {
-                //mapInfo.show();
-            }).with(funcSetTextb);
-        });
-
-        cont.row();
-
         cont.table(tt -> {
             tt.button("@main.buttons.container", textbtoggle, () -> {
                 container.addTo(container.hasParent() ? null : Core.scene.root);
@@ -69,6 +61,7 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckSettingEntry("showEmojis", "@settings.main.emoji", b -> emojis.addTo(b?Core.scene.root:null)));
         settings.add(new CheckSettingEntry("showCoreInfo", "@settings.main.coreInfo", b -> coreInfo.addTo(b?Core.scene.root:null)));
         settings.add(new CheckSettingEntry("showMindowMap", "@settings.main.mindowMap", b -> mindowmap.addTo(b?Core.scene.root:null)));
+        settings.add(new CheckSettingEntry("showMapInfo", "@settings.main.mapInfo", b -> mapinfo.addTo(b?Core.scene.root:null)));
         settings.add(new CheckSettingEntry("enUnitHpBar", "@settings.main.unitHpBar"));
         settings.add(new CheckSettingEntry("enUnitLogic", "@settings.main.unitLogic"));
         settings.add(new CheckSettingEntry("enUnitLogicTimer", "@settings.main.unitLogicTimer"));
