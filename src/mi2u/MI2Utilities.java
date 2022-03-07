@@ -35,6 +35,7 @@ public class MI2Utilities extends Mod{
                 if(MI2USettings.getBool("showMapInfo")) mapinfo.addTo(coreInfo.hasParent() ? coreInfo.parent : Core.scene.root);
             });
 
+            //popup too early will cause font rendering bug.
             Time.runTask(140f, () -> {
                 checkUpdate();
             });
@@ -94,15 +95,17 @@ public class MI2Utilities extends Mod{
                             t.row(); 
                             t.add(json.getString("name")).align(Align.left).fillX().pad(5f).get().setColor(1f, 1f, 0.3f, 1f);
                             t.row();
-                            t.labelWrap(json.getString("body")).align(Align.left).growX();
+                            t.add(json.getString("body")).align(Align.left).growX();
                         }else{
-                            delay = 150f;
+                            in.get(1);
+                            delay = 120f;
                             t.add("Current Is Latest!").align(Align.left).fillX().pad(5f).get().setColor(0.75f, 0.25f, 1f, 1f); 
                         }
                     }).width(400f).maxHeight(600f);
                     //Log.info(json.toString());
                 }, e -> {
-                    delay = 150f;
+                    in.get(1);
+                    delay = 120f;
                     cont.add("Failed to check update.");
                     Log.err(e);
                 });
