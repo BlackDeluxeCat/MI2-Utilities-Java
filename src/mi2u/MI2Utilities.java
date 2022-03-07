@@ -95,7 +95,7 @@ public class MI2Utilities extends Mod{
                             t.row(); 
                             t.add(json.getString("name")).align(Align.left).fillX().pad(5f).get().setColor(1f, 1f, 0.3f, 1f);
                             t.row();
-                            t.add(json.getString("body")).align(Align.left).growX();
+                            //t.add(json.getString("body")).align(Align.left).growX();  //drawing update discription possibly cause font color bug.
                         }else{
                             in.get(1);
                             delay = 120f;
