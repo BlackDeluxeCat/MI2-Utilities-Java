@@ -38,9 +38,9 @@ public class MinimapMindow extends Mindow2{
         m.setMapSize(MI2USettings.getInt(mindowName + ".size", 200));
         cont.add(m).fill();
         cont.row();
-        cont.label(() -> Strings.fixed(World.conv(player.x), 1) + ", "+ Strings.fixed(World.conv(player.y), 1));
+        cont.label(() -> "    " + Strings.fixed(World.conv(player.x), 1) + ", "+ Strings.fixed(World.conv(player.y), 1));
         cont.row();
-        cont.label(() -> Iconc.commandAttack + "  " + Strings.fixed(World.conv(Core.input.mouseWorldY()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1));
+        cont.label(() -> Iconc.commandAttack + "  " + Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1));
     }
 
     @Override
