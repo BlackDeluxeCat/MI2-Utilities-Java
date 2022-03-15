@@ -2,16 +2,17 @@ package mi2u.ui;
 
 import arc.Core;
 import arc.func.*;
+import arc.graphics.Color;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
+import mindustry.Vars;
 import mindustry.gen.*;
 
 import static mi2u.MI2UVars.*;
 import static mi2u.MI2UFuncs.*;
 
 public class MI2UI extends Mindow2{
-
     public static Cons<TextButton> funcSetTextb = c -> {
         c.getLabel().setAlignment(Align.left);
         c.getLabel().setWrap(false);
@@ -30,25 +31,26 @@ public class MI2UI extends Mindow2{
         cont.table(tt -> {
             tt.button("" + Iconc.refresh, textb, () -> {
                 Call.sendChatMessage("/sync");
-            }).with(funcSetTextb);
+            }).minHeight(36f).with(funcSetTextb);
         
             tt.button("@main.buttons.rebuild", textb, () -> {
                 unitRebuildBlocks();
-            }).with(funcSetTextb);
+            }).minHeight(36f).with(funcSetTextb);
 
             tt.button("" + Iconc.zoom + Iconc.blockJunction, textbtoggle, () -> {
                 enDistributionReveal = !enDistributionReveal;
             }).update(b -> {
                 b.setChecked(enDistributionReveal);
-            }).with(funcSetTextb);
+            }).minHeight(36f).with(funcSetTextb);
         });
         
         cont.row();
-
+        cont.image().color(Color.pink).growX().height(2f);
+        cont.row();
         cont.table(tt -> {
             tt.button("@main.buttons.container", textbtoggle, () -> {
                 container.addTo(container.hasParent() ? null : Core.scene.root);
-            }).update(b -> {
+            }).minHeight(36f).update(b -> {
                 b.setChecked(container.hasParent());
             }).with(funcSetTextb);
         });
