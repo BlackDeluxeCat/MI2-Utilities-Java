@@ -5,149 +5,202 @@ import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
+import arc.scene.ui.*;
 import arc.struct.*;
 import arc.util.*;
 import mi2u.io.*;
+import mi2u.ui.*;
 import mindustry.ai.*;
 import mindustry.ai.types.*;
 import mindustry.content.*;
-import mindustry.core.World;
+import mindustry.core.*;
+import mindustry.entities.*;
 import mindustry.entities.units.*;
+import mindustry.game.*;
 import mindustry.game.Teams.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
+import mindustry.input.Binding;
+import mindustry.input.DesktopInput;
+import mindustry.input.MobileInput;
 import mindustry.type.*;
+import mindustry.ui.Styles;
+import mindustry.ui.dialogs.SchematicsDialog;
+import mindustry.ui.dialogs.SchematicsDialog.*;
 import mindustry.world.*;
+import mindustry.world.blocks.*;
 import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.distribution.BufferedItemBridge.*;
 import mindustry.world.blocks.distribution.ItemBridge.*;
 import mindustry.world.blocks.distribution.Junction.*;
 import mindustry.world.blocks.distribution.Router.RouterBuild;
+import mindustry.world.blocks.logic.LogicBlock;
+import mindustry.world.blocks.logic.MessageBlock;
 import mindustry.world.blocks.storage.*;
 import mindustry.world.blocks.storage.Unloader.*;
 import mindustry.world.blocks.storage.Unloader.UnloaderBuild.*;
 
 import static mindustry.Vars.*;
+import static mi2u.MI2UVars.*;
 
+import java.io.*;
 import java.lang.reflect.*;
+import java.util.zip.*;
 
 /** @Author 工业2*/
 public class MI2UFuncs{
     protected static Interval interval = new Interval();
 
+    public static void drawBase(){
+        if(!state.isGame()) return;
+        state.teams.getActive().each(data -> {
+            data.units.each(unit -> {
+                drawUnit(unit);
+            });
+        }); 
+        if(enDistributionReveal) drawBlackboxBuilding();
+    }
+
+    public static void updateBase(){
+        //if(autoTarget) autoTarget();
+    }
+
     public static void drawUnit(Unit unit){
-        if(Math.abs(unit.x - Core.camera.position.x) > (Core.camera.width / 2) || Math.abs(unit.y - Core.camera.position.y) > (Core.camera.height / 2)) return;
-        //display healthbar by MI2
-        Draw.z(Layer.shields + 6f);
-        if(MI2USettings.getBool("enUnitHpBar")){
+        //Draw aim point
+        if(unit.isPlayer() && Math.abs(unit.aimX - Core.camera.position.x) <= (Core.camera.width / 2) && Math.abs(unit.aimY - Core.camera.position.y) <= (Core.camera.height / 2)){
             Draw.reset();
-            if(unit.hitTime > 0f){
-                Lines.stroke(4f + Mathf.lerp(0f, 2f, Mathf.clamp(unit.hitTime)));
-                Draw.color(Color.white, Mathf.lerp(0.1f, 1f, Mathf.clamp(unit.hitTime)));
-                Lines.line(unit.x - unit.hitSize() * 0.6f, unit.y + (unit.hitSize() / 2f), unit.x + unit.hitSize() * 0.6f, unit.y + (unit.hitSize() / 2f));
+            Draw.z(Layer.flyingUnit + 2f);
+            if(unit.isShooting()){
+                Draw.color(1f, 0.2f, 0.2f, 0.8f);
+            }else{
+                Draw.color(1f, 1f, 1f, 0.4f);
             }
-            Lines.stroke(4f);
-            Draw.color(unit.team.color, 0.5f);
-            Lines.line(unit.x - unit.hitSize() * 0.6f, unit.y + (unit.hitSize() / 2f), unit.x + unit.hitSize() * 0.6f, unit.y + (unit.hitSize() / 2f));
-            Draw.color((unit.health > 0 ? Pal.health:Color.gray), 0.8f);
-            Lines.stroke(2);
-            Lines.line(
-                unit.x - unit.hitSize() * 0.6f, unit.y + (unit.hitSize() / 2f), 
-                unit.x + unit.hitSize() * ((unit.health > 0 ? unit.health : Mathf.maxZero(unit.maxHealth + unit.health)) / unit.maxHealth * 1.2f - 0.6f), unit.y + (unit.hitSize() / 2f));
-            Lines.stroke(2f);
-            if(unit.shield > 0){
-                for(int didgt = 1; didgt <= Mathf.digits((int)(unit.shield / unit.maxHealth)) + 1; didgt++){
-                    //if(didgt == Mathf.digits((int)(unit.shield / unit.maxHealth)) + 1) continue;
-                    Draw.color(Pal.shield, 0.8f);
-                    float barLength = Mathf.mod(unit.shield / unit.maxHealth, Mathf.pow(10f, (float)didgt - 1f)) / Mathf.pow(10f, (float)didgt - 1f);
-                    if(didgt > 1){
-                        //float x = unit.x - (1f - Mathf.floor(barLength * 10f) / 10f) / 2f * 1.2f * unit.hitSize();
-                        float y = unit.y + unit.hitSize() / 2f + didgt * 2f;
-                        float h = 2f;
-                        //float w = 1.2f * Mathf.floor(barLength * 10f) / 10f * unit.hitSize();
-                        for(float i = 1; i <= Mathf.floor(barLength * 10f); i++){
-                            Fill.rect(unit.x - 0.55f * unit.hitSize() + (i - 1f) * 0.12f * unit.hitSize(), y, 0.1f * unit.hitSize(), h);
+            if(unit.mounts().length == 0){
+                Lines.dashLine(unit.aimX, unit.aimY, unit.x, unit.y, 40);
+            }else{
+                for(WeaponMount m : unit.mounts()){
+                    if(Mathf.len(m.aimX - unit.x - m.weapon.x, m.aimY - unit.y - m.weapon.y) < 1800f){
+                        Lines.dashLine(m.aimX, m.aimY, unit.x + Mathf.cos((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), unit.y + Mathf.sin((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), 40);
+                    }
+                } 
+            }
+        }
+
+        if(Math.abs(unit.x - Core.camera.position.x) <= (Core.camera.width / 2) && Math.abs(unit.y - Core.camera.position.y) <= (Core.camera.height / 2)){
+            //display healthbar by MI2
+            Draw.z(Layer.shields + 6f);
+            if(MI2USettings.getBool("enUnitHpBar")){
+                Draw.reset();
+                if(unit.hitTime > 0f){
+                    Lines.stroke(4f + Mathf.lerp(0f, 2f, Mathf.clamp(unit.hitTime)));
+                    Draw.color(Color.white, Mathf.lerp(0.1f, 1f, Mathf.clamp(unit.hitTime)));
+                    Lines.line(unit.x - unit.hitSize() * 0.6f, unit.y + (unit.hitSize() / 2f), unit.x + unit.hitSize() * 0.6f, unit.y + (unit.hitSize() / 2f));
+                }
+                Lines.stroke(4f);
+                Draw.color(unit.team.color, 0.5f);
+                Lines.line(unit.x - unit.hitSize() * 0.6f, unit.y + (unit.hitSize() / 2f), unit.x + unit.hitSize() * 0.6f, unit.y + (unit.hitSize() / 2f));
+                Draw.color((unit.health > 0 ? Pal.health:Color.gray), 0.8f);
+                Lines.stroke(2);
+                Lines.line(
+                    unit.x - unit.hitSize() * 0.6f, unit.y + (unit.hitSize() / 2f), 
+                    unit.x + unit.hitSize() * ((unit.health > 0 ? unit.health : Mathf.maxZero(unit.maxHealth + unit.health)) / unit.maxHealth * 1.2f - 0.6f), unit.y + (unit.hitSize() / 2f));
+                Lines.stroke(2f);
+                if(unit.shield > 0){
+                    for(int didgt = 1; didgt <= Mathf.digits((int)(unit.shield / unit.maxHealth)) + 1; didgt++){
+                        //if(didgt == Mathf.digits((int)(unit.shield / unit.maxHealth)) + 1) continue;
+                        Draw.color(Pal.shield, 0.8f);
+                        float barLength = Mathf.mod(unit.shield / unit.maxHealth, Mathf.pow(10f, (float)didgt - 1f)) / Mathf.pow(10f, (float)didgt - 1f);
+                        if(didgt > 1){
+                            //float x = unit.x - (1f - Mathf.floor(barLength * 10f) / 10f) / 2f * 1.2f * unit.hitSize();
+                            float y = unit.y + unit.hitSize() / 2f + didgt * 2f;
+                            float h = 2f;
+                            //float w = 1.2f * Mathf.floor(barLength * 10f) / 10f * unit.hitSize();
+                            for(float i = 1; i <= Mathf.floor(barLength * 10f); i++){
+                                Fill.rect(unit.x - 0.55f * unit.hitSize() + (i - 1f) * 0.12f * unit.hitSize(), y, 0.1f * unit.hitSize(), h);
+                            }
+                        }else{
+                            float x = unit.x - (1f - barLength) / 2f * 1.2f * unit.hitSize();
+                            float y = unit.y + unit.hitSize() / 2f + didgt * 2f;
+                            float h = 2f;
+                            float w = 1.2f * barLength * unit.hitSize();
+                            Fill.rect(x, y, w, h);
                         }
-                    }else{
-                        float x = unit.x - (1f - barLength) / 2f * 1.2f * unit.hitSize();
-                        float y = unit.y + unit.hitSize() / 2f + didgt * 2f;
-                        float h = 2f;
-                        float w = 1.2f * barLength * unit.hitSize();
-                        Fill.rect(x, y, w, h);
+                    }
+                }
+                Draw.reset();
+                
+                float index = 0f;
+                for(StatusEffect eff : content.statusEffects()){
+                    if(eff == StatusEffects.boss) continue;
+                    if(unit.hasEffect(eff)){
+                        float iconSize = Mathf.ceil(unit.hitSize() / 4f);
+                        Draw.rect(eff.uiIcon, 
+                        unit.x - unit.hitSize() * 0.6f + 0.5f * iconSize * Mathf.mod(index, 4f), 
+                        unit.y + (unit.hitSize() / 2f) + 3f + iconSize * Mathf.floor(index / 4f), 
+                        4f, 4f);
+                        index++;
                     }
                 }
             }
-            Draw.reset();
-            
-            float index = 0f;
-            for(StatusEffect eff : content.statusEffects()){
-                if(eff == StatusEffects.boss) continue;
-                if(unit.hasEffect(eff)){
-                    float iconSize = Mathf.ceil(unit.hitSize() / 4f);
-                    Draw.rect(eff.uiIcon, 
-                    unit.x - unit.hitSize() * 0.6f + 0.5f * iconSize * Mathf.mod(index, 4f), 
-                    unit.y + (unit.hitSize() / 2f) + 3f + iconSize * Mathf.floor(index / 4f), 
-                    4f, 4f);
-                    index++;
+
+            //display logicAI info by MI2
+            if(unit.controller() instanceof LogicAI logicai){
+                Draw.reset();
+                //if(Core.settings.getBool("unitLogicMoveLine") && Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) <= 1200f){
+                if(MI2USettings.getBool("enUnitLogic") && Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) <= 1200f){
+                    Lines.stroke(1f);
+                    Draw.color(0.2f, 0.2f, 1f, 0.9f);
+                    Lines.dashLine(unit.x, unit.y, logicai.moveX, logicai.moveY, (int)(Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) / 8));
+                    Lines.dashCircle(logicai.moveX, logicai.moveY, logicai.moveRad);
+                    Draw.reset();
+                }
+                
+                //logicai timers
+                //if(Core.settings.getBool("unitLogicTimerBars")){
+                if(MI2USettings.getBool("enUnitLogicTimer")){
+                    Lines.stroke(2f);
+                    Draw.color(Pal.heal);
+                    Lines.line(unit.x - (unit.hitSize() / 2f), unit.y - (unit.hitSize() / 2f), unit.x - (unit.hitSize() / 2f), unit.y + unit.hitSize() * (logicai.controlTimer / LogicAI.logicControlTimeout - 0.5f));
+
+                    Lines.stroke(2f);
+                    Draw.color(Pal.items);
+                    Lines.line(unit.x - (unit.hitSize() / 2f) - 1f, unit.y - (unit.hitSize() / 2f), unit.x - (unit.hitSize() / 2f) - 1f, unit.y + unit.hitSize() * (logicai.itemTimer / LogicAI.transferDelay - 0.5f));
+
+                    Lines.stroke(2f);
+                    Draw.color(Pal.items);
+                    Lines.line(unit.x - (unit.hitSize() / 2f) - 1.5f, unit.y - (unit.hitSize() / 2f), unit.x - (unit.hitSize() / 2f) - 1.5f, unit.y + unit.hitSize() * (logicai.payTimer / LogicAI.transferDelay - 0.5f));
+
+                    Draw.reset();
                 }
             }
-        }
 
-        //display logicAI info by MI2
-        if(unit.controller() instanceof LogicAI logicai){
-            Draw.reset();
-            //if(Core.settings.getBool("unitLogicMoveLine") && Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) <= 1200f){
-            if(MI2USettings.getBool("enUnitLogic") && Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) <= 1200f){
-                Lines.stroke(1f);
-                Draw.color(0.2f, 0.2f, 1f, 0.9f);
-                Lines.dashLine(unit.x, unit.y, logicai.moveX, logicai.moveY, (int)(Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) / 8));
-                Lines.dashCircle(logicai.moveX, logicai.moveY, logicai.moveRad);
+            //Pathfind Renderer
+            //if(Core.settings.getBool("unitPathLine") && Core.settings.getInt("unitPathLineLength") > 0){
+            if(MI2USettings.getBool("enUnitPath")){
+                Draw.z(Layer.power - 4f);
+                Tile tile = unit.tileOn();
                 Draw.reset();
-            }
-            
-            //logicai timers
-            //if(Core.settings.getBool("unitLogicTimerBars")){
-            if(MI2USettings.getBool("enUnitLogicTimer")){
-                Lines.stroke(2f);
-                Draw.color(Pal.heal);
-                Lines.line(unit.x - (unit.hitSize() / 2f), unit.y - (unit.hitSize() / 2f), unit.x - (unit.hitSize() / 2f), unit.y + unit.hitSize() * (logicai.controlTimer / LogicAI.logicControlTimeout - 0.5f));
-
-                Lines.stroke(2f);
-                Draw.color(Pal.items);
-                Lines.line(unit.x - (unit.hitSize() / 2f) - 1f, unit.y - (unit.hitSize() / 2f), unit.x - (unit.hitSize() / 2f) - 1f, unit.y + unit.hitSize() * (logicai.itemTimer / LogicAI.transferDelay - 0.5f));
-
-                Lines.stroke(2f);
-                Draw.color(Pal.items);
-                Lines.line(unit.x - (unit.hitSize() / 2f) - 1.5f, unit.y - (unit.hitSize() / 2f), unit.x - (unit.hitSize() / 2f) - 1.5f, unit.y + unit.hitSize() * (logicai.payTimer / LogicAI.transferDelay - 0.5f));
-
-                Draw.reset();
-            }
-        }
-
-        //Pathfind Renderer
-        //if(Core.settings.getBool("unitPathLine") && Core.settings.getInt("unitPathLineLength") > 0){
-        if(MI2USettings.getBool("enUnitPath")){
-            Draw.z(Layer.power - 4f);
-            Tile tile = unit.tileOn();
-            Draw.reset();
-            for(int tileIndex = 1; tileIndex <= 40; tileIndex++){
-                Tile nextTile = pathfinder.getTargetTile(tile, pathfinder.getField(unit.team, unit.pathType(), (unit.team.data().command == UnitCommand.attack)? Pathfinder.fieldCore : Pathfinder.fieldRally));
-                if(nextTile == null) break;
-                Lines.stroke(2);
-                if(nextTile == tile){
-                    Draw.color(unit.team.color, Color.black, Mathf.absin(Time.time, 4f, 1f));
-                    Lines.poly(unit.x, unit.y, 6, unit.hitSize());
-                    break;
+                for(int tileIndex = 1; tileIndex <= 40; tileIndex++){
+                    Tile nextTile = pathfinder.getTargetTile(tile, pathfinder.getField(unit.team, unit.pathType(), (unit.team.data().command == UnitCommand.attack)? Pathfinder.fieldCore : Pathfinder.fieldRally));
+                    if(nextTile == null) break;
+                    Lines.stroke(2);
+                    if(nextTile == tile){
+                        Draw.color(unit.team.color, Color.black, Mathf.absin(Time.time, 4f, 1f));
+                        Lines.poly(unit.x, unit.y, 6, unit.hitSize());
+                        break;
+                    }
+                    Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
+                    Lines.dashLine(tile.worldx(), tile.worldy(), nextTile.worldx(), nextTile.worldy(), (int)(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) / 4f));
+                    //Fill.poly(nextTile.worldx(), nextTile.worldy(), 4, tilesize - 2, 90);
+                    tile = nextTile;
                 }
-                Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
-                Lines.dashLine(tile.worldx(), tile.worldy(), nextTile.worldx(), nextTile.worldy(), (int)(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) / 4f));
-                //Fill.poly(nextTile.worldx(), nextTile.worldy(), 4, tilesize - 2, 90);
-                tile = nextTile;
+                Draw.reset();
             }
+
             Draw.reset();
         }
+        
 
-        Draw.reset();
     }
     
     public static void unitRebuildBlocks(){
@@ -160,6 +213,44 @@ public class MI2UFuncs{
             player.unit().addBuild(new BuildPlan(block.x, block.y, block.rotation, content.block(block.block), block.config));
         }
     }
+
+    /* wouldnt work well if not have subclass of DesktopInput 
+    public static void autoTarget(){
+        if(!state.isGame() || player.dead()) return;
+        if(mobile && control.input instanceof MobileInput mi && mi.manualShooting) return;
+        //autofire targeting
+        Unit unit = player.unit();
+        boolean boosted = (unit instanceof Mechc && unit.isFlying());
+        float range = unit.hasWeapons() ? unit.range() : 0f;
+        boolean manual = Core.input.keyDown(Binding.select);
+        Teamc target = null;
+        if(!(player.unit() instanceof BlockUnitUnit u && u.tile() instanceof ControlBlock c && !c.shouldAutoTarget())){
+            target = Units.closestTarget(unit.team, unit.x, unit.y, range, u -> u.checkTarget(unit.type.targetAir, unit.type.targetGround), u -> unit.type.targetGround);
+
+            if(unit.type.canHeal && target == null){
+                target = Geometry.findClosest(unit.x, unit.y, indexer.getDamaged(Team.sharded));
+                if(target != null && !unit.within(target, range)){
+                    target = null;
+                }
+            }
+        }
+        if(target != null && !manual){
+            Vec2 intercept = Predict.intercept(unit, target, unit.hasWeapons() ? unit.type.weapons.first().bullet.speed : 0f);
+            if(unit.type.omniMovement && player.shooting && unit.type.hasWeapons() && unit.type.faceTarget && !boosted && unit.type.rotateShooting){
+                unit.lookAt(Angles.angle(unit.x, unit.y, intercept.x, intercept.y));
+            }else{
+                unit.lookAt(Angles.mouseAngle(unit.x, unit.y));
+            }
+            unit.aim(intercept.x, intercept.y);
+            unit.controlWeapons(!player.boosting && !boosted);
+            player.mouseX = unit.aimX();
+            player.mouseY = unit.aimY();
+            player.shooting = true;
+        }else{
+            if(!manual) player.shooting = false;
+        }
+    }
+    */
 
     public static void drawBlackboxBuilding(){
         Draw.reset();
@@ -493,5 +584,120 @@ public class MI2UFuncs{
             Draw.rect(rb.lastItem.uiIcon, rb.x, rb.y, 4f, 4f);
         }
         Draw.reset();
+    }
+
+    public static void schelogic(){
+        SchematicInfoDialog info = Reflect.get(SchematicsDialog.class, ui.schematics, "info");
+        info.shown(Time.runTask(10f, () -> {
+            Label l = info.find(e -> e instanceof Label ll && ll.getText().toString().contains("[[" + Core.bundle.get("schematic") + "] "));
+            if(l != null){
+                info.cont.row();
+                info.cont.add("Sche Name Got!");
+                info.cont.row();
+                String schename = l.getText().toString().replace("[[" + Core.bundle.get("schematic") + "] ", "");
+                Schematic sche = schematics.all().find(s -> s.name().equals(schename));
+                if(sche != null && sche.width < 16 && sche.height < 16){
+                    info.cont.add("Sche Size Permitted!");
+                    info.cont.row();
+                    info.cont.button("@schematicsDialog.details", () -> {}).with(b -> {
+                        //float padding = 2f;
+                        b.getLabel().setWrap(false);
+                        b.clicked(() -> {
+                            b.setDisabled(true);
+                            SchematicImage image = info.find(e -> e instanceof SchematicImage);
+                            if(image == null){
+                                Log.infoTag("MI2U", "Failed to get Sche Image, skip.");
+                                return;
+                            }
+                            Tmp.v6.set(0f, 0f);
+                            Vec2 imagexy = Tmp.v6;
+                            image.localToParentCoordinates(imagexy);
+                            sche.tiles.each(tile -> {
+                                int size = tile.block.size;
+                                float padding = 2f;
+                                Vec2 tablexy = new Vec2(tile.x, tile.y);
+                                tablexy.add(padding/2f, padding/2f);
+                                tablexy.scl(32f);
+                                tablexy.add(imagexy.x, imagexy.y);
+                                Label tl = new Label(tile.block.name);
+                                info.cont.addChild(tl);
+                                tl.setPosition(tablexy.x, tablexy.y);
+                                tl.setSize(size);
+                                if(tile.block instanceof LogicBlock){
+                                    //tile.config is a byte[] including compressed code and links
+                                    try(DataInputStream stream = new DataInputStream(new InflaterInputStream(new ByteArrayInputStream((byte[])tile.config)))){
+                                        stream.read();
+                                        int bytelen = stream.readInt();
+                                        if(bytelen > 1024 * 500) throw new IOException("Malformed logic data! Length: " + bytelen);
+                                        byte[] bytes = new byte[bytelen];
+                                        stream.readFully(bytes);
+                                        /*
+                                        links.clear();
+                        
+                                        int total = stream.readInt();
+                                        
+                                        if(version == 0){
+                                            //old version just had links, ignore those
+                        
+                                            for(int i = 0; i < total; i++){
+                                                stream.readInt();
+                                            }
+                                        }else{
+                                            for(int i = 0; i < total; i++){
+                                                String name = stream.readUTF();
+                                                short x = stream.readShort(), y = stream.readShort();
+                        
+                                                if(relative){
+                                                    x += tileX();
+                                                    y += tileY();
+                                                }
+                        
+                                                Building build = world.build(x, y);
+                        
+                                                if(build != null){
+                                                    String bestName = getLinkName(build.block);
+                                                    if(!name.startsWith(bestName)){
+                                                        name = findLinkName(build.block);
+                                                    }
+                                                }
+                        
+                                                links.add(new LogicLink(x, y, name, false));
+                                            }
+                                        }
+                                        */
+                                        TextButton bl = new TextButton("" + Iconc.paste);
+                                        bl.clicked(() -> {
+                                            Core.app.setClipboardText(new String(bytes, charset));
+                                        });
+                                        info.cont.addChild(bl);
+                                        bl.setPosition(tablexy.x, tablexy.y);
+                                        bl.setSize(36f);
+                                    }catch(Exception ignored){
+                                        //invalid logic doesn't matter here
+                                    }
+                                }
+                                if(tile.block instanceof MessageBlock){
+                                    TextButton bl = new TextButton("" + Iconc.paste);
+                                    bl.clicked(() -> {
+                                        Core.app.setClipboardText(tile.config.toString());
+                                    });
+                                    bl.addListener(new Tooltip(tooltip -> {
+                                        tooltip.background(Styles.black);
+                                        tooltip.add(tile.config.toString());
+                                    }));
+                                    info.cont.addChild(bl);
+                                    bl.setPosition(tablexy.x, tablexy.y);
+                                    bl.setSize(36f);
+                                }
+                            });
+                        });
+                    }).size(100f, 30f).with(c -> {
+                        c.getLabel().setAlignment(Align.left);
+                        c.getLabel().setWrap(false);
+                        c.getLabelCell().pad(2);
+                    });
+                }
+            }
+        }));
     }
 }

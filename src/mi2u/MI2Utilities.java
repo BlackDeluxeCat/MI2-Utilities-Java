@@ -39,16 +39,15 @@ public class MI2Utilities extends Mod{
             Time.runTask(140f, () -> {
                 checkUpdate();
             });
+
+            schelogic();
         });
 
         Events.run(Trigger.draw, () -> {
-            if(!state.isGame()) return;
-            state.teams.getActive().each(data -> {
-                data.units.each(unit -> {
-                    drawUnit(unit);
-                });
-            }); 
-            if(enDistributionReveal) drawBlackboxBuilding();
+            drawBase();
+        });
+        Events.run(Trigger.update, () -> {
+            updateBase();
         });
     }
 
