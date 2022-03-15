@@ -16,6 +16,7 @@ import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import mi2u.io.*;
+import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
@@ -37,7 +38,7 @@ import static mi2u.MI2UVars.*;
 public class Mindow2 extends Table{
     @Nullable public static Mindow2 currTopmost = null;
     public static LabelStyle titleStyleNormal, titleStyleSnapped;
-    public static Drawable titleBarbgNormal, titleBarbgSnapped;
+    public static Drawable titleBarbgNormal, titleBarbgSnapped, white;
 
     public float fromx = 0, fromy = 0, curx = 0, cury = 0, titleScale = 1f;
     public boolean topmost = false, minimized = false, closable = true;
@@ -49,6 +50,11 @@ public class Mindow2 extends Table{
     @Nullable public Element aboveSnap; public int edgesnap = -1;
 
     public Mindow2(String title){
+        
+        Events.on(ResizeEvent.class, e -> {
+            loadUISettings();
+        });
+
         titleText = title;
         rebuild();
     }
@@ -280,12 +286,14 @@ public class Mindow2 extends Table{
     public void showSettings(){
         new BaseDialog("@mindow2.settings.title"){
             {
+                this.buttons.add("@mindow2.settingHelp").width(Math.min(600, Core.graphics.getWidth())).get().setWrap(true);
+                this.buttons.row();
                 addCloseButton();
                 this.cont.pane(t -> {
                     t.add(mindowName != null && !mindowName.equals("") ? Core.bundle.format("mindow2.settings.curMindowName") + mindowName: "@mindow2.settings.noMindowNameWarning").fontScale(1.2f).get().setAlignment(Align.center);
                     t.row();
                     settings.each(st -> {
-                        t.add(st.getF()).width(Math.min(500, Core.graphics.getWidth())).left();
+                        t.add(st.getF()).width(Math.min(600, Core.graphics.getWidth())).left();
                         t.row();
                     });
                     t.table(tt -> {
@@ -295,7 +303,7 @@ public class Mindow2 extends Table{
     
                         tt.button("@mindow2.settings.cacheUI", textb, () -> {
                             saveUISettings();
-                        }).width(100).get().getLabel().setColor(1, 1, 0, 1);
+                        }).width(100).get().getLabel().setColor(0, 0, 1, 1);
     
                         tt.button("@mindow2.settings.writeToFile", textb, () -> {
                             MI2USettings.save();
@@ -314,19 +322,20 @@ public class Mindow2 extends Table{
     public void initSettings(){
         settings.clear();
         if(mindowName == null || mindowName.equals("")) return;
-        settings.add(new SettingEntry(mindowName + ".minimized", true));
-        settings.add(new SettingEntry(mindowName + ".topmost", true));
-        settings.add(new SettingEntry(mindowName + ".curx", true));
-        settings.add(new SettingEntry(mindowName + ".cury", true));
+        settings.add(new SettingEntry(mindowName + ".minimized", true, true));
+        settings.add(new SettingEntry(mindowName + ".topmost", true, true));
+        settings.add(new SettingEntry(mindowName + ".curx", true, true));
+        settings.add(new SettingEntry(mindowName + ".cury", true, true));
         var f = new FieldSettingEntry(SettingType.Int, mindowName + ".edgesnap", s -> {
             return Strings.canParseInt(s) && Strings.parseInt(s) <= 7 && Strings.parseInt(s) >= -1;
         }, "@settings.mindow.edgesnap");
-        f.isUI = true;
+        f.isUILoad = true;
+        f.isUISave = true;
         settings.add(f);
         f = new FieldSettingEntry(SettingType.Str, mindowName + ".abovesnapTarget", s -> {
             return mindow2s.contains(mi2 -> mi2.mindowName.equals(s)) || s.equals("null");
         }, "@settings.mindow.abovesnapTarget");
-        f.isUI = true;
+        f.isUILoad = true;
         settings.add(f);
         settings.add(new CheckSettingEntry(mindowName + ".autoHideTitle", "@settings.mindow.autoHideTitle"));
     }
@@ -393,23 +402,26 @@ public class Mindow2 extends Table{
         //titleStyleSnapped.background = whiteui.tint(1f, 0.1f, 0.2f, 0.2f);
         titleBarbgNormal = whiteui.tint(1f, 0.1f, 0.2f, 0.8f);
         titleBarbgSnapped = whiteui.tint(1f, 0.1f, 0.2f, 0.2f);
+        white = whiteui.tint(1f, 1f, 1f, 1f);
     }
 
     public class SettingEntry{
         public String name = "";
-        public boolean isUI = false;
+        public boolean isUILoad = false, isUISave = false;
         protected SettingType type;
         protected Table cont;
         public SettingEntry(String name){
             this.name = name;
             cont = new Table();
-            cont.label(() -> this.name + " = " + MI2USettings.getStr(this.name)).update(t -> {
-                t.setColor(1,1,this.isUI?0:1,1);
-            });
+            cont.clear();
+            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUILoad ? Tmp.c4.set(1f, 1f, 0f, 0.5f):Tmp.c4.set(1f, 1f, 1f, 0.2f)));
+            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUISave ? Tmp.c4.set(0f, 0f, 1f, 0.6f):Tmp.c4.set(1f, 1f, 1f, 0.2f)));
+            cont.label(() -> this.name + " = " + MI2USettings.getStr(this.name)).align(Align.left).growX();
         }
-        public SettingEntry(String name, boolean isUI){
+        public SettingEntry(String name, boolean isUILoad, boolean isUISave){
             this(name);
-            this.isUI = isUI;
+            this.isUILoad = isUILoad;
+            this.isUISave = isUISave;
         }
         public Table getF(){
             return cont;
@@ -422,6 +434,8 @@ public class Mindow2 extends Table{
             super(name);
             this.changed = changed;
             cont.clear();
+            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUILoad ? Tmp.c4.set(1f, 1f, 0f, 0.5f):Tmp.c4.set(1f, 1f, 1f, 0.2f)));
+            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUISave ? Tmp.c4.set(0f, 0f, 1f, 0.6f):Tmp.c4.set(1f, 1f, 1f, 0.2f)));
             TextButton tb = new TextButton(this.name, textbtoggle);
             cont.add(tb).left().with(c -> {
                 c.getLabelCell().width(200).height(32);
@@ -443,8 +457,6 @@ public class Mindow2 extends Table{
                 c.get().setWrap(true);
                 c.get().setAlignment(Align.right);
                 c.get().setColor(1, 1, 1, 0.7f);
-            }).update(t -> {
-                t.setColor(1,1,this.isUI?0:1,1);
             });
         }
 
@@ -460,6 +472,8 @@ public class Mindow2 extends Table{
             super(name);
             this.changed = changed;
             cont.clear();
+            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUILoad ? Tmp.c4.set(1f, 1f, 0f, 0.5f):Tmp.c4.set(1f, 1f, 1f, 0.2f)));
+            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUISave ? Tmp.c4.set(0f, 0f, 1f, 0.6f):Tmp.c4.set(1f, 1f, 1f, 0.2f)));
             type = ty;
             TextField tf = new TextField("", Styles.nodeField);
             tf.setValidator(val);
@@ -491,8 +505,6 @@ public class Mindow2 extends Table{
                 c.get().setWrap(true);
                 c.get().setAlignment(Align.right);
                 c.get().setColor(1, 1, 1, 0.7f);
-            }).update(t -> {
-                t.setColor(1,1,this.isUI?0:1,1);
             });
         }
 
