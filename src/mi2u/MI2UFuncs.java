@@ -6,10 +6,11 @@ import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.ui.*;
+import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import arc.util.pooling.*;
 import mi2u.io.*;
-import mi2u.ui.*;
 import mindustry.ai.*;
 import mindustry.ai.types.*;
 import mindustry.content.*;
@@ -24,7 +25,7 @@ import mindustry.input.Binding;
 import mindustry.input.DesktopInput;
 import mindustry.input.MobileInput;
 import mindustry.type.*;
-import mindustry.ui.Styles;
+import mindustry.ui.*;
 import mindustry.ui.dialogs.SchematicsDialog;
 import mindustry.ui.dialogs.SchematicsDialog.*;
 import mindustry.world.*;
@@ -67,23 +68,61 @@ public class MI2UFuncs{
 
     public static void drawUnit(Unit unit){
         //Draw aim point
-        if(unit.isPlayer() && Math.abs(unit.aimX - Core.camera.position.x) <= (Core.camera.width / 2) && Math.abs(unit.aimY - Core.camera.position.y) <= (Core.camera.height / 2)){
-            Draw.reset();
-            Draw.z(Layer.flyingUnit + 2f);
-            if(unit.isShooting()){
-                Draw.color(1f, 0.2f, 0.2f, 0.8f);
-            }else{
-                Draw.color(1f, 1f, 1f, 0.4f);
+        if(unit.isPlayer() && Mathf.len(unit.aimX - unit.x, unit.aimY - unit.y) < 4800f){
+            Rect tmpRect = Tmp.r3.setCentered(Core.camera.position.x, Core.camera.position.y, Core.camera.width, Core.camera.height);
+            if(tmpRect.contains(unit.aimX, unit.aimY) || tmpRect.contains(unit.x, unit.y)){
+                Draw.reset();
+                Draw.z(Layer.flyingUnit + 2f);
+                if(unit.isShooting()){
+                    Draw.color(1f, 0.2f, 0.2f, 0.8f);
+                }else{
+                    Draw.color(1f, 1f, 1f, 0.4f);
+                }
+                if(unit.mounts().length == 0){
+                    Lines.dashLine(unit.aimX, unit.aimY, unit.x, unit.y, 40);
+                }else{
+                    for(WeaponMount m : unit.mounts()){
+                        if(Mathf.len(m.aimX - unit.x - m.weapon.x, m.aimY - unit.y - m.weapon.y) < 1800f){
+                            Lines.dashLine(m.aimX, m.aimY, unit.x + Mathf.cos((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), unit.y + Mathf.sin((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), 40);
+                        }
+                    } 
+                }
             }
-            if(unit.mounts().length == 0){
-                Lines.dashLine(unit.aimX, unit.aimY, unit.x, unit.y, 40);
-            }else{
-                for(WeaponMount m : unit.mounts()){
-                    if(Mathf.len(m.aimX - unit.x - m.weapon.x, m.aimY - unit.y - m.weapon.y) < 1800f){
-                        Lines.dashLine(m.aimX, m.aimY, unit.x + Mathf.cos((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), unit.y + Mathf.sin((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), 40);
+
+            if(tmpRect.contains(unit.aimX, unit.aimY) && !tmpRect.contains(unit.x, unit.y)){
+                Draw.z(Layer.playerName);
+                Drawf.target(unit.aimX, unit.aimY, 4f, Pal.remove);
+
+                if(!unit.getPlayer().isLocal()){
+                    Player p = unit.getPlayer();
+                    Font font = Fonts.def;
+                    GlyphLayout layout = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
+                    final float nameHeight = 6f;
+            
+                    font.setUseIntegerPositions(false);
+                    font.getData().setScale(0.25f / Scl.scl(1f));
+                    layout.setText(font, p.name);
+
+                    Draw.color(unit.team.color, 0.3f);
+                    Fill.rect(unit.aimX, unit.aimY + nameHeight - layout.height / 2, layout.width + 2, layout.height + 3);
+                    Draw.color();
+                    font.setColor(p.color);
+                    font.draw(p.name, unit.aimX, unit.aimY + nameHeight, 0, Align.center, false);
+        
+                    if(p.admin){
+                        float s = 3f;
+                        Draw.color(p.color.r * 0.5f, p.color.g * 0.5f, p.color.b * 0.5f, 1f);
+                        Draw.rect(Icon.adminSmall.getRegion(), unit.aimX + layout.width / 2f + 2 + 1, unit.aimY + nameHeight - 1.5f, s, s);
+                        Draw.color(p.color);
+                        Draw.rect(Icon.adminSmall.getRegion(), unit.aimX + layout.width / 2f + 2 + 1, unit.aimY + nameHeight - 1f, s, s);
                     }
-                } 
+
+                    Pools.free(layout);
+                    font.getData().setScale(1f);
+                    font.setColor(Color.white);
+                }
             }
+            Draw.reset();
         }
 
         if(Math.abs(unit.x - Core.camera.position.x) <= (Core.camera.width / 2) && Math.abs(unit.y - Core.camera.position.y) <= (Core.camera.height / 2)){
@@ -258,11 +297,10 @@ public class MI2UFuncs{
         Lines.rect(new Rect().setSize(240f).setCenter(Core.input.mouseWorld()));
 
         Groups.build.each(b -> {
-            Rect rect = new Rect();
-            Core.camera.bounds(rect);
-            if(!rect.contains(b.tile().worldx(), b.tile().worldy())) return;
-            rect.setSize(240f).setCenter(Core.input.mouseWorld());
-            if(!rect.contains(b.tile().worldx(), b.tile().worldy())) return;
+            Core.camera.bounds(Tmp.r3);
+            if(!Tmp.r3.contains(b.tile().worldx(), b.tile().worldy())) return;
+            Tmp.r3.setSize(240f).setCenter(Core.input.mouseWorld());
+            if(!Tmp.r3.contains(b.tile().worldx(), b.tile().worldy())) return;
 
             if(b instanceof JunctionBuild jb) drawJunciton(jb);
             if(b instanceof ItemBridgeBuild ib) drawItemBridge(ib);
@@ -596,7 +634,7 @@ public class MI2UFuncs{
                 info.cont.row();
                 String schename = l.getText().toString().replace("[[" + Core.bundle.get("schematic") + "] ", "");
                 Schematic sche = schematics.all().find(s -> s.name().equals(schename));
-                if(sche != null && sche.width < 16 && sche.height < 16){
+                if(sche != null && sche.width <= 128 && sche.height <= 128){
                     info.cont.add("Sche Size Permitted!");
                     info.cont.row();
                     info.cont.button("@schematicsDialog.details", () -> {}).with(b -> {
@@ -611,18 +649,23 @@ public class MI2UFuncs{
                             }
                             Tmp.v6.set(0f, 0f);
                             Vec2 imagexy = Tmp.v6;
+                            
                             image.localToParentCoordinates(imagexy);
                             sche.tiles.each(tile -> {
                                 int size = tile.block.size;
                                 float padding = 2f;
+                                float bufferScl = Math.min(image.getWidth() / ((sche.width + padding) * 32f * Scl.scl()), image.getHeight() / ((sche.height + padding) * 32f * Scl.scl()));
                                 Vec2 tablexy = new Vec2(tile.x, tile.y);
-                                tablexy.add(padding/2f, padding/2f);
-                                tablexy.scl(32f);
+                                //tablexy.add(padding/2f, padding/2f);
+                                tablexy.add(-sche.width/2f, -sche.height/2f);
+                                tablexy.scl(32f * Scl.scl());
+                                tablexy.scl(bufferScl);
                                 tablexy.add(imagexy.x, imagexy.y);
-                                Label tl = new Label(tile.block.name);
-                                info.cont.addChild(tl);
-                                tl.setPosition(tablexy.x, tablexy.y);
-                                tl.setSize(size);
+                                tablexy.add(image.getWidth()/2f, image.getHeight()/2f);
+                                //Label tl = new Label(tile.block.name);
+                                //info.cont.addChild(tl);
+                                //tl.setPosition(tablexy.x, tablexy.y);
+                                //tl.setSize(size);
                                 if(tile.block instanceof LogicBlock){
                                     //tile.config is a byte[] including compressed code and links
                                     try(DataInputStream stream = new DataInputStream(new InflaterInputStream(new ByteArrayInputStream((byte[])tile.config)))){
@@ -666,28 +709,30 @@ public class MI2UFuncs{
                                         }
                                         */
                                         TextButton bl = new TextButton("" + Iconc.paste);
+                                        bl.setStyle(textb);
                                         bl.clicked(() -> {
                                             Core.app.setClipboardText(new String(bytes, charset));
                                         });
                                         info.cont.addChild(bl);
                                         bl.setPosition(tablexy.x, tablexy.y);
-                                        bl.setSize(36f);
+                                        bl.setSize(Scl.scl() * 36f * (size <= 1f ? 0.5f:1f));
                                     }catch(Exception ignored){
                                         //invalid logic doesn't matter here
                                     }
                                 }
                                 if(tile.block instanceof MessageBlock){
                                     TextButton bl = new TextButton("" + Iconc.paste);
+                                    bl.setStyle(textb);
                                     bl.clicked(() -> {
                                         Core.app.setClipboardText(tile.config.toString());
                                     });
                                     bl.addListener(new Tooltip(tooltip -> {
-                                        tooltip.background(Styles.black);
+                                        tooltip.background(Styles.black5);
                                         tooltip.add(tile.config.toString());
                                     }));
                                     info.cont.addChild(bl);
                                     bl.setPosition(tablexy.x, tablexy.y);
-                                    bl.setSize(36f);
+                                    bl.setSize(Scl.scl() * 36f * (size <= 1f ? 0.5f:1f));
                                 }
                             });
                         });
