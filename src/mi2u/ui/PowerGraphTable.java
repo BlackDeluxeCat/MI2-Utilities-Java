@@ -60,9 +60,7 @@ public class PowerGraphTable extends Table{
             totalCap += p.getLastCapacity();
         }
 
-        for(PowerGraph s : saved){
-            if(!graphs.contains(s)) saved.remove(s);
-        }
+        saved.removeAll(s -> !graphs.contains(s));
         
         int index = 0;
         for(PowerGraph p : saved){
