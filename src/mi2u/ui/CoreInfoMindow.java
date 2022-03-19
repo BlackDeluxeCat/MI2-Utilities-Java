@@ -1,24 +1,32 @@
 package mi2u.ui;
 
+import arc.*;
+import arc.math.*;
+import arc.scene.Element;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import mi2u.io.*;
-import mindustry.Vars;
 import mindustry.core.*;
+import mindustry.game.Team;
+import mindustry.game.Teams.*;
+import mindustry.gen.*;
 import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.world.blocks.storage.CoreBlock.*;
 
 import static mindustry.Vars.*;
+import static mi2u.MI2UVars.*;
 
 public class CoreInfoMindow extends Mindow2{
-    private Interval interval = new Interval();
-    private ObjectIntMap<Item> lastItemsAmt = new ObjectIntMap<>(); 
-    private ObjectIntMap<Item> lastLastItemsAmt = new ObjectIntMap<>(); 
-    private CoreBuild core;
-    private PowerGraphTable pg = new PowerGraphTable(400);
+    protected Interval interval = new Interval();
+    protected ObjectIntMap<Item> lastItemsAmt = new ObjectIntMap<>();
+    protected ObjectIntMap<Item> lastLastItemsAmt = new ObjectIntMap<>();
+    protected CoreBuild core;
+    protected Team select, team;
+    protected PowerGraphTable pg = new PowerGraphTable(330);
+    protected Table teamSelect = new Table();
     
     public CoreInfoMindow(){
         super("@coreInfo.MI2U", "@coreInfo.help");
@@ -29,8 +37,13 @@ public class CoreInfoMindow extends Mindow2{
     public void setupCont(Table cont){
         cont.clear();
         cont.update(() -> {
-            core = Vars.player.team().core();
-
+            if(select == null || !select.active()){
+                team = player.team();
+            }else{
+                team = select;
+            }
+            core = team.core();
+            pg.team = team;
             if(state.isGame() && core != null && interval.get(60f)){
                 for(Item item : content.items()){
                     lastLastItemsAmt.put(item, lastItemsAmt.get(item));
@@ -43,13 +56,29 @@ public class CoreInfoMindow extends Mindow2{
             cont.row();
         }
         
-            cont.table(iut -> {
+        cont.table(ipt -> {
+            ipt.table(utt -> {
+                utt.image(Mindow2.white).width(24f).growY().update(i -> {
+                    i.setColor(team.color);
+                });
+                utt.button("Select", textb, () -> {
+                    rebuildSelect();
+                    snapToSelect(this);
+                }).growX().height(48f).update(b -> {
+                    b.setText(Core.bundle.get("coreInfo.selectButton.team") + (select == null ? Core.bundle.get("coreInfo.selectButton.playerteam"):team.localized()));
+                    //b.setColor(team.color);
+                });
+            }).grow();
+
+            ipt.row();
+
+            ipt.table(iut -> {
                 int i = 0;
                 if(MI2USettings.getBool(mindowName + ".showCoreItems")){
                     for(Item item : content.items()){
                         iut.stack(
                             new Image(item.uiIcon),
-                            new Table(t -> t.label(() -> core == null ? "" : (lastItemsAmt.get(item) - lastLastItemsAmt.get(item) >= 0 ? "[green]+" : "[red]") + (lastItemsAmt.get(item) - lastLastItemsAmt.get(item))).get().setFontScale(0.6f)).right().bottom()
+                            new Table(t -> t.label(() -> core == null ? "" : (lastItemsAmt.get(item) - lastLastItemsAmt.get(item) >= 0 ? "[green]+" : "[red]") + (lastItemsAmt.get(item) - lastLastItemsAmt.get(item))).get().setFontScale(0.65f)).right().bottom()
                             ).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel));
                         //image(item.uiIcon).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel));
                         //TODO leaks garbage
@@ -63,30 +92,85 @@ public class CoreInfoMindow extends Mindow2{
                         
                     }
                 }
+            });
+            if(MI2USettings.getBool(mindowName + ".showPowerGraphs")){
+                ipt.row();
+                ipt.add(pg).fillX();
+            }
+        });
+
+
+        //cont.row();
+
+        if(MI2USettings.getBool(mindowName + ".showUnits")){
+            cont.table(uut -> {
+                int i = 0;
+                for(UnitType type : content.units()){
+                    if(type.isHidden()) continue;
+                    uut.stack(new Image(type.uiIcon){{this.setColor(1f,1f,1f,0.8f);}},
+                        new Table(t -> t.label(() -> core != null && team.data().countType(type) > 0 ? UI.formatAmount(team.data().countType(type)) : "").get().setFontScale(0.65f)).right().bottom()
+                        ).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(type.localizedName).style(Styles.outlineLabel));
+                    //uut.image(type.uiIcon).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(type.localizedName).style(Styles.outlineLabel));
+                    //uut.label(() -> core == null ? "0" : UI.formatAmount(team.data().countType(type))).padRight(3).minWidth(52f).left();
         
-                //unittypes in a new line
-                iut.row();
-                i = 0;
-                if(MI2USettings.getBool(mindowName + ".showUnits")){
-                    for(UnitType type : content.units()){
-                        if(type.isHidden()) continue;
-                        iut.image(type.uiIcon).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(type.localizedName).style(Styles.outlineLabel));
-                        iut.label(() -> core == null ? "0" : UI.formatAmount(player.team().data().countType(type))).padRight(3).minWidth(52f).left();
-            
-                        if(++i % 5 == 0){
-                            iut.row();
-                        }
-                        
+                    if(++i % 5 == 0){
+                        uut.row();
                     }
                 }
+                uut.stack(new Image(Icon.unitsSmall){{this.setColor(1,0.6f,0,0.5f);}},
+                new Label(""){{
+                    this.setFillParent(true);
+                    this.setAlignment(Align.bottomRight);
+                    this.setFontScale(0.65f);
+                    this.update(() -> {
+                        //this.setFontScale(team.data().unitCount <= 1000 ? 0.65f : 0.5f);
+                        this.setText(core != null && team.data().unitCount > 0 ? 
+                            (team.data().unitCount>1000?(int)(team.data().unitCount/1000) + "\n":"") + 
+                            Mathf.mod(team.data().unitCount, 1000) + "" : "");
+                    });
+                }}
+                ).size(iconSmall).padRight(3);
+                uut.stack(new Label("" + Iconc.blockCoreNucleus){{this.setColor(1,0.6f,0,0.5f);}},
+                new Table(t -> t.label(() -> core != null && team.data().cores.size > 0 ? UI.formatAmount(team.data().cores.size) : "").get().setFontScale(0.65f)).right().bottom()
+                ).size(iconSmall).padRight(3);
             });
-        
-
-        if(MI2USettings.getBool(mindowName + ".showPowerGraphs")){
-            cont.row();
-            cont.add(pg).fillX();
         }
+    }
 
+    public void rebuildSelect(){
+        teamSelect.clear();
+        teamSelect.pane(p -> {
+            p.button(Iconc.cancel + "", textb, () -> {
+                select = null;
+                rebuild();
+                teamSelect.remove();
+            }).minSize(titleButtonSize).disabled(select == null).get().getLabel().setWrap(false);
+            int i = 1;
+            for(TeamData t : state.teams.getActive()){
+                p.button(t.team.localized(), textb, () -> {
+                    select = t.team;
+                    rebuild();
+                    teamSelect.remove();
+                }).minSize(titleButtonSize).color(t.team.color).disabled(select == t.team).get().getLabel().setWrap(false);
+                if(++i < 4) continue;
+                    p.row();
+                    i = 0;
+            }
+        }).maxHeight(300f);
+        teamSelect.update(() -> {
+            teamSelect.toFront();
+            if(!teamSelect.hasMouse() && !CoreInfoMindow.this.hasMouse()){
+                teamSelect.remove();
+            }
+        });
+    }
+
+    public void snapToSelect(Element e){
+        Core.scene.add(teamSelect);
+        teamSelect.setPosition(e.x, e.y);
+        teamSelect.keepInStage();
+        teamSelect.invalidateHierarchy();
+        teamSelect.pack();
     }
 
     /** can be overrided, should use super.initSettings(), called in rebuild() */

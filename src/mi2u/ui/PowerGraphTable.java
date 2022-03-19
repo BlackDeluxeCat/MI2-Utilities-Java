@@ -42,10 +42,11 @@ public class PowerGraphTable extends Table{
     public void rebuild(){
         clear();
         if(!state.isGame()) return;
-        if(state.teams.get(player.team()).buildings == null) return;
+        if(team == null) return;
+        if(state.teams.get(team).buildings == null) return;
         ObjectSet<PowerGraph> graphs = new ObjectSet<PowerGraph>();
         Seq<Building> builds = new Seq<Building>();
-        state.teams.get(player.team()).buildings.getObjects(builds);
+        state.teams.get(team).buildings.getObjects(builds);
         totalCap = 0f;
         Prov<String> powertext;
 
