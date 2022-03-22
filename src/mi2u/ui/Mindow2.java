@@ -15,6 +15,7 @@ import arc.scene.ui.TextField.TextFieldValidator;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import mi2u.MI2UTmp;
 import mi2u.io.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
@@ -104,7 +105,7 @@ public class Mindow2 extends Table{
 
             @Override
             public void touchDragged(InputEvent event, float x, float y, int pointer){
-                Vec2 v = localToStageCoordinates(Tmp.v1.set(x, y));
+                Vec2 v = localToStageCoordinates(MI2UTmp.v1.set(x, y));
                 Element hit = Core.scene.hit(v.x + title.x + title.parent.x, v.y + title.y + title.parent.y, false);
                 if(hit != null && hit.name == "Mindow2Title" && !hit.isDescendantOf(Mindow2.this)){
                     aboveSnap = hit.parent.parent;
@@ -170,12 +171,12 @@ public class Mindow2 extends Table{
         });
 
         titleBar.setTransform(true);
-        titleBar.setClip(true);
         interval.reset(0, 1);
         interval.reset(1, 1);
         titleBar.update(() -> {
             cont.touchable = Touchable.enabled;
-            title.setStyle(aboveSnap == null ? titleStyleNormal : titleStyleSnapped);
+            //TODO add a abovesnap listener
+            //title.setStyle(aboveSnap == null ? titleStyleNormal : titleStyleSnapped);
             titleBar.setBackground(aboveSnap == null ? titleBarbgNormal : titleBarbgSnapped);
             //don't collapse when minimized
             if(minimized || !MI2USettings.getBool(mindowName + ".autoHideTitle", false)) titleScale = 1f;
@@ -414,8 +415,8 @@ public class Mindow2 extends Table{
             this.name = name;
             cont = new Table();
             cont.clear();
-            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUILoad ? Tmp.c4.set(1f, 1f, 0f, 0.5f):Tmp.c4.set(1f, 1f, 1f, 0.2f)));
-            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUISave ? Tmp.c4.set(0f, 0f, 1f, 0.6f):Tmp.c4.set(1f, 1f, 1f, 0.2f)));
+            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUILoad ? MI2UTmp.c1.set(1f, 1f, 0f, 0.5f):MI2UTmp.c1.set(1f, 1f, 1f, 0.2f)));
+            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUISave ? MI2UTmp.c1.set(0f, 0f, 1f, 0.6f):MI2UTmp.c1.set(1f, 1f, 1f, 0.2f)));
             cont.label(() -> this.name + " = " + MI2USettings.getStr(this.name)).align(Align.left).growX();
         }
         public SettingEntry(String name, boolean isUILoad, boolean isUISave){
@@ -434,8 +435,8 @@ public class Mindow2 extends Table{
             super(name);
             this.changed = changed;
             cont.clear();
-            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUILoad ? Tmp.c4.set(1f, 1f, 0f, 0.5f):Tmp.c4.set(1f, 1f, 1f, 0.2f)));
-            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUISave ? Tmp.c4.set(0f, 0f, 1f, 0.6f):Tmp.c4.set(1f, 1f, 1f, 0.2f)));
+            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUILoad ? MI2UTmp.c1.set(1f, 1f, 0f, 0.5f):MI2UTmp.c1.set(1f, 1f, 1f, 0.2f)));
+            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUISave ? MI2UTmp.c1.set(0f, 0f, 1f, 0.6f):MI2UTmp.c1.set(1f, 1f, 1f, 0.2f)));
             TextButton tb = new TextButton(this.name, textbtoggle);
             cont.add(tb).left().with(c -> {
                 c.getLabelCell().width(200).height(32);
@@ -472,8 +473,8 @@ public class Mindow2 extends Table{
             super(name);
             this.changed = changed;
             cont.clear();
-            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUILoad ? Tmp.c4.set(1f, 1f, 0f, 0.5f):Tmp.c4.set(1f, 1f, 1f, 0.2f)));
-            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUISave ? Tmp.c4.set(0f, 0f, 1f, 0.6f):Tmp.c4.set(1f, 1f, 1f, 0.2f)));
+            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUILoad ? MI2UTmp.c1.set(1f, 1f, 0f, 0.5f):MI2UTmp.c1.set(1f, 1f, 1f, 0.2f)));
+            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUISave ? MI2UTmp.c1.set(0f, 0f, 1f, 0.6f):MI2UTmp.c1.set(1f, 1f, 1f, 0.2f)));
             type = ty;
             TextField tf = new TextField("", Styles.nodeField);
             tf.setValidator(val);
