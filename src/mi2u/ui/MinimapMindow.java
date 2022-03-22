@@ -12,6 +12,8 @@ import arc.scene.ui.layout.*;
 import arc.struct.Seq;
 import arc.util.*;
 import arc.util.pooling.*;
+import mi2u.MI2UTmp;
+import mi2u.MI2UVars;
 import mi2u.io.*;
 import mindustry.core.*;
 import mindustry.entities.*;
@@ -38,9 +40,16 @@ public class MinimapMindow extends Mindow2{
         m.setMapSize(MI2USettings.getInt(mindowName + ".size", 200));
         cont.add(m).fill();
         cont.row();
-        cont.label(() -> "    " + Strings.fixed(World.conv(player.x), 1) + ", "+ Strings.fixed(World.conv(player.y), 1));
-        cont.row();
-        cont.label(() -> Iconc.commandAttack + "  " + Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1));
+        cont.table(t -> {
+            t.table(tt -> {
+                tt.label(() -> "    " + Strings.fixed(World.conv(player.x), 1) + ", "+ Strings.fixed(World.conv(player.y), 1));
+                tt.row();
+                tt.label(() -> Iconc.commandAttack + "  " + Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1));
+            });
+            t.table(tt -> {
+                tt.button(Iconc.players + "", MI2UVars.textbtoggle, () -> renderer2.drawLabel = !renderer2.drawLabel).update(b -> b.setChecked(renderer2.drawLabel)).size(48f);
+            });
+        });
     }
 
     @Override
@@ -158,7 +167,6 @@ public class MinimapMindow extends Mindow2{
             });
     
             update(() -> {
-    
                 Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
                 if(e != null && e.isDescendantOf(this)){
                     requestScroll();
@@ -179,7 +187,6 @@ public class MinimapMindow extends Mindow2{
 
     //may cause some problems about ui color
     public static class MinimapRenderer2{
-        public static final Color tmpc = new Color();
         private static final float baseSize = 16f;
         private final Seq<Unit> units = new Seq<>();
         private Pixmap pixmap;
@@ -187,14 +194,14 @@ public class MinimapMindow extends Mindow2{
         private TextureRegion region;
         private Rect rect = new Rect();
         private float zoom = 4;
+        public boolean drawLabel = true;
     
         public MinimapRenderer2(){
             Events.on(WorldLoadEvent.class, event -> {
                 reset();
-                updateAll();
+                Time.runTask(10f, () -> updateAll());
             });
             Events.on(TileChangeEvent.class, event -> {
-                //TODO don't update when the minimap is off?
                 if(!ui.editor.isShown()){
                     update(event.tile);
                 }
@@ -273,8 +280,8 @@ public class MinimapMindow extends Mindow2{
                 Draw.reset();
             }
     
-            //always display labels
-            if(true){
+            //display labels
+            if(drawLabel){
                 for(Player player : Groups.player){
                     if(!player.dead()){
                         //float rx = player.x / (world.width() * tilesize) * w;
@@ -330,7 +337,7 @@ public class MinimapMindow extends Mindow2{
     
             int color = colorFor(tile);
             pixmap.set(tile.x, pixmap.height - 1 - tile.y, color);
-    
+            //Log.info(color);
             Pixmaps.drawPixel(texture, tile.x, pixmap.height - 1 - tile.y, color);
         }
     
@@ -348,7 +355,7 @@ public class MinimapMindow extends Mindow2{
         private int colorFor(Tile tile){
             if(tile == null) return 0;
             int bc = tile.block().minimapColor(tile);
-            Color color = tmpc.set(bc == 0 ? MapIO.colorFor(tile.block(), tile.floor(), tile.overlay(), tile.team()) : bc);
+            Color color = MI2UTmp.c2.set(bc == 0 ? MapIO.colorFor(tile.block(), tile.floor(), tile.overlay(), tile.team()) : bc);
             color.mul(1f - Mathf.clamp(world.getDarkness(tile.x, tile.y) / 4f));
     
             return color.rgba();
@@ -371,9 +378,8 @@ public class MinimapMindow extends Mindow2{
             font.setColor(color);
             font.draw(text, x - l.width/2f, y + yOffset, 90f, Align.left, true);
             font.setUseIntegerPositions(ints);
-    
             font.getData().setScale(1f);
-    
+            font.setColor(Color.white);
             Pools.free(l);
         }
     }
