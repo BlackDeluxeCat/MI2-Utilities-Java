@@ -105,8 +105,8 @@ public class WaveBarTable extends Table{
         public void init(){
             totalHp = totalShield = 0f;
             for(SpawnGroup group : state.rules.spawns){
-                totalHp += group.type.health * group.getSpawned(wave - 1) * spawner.countSpawns();
-                totalShield += group.getShield(wave - 1) * group.getSpawned(wave - 1) * spawner.countSpawns();
+                totalHp += group.type.health * group.getSpawned(wave - 1) * (spawner.countSpawns() + state.rules.waveTeam.data().cores.size);
+                totalShield += group.getShield(wave - 1) * group.getSpawned(wave - 1) * (spawner.countSpawns() + state.rules.waveTeam.data().cores.size);
             }
         }
 
