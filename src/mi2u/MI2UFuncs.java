@@ -69,7 +69,7 @@ public class MI2UFuncs{
     public static void drawUnit(Unit unit){
         //Draw aim point
         if(unit.isPlayer() && Mathf.len(unit.aimX - unit.x, unit.aimY - unit.y) < 4800f){
-            Rect tmpRect = Tmp.r3.setCentered(Core.camera.position.x, Core.camera.position.y, Core.camera.width, Core.camera.height);
+            Rect tmpRect = MI2UTmp.r1.setCentered(Core.camera.position.x, Core.camera.position.y, Core.camera.width, Core.camera.height);
             if(tmpRect.contains(unit.aimX, unit.aimY) || tmpRect.contains(unit.x, unit.y)){
                 Draw.reset();
                 Draw.z(Layer.flyingUnit + 2f);
@@ -170,7 +170,7 @@ public class MI2UFuncs{
                 
                 float index = 0f;
                 for(StatusEffect eff : content.statusEffects()){
-                    if(eff == StatusEffects.boss) continue;
+                    if(eff == StatusEffects.none) continue;
                     if(unit.hasEffect(eff)){
                         float iconSize = Mathf.ceil(unit.hitSize() / 4f);
                         Draw.rect(eff.uiIcon, 
@@ -297,10 +297,10 @@ public class MI2UFuncs{
         Lines.rect(new Rect().setSize(240f).setCenter(Core.input.mouseWorld()));
 
         Groups.build.each(b -> {
-            Core.camera.bounds(Tmp.r3);
-            if(!Tmp.r3.contains(b.tile().worldx(), b.tile().worldy())) return;
-            Tmp.r3.setSize(240f).setCenter(Core.input.mouseWorld());
-            if(!Tmp.r3.contains(b.tile().worldx(), b.tile().worldy())) return;
+            Core.camera.bounds(MI2UTmp.r1);
+            if(!MI2UTmp.r1.contains(b.tile().worldx(), b.tile().worldy())) return;
+            MI2UTmp.r1.setSize(240f).setCenter(Core.input.mouseWorld());
+            if(!MI2UTmp.r1.contains(b.tile().worldx(), b.tile().worldy())) return;
 
             if(b instanceof JunctionBuild jb) drawJunciton(jb);
             if(b instanceof ItemBridgeBuild ib) drawItemBridge(ib);
@@ -647,9 +647,8 @@ public class MI2UFuncs{
                                 Log.infoTag("MI2U", "Failed to get Sche Image, skip.");
                                 return;
                             }
-                            Tmp.v6.set(0f, 0f);
-                            Vec2 imagexy = Tmp.v6;
-                            
+                            Vec2 imagexy = MI2UTmp.v1;
+                            imagexy.set(0f, 0f);
                             image.localToParentCoordinates(imagexy);
                             sche.tiles.each(tile -> {
                                 int size = tile.block.size;

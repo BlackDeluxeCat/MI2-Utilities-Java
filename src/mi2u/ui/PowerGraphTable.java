@@ -35,7 +35,6 @@ public class PowerGraphTable extends Table{
             if(interval.get(0, 120)){
                 rebuild();
             }
-            
         });
     }
 

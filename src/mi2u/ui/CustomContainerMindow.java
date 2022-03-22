@@ -7,6 +7,7 @@ import arc.scene.event.Touchable;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import mi2u.MI2UTmp;
 import mindustry.game.EventType.Trigger;
 import mindustry.input.Binding;
 import mindustry.ui.Styles;
@@ -38,7 +39,7 @@ public class CustomContainerMindow extends Mindow2{
             }
             if(e == null) return;
             Core.scene.root.addChild(plate);
-            Vec2 v = e.localToStageCoordinates(Tmp.v3.set(0, 0));
+            Vec2 v = e.localToStageCoordinates(MI2UTmp.v2.set(0, 0));
             plate.touchable = Touchable.disabled;
             plate.setBounds(v.x, v.y, e.getWidth(), e.getHeight());
             plate.setZIndex(10005);
