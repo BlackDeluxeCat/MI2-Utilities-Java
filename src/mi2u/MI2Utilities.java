@@ -41,13 +41,12 @@ public class MI2Utilities extends Mod{
             });
 
             schelogic();
+
+            initBase();
         });
 
         Events.run(Trigger.draw, () -> {
             drawBase();
-        });
-        Events.run(Trigger.update, () -> {
-            updateBase();
         });
     }
 

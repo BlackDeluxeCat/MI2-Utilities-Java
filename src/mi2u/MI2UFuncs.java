@@ -18,6 +18,7 @@ import mindustry.core.*;
 import mindustry.entities.*;
 import mindustry.entities.units.*;
 import mindustry.game.*;
+import mindustry.game.EventType.*;
 import mindustry.game.Teams.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
@@ -51,6 +52,11 @@ import java.util.zip.*;
 /** @Author 工业2*/
 public class MI2UFuncs{
     protected static Interval interval = new Interval();
+    public static ObjectMap<Unit, Vec2> players = new ObjectMap<Unit, Vec2>();
+
+    public static void initBase(){
+        Events.on(WorldLoadEvent.class, e -> players.clear());
+    }
 
     public static void drawBase(){
         if(!state.isGame()) return;
@@ -62,15 +68,17 @@ public class MI2UFuncs{
         if(enDistributionReveal) drawBlackboxBuilding();
     }
 
-    public static void updateBase(){
-        //if(autoTarget) autoTarget();
-    }
-
     public static void drawUnit(Unit unit){
         //Draw aim point
         if(unit.isPlayer() && Mathf.len(unit.aimX - unit.x, unit.aimY - unit.y) < 4800f){
+            if(players.get(unit) != null){
+                players.get(unit).lerp(unit.aimX, unit.aimY, 0.5f);
+            }else{
+                players.put(unit, new Vec2(unit.aimX, unit.aimY));
+            }
+            Vec2 v = MI2UTmp.v2.set(players.get(unit));
             Rect tmpRect = MI2UTmp.r1.setCentered(Core.camera.position.x, Core.camera.position.y, Core.camera.width, Core.camera.height);
-            if(tmpRect.contains(unit.aimX, unit.aimY) || tmpRect.contains(unit.x, unit.y)){
+            if(tmpRect.contains(v.x, v.y) || tmpRect.contains(unit.x, unit.y)){
                 Draw.reset();
                 Draw.z(Layer.flyingUnit + 2f);
                 if(unit.isShooting()){
@@ -79,19 +87,23 @@ public class MI2UFuncs{
                     Draw.color(1f, 1f, 1f, 0.4f);
                 }
                 if(unit.mounts().length == 0){
-                    Lines.dashLine(unit.aimX, unit.aimY, unit.x, unit.y, 40);
+                    Lines.dashLine(v.x, v.y, unit.x, unit.y, 40);
                 }else{
                     for(WeaponMount m : unit.mounts()){
                         if(Mathf.len(m.aimX - unit.x - m.weapon.x, m.aimY - unit.y - m.weapon.y) < 1800f){
-                            Lines.dashLine(m.aimX, m.aimY, unit.x + Mathf.cos((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), unit.y + Mathf.sin((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), 40);
+                            if(m.weapon.controllable){
+                                Lines.dashLine(v.x, v.y, unit.x + Mathf.cos((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), unit.y + Mathf.sin((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), 40);
+                            }else{
+                                Lines.dashLine(m.aimX, m.aimY, unit.x + Mathf.cos((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), unit.y + Mathf.sin((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), 40);
+                            }
                         }
                     } 
                 }
             }
 
-            if(tmpRect.contains(unit.aimX, unit.aimY) && !tmpRect.contains(unit.x, unit.y)){
+            if(tmpRect.contains(v.x, v.y) && !tmpRect.contains(unit.x, unit.y)){
                 Draw.z(Layer.playerName);
-                Drawf.target(unit.aimX, unit.aimY, 4f, Pal.remove);
+                Drawf.target(v.x, v.y, 4f, Pal.remove);
 
                 if(!unit.getPlayer().isLocal()){
                     Player p = unit.getPlayer();
@@ -104,17 +116,17 @@ public class MI2UFuncs{
                     layout.setText(font, p.name);
 
                     Draw.color(unit.team.color, 0.3f);
-                    Fill.rect(unit.aimX, unit.aimY + nameHeight - layout.height / 2, layout.width + 2, layout.height + 3);
+                    Fill.rect(v.x, v.y + nameHeight - layout.height / 2, layout.width + 2, layout.height + 3);
                     Draw.color();
                     font.setColor(p.color);
-                    font.draw(p.name, unit.aimX, unit.aimY + nameHeight, 0, Align.center, false);
+                    font.draw(p.name, v.x, v.y + nameHeight, 0, Align.center, false);
         
                     if(p.admin){
                         float s = 3f;
                         Draw.color(p.color.r * 0.5f, p.color.g * 0.5f, p.color.b * 0.5f, 1f);
-                        Draw.rect(Icon.adminSmall.getRegion(), unit.aimX + layout.width / 2f + 2 + 1, unit.aimY + nameHeight - 1.5f, s, s);
+                        Draw.rect(Icon.adminSmall.getRegion(), v.x + layout.width / 2f + 2 + 1, v.y + nameHeight - 1.5f, s, s);
                         Draw.color(p.color);
-                        Draw.rect(Icon.adminSmall.getRegion(), unit.aimX + layout.width / 2f + 2 + 1, unit.aimY + nameHeight - 1f, s, s);
+                        Draw.rect(Icon.adminSmall.getRegion(), v.x + layout.width / 2f + 2 + 1, v.y + nameHeight - 1f, s, s);
                     }
 
                     Pools.free(layout);
