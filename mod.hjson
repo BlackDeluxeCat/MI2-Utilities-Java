@@ -25,7 +25,7 @@ Mindustry Java模组，添加实用原版工具，以特殊窗体承载。MI2端
 2. 基于Mindow2的功能窗体：主UI、逻辑辅助、进阶核心资源栏、Emojis键入器等。具体功能请查看帮助信息。"
 
 #the mod version
-version: 0.4.3
+version: 0.5.0
 
 #the minimum game build required to run this mod
 minGameVersion: 135
