@@ -52,10 +52,19 @@ import java.util.zip.*;
 /** @Author 工业2*/
 public class MI2UFuncs{
     protected static Interval interval = new Interval();
-    public static ObjectMap<Unit, Vec2> players = new ObjectMap<Unit, Vec2>();
+    protected static ObjectMap<Unit, Vec2> players = new ObjectMap<Unit, Vec2>();
 
     public static void initBase(){
         Events.on(WorldLoadEvent.class, e -> players.clear());
+        Events.run(Trigger.draw, () -> {
+            players.each((u, v) -> {if(!u.isPlayer()||!u.isValid()) players.remove(u);});
+            drawBase();
+        });
+
+        Events.run(Trigger.update, () -> {
+            fullAI.unit(player.unit());
+            fullAI.updateUnit();
+        });
     }
 
     public static void drawBase(){
@@ -72,7 +81,7 @@ public class MI2UFuncs{
         //Draw aim point
         if(unit.isPlayer() && Mathf.len(unit.aimX - unit.x, unit.aimY - unit.y) < 4800f){
             if(players.get(unit) != null){
-                players.get(unit).lerp(unit.aimX, unit.aimY, 0.5f);
+                players.get(unit).lerp(unit.aimX, unit.aimY, 0.4f);
             }else{
                 players.put(unit, new Vec2(unit.aimX, unit.aimY));
             }

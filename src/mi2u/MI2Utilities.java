@@ -33,6 +33,10 @@ public class MI2Utilities extends Mod{
                 if(MI2USettings.getBool("showCoreInfo")) coreInfo.addTo(coreInfo.hasParent() ? coreInfo.parent : Core.scene.root);
                 if(MI2USettings.getBool("showMindowMap")) mindowmap.addTo(coreInfo.hasParent() ? coreInfo.parent : Core.scene.root);
                 if(MI2USettings.getBool("showMapInfo")) mapinfo.addTo(coreInfo.hasParent() ? coreInfo.parent : Core.scene.root);
+                
+                schelogic();
+
+                initBase();
             });
 
             //popup too early will cause font rendering bug.
@@ -40,13 +44,6 @@ public class MI2Utilities extends Mod{
                 checkUpdate();
             });
 
-            schelogic();
-
-            initBase();
-        });
-
-        Events.run(Trigger.draw, () -> {
-            drawBase();
         });
     }
 

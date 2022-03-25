@@ -7,6 +7,7 @@ import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mindustry.Vars;
+import mindustry.entities.units.AIController;
 import mindustry.gen.*;
 
 import static mi2u.MI2UVars.*;
@@ -42,6 +43,19 @@ public class MI2UI extends Mindow2{
             }).update(b -> {
                 b.setChecked(enDistributionReveal);
             }).minHeight(36f).with(funcSetTextb);
+        });
+
+        cont.row();
+
+        cont.table(tt -> {
+            tt.add("AI");
+            fullAI.modes.each(mode -> {
+                tt.button(mode.btext, textbtoggle, () -> {
+                    mode.enable = !mode.enable;
+                }).update(b -> {
+                    b.setChecked(mode.enable);
+                }).minSize(30f).with(funcSetTextb);
+            });
         });
         
         cont.row();

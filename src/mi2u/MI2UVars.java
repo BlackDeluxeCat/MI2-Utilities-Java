@@ -2,8 +2,8 @@ package mi2u;
 
 import arc.scene.ui.TextButton.*;
 import arc.struct.*;
+import mi2u.ai.*;
 import mi2u.ui.*;
-
 import mindustry.ui.*;
 
 public class MI2UVars {
@@ -11,6 +11,8 @@ public class MI2UVars {
     public static TextButtonStyle textb = Styles.cleart, textbtoggle = Styles.clearToggleMenut;
 
     public static Seq<Mindow2> mindow2s = new Seq<Mindow2>();
+
+    public static FullAI fullAI = new FullAI();
 
     public static MI2UI mi2ui = new MI2UI();
     public static EmojiMindow emojis = new EmojiMindow();
