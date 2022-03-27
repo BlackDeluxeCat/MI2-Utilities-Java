@@ -1,8 +1,10 @@
 package mi2u.ui;
 
 import arc.*;
+import arc.graphics.*;
 import arc.math.*;
-import arc.scene.Element;
+import arc.scene.*;
+import arc.scene.event.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
@@ -58,7 +60,7 @@ public class CoreInfoMindow extends Mindow2{
         
         cont.table(ipt -> {
             ipt.table(utt -> {
-                utt.image(Mindow2.white).width(24f).growY().update(i -> {
+                utt.image(Mindow2.white).width(36f).growY().update(i -> {
                     i.setColor(team.color);
                 });
                 utt.button("Select", textb, () -> {
@@ -66,7 +68,7 @@ public class CoreInfoMindow extends Mindow2{
                     snapToSelect(this);
                 }).growX().height(48f).update(b -> {
                     b.setText(Core.bundle.get("coreInfo.selectButton.team") + (select == null ? Core.bundle.get("coreInfo.selectButton.playerteam"):team.localized()));
-                    //b.setColor(team.color);
+                    b.getLabel().setColor(team == null ? Color.white:team.color);
                 });
             }).grow();
 
@@ -89,10 +91,9 @@ public class CoreInfoMindow extends Mindow2{
                         if(++i % 4 == 0){
                             iut.row();
                         }
-                        
                     }
                 }
-            });
+            }).maxHeight(200f);
             if(MI2USettings.getBool(mindowName + ".showPowerGraphs")){
                 ipt.row();
                 ipt.add(pg).fillX();
@@ -103,7 +104,7 @@ public class CoreInfoMindow extends Mindow2{
         //cont.row();
 
         if(MI2USettings.getBool(mindowName + ".showUnits")){
-            cont.table(uut -> {
+            cont.pane(uut -> {
                 int i = 0;
                 for(UnitType type : content.units()){
                     if(type.isHidden()) continue;
@@ -133,28 +134,38 @@ public class CoreInfoMindow extends Mindow2{
                 uut.stack(new Label("" + Iconc.blockCoreNucleus){{this.setColor(1,0.6f,0,0.5f);}},
                 new Table(t -> t.label(() -> core != null && team.data().cores.size > 0 ? UI.formatAmount(team.data().cores.size) : "").get().setFontScale(0.65f)).right().bottom()
                 ).size(iconSmall).padRight(3);
+            }).maxHeight(200f).update(p -> {
+                Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
+                if(e != null && e.isDescendantOf(p)){
+                    p.requestScroll();
+                }else if(p.hasScroll()){
+                    Core.scene.setScrollFocus(null);
+                }
             });
         }
     }
 
     public void rebuildSelect(){
         teamSelect.clear();
-        teamSelect.pane(p -> {
+        teamSelect.table(p -> {
             p.button(Iconc.cancel + "", textb, () -> {
                 select = null;
                 rebuild();
                 teamSelect.remove();
-            }).minSize(titleButtonSize).disabled(select == null).get().getLabel().setWrap(false);
+            }).minSize(titleButtonSize).grow().disabled(select == null).get().getLabel().setWrap(false);
             int i = 1;
             for(TeamData t : state.teams.getActive()){
                 p.button(t.team.localized(), textb, () -> {
                     select = t.team;
                     rebuild();
                     teamSelect.remove();
-                }).minSize(titleButtonSize).color(t.team.color).disabled(select == t.team).get().getLabel().setWrap(false);
+                }).minSize(titleButtonSize * 2f).disabled(select == t.team).with(b -> {
+                    b.getLabel().setWrap(false);
+                    b.getLabel().setColor(t.team.color);
+                });
                 if(++i < 4) continue;
-                    p.row();
-                    i = 0;
+                p.row();
+                i = 0;
             }
         }).maxHeight(300f);
         teamSelect.update(() -> {

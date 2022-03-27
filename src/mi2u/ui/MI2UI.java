@@ -54,7 +54,9 @@ public class MI2UI extends Mindow2{
                     mode.enable = !mode.enable;
                 }).update(b -> {
                     b.setChecked(mode.enable);
-                }).minSize(30f).with(funcSetTextb);
+                }).minSize(30f).with(c -> {
+                    c.getLabel().setAlignment(Align.center);
+                });
             });
         });
         
