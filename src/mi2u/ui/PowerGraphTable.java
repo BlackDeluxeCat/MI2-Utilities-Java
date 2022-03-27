@@ -12,6 +12,7 @@ import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
+import mindustry.input.DesktopInput;
 import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.power.*;
@@ -72,6 +73,15 @@ public class PowerGraphTable extends Table{
                 newBar.userObject = p;
                 newBar.set(powertext, () -> p.getLastPowerStored() / p.getLastCapacity(), Pal.accent);
                 newBar.blink(Color.white).outline(new Color(0.3f, 0.3f, 0.6f, 0.3f), 2f);
+                
+                newBar.clicked(() -> {
+                    if(control.input instanceof DesktopInput inp){
+                        Building random = ((PowerGraph)newBar.userObject).all.random();
+                        inp.panning = true;
+                        Core.camera.position.set(random.x, random.y);
+                    }
+                });
+
                 newBar.addListener(new Tooltip(tt -> {
                     tt.background(Styles.black6);
                     tt.label(() -> "" + UI.formatAmount((long)((PowerGraph)newBar.userObject).getLastPowerStored()) + "/" + UI.formatAmount((long)((PowerGraph)newBar.userObject).getLastCapacity()) + "  " + (((PowerGraph)newBar.userObject).getPowerBalance() >= 0 ? "+" : "") + UI.formatAmount((long)(((PowerGraph)newBar.userObject).getPowerBalance() * 60)));
