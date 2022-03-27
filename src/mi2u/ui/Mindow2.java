@@ -166,7 +166,7 @@ public class Mindow2 extends Table{
             }
             @Override
             public void exit(InputEvent event, float x, float y, int pointer, Element toActor){
-                if(toActor.isDescendantOf(Mindow2.this)) return;
+                if(toActor != null && toActor.isDescendantOf(Mindow2.this)) return;
                 titleScale = 0f;
                 interval.get(0, 1);
             }
