@@ -1,15 +1,16 @@
 package mi2u.ai;
 
-import arc.math.geom.Position;
+import arc.math.geom.*;
 import arc.struct.Seq;
 import arc.util.Nullable;
-import mindustry.content.Blocks;
+import mindustry.content.*;
 import mindustry.entities.units.AIController;
 import mindustry.gen.Building;
 import mindustry.gen.Call;
 import mindustry.gen.Iconc;
 import mindustry.type.Item;
 import mindustry.world.Tile;
+import mindustry.world.meta.BlockFlag;
 
 import static mindustry.Vars.*;
 
@@ -23,7 +24,11 @@ public class FullAI extends AIController{
     public FullAI(){
         super();
         modes.add(new MineMode());
+        modes.add(new BaseMineMode(){{
+            list.add(Items.copper, Items.lead);
+        }});
         modes.add(new AutoBuildMode());
+        modes.add(new SelfRepairMode());
     }
 
     @Override
@@ -64,7 +69,7 @@ public class FullAI extends AIController{
         Tile ore;
         
         public BaseMineMode(){
-            btext = Iconc.unitMono + "B";
+            btext = Iconc.unitMono + "";
         }
 
         @Override
@@ -94,7 +99,7 @@ public class FullAI extends AIController{
                         ore = indexer.findClosestOre(unit, targetItem);
                     }
                     if(ore != null){
-                        if(!unit.within(ore, 60f)) moveAction(ore, 50f);
+                        moveAction(ore, 50f);
                         if(ore.block() == Blocks.air && unit.within(ore, unit.type.miningRange)){
                             unit.mineTile = ore;
                         }
@@ -123,7 +128,7 @@ public class FullAI extends AIController{
 
     public class MineMode extends BaseMineMode{
         public MineMode(){
-            btext = Iconc.unitMono + "";
+            btext = Iconc.unitMono + "+";
         }
         @Override
         public void act(){
@@ -143,6 +148,22 @@ public class FullAI extends AIController{
             if(unit.plans().isEmpty() || !unit.canBuild()) return;
             boostAction(true);
             moveAction(unit.plans().first(), buildingRange / 1.4f);
+        }
+    }
+
+    public class SelfRepairMode extends Mode{
+        public SelfRepairMode(){
+            btext = Iconc.blockRepairPoint + "";
+        }
+        @Override
+        public void act(){
+            if(!enable) return;
+            if(unit.dead || !unit.isValid()) return;
+            if(unit.health > unit.maxHealth * 0.6f) return;
+            Tile tile = Geometry.findClosest(unit.x, unit.y, indexer.getAllied(unit.team, BlockFlag.repair));
+            if(tile == null) return;
+            boostAction(true);
+            moveAction(tile, 20f);
         }
     }
 }
