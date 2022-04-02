@@ -108,11 +108,12 @@ public class MI2UFuncs{
                         }
                     } 
                 }
+                Draw.z(Layer.playerName);
+                Drawf.target(v.x, v.y, 4f, Pal.remove);
             }
 
             if(tmpRect.contains(v.x, v.y) && !tmpRect.contains(unit.x, unit.y)){
                 Draw.z(Layer.playerName);
-                Drawf.target(v.x, v.y, 4f, Pal.remove);
 
                 if(!unit.getPlayer().isLocal()){
                     Player p = unit.getPlayer();
