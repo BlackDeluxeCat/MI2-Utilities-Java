@@ -1,13 +1,25 @@
 package mi2u.ai;
 
+import arc.Core;
 import arc.math.geom.*;
 import arc.struct.Seq;
+import arc.util.Log;
 import arc.util.Nullable;
+import mi2u.MI2UTmp;
+import mi2u.input.DesktopInputExt;
+import mi2u.input.InputOverwrite;
+import mi2u.input.MobileInputExt;
+import mi2u.io.MI2USettings;
 import mindustry.content.*;
+import mindustry.entities.Predict;
+import mindustry.entities.Units;
 import mindustry.entities.units.AIController;
+import mindustry.game.Team;
 import mindustry.gen.Building;
 import mindustry.gen.Call;
 import mindustry.gen.Iconc;
+import mindustry.gen.Teamc;
+import mindustry.input.Binding;
 import mindustry.type.Item;
 import mindustry.world.Tile;
 import mindustry.world.meta.BlockFlag;
@@ -16,10 +28,6 @@ import static mindustry.Vars.*;
 
 public class FullAI extends AIController{
     public Seq<Mode> modes = new Seq<Mode>();
-    boolean ctrlBoost = false; boolean ctrlMove = false;
-    boolean boost = false;
-    @Nullable Position moveTarget = null;
-    float moveRadius = 10f;
 
     public FullAI(){
         super();
@@ -29,27 +37,35 @@ public class FullAI extends AIController{
         }});
         modes.add(new AutoBuildMode());
         modes.add(new SelfRepairMode());
+        modes.add(new AutoTargetMode());
     }
 
     @Override
     public void updateUnit(){
-        ctrlBoost = ctrlMove = false;
-        modes.each(mode -> mode.act());
-        if(ctrlMove) moveTo(moveTarget, moveRadius, 20f);
-        //boost control is invaild in servers.
-        if(ctrlBoost) player.boosting = boost;
+        if(!(control.input instanceof InputOverwrite) && MI2USettings.getBool("inputReplace", true)) {
+            if(mobile){
+                MobileInputExt.mobileExt.replaceInput();
+            }else{
+                DesktopInputExt.desktopExt.replaceInput();
+            }
+        }
+        if(control.input instanceof InputOverwrite inp){
+            inp.clear();
+            modes.each(Mode::act);
+        }
     }
 
     /**unit actions can be covered by the lasted related mode. Executed after each mode acted.*/
     public void moveAction(Position target, float radius){
-        ctrlMove = true;
-        moveTarget = target;
-        moveRadius = radius;
+        if(control.input instanceof InputOverwrite inp) inp.approach(target, radius);
     }
 
     public void boostAction(boolean boost){
-        ctrlBoost = true;
-        this.boost = boost;
+        if(control.input instanceof InputOverwrite inp) inp.boost(boost);
+    }
+
+    public void shootAction(Vec2 point, Boolean shoot){
+        if(control.input instanceof InputOverwrite inp) inp.shoot(point, shoot, true);
     }
 
     public class Mode{
@@ -63,7 +79,7 @@ public class FullAI extends AIController{
     }
 
     public class BaseMineMode extends Mode{
-        public Seq<Item> list = new Seq<Item>();
+        public Seq<Item> list = new Seq<>();
         boolean mining;
         Item targetItem;
         Tile ore;
@@ -145,6 +161,7 @@ public class FullAI extends AIController{
         @Override
         public void act(){
             if(!enable) return;
+            if(!control.input.isBuilding) return;
             if(unit.plans().isEmpty() || !unit.canBuild()) return;
             boostAction(true);
             moveAction(unit.plans().first(), buildingRange / 1.4f);
@@ -164,6 +181,35 @@ public class FullAI extends AIController{
             if(tile == null) return;
             boostAction(true);
             moveAction(tile, 20f);
+        }
+    }
+
+    public class AutoTargetMode extends Mode{
+        public AutoTargetMode(){
+            btext = "AT";
+        }
+        @Override
+        public void act(){
+            if(!enable) return;
+            if(Core.input.keyDown(Binding.select)) return;
+
+            if(timer.get(timerTarget2, 30f)){
+                float range = unit.hasWeapons() ? unit.range() : 0f;
+                target = Units.closestTarget(unit.team, unit.x, unit.y, range, u -> u.checkTarget(unit.type.targetAir, unit.type.targetGround), u -> unit.type.targetGround);
+                if(unit.type.canHeal && target == null){
+                    target = Geometry.findClosest(unit.x, unit.y, indexer.getDamaged(unit.team));
+                    if(target != null && !unit.within(target, range)){
+                        target = null;
+                    }
+                }
+            }
+
+            if(target != null){
+                Vec2 intercept = Predict.intercept(unit, target, unit.hasWeapons() ? unit.type.weapons.first().bullet.speed : 0f);
+                shootAction(intercept, true);
+            }else{
+                shootAction(MI2UTmp.v1.set(player.mouseX, player.mouseY), false);
+            }
         }
     }
 }

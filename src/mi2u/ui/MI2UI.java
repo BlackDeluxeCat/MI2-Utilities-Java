@@ -84,5 +84,6 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckSettingEntry("enUnitLogic", "@settings.main.unitLogic"));
         settings.add(new CheckSettingEntry("enUnitLogicTimer", "@settings.main.unitLogicTimer"));
         settings.add(new CheckSettingEntry("enUnitPath", "@settings.main.unitPath"));
+        settings.add(new CheckSettingEntry("inputReplace", "@settings.main.inputReplace"));
     }
 }
