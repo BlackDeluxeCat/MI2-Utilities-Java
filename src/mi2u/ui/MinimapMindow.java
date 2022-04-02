@@ -14,6 +14,7 @@ import arc.util.*;
 import arc.util.pooling.*;
 import mi2u.MI2UTmp;
 import mi2u.MI2UVars;
+import mi2u.input.InputOverwrite;
 import mi2u.io.*;
 import mindustry.core.*;
 import mindustry.entities.*;
@@ -145,18 +146,21 @@ public class MinimapMindow extends Mindow2{
     
                 @Override
                 public void clicked(InputEvent event, float x, float y){
-                    if(control.input instanceof DesktopInput inp){
+                    if(control.input instanceof DesktopInput || control.input instanceof InputOverwrite){
                         try{
                             float sz = 16f * renderer2.getZoom();
                             float dx = (Core.camera.position.x / tilesize);
                             float dy = (Core.camera.position.y / tilesize);
                             dx = (2 * sz) <= world.width() ? Mathf.clamp(dx, sz, world.width() - sz) : world.width() / 2;
                             dy = (2 * sz) <= world.height() ? Mathf.clamp(dy, sz, world.height() - sz) : world.height() / 2;
-
-                            inp.panning = true;
-                            Core.camera.position.set(
-                                ((x / width - 0.5f) * 2f * sz * tilesize + dx * tilesize), 
-                                ((y / height - 0.5f) * 2f * sz * tilesize + dy * tilesize));
+                            if(control.input instanceof DesktopInput inp){
+                                inp.panning = true;
+                                Core.camera.position.set(
+                                        ((x / width - 0.5f) * 2f * sz * tilesize + dx * tilesize),
+                                        ((y / height - 0.5f) * 2f * sz * tilesize + dy * tilesize));
+                            }else if(control.input instanceof InputOverwrite ino){
+                                ino.pan(true, MI2UTmp.v1.set((x / width - 0.5f) * 2f * sz * tilesize + dx * tilesize, (y / height - 0.5f) * 2f * sz * tilesize + dy * tilesize));
+                            }
                         }catch(Exception e){
                             Log.err("Minimap", e);
                         }
