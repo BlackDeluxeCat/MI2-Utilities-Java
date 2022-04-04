@@ -9,6 +9,8 @@ import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import mi2u.MI2UTmp;
+import mi2u.input.InputOverwrite;
 import mi2u.io.*;
 import mindustry.core.*;
 import mindustry.game.Team;
@@ -29,6 +31,7 @@ public class CoreInfoMindow extends Mindow2{
     protected Team select, team;
     protected PowerGraphTable pg = new PowerGraphTable(330);
     protected Table teamSelect = new Table();
+    protected int[] unitIndex = new int[content.units().size];
     
     public CoreInfoMindow(){
         super("@coreInfo.MI2U", "@coreInfo.help");
@@ -110,7 +113,15 @@ public class CoreInfoMindow extends Mindow2{
                     if(type.isHidden()) continue;
                     uut.stack(new Image(type.uiIcon){{this.setColor(1f,1f,1f,0.8f);}},
                         new Table(t -> t.label(() -> core != null && team.data().countType(type) > 0 ? UI.formatAmount(team.data().countType(type)) : "").get().setFontScale(0.65f)).right().bottom()
-                        ).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(type.localizedName).style(Styles.outlineLabel));
+                        ).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(type.localizedName).style(Styles.outlineLabel)).get().clicked(() -> {
+                            //click to glance unit
+                            if(control.input instanceof InputOverwrite inp){
+                                if(team.data().unitCache(type) == null || team.data().unitCache(type).isEmpty()) return;
+                                unitIndex[type.id]++;
+                                if(unitIndex[type.id] >= team.data().unitCache(type).size) unitIndex[type.id] = 0;
+                                inp.pan(true, MI2UTmp.v1.set(team.data().unitCache(type).get(unitIndex[type.id]).x(), team.data().unitCache(type).get(unitIndex[type.id]).y()));
+                            }
+                        });
                     //uut.image(type.uiIcon).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(type.localizedName).style(Styles.outlineLabel));
                     //uut.label(() -> core == null ? "0" : UI.formatAmount(team.data().countType(type))).padRight(3).minWidth(52f).left();
         
