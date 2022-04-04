@@ -80,10 +80,15 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckSettingEntry("showCoreInfo", "@settings.main.coreInfo", b -> coreInfo.addTo(b?Core.scene.root:null)));
         settings.add(new CheckSettingEntry("showMindowMap", "@settings.main.mindowMap", b -> mindowmap.addTo(b?Core.scene.root:null)));
         settings.add(new CheckSettingEntry("showMapInfo", "@settings.main.mapInfo", b -> mapinfo.addTo(b?Core.scene.root:null)));
+        settings.add(new CheckSettingEntry("enPlayerCursor", "@settings.main.playerCursor"));
+        settings.add(new CheckSettingEntry("disableWreck", "@settings.main.disableWreck"));
+        settings.add(new CheckSettingEntry("disableUnit", "@settings.main.disableUnit"));
+        settings.add(new CheckSettingEntry("disableBullet", "@settings.main.disableBullet"));
         settings.add(new CheckSettingEntry("enUnitHpBar", "@settings.main.unitHpBar"));
         settings.add(new CheckSettingEntry("enUnitLogic", "@settings.main.unitLogic"));
         settings.add(new CheckSettingEntry("enUnitLogicTimer", "@settings.main.unitLogicTimer"));
         settings.add(new CheckSettingEntry("enUnitPath", "@settings.main.unitPath"));
         settings.add(new CheckSettingEntry("inputReplace", "@settings.main.inputReplace"));
+        settings.add(new CheckSettingEntry("forceTapTile", "@settings.main.forceTapTile"));
     }
 }

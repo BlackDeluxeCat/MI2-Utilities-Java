@@ -60,7 +60,7 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
     public void pan(Boolean value, Vec2 panXY){
         ctrlPan = true;
         pan = value;
-        this.panXY = panXY;
+        this.panXY.set(panXY);
     }
 
     @Override

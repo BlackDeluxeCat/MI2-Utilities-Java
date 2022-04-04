@@ -15,16 +15,13 @@ import mindustry.ai.*;
 import mindustry.ai.types.*;
 import mindustry.content.*;
 import mindustry.core.*;
-import mindustry.entities.*;
 import mindustry.entities.units.*;
 import mindustry.game.*;
 import mindustry.game.EventType.*;
 import mindustry.game.Teams.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
-import mindustry.input.Binding;
-import mindustry.input.DesktopInput;
-import mindustry.input.MobileInput;
+import mindustry.input.*;
 import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.SchematicsDialog;
@@ -53,9 +50,13 @@ import java.util.zip.*;
 public class MI2UFuncs{
     protected static Interval interval = new Interval();
     protected static ObjectMap<Unit, Vec2> players = new ObjectMap<Unit, Vec2>();
+    protected static Seq<Unit> hiddenUnit = new Seq<>();
 
     public static void initBase(){
-        Events.on(WorldLoadEvent.class, e -> players.clear());
+        Events.on(WorldLoadEvent.class, e -> {
+            players.clear();
+            hiddenUnit.clear();
+        });
         Events.run(Trigger.draw, () -> {
             players.each((u, v) -> {if(!u.isPlayer()||!u.isValid()) players.remove(u);});
             drawBase();
@@ -69,17 +70,29 @@ public class MI2UFuncs{
 
     public static void drawBase(){
         if(!state.isGame()) return;
-        state.teams.getActive().each(data -> {
-            data.units.each(unit -> {
-                drawUnit(unit);
-            });
-        }); 
-        if(enDistributionReveal) drawBlackboxBuilding();
+        if(!MI2USettings.getBool("disableUnit", false)){
+            hiddenUnit.select(u -> u.isValid()).each(u -> Groups.draw.add(u));
+            hiddenUnit.clear();
+        }
+        Groups.draw.each(d -> {
+            if(d instanceof Decal && MI2USettings.getBool("disableWreck", false)) d.remove();
+            if(d instanceof Unit u){
+                if(MI2USettings.getBool("disableUnit", false)){
+                    Groups.draw.remove(u);
+                    hiddenUnit.add(u);
+                }else{
+                    drawUnit(u);
+                }
+            }
+            if(d instanceof Bullet b && MI2USettings.getBool("disableBullet", false)) Groups.draw.remove(b);
+        });
+
+        if(enDistributionReveal) drawBlackboxBuildings();
     }
 
     public static void drawUnit(Unit unit){
         //Draw aim point
-        if(unit.isPlayer() && Mathf.len(unit.aimX - unit.x, unit.aimY - unit.y) < 4800f){
+        if(unit.isPlayer() && MI2USettings.getBool("enPlayerCursor", false) && Mathf.len(unit.aimX - unit.x, unit.aimY - unit.y) < 4800f){
             if(players.get(unit) != null){
                 players.get(unit).lerp(unit.aimX, unit.aimY, 0.4f);
             }else{
@@ -313,7 +326,7 @@ public class MI2UFuncs{
     }
     */
 
-    public static void drawBlackboxBuilding(){
+    public static void drawBlackboxBuildings(){
         Draw.reset();
         Lines.stroke(0.5f);
         Lines.rect(new Rect().setSize(240f).setCenter(Core.input.mouseWorld()));
@@ -765,5 +778,66 @@ public class MI2UFuncs{
                 }
             }
         }));
+    }
+
+    //from schematics.create but max size is 512
+    public static Schematic createSchematic(int x, int y, int x2, int y2){
+        Placement.NormalizeResult result = Placement.normalizeArea(x, y, x2, y2, 0, false, 512);
+        x = result.x;
+        y = result.y;
+        x2 = result.x2;
+        y2 = result.y2;
+
+        int ox = x, oy = y, ox2 = x2, oy2 = y2;
+
+        Seq<Schematic.Stile> tiles = new Seq<>();
+
+        int minx = x2, miny = y2, maxx = x, maxy = y;
+        boolean found = false;
+        for(int cx = x; cx <= x2; cx++){
+            for(int cy = y; cy <= y2; cy++){
+                Building linked = world.build(cx, cy);
+                Block realBlock = linked == null ? null : linked instanceof ConstructBlock.ConstructBuild cons ? cons.current : linked.block;
+
+                if(linked != null && realBlock != null && (realBlock.isVisible() || realBlock instanceof CoreBlock)){
+                    int top = realBlock.size/2;
+                    int bot = realBlock.size % 2 == 1 ? -realBlock.size/2 : -(realBlock.size - 1)/2;
+                    minx = Math.min(linked.tileX() + bot, minx);
+                    miny = Math.min(linked.tileY() + bot, miny);
+                    maxx = Math.max(linked.tileX() + top, maxx);
+                    maxy = Math.max(linked.tileY() + top, maxy);
+                    found = true;
+                }
+            }
+        }
+
+        if(found){
+            x = minx;
+            y = miny;
+            x2 = maxx;
+            y2 = maxy;
+        }else{
+            return new Schematic(new Seq<>(), new StringMap(), 1, 1);
+        }
+
+        int width = x2 - x + 1, height = y2 - y + 1;
+        int offsetX = -x, offsetY = -y;
+        IntSet counted = new IntSet();
+        for(int cx = ox; cx <= ox2; cx++){
+            for(int cy = oy; cy <= oy2; cy++){
+                Building tile = world.build(cx, cy);
+                Block realBlock = tile == null ? null : tile instanceof ConstructBlock.ConstructBuild cons ? cons.current : tile.block;
+
+                if(tile != null && !counted.contains(tile.pos()) && realBlock != null
+                        && (realBlock.isVisible() || realBlock instanceof CoreBlock)){
+                    Object config = tile instanceof ConstructBlock.ConstructBuild cons ? cons.lastConfig : tile.config();
+
+                    tiles.add(new Schematic.Stile(realBlock, tile.tileX() + offsetX, tile.tileY() + offsetY, config, (byte)tile.rotation));
+                    counted.add(tile.pos());
+                }
+            }
+        }
+
+        return new Schematic(tiles, new StringMap(), width, height);
     }
 }
