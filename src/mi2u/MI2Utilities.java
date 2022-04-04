@@ -20,9 +20,7 @@ public class MI2Utilities extends Mod{
     public static Mods.LoadedMod MOD;
 
     public MI2Utilities(){
-        Log.info("Loaded MI2Utilities constructor.");
 
-        //listen for game load event
         Events.on(ClientLoadEvent.class, e -> {
             Time.runTask(40f, () -> {
                 MI2USettings.init();
