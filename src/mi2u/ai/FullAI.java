@@ -11,6 +11,7 @@ import mi2u.input.InputOverwrite;
 import mi2u.input.MobileInputExt;
 import mi2u.io.MI2USettings;
 import mindustry.content.*;
+import mindustry.ctype.ContentType;
 import mindustry.entities.Predict;
 import mindustry.entities.Units;
 import mindustry.entities.units.AIController;
@@ -32,9 +33,13 @@ public class FullAI extends AIController{
     public FullAI(){
         super();
         modes.add(new MineMode());
-        modes.add(new BaseMineMode(){{
-            list.add(Items.copper, Items.lead);
-        }});
+        modes.add(new BaseMineMode(){
+            @Override
+            public void updateList() {
+                list.clear();
+                list.add(content.getByID(ContentType.item, 0), content.getByID(ContentType.item, 1));
+            }
+        });
         modes.add(new AutoBuildMode());
         modes.add(new SelfRepairMode());
         modes.add(new AutoTargetMode());
@@ -91,6 +96,7 @@ public class FullAI extends AIController{
         @Override
         public void act(){
             if(!enable) return;
+            updateList();
             Building core = unit.closestCore();
             boostAction(true);
             if(!(unit.canMine()) || core == null) return;
@@ -140,6 +146,9 @@ public class FullAI extends AIController{
                 moveAction(core, itemTransferRange / 2f);
             }
         }
+
+        public void updateList(){
+        }
     }
 
     public class MineMode extends BaseMineMode{
@@ -147,9 +156,8 @@ public class FullAI extends AIController{
             btext = Iconc.unitMono + "+";
         }
         @Override
-        public void act(){
+        public void updateList(){
             list = content.items();
-            super.act();
         }
     }
 
