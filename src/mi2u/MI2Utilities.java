@@ -12,7 +12,7 @@ import mindustry.mod.*;
 
 import static mindustry.Vars.*;
 import static mi2u.MI2UVars.*;
-import static mi2u.MI2UFuncs.*;
+
 
 public class MI2Utilities extends Mod{
     public static final String gitURL = "https://github.com/BlackDeluxeCat/MI2-Utilities-Java";
@@ -26,15 +26,15 @@ public class MI2Utilities extends Mod{
                 MI2USettings.init();
                 MI2UVars.init();
                 mi2ui.addTo(Core.scene.root);
-                logicHelper.addTo(ui.logic);
                 if(MI2USettings.getBool("showEmojis")) emojis.addTo(emojis.hasParent() ? emojis.parent : Core.scene.root);
                 if(MI2USettings.getBool("showCoreInfo")) coreInfo.addTo(coreInfo.hasParent() ? coreInfo.parent : Core.scene.root);
-                if(MI2USettings.getBool("showMindowMap")) mindowmap.addTo(coreInfo.hasParent() ? coreInfo.parent : Core.scene.root);
-                if(MI2USettings.getBool("showMapInfo")) mapinfo.addTo(coreInfo.hasParent() ? coreInfo.parent : Core.scene.root);
-                
-                schelogic();
+                if(MI2USettings.getBool("showMindowMap")) mindowmap.addTo(mindowmap.hasParent() ? mindowmap.parent : Core.scene.root);
+                if(MI2USettings.getBool("showMapInfo")) mapinfo.addTo(mapinfo.hasParent() ? mapinfo.parent : Core.scene.root);
+                if(MI2USettings.getBool("showLogicHelper")) logicHelper.addTo(logicHelper.hasParent() ? logicHelper.parent : ui.logic);
 
-                initBase();
+                MI2UFuncs.schelogic();
+                MI2UFuncs.initBase();
+                if(MI2USettings.getBool("modifyBlockBars")) ModifyFuncs.modifyVanillaBlockBars();
             });
 
             //popup too early will cause font rendering bug.
@@ -46,6 +46,7 @@ public class MI2Utilities extends Mod{
     }
 
     public void checkUpdate(){
+        if(!MI2USettings.getBool("enableUpdate", false)) return;
         MOD = mods.getMod(getClass());
         new Mindow2("Update Check"){
             Interval in = new Interval();

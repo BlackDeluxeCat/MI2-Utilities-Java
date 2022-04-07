@@ -76,10 +76,12 @@ public class MI2UI extends Mindow2{
     @Override
     public void initSettings(){
         super.initSettings();
+        settings.add(new CheckSettingEntry("enableUpdate", "@settings.main.enableUpdate"));
         settings.add(new CheckSettingEntry("showEmojis", "@settings.main.emoji", b -> emojis.addTo(b?Core.scene.root:null)));
         settings.add(new CheckSettingEntry("showCoreInfo", "@settings.main.coreInfo", b -> coreInfo.addTo(b?Core.scene.root:null)));
         settings.add(new CheckSettingEntry("showMindowMap", "@settings.main.mindowMap", b -> mindowmap.addTo(b?Core.scene.root:null)));
         settings.add(new CheckSettingEntry("showMapInfo", "@settings.main.mapInfo", b -> mapinfo.addTo(b?Core.scene.root:null)));
+        settings.add(new CheckSettingEntry("showLogicHelper", "@settings.main.logicHelper", b -> logicHelper.addTo(b?Vars.ui.logic:null)));
         settings.add(new CheckSettingEntry("enPlayerCursor", "@settings.main.playerCursor"));
         settings.add(new CheckSettingEntry("disableWreck", "@settings.main.disableWreck"));
         settings.add(new CheckSettingEntry("disableUnit", "@settings.main.disableUnit"));
@@ -88,6 +90,7 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckSettingEntry("enUnitLogic", "@settings.main.unitLogic"));
         settings.add(new CheckSettingEntry("enUnitLogicTimer", "@settings.main.unitLogicTimer"));
         settings.add(new CheckSettingEntry("enUnitPath", "@settings.main.unitPath"));
+        settings.add(new CheckSettingEntry("modifyBlockBars", "@settings.main.modifyBlockBars"));
         settings.add(new CheckSettingEntry("inputReplace", "@settings.main.inputReplace"));
         settings.add(new CheckSettingEntry("forceTapTile", "@settings.main.forceTapTile"));
     }

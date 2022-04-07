@@ -315,7 +315,7 @@ public class Mindow2 extends Table{
                         c.width(Math.min(530, Core.graphics.getWidth()));
                     });
 
-                });
+                }).grow();
                 show();
             }
         };
