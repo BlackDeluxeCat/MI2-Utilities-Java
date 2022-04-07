@@ -4,7 +4,6 @@ import arc.*;
 import arc.graphics.*;
 import arc.math.*;
 import arc.scene.*;
-import arc.scene.event.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
@@ -30,7 +29,7 @@ public class CoreInfoMindow extends Mindow2{
     protected CoreBuild core;
     protected Team select, team;
     protected PowerGraphTable pg = new PowerGraphTable(330);
-    protected Table teamSelect = new Table();
+    protected PopupTable teamSelect = new PopupTable();
     protected int[] unitIndex = new int[content.units().size];
     
     public CoreInfoMindow(){
@@ -68,7 +67,8 @@ public class CoreInfoMindow extends Mindow2{
                 });
                 utt.button("Select", textb, () -> {
                     rebuildSelect();
-                    snapToSelect(this);
+                    teamSelect.popup(Align.left);
+                    teamSelect.snapTo(this);
                 }).growX().height(48f).update(b -> {
                     b.setText(Core.bundle.get("coreInfo.selectButton.team") + (select == null ? Core.bundle.get("coreInfo.selectButton.playerteam"):team.localized()));
                     b.getLabel().setColor(team == null ? Color.white:team.color);
@@ -162,14 +162,14 @@ public class CoreInfoMindow extends Mindow2{
             p.button(Iconc.cancel + "", textb, () -> {
                 select = null;
                 rebuild();
-                teamSelect.remove();
+                teamSelect.hide();
             }).minSize(titleButtonSize).grow().disabled(select == null).get().getLabel().setWrap(false);
             int i = 1;
             for(TeamData t : state.teams.getActive()){
                 p.button(t.team.localized(), textb, () -> {
                     select = t.team;
                     rebuild();
-                    teamSelect.remove();
+                    teamSelect.hide();
                 }).minSize(titleButtonSize * 2f).disabled(select == t.team).with(b -> {
                     b.getLabel().setWrap(false);
                     b.getLabel().setColor(t.team.color);
@@ -181,19 +181,11 @@ public class CoreInfoMindow extends Mindow2{
         }).maxHeight(300f);
         teamSelect.update(() -> {
             teamSelect.toFront();
-            if(!teamSelect.hasMouse() && !CoreInfoMindow.this.hasMouse()){
-                teamSelect.remove();
-            }
+            teamSelect.hideWithoutFocusOn(this);
         });
     }
 
-    public void snapToSelect(Element e){
-        Core.scene.add(teamSelect);
-        teamSelect.setPosition(e.x, e.y);
-        teamSelect.keepInStage();
-        teamSelect.invalidateHierarchy();
-        teamSelect.pack();
-    }
+
 
     /** can be overrided, should use super.initSettings(), called in rebuild() */
     @Override
