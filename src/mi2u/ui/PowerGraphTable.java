@@ -4,6 +4,8 @@ import arc.*;
 import arc.func.*;
 import arc.graphics.*;
 import arc.math.*;
+import arc.scene.Element;
+import arc.scene.event.Touchable;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
@@ -22,6 +24,7 @@ import static mindustry.Vars.*;
 public class PowerGraphTable extends Table{
     public Team team;
     public float barsWidth = 400f;
+    public PopupTable detailTable = new PopupTable();
 
     private Interval interval = new Interval();
     //P.G. set for ui generation, to keep P.G. order（让多电网的次序不会每次都变化）
@@ -73,7 +76,7 @@ public class PowerGraphTable extends Table{
                 newBar.userObject = p;
                 newBar.set(powertext, () -> p.getLastPowerStored() / p.getLastCapacity(), Pal.accent);
                 newBar.blink(Color.white).outline(new Color(0.3f, 0.3f, 0.6f, 0.3f), 2f);
-                
+
                 newBar.clicked(() -> {
                     if(control.input instanceof DesktopInput inp){
                         Building random = ((PowerGraph)newBar.userObject).all.random();
@@ -82,65 +85,7 @@ public class PowerGraphTable extends Table{
                     }
                 });
 
-                newBar.addListener(new Tooltip(tt -> {
-                    tt.background(Styles.black6);
-                    tt.label(() -> "" + UI.formatAmount((long)((PowerGraph)newBar.userObject).getLastPowerStored()) + "/" + UI.formatAmount((long)((PowerGraph)newBar.userObject).getLastCapacity()) + "  " + (((PowerGraph)newBar.userObject).getPowerBalance() >= 0 ? "+" : "") + UI.formatAmount((long)(((PowerGraph)newBar.userObject).getPowerBalance() * 60)));
-                    tt.row();
-                    tt.table(ttt ->{
-                        ttt.update(() -> {
-                            ttt.clear();
-                            ttt.add("Prod");
-                            ttt.add("Cons");
-                            ttt.row();
-                            PowerGraph ppp = (PowerGraph)newBar.userObject;
-                            ttt.table(tttp -> {
-                                OrderedMap<Block, Float> blocks = new OrderedMap<Block, Float>();
-                                OrderedMap<Block, Float> values = new OrderedMap<Block, Float>();
-                                
-                                for(Building producer : ppp.producers){
-                                    blocks.put(producer.block, (blocks.containsKey(producer.block) ? blocks.get(producer.block):0f) + 1f);
-                                    values.put(producer.block, (values.containsKey(producer.block) ? values.get(producer.block):0f) + producer.getPowerProduction() * producer.timeScale() * 60f);
-                                }
-
-                                int cols = (int)(blocks.size / (Core.scene.getHeight() / 36f));
-                                int ir = 0;
-                                
-                                for(Block b : blocks.keys()){
-                                    tttp.image(b.uiIcon).size(iconMed);
-                                    tttp.add("x" + blocks.get(b).intValue()).labelAlign(Align.right).padRight(8f).fontScale(1f);
-                                    tttp.add("+" + values.get(b).longValue()).labelAlign(Align.right).padRight(8f).fontScale(1f);
-                                    if(ir++ < cols) continue;
-                                    tttp.row();
-                                    ir = 0;
-                                }
-                            }).top();
-
-                            ttt.table(tttp -> {
-                                OrderedMap<Block, Float> blocks = new OrderedMap<Block, Float>();
-                                OrderedMap<Block, Float> values = new OrderedMap<Block, Float>();
-                                
-                                for(Building consumer : ppp.consumers){
-                                    if(!consumer.block.consumes.hasPower()) continue;
-                                    blocks.put(consumer.block, (blocks.containsKey(consumer.block) ? blocks.get(consumer.block):0f) + 1f);
-                                    values.put(consumer.block, (values.containsKey(consumer.block) ? values.get(consumer.block):0f) + Mathf.num(consumer.shouldConsume()) * consumer.power.status * consumer.block.consumes.getPower().usage * 60 * consumer.timeScale());
-                                }
-
-                                int cols = (int)(blocks.size / (Core.scene.getHeight() / 48f));
-                                int ir = 0;
-                                
-                                for(Block b : blocks.keys()){
-                                    tttp.image(b.uiIcon).size(iconMed);
-                                    tttp.add("x" + blocks.get(b).intValue()).labelAlign(Align.right).padRight(8f).fontScale(1f);
-                                    tttp.add("-" + values.get(b).longValue()).labelAlign(Align.right).padRight(8f).fontScale(1f);
-                                    if(ir++ < cols) continue;
-                                    tttp.row();
-                                    ir = 0;
-                                }
-                            }).top();
-
-                        });
-                    });
-                }));
+                newBar.hovered(() -> showDetailFor(newBar));
                 bars.add(newBar);
             }else{
                 bars.get(index).userObject = p;
@@ -151,5 +96,70 @@ public class PowerGraphTable extends Table{
             add(bars.get(index)).width(barsWidth * p.getLastCapacity() / totalCap).height(24f);
             index++;
         }
+    }
+
+    public void showDetailFor(MI2Bar e){
+        PowerGraph p = (PowerGraph)e.userObject;
+        detailTable.shown = false;
+        detailTable.background(Styles.black6);
+        detailTable.clearListeners();
+        detailTable.clearChildren();
+        detailTable.touchable = Touchable.enabled;
+        detailTable.label(() -> "" + UI.formatAmount((long)(p.getLastPowerStored())) + "/" + UI.formatAmount((long)p.getLastCapacity()) + "  " + (p.getPowerBalance() >= 0 ? "+" : "") + UI.formatAmount((long)(p.getPowerBalance() * 60))).colspan(2);
+        detailTable.row();
+        detailTable.add("Prod");
+        detailTable.add("Cons");
+        detailTable.row();
+        detailTable.table(tttp -> {
+            OrderedMap<Block, Float> blocks = new OrderedMap<Block, Float>();
+            OrderedMap<Block, Float> values = new OrderedMap<Block, Float>();
+
+            for(Building producer : p.producers){
+                blocks.put(producer.block, (blocks.containsKey(producer.block) ? blocks.get(producer.block):0f) + 1f);
+                values.put(producer.block, (values.containsKey(producer.block) ? values.get(producer.block):0f) + producer.getPowerProduction() * producer.timeScale() * 60f);
+            }
+
+            int cols = (int)(blocks.size / (Core.scene.getHeight() / 36f));
+            int ir = 0;
+
+            for(Block b : blocks.keys()){
+                tttp.image(b.uiIcon).size(iconMed);
+                tttp.add("x" + blocks.get(b).intValue()).labelAlign(Align.right).padRight(8f).fontScale(1f);
+                tttp.add("+" + values.get(b).longValue()).labelAlign(Align.right).padRight(8f).fontScale(1f);
+                if(ir++ < cols) continue;
+                tttp.row();
+                ir = 0;
+            }
+        }).top();
+
+        detailTable.table(tttp -> {
+            OrderedMap<Block, Float> blocks = new OrderedMap<Block, Float>();
+            OrderedMap<Block, Float> values = new OrderedMap<Block, Float>();
+
+            for(Building consumer : p.consumers){
+                if(!consumer.block.consumes.hasPower()) continue;
+                blocks.put(consumer.block, (blocks.containsKey(consumer.block) ? blocks.get(consumer.block):0f) + 1f);
+                values.put(consumer.block, (values.containsKey(consumer.block) ? values.get(consumer.block):0f) + Mathf.num(consumer.shouldConsume()) * consumer.power.status * consumer.block.consumes.getPower().usage * 60 * consumer.timeScale());
+            }
+
+            int cols = (int)(blocks.size / (Core.scene.getHeight() / 48f));
+            int ir = 0;
+
+            for(Block b : blocks.keys()){
+                tttp.image(b.uiIcon).size(iconMed);
+                tttp.add("x" + blocks.get(b).intValue()).labelAlign(Align.right).padRight(8f).fontScale(1f);
+                tttp.add("-" + values.get(b).longValue()).labelAlign(Align.right).padRight(8f).fontScale(1f);
+                if(ir++ < cols) continue;
+                tttp.row();
+                ir = 0;
+            }
+        }).top();
+        detailTable.addCloseButton();
+        detailTable.update(() -> {
+            detailTable.snapTo(e);
+            detailTable.hideWithoutFocusOn(e);
+        });
+        detailTable.popup();
+        detailTable.toFront();
     }
 }
