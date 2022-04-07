@@ -24,12 +24,12 @@ import mindustry.input.*;
 import mindustry.io.*;
 import mindustry.ui.*;
 import mindustry.world.*;
+import mindustry.world.blocks.distribution.Sorter;
 
 import static mindustry.Vars.*;
 
 public class MinimapMindow extends Mindow2{
     public static Minimap2 m = new Minimap2(200f);
-    public static MinimapRenderer2 renderer2 = new MinimapRenderer2();
     public MinimapMindow(){
         super("MindowMap");
         mindowName = "MindowMap";
@@ -46,11 +46,11 @@ public class MinimapMindow extends Mindow2{
                 tt.label(() -> "    " + Strings.fixed(World.conv(player.x), 1) + ", "+ Strings.fixed(World.conv(player.y), 1));
                 tt.row();
                 tt.label(() -> Iconc.commandAttack + "  " + Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1));
-            });
+            }).growX();
             t.table(tt -> {
-                tt.button(Iconc.players + "", MI2UVars.textbtoggle, () -> renderer2.drawLabel = !renderer2.drawLabel).update(b -> b.setChecked(renderer2.drawLabel)).size(48f);
+                tt.button(Iconc.players + "", MI2UVars.textbtoggle, () -> m.drawLabel = !m.drawLabel).update(b -> b.setChecked(m.drawLabel)).size(48f);
             });
-        });
+        }).growX();
     }
 
     @Override
@@ -72,6 +72,10 @@ public class MinimapMindow extends Mindow2{
     
     public static class Minimap2 extends Table{
         protected Element map;
+        public boolean drawLabel = true;
+        private static final float baseSize = 16f;
+        public float zoom = 4;
+
         public Minimap2(float size){
             float margin = 5f;
             this.touchable = Touchable.enabled;
@@ -89,15 +93,15 @@ public class MinimapMindow extends Mindow2{
     
                 @Override
                 public void draw(){
-                    if(renderer2.getRegion() == null) return;
+                    if(renderer.minimap.getRegion() == null) return;
                     if(!clipBegin()) return;
                     
                     Draw.reset();
-                    Draw.rect(renderer2.getRegion(), x + width / 2f, y + height / 2f, width, height);
+                    Draw.rect(getRegion(), x + width / 2f, y + height / 2f, width, height);
     
-                    if(renderer2.getTexture() != null){
+                    if(renderer.minimap.getTexture() != null){
                         Draw.alpha(parentAlpha);
-                        renderer2.drawEntities(x, y, width, height, 0.75f, true);
+                        drawEntities(x, y, width, height, 0.75f, drawLabel);
                     }
     
                     clipEnd();
@@ -109,7 +113,7 @@ public class MinimapMindow extends Mindow2{
             addListener(new InputListener(){
                 @Override
                 public boolean scrolled(InputEvent event, float x, float y, float amountx, float amounty){
-                    renderer2.zoomBy(amounty);
+                    zoomBy(amounty);
                     return true;
                 }
             });
@@ -140,7 +144,7 @@ public class MinimapMindow extends Mindow2{
     
                     if(mobile){
                         float max = Math.min(world.width(), world.height()) / 16f / 2f;
-                        renderer2.setZoom(1f + y / height * (max - 1f));
+                        setZoom(1f + y / height * (max - 1f));
                     }
                 }
     
@@ -148,7 +152,7 @@ public class MinimapMindow extends Mindow2{
                 public void clicked(InputEvent event, float x, float y){
                     if(control.input instanceof DesktopInput || control.input instanceof InputOverwrite){
                         try{
-                            float sz = 16f * renderer2.getZoom();
+                            float sz = baseSize * zoom;
                             float dx = (Core.camera.position.x / tilesize);
                             float dy = (Core.camera.position.y / tilesize);
                             dx = (2 * sz) <= world.width() ? Mathf.clamp(dx, sz, world.width() - sz) : world.width() / 2;
@@ -187,127 +191,71 @@ public class MinimapMindow extends Mindow2{
             map.setSize(Scl.scl(size));
             add(map).size(size);
         }
-    }
 
-    //may cause some problems about ui color
-    public static class MinimapRenderer2{
-        private static final float baseSize = 16f;
-        private final Seq<Unit> units = new Seq<>();
-        private Pixmap pixmap;
-        private Texture texture;
-        private TextureRegion region;
-        private Rect rect = new Rect();
-        private float zoom = 4;
-        public boolean drawLabel = true;
-    
-        public MinimapRenderer2(){
-            Events.on(WorldLoadEvent.class, event -> {
-                reset();
-                Time.runTask(10f, () -> updateAll());
-            });
-            Events.on(TileChangeEvent.class, event -> {
-                if(!ui.editor.isShown()){
-                    update(event.tile);
-                }
-            });
-    
-            Events.on(BuildTeamChangeEvent.class, event -> update(event.build.tile));
-        }
-    
-        public Pixmap getPixmap(){
-            return pixmap;
-        }
-    
-        public @Nullable Texture getTexture(){
-            return texture;
-        }
-    
+        /** these methods below are replacing vanilla minimap renderer method*/
         public void zoomBy(float amount){
             zoom += amount;
             setZoom(zoom);
         }
-    
+
         public void setZoom(float amount){
             zoom = Mathf.clamp(amount, 1f, Math.max(world.width(), world.height()) / baseSize / 2f);
         }
-    
-        public float getZoom(){
-            return zoom;
-        }
-    
-        public void reset(){
-            if(pixmap != null){
-                pixmap.dispose();
-                texture.dispose();
-            }
-            setZoom(4f);
-            pixmap = new Pixmap(world.width(), world.height());
-            texture = new Texture(pixmap);
-            region = new TextureRegion(texture);
-        }
-    
+
         public void drawEntities(float x, float y, float w, float h, float scaling, boolean withLabels){
-            if(!withLabels){
-                updateUnitArray();
-            }else{
-                units.clear();
-                Groups.unit.each(units::add);
-            }
-    
             float sz = baseSize * zoom;
             float dx = (Core.camera.position.x / tilesize);
             float dy = (Core.camera.position.y / tilesize);
             dx = (2 * sz) <= world.width() ? Mathf.clamp(dx, sz, world.width() - sz) : world.width() / 2;
             dy = (2 * sz) <= world.height() ? Mathf.clamp(dy, sz, world.height() - sz) : world.height() / 2;
-    
-            rect.set((dx - sz) * tilesize, (dy - sz) * tilesize, sz * 2 * tilesize, sz * 2 * tilesize);
-    
+
+            Rect rect = MI2UTmp.r1.set((dx - sz) * tilesize, (dy - sz) * tilesize, sz * 2 * tilesize, sz * 2 * tilesize);
+
             //draw a linerect of view area
             Lines.stroke(1f, new Color(1f, 1f, 1f, 0.5f));
             float cx = withLabels ? (Core.camera.position.x - rect.x) / rect.width * w : Core.camera.position.x / (world.width() * tilesize) * w;
             float cy = withLabels ? (Core.camera.position.y - rect.y) / rect.width * h : Core.camera.position.y / (world.height() * tilesize) * h;
-            Lines.rect(x + cx - Core.graphics.getWidth() / rect.width * w / renderer.getScale() / 2f, 
-                y + cy - Core.graphics.getHeight() / rect.width * h / renderer.getScale() / 2f, 
-                Core.graphics.getWidth() / rect.width * w / renderer.getScale() , 
-                Core.graphics.getHeight() / rect.width * h / renderer.getScale());
+            Lines.rect(x + cx - Core.graphics.getWidth() / rect.width * w / renderer.getScale() / 2f,
+                    y + cy - Core.graphics.getHeight() / rect.width * h / renderer.getScale() / 2f,
+                    Core.graphics.getWidth() / rect.width * w / renderer.getScale() ,
+                    Core.graphics.getHeight() / rect.width * h / renderer.getScale());
             Draw.color();
-    
-            for(Unit unit : units){
-                float rx = withLabels ? (unit.x - rect.x) / rect.width * w : unit.x / (world.width() * tilesize) * w;
-                float ry = withLabels ? (unit.y - rect.y) / rect.width * h : unit.y / (world.height() * tilesize) * h;
-    
+            //just render unit group
+            Groups.unit.each(unit -> {
+                float rx = (unit.x - rect.x) / rect.width * w;
+                float ry = (unit.y - rect.y) / rect.width * h;
+
                 float scale = Scl.scl(1f) / 2f * scaling * 32f;
                 var region = unit.icon();
                 //color difference between block and unit in setting
                 Draw.mixcol(new Color(unit.team().color.r * 0.9f, unit.team().color.g * 0.9f, unit.team().color.b * 0.9f, 1f), 1f);
                 Draw.rect(region, x + rx, y + ry, scale, scale * (float)region.height / region.width, unit.rotation() - 90);
                 Draw.reset();
-            }
-    
+            });
+
             //display labels
-            if(drawLabel){
+            if(withLabels){
                 for(Player player : Groups.player){
                     if(!player.dead()){
                         //float rx = player.x / (world.width() * tilesize) * w;
                         //float ry = player.y / (world.height() * tilesize) * h;
-                        float rx = withLabels ? (player.x - rect.x) / rect.width * w : player.x / (world.width() * tilesize) * w;
-                        float ry = withLabels ? (player.y - rect.y) / rect.width * h : player.y / (world.height() * tilesize) * h;
-    
+                        float rx = (player.x - rect.x) / rect.width * w;
+                        float ry = (player.y - rect.y) / rect.width * h;
+
                         drawLabel(x + rx, y + ry, player.name, player.team().color);
                     }
                 }
             }
-    
+
             Draw.reset();
         }
-    
-        public void drawEntities(float x, float y, float w, float h){
-            drawEntities(x, y, w, h, 1f, true);
-        }
-    
+
         public @Nullable TextureRegion getRegion(){
+            //TODO get texture, region in minimaprenderer
+            var texture = getTextureRef();
             if(texture == null) return null;
-    
+            var region = getRegionRef();
+            if(texture == null) return null;
             //2 * sz = map width/height in tiles
             float sz = baseSize * zoom;
             float dx = (Core.camera.position.x / tilesize);
@@ -320,62 +268,18 @@ public class MinimapMindow extends Mindow2{
             region.set(x * invTexWidth, y * invTexHeight, (x + width) * invTexWidth, (y + height) * invTexHeight);
             return region;
         }
-    
-        public void updateAll(){
-            for(Tile tile : world.tiles){
-                pixmap.set(tile.x, pixmap.height - 1 - tile.y, colorFor(tile));
-            }
-            texture.draw(pixmap);
-        }
-    
-        public void update(Tile tile){
-            if(world.isGenerating() || !state.isGame()) return;
-    
-            if(tile.build != null && tile.isCenter()){
-                tile.getLinkedTiles(other -> {
-                    if(!other.isCenter()){
-                        update(other);
-                    }
-                });
-            }
-    
-            int color = colorFor(tile);
-            pixmap.set(tile.x, pixmap.height - 1 - tile.y, color);
-            //Log.info(color);
-            Pixmaps.drawPixel(texture, tile.x, pixmap.height - 1 - tile.y, color);
-        }
-    
-        public void updateUnitArray(){
-            float sz = baseSize * zoom;
-            float dx = (Core.camera.position.x / tilesize);
-            float dy = (Core.camera.position.y / tilesize);
-            dx = Mathf.clamp(dx, sz, world.width() - sz);
-            dy = Mathf.clamp(dy, sz, world.height() - sz);
-    
-            units.clear();
-            Units.nearby((dx - sz) * tilesize, (dy - sz) * tilesize, sz * 2 * tilesize, sz * 2 * tilesize, units::add);
-        }
-    
-        private int colorFor(Tile tile){
-            if(tile == null) return 0;
-            int bc = tile.block().minimapColor(tile);
-            Color color = MI2UTmp.c2.set(bc == 0 ? MapIO.colorFor(tile.block(), tile.floor(), tile.overlay(), tile.team()) : bc);
-            color.mul(1f - Mathf.clamp(world.getDarkness(tile.x, tile.y) / 4f));
-    
-            return color.rgba();
-        }
-    
+
         public void drawLabel(float x, float y, String text, Color color){
             Font font = Fonts.outline;
             GlyphLayout l = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
             boolean ints = font.usesIntegerPositions();
             font.getData().setScale(1 / 1.5f / Scl.scl(1f));
             font.setUseIntegerPositions(false);
-    
+
             l.setText(font, text, color, 90f, Align.left, true);
             float yOffset = 20f;
             float margin = 3f;
-    
+
             Draw.color(0f, 0f, 0f, 0.2f);
             Fill.rect(x, y + yOffset - l.height/2f, l.width + margin, l.height + margin);
             Draw.color();
@@ -386,5 +290,29 @@ public class MinimapMindow extends Mindow2{
             font.setColor(Color.white);
             Pools.free(l);
         }
+
+        public static Texture getTextureRef(){
+            Texture texture;
+            try{
+                texture = Reflect.get(renderer.minimap, "texture");
+            }catch (Exception e){
+                return null;
+            }
+            if(texture == null) return null;
+            return texture;
+        }
+
+        public static TextureRegion getRegionRef(){
+            TextureRegion region;
+            try{
+                if(getTextureRef() == null) return null;
+                region = Reflect.get(renderer.minimap, "region");
+            }catch (Exception e){
+                return null;
+            }
+            if(region == null) return null;
+            return region;
+        }
+
     }
 }
