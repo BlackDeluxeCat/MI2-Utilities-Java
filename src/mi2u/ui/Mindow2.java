@@ -180,8 +180,8 @@ public class Mindow2 extends Table{
             //TODO add a abovesnap listener
             //title.setStyle(aboveSnap == null ? titleStyleNormal : titleStyleSnapped);
             titleBar.setBackground(aboveSnap == null ? titleBarbgNormal : titleBarbgSnapped);
-            //don't collapse when minimized
-            if(minimized || !MI2USettings.getBool(mindowName + ".autoHideTitle", false)) titleScale = 1f;
+            //don't collapse when minimized or empty container
+            if(minimized || !MI2USettings.getBool(mindowName + ".autoHideTitle", false) || cont.getPrefHeight() < 20f || !cont.visible) titleScale = 1f;
             if((interval.check(0, 180) && titleBar.scaleY > 0.95f) || (interval.check(1, 15) && titleBar.scaleY < 0.95f)){
                 titleBar.toFront();
                 titleBar.setScale(1, Mathf.lerpDelta(titleBar.scaleY, titleScale, 0.3f));
