@@ -1,18 +1,8 @@
-#the mod name as displayed in-game
-displayName: "MI2-Utilities Java"
+# MI2-Utilities Java
 
-#the internal name of your mod
-name: "MI2-Utilities-Java"
+- [English](README.md) | [中文](README_zh.md)
 
-#your name
-author: "BlackDeluxeCat"
-
-#the fully qualified main class of the mod
-main: "mi2u.MI2Utilities"
-
-#the mod description as seen in the mod dialog
-description: "# MI2-Utilities Java
-一个原版辅助工具，有爱自取。
+一个原版辅助工具，有爱自取。 
 
 安装方法：
 
@@ -66,15 +56,4 @@ description: "# MI2-Utilities Java
 - 关闭残骸、单位、射弹渲染
 - 修改部分方块数值条
 - 99.5%的改动可以通过选项关闭
-- MI2U选项存储在$Mindustry/mods/MI2U_Settings/目录下"
-
-#the mod version
-version: 0.7.0
-
-#the minimum game build required to run this mod
-minGameVersion: 135
-
-#this is a java mod
-java: true
-
-hidden: true
+- MI2U选项存储在$Mindustry/mods/MI2U_Settings/目录下

@@ -1,4 +1,7 @@
-# MI2-Utilities Testing
+# MI2-Utilities Java
+
+- [English](README.md) | [中文](README_zh.md)
+
 A Mindustry Java mod. Useful vanilla tools built in Mindustry-window. MI2-Client sublimation.
 
 Mindustry Java模组，添加实用原版工具，以特殊窗体承载。MI2端的升华。
