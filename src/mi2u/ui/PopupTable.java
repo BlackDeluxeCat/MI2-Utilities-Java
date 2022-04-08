@@ -18,6 +18,7 @@ public class PopupTable extends Table{
         Core.scene.add(this);
         shown = true;
         setTransform(true);
+        clearActions();
         float duration = 0.15f;
         if(Align.isTop(align)){
             actions(Actions.scaleTo(1f,0f), Actions.translateBy(0f, getPrefHeight()));
@@ -34,7 +35,7 @@ public class PopupTable extends Table{
         }
     }
 
-    public void popup(){popup(Align.top);}
+    public void popup(){popup(Align.left);}
 
     public void hide(){
         if(!shown) return;
@@ -63,9 +64,6 @@ public class PopupTable extends Table{
                     break;
                 }
             }
-        }
-        if(hasMouse()){
-            hasMouse = true;
         }
         if(!hasMouse) hide();
     }

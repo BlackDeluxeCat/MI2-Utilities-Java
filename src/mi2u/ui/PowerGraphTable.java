@@ -5,6 +5,7 @@ import arc.func.*;
 import arc.graphics.*;
 import arc.math.*;
 import arc.scene.Element;
+import arc.scene.actions.Actions;
 import arc.scene.event.Touchable;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
@@ -104,7 +105,7 @@ public class PowerGraphTable extends Table{
         detailTable.background(Styles.black6);
         detailTable.clearListeners();
         detailTable.clearChildren();
-        detailTable.touchable = Touchable.enabled;
+        detailTable.touchable = Touchable.disabled;
         detailTable.label(() -> "" + UI.formatAmount((long)(p.getLastPowerStored())) + "/" + UI.formatAmount((long)p.getLastCapacity()) + "  " + (p.getPowerBalance() >= 0 ? "+" : "") + UI.formatAmount((long)(p.getPowerBalance() * 60))).colspan(2);
         detailTable.row();
         detailTable.add("Prod");
@@ -154,12 +155,11 @@ public class PowerGraphTable extends Table{
                 ir = 0;
             }
         }).top();
-        detailTable.addCloseButton();
-        detailTable.update(() -> {
-            detailTable.snapTo(e);
-            detailTable.hideWithoutFocusOn(e);
-        });
         detailTable.popup();
+        detailTable.update(() -> {
+            detailTable.hideWithoutFocusOn(e);
+            detailTable.setPositionInScreen(Core.input.mouseX() - 20f, Core.input.mouseY() - detailTable.getPrefHeight() - 20f);
+        });
         detailTable.toFront();
     }
 }

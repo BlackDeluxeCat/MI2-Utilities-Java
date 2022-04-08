@@ -67,7 +67,7 @@ public class CoreInfoMindow extends Mindow2{
                 });
                 utt.button("Select", textb, () -> {
                     rebuildSelect();
-                    teamSelect.popup(Align.left);
+                    teamSelect.popup();
                     teamSelect.snapTo(this);
                 }).growX().height(48f).update(b -> {
                     b.setText(Core.bundle.get("coreInfo.selectButton.team") + (select == null ? Core.bundle.get("coreInfo.selectButton.playerteam"):team.localized()));
@@ -181,7 +181,7 @@ public class CoreInfoMindow extends Mindow2{
         }).maxHeight(300f);
         teamSelect.update(() -> {
             teamSelect.toFront();
-            teamSelect.hideWithoutFocusOn(this);
+            teamSelect.hideWithoutFocusOn(this, teamSelect);
         });
     }
 
