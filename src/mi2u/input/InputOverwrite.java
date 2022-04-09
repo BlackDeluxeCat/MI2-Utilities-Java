@@ -19,9 +19,13 @@ public interface InputOverwrite{
 
     public default void move(Vec2 value){};
 
-    public default void approach(Vec2 point, float radius){
+    public default void approach(Vec2 point, float radius, boolean checkWithin){
         Vec2 vec = MI2UTmp.v1;
         Unit unit = player.unit();
+        if(checkWithin && unit.within(point.x, point.y, radius)){
+            move(vec.setZero());
+            return;
+        }
         vec.set(point).sub(unit);
         float length = radius <= 0.001f ? 1f : Mathf.clamp((unit.dst(point.x, point.y) - radius) / 50f, -1f, 1f);
         vec.setLength(unit.speed() * length);
@@ -33,9 +37,9 @@ public interface InputOverwrite{
         move(vec);
     }
 
-    public default void approach(Position target, float radius){
+    public default void approach(Position target, float radius, boolean checkWithin){
         if(target == null) return;
-        approach(MI2UTmp.v2.set(target.getX(),target.getY()), radius);
+        approach(MI2UTmp.v2.set(target.getX(),target.getY()), radius, checkWithin);
     }
 
     public default void clear(){};

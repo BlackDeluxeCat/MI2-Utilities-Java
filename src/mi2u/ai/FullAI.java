@@ -1,25 +1,23 @@
 package mi2u.ai;
 
 import arc.Core;
-import arc.math.geom.*;
+import arc.math.geom.Geometry;
+import arc.math.geom.Position;
+import arc.math.geom.Vec2;
 import arc.struct.Seq;
-import arc.util.Log;
-import arc.util.Nullable;
 import mi2u.MI2UTmp;
 import mi2u.input.DesktopInputExt;
 import mi2u.input.InputOverwrite;
 import mi2u.input.MobileInputExt;
 import mi2u.io.MI2USettings;
-import mindustry.content.*;
+import mindustry.content.Blocks;
 import mindustry.ctype.ContentType;
 import mindustry.entities.Predict;
 import mindustry.entities.Units;
 import mindustry.entities.units.AIController;
-import mindustry.game.Team;
 import mindustry.gen.Building;
 import mindustry.gen.Call;
 import mindustry.gen.Iconc;
-import mindustry.gen.Teamc;
 import mindustry.input.Binding;
 import mindustry.type.Item;
 import mindustry.world.Tile;
@@ -28,7 +26,7 @@ import mindustry.world.meta.BlockFlag;
 import static mindustry.Vars.*;
 
 public class FullAI extends AIController{
-    public Seq<Mode> modes = new Seq<Mode>();
+    public Seq<Mode> modes = new Seq<>();
 
     public FullAI(){
         super();
@@ -61,8 +59,8 @@ public class FullAI extends AIController{
     }
 
     /**unit actions can be covered by the lasted related mode. Executed after each mode acted.*/
-    public void moveAction(Position target, float radius){
-        if(control.input instanceof InputOverwrite inp) inp.approach(target, radius);
+    public void moveAction(Position target, float radius, boolean checkWithin){
+        if(control.input instanceof InputOverwrite inp) inp.approach(target, radius, checkWithin);
     }
 
     public void boostAction(boolean boost){
@@ -121,7 +119,7 @@ public class FullAI extends AIController{
                         ore = indexer.findClosestOre(unit, targetItem);
                     }
                     if(ore != null){
-                        moveAction(ore, 50f);
+                        moveAction(ore, 50f, false);
                         if(ore.block() == Blocks.air && unit.within(ore, unit.type.miningRange)){
                             unit.mineTile = ore;
                         }
@@ -143,7 +141,7 @@ public class FullAI extends AIController{
                     unit.clearItem();
                     mining = true;
                 }
-                moveAction(core, itemTransferRange / 2f);
+                moveAction(core, itemTransferRange / 2f, false);
             }
         }
 
@@ -172,7 +170,7 @@ public class FullAI extends AIController{
             if(!control.input.isBuilding) return;
             if(unit.plans().isEmpty() || !unit.canBuild()) return;
             boostAction(true);
-            moveAction(unit.plans().first(), buildingRange / 1.4f);
+            moveAction(unit.plans().first(), buildingRange / 1.4f, true);
         }
     }
 
@@ -188,7 +186,7 @@ public class FullAI extends AIController{
             Tile tile = Geometry.findClosest(unit.x, unit.y, indexer.getAllied(unit.team, BlockFlag.repair));
             if(tile == null) return;
             boostAction(true);
-            moveAction(tile, 20f);
+            moveAction(tile, 20f, false);
         }
     }
 
