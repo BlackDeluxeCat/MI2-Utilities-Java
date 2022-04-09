@@ -14,10 +14,10 @@ import static mindustry.Vars.*;
 
 public class WaveBarTable extends Table{
     public int curWave = 1;
-    public Seq<WaveData> waves = new Seq<WaveData>();
-    public Seq<UnitData> allunits = new Seq<UnitData>();
+    public Seq<WaveData> waves = new Seq<>();
+    public Seq<UnitData> allunits = new Seq<>();
     public Interval timer = new Interval(2);
-    protected Seq<MI2Bar> hpBars = new Seq<MI2Bar>();
+    protected Seq<MI2Bar> hpBars = new Seq<>();
     protected int[] prewave = {1,2,3,4,5};
 
     public WaveBarTable(){
@@ -25,16 +25,10 @@ public class WaveBarTable extends Table{
 
         Events.on(WorldLoadEvent.class, e -> {
             clearData();
-            Time.run(Math.min(state.rules.waveSpacing, 60f), () -> {
-                catchWave();
-            });
+            Time.run(Math.min(state.rules.waveSpacing, 60f), this::catchWave);
         });
 
-        Events.on(WaveEvent.class, e -> {
-            Time.run(Math.min(state.rules.waveSpacing, 60f), () -> {
-                catchWave();
-            });
-        });
+        Events.on(WaveEvent.class, e -> Time.run(Math.min(state.rules.waveSpacing, 60f), this::catchWave));
 
         update(() -> {
             if(!timer.get(0, 19f)) return;
@@ -43,7 +37,7 @@ public class WaveBarTable extends Table{
                 return;
             }
             //if(timer.get(1, 60 * 60f)) clearData();
-            allunits.remove(unit -> unit.unit == null || unit.unit.dead());
+            allunits.remove(unit -> unit.unit == null || !unit.unit.isValid());
             state.teams.get(state.rules.waveTeam).units.each(u -> {
                 if(allunits.contains(data -> data.unit == u)) return;
                 allunits.add(new UnitData(u, -1));
@@ -87,16 +81,14 @@ public class WaveBarTable extends Table{
     }
 
     public void updateData(){
-        waves.each(waved -> {
-            waved.removeDead();
-        });
+        waves.each(WaveData::removeDead);
         waves.removeAll(waved -> waved.units.isEmpty());
     }
 
     public class WaveData{
-        int wave = 1;
+        int wave;
         float totalHp = 1f, totalShield = 1f;
-        Seq<UnitData> units = new Seq<UnitData>();
+        Seq<UnitData> units = new Seq<>();
         public WaveData(int wave){
             this.wave = wave;
             init();
@@ -111,13 +103,13 @@ public class WaveBarTable extends Table{
         }
 
         public void removeDead(){
-            units.removeAll(unit -> unit.unit == null || unit.unit.dead() || unit.unit.health <= 0);
+            units.removeAll(unit -> unit.unit == null || !unit.unit.isValid() || unit.unit.dead() || unit.unit.health <= 0);
         }
     }
 
     public class UnitData{
         public Unit unit;
-        public float spawnTime = 0f;
+        public float spawnTime;
         public int wave = 1;
 
         public UnitData(Unit unit, int wave){

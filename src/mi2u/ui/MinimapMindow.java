@@ -9,7 +9,6 @@ import arc.math.geom.*;
 import arc.scene.*;
 import arc.scene.event.*;
 import arc.scene.ui.layout.*;
-import arc.struct.Seq;
 import arc.util.*;
 import arc.util.pooling.*;
 import mi2u.MI2UTmp;
@@ -17,14 +16,10 @@ import mi2u.MI2UVars;
 import mi2u.input.InputOverwrite;
 import mi2u.io.*;
 import mindustry.core.*;
-import mindustry.entities.*;
-import mindustry.game.EventType.*;
 import mindustry.gen.*;
+import mindustry.graphics.*;
 import mindustry.input.*;
-import mindustry.io.*;
 import mindustry.ui.*;
-import mindustry.world.*;
-import mindustry.world.blocks.distribution.Sorter;
 
 import static mindustry.Vars.*;
 
@@ -47,18 +42,14 @@ public class MinimapMindow extends Mindow2{
                 tt.row();
                 tt.label(() -> Iconc.commandAttack + "  " + Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1));
             }).growX();
-            t.table(tt -> {
-                tt.button(Iconc.players + "", MI2UVars.textbtoggle, () -> m.drawLabel = !m.drawLabel).update(b -> b.setChecked(m.drawLabel)).size(48f);
-            });
+            t.table(tt -> tt.button(Iconc.players + "", MI2UVars.textbtoggle, () -> m.drawLabel = !m.drawLabel).update(b -> b.setChecked(m.drawLabel)).size(48f));
         }).growX();
     }
 
     @Override
     public void initSettings(){
         super.initSettings();
-        settings.add(new FieldSettingEntry(SettingType.Int, mindowName + ".size", s -> {
-            return Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 600;
-        }, "@settings.mindowMap.size", s -> rebuild()));
+        settings.add(new FieldSettingEntry(SettingType.Int, mindowName + ".size", s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 600, "@settings.mindowMap.size", s -> rebuild()));
     }
 
     @Override
@@ -155,8 +146,8 @@ public class MinimapMindow extends Mindow2{
                             float sz = baseSize * zoom;
                             float dx = (Core.camera.position.x / tilesize);
                             float dy = (Core.camera.position.y / tilesize);
-                            dx = (2 * sz) <= world.width() ? Mathf.clamp(dx, sz, world.width() - sz) : world.width() / 2;
-                            dy = (2 * sz) <= world.height() ? Mathf.clamp(dy, sz, world.height() - sz) : world.height() / 2;
+                            dx = (2 * sz) <= world.width() ? Mathf.clamp(dx, sz, world.width() - sz) : world.width() / 2f;
+                            dy = (2 * sz) <= world.height() ? Mathf.clamp(dy, sz, world.height() - sz) : world.height() / 2f;
                             if(control.input instanceof DesktopInput inp){
                                 inp.panning = true;
                                 Core.camera.position.set(
@@ -206,8 +197,8 @@ public class MinimapMindow extends Mindow2{
             float sz = baseSize * zoom;
             float dx = (Core.camera.position.x / tilesize);
             float dy = (Core.camera.position.y / tilesize);
-            dx = (2 * sz) <= world.width() ? Mathf.clamp(dx, sz, world.width() - sz) : world.width() / 2;
-            dy = (2 * sz) <= world.height() ? Mathf.clamp(dy, sz, world.height() - sz) : world.height() / 2;
+            dx = (2 * sz) <= world.width() ? Mathf.clamp(dx, sz, world.width() - sz) : world.width() / 2f;
+            dy = (2 * sz) <= world.height() ? Mathf.clamp(dy, sz, world.height() - sz) : world.height() / 2f;
 
             Rect rect = MI2UTmp.r1.set((dx - sz) * tilesize, (dy - sz) * tilesize, sz * 2 * tilesize, sz * 2 * tilesize);
 
@@ -237,8 +228,6 @@ public class MinimapMindow extends Mindow2{
             if(withLabels){
                 for(Player player : Groups.player){
                     if(!player.dead()){
-                        //float rx = player.x / (world.width() * tilesize) * w;
-                        //float ry = player.y / (world.height() * tilesize) * h;
                         float rx = (player.x - rect.x) / rect.width * w;
                         float ry = (player.y - rect.y) / rect.width * h;
 
@@ -250,18 +239,19 @@ public class MinimapMindow extends Mindow2{
             Draw.reset();
         }
 
+        /**
+         * get texture, region in {@link MinimapRenderer}*/
         public @Nullable TextureRegion getRegion(){
-            //TODO get texture, region in minimaprenderer
             var texture = getTextureRef();
             if(texture == null) return null;
             var region = getRegionRef();
-            if(texture == null) return null;
+            if(region == null) return null;
             //2 * sz = map width/height in tiles
             float sz = baseSize * zoom;
             float dx = (Core.camera.position.x / tilesize);
             float dy = (Core.camera.position.y / tilesize);
-            dx = (2 * sz) <= world.width() ? Mathf.clamp(dx, sz, world.width() - sz) : world.width() / 2;
-            dy = (2 * sz) <= world.height() ? Mathf.clamp(dy, sz, world.height() - sz) : world.height() / 2;
+            dx = (2 * sz) <= world.width() ? Mathf.clamp(dx, sz, world.width() - sz) : world.width() / 2f;
+            dy = (2 * sz) <= world.height() ? Mathf.clamp(dy, sz, world.height() - sz) : world.height() / 2f;
             float invTexWidth = 1f / texture.width;
             float invTexHeight = 1f / texture.height;
             float x = dx - sz, y = world.height() - dy - sz, width = sz * 2, height = sz * 2;
@@ -287,7 +277,6 @@ public class MinimapMindow extends Mindow2{
             font.draw(text, x - l.width/2f, y + yOffset, 90f, Align.left, true);
             font.setUseIntegerPositions(ints);
             font.getData().setScale(1f);
-            font.setColor(Color.white);
             Pools.free(l);
         }
 
@@ -298,7 +287,6 @@ public class MinimapMindow extends Mindow2{
             }catch (Exception e){
                 return null;
             }
-            if(texture == null) return null;
             return texture;
         }
 
@@ -310,7 +298,6 @@ public class MinimapMindow extends Mindow2{
             }catch (Exception e){
                 return null;
             }
-            if(region == null) return null;
             return region;
         }
 
