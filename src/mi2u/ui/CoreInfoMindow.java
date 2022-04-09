@@ -12,7 +12,7 @@ import mi2u.MI2UTmp;
 import mi2u.input.InputOverwrite;
 import mi2u.io.*;
 import mindustry.core.*;
-import mindustry.game.Team;
+import mindustry.game.*;
 import mindustry.game.Teams.*;
 import mindustry.gen.*;
 import mindustry.type.*;
@@ -29,12 +29,26 @@ public class CoreInfoMindow extends Mindow2{
     protected CoreBuild core;
     protected Team select, team;
     protected PowerGraphTable pg = new PowerGraphTable(330);
-    protected PopupTable teamSelect = new PopupTable();
+    protected PopupTable teamSelect = new PopupTable(), buildPlanTable = new PopupTable();
     protected int[] unitIndex = new int[content.units().size];
     
     public CoreInfoMindow(){
         super("@coreInfo.MI2U", "@coreInfo.help");
         mindowName = "CoreInfo";
+        Events.run(EventType.Trigger.update, () -> {
+            if(player.unit() != null && player.unit().plans().size <= 0){
+                buildPlanTable.hide();
+                buildPlanTable.clearChildren();
+            }else{
+                buildPlanTable.setPositionInScreen(this.x, this.y - buildPlanTable.getPrefHeight());
+                buildPlanTable.popup();
+            }
+        });
+        Events.on(EventType.WorldLoadEvent.class, e -> {
+            lastLastItemsAmt.clear();
+            lastItemsAmt.clear();
+            rebuild();
+        });
     }
 
     @Override
@@ -62,9 +76,7 @@ public class CoreInfoMindow extends Mindow2{
         
         cont.table(ipt -> {
             ipt.table(utt -> {
-                utt.image(Mindow2.white).width(36f).growY().update(i -> {
-                    i.setColor(team.color);
-                });
+                utt.image(Mindow2.white).width(36f).growY().update(i -> i.setColor(team.color));
                 utt.button("Select", textb, () -> {
                     rebuildSelect();
                     teamSelect.popup();
@@ -85,8 +97,6 @@ public class CoreInfoMindow extends Mindow2{
                             new Image(item.uiIcon),
                             new Table(t -> t.label(() -> core == null ? "" : (lastItemsAmt.get(item) - lastLastItemsAmt.get(item) >= 0 ? "[green]+" : "[red]") + (lastItemsAmt.get(item) - lastLastItemsAmt.get(item))).get().setFontScale(0.65f)).right().bottom()
                             ).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel));
-                        //image(item.uiIcon).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel));
-                        //TODO leaks garbage
                         iut.label(() -> core == null ? "0" : 
                             UI.formatAmount(core.items.get(item)))
                         .padRight(3).minWidth(52f).left();
@@ -103,7 +113,6 @@ public class CoreInfoMindow extends Mindow2{
             }
         });
 
-
         //cont.row();
 
         if(MI2USettings.getBool(mindowName + ".showUnits")){
@@ -112,7 +121,7 @@ public class CoreInfoMindow extends Mindow2{
                 for(UnitType type : content.units()){
                     if(type.isHidden()) continue;
                     uut.stack(new Image(type.uiIcon){{this.setColor(1f,1f,1f,0.8f);}},
-                        new Table(t -> t.label(() -> core != null && team.data().countType(type) > 0 ? UI.formatAmount(team.data().countType(type)) : "").get().setFontScale(0.65f)).right().bottom()
+                        new Table(t -> t.label(() -> team.data().countType(type) > 0 ? UI.formatAmount(team.data().countType(type)) : "").get().setFontScale(0.65f)).right().bottom()
                         ).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(type.localizedName).style(Styles.outlineLabel)).get().clicked(() -> {
                             //click to glance unit
                             if(control.input instanceof InputOverwrite inp){
@@ -122,8 +131,6 @@ public class CoreInfoMindow extends Mindow2{
                                 inp.pan(true, MI2UTmp.v1.set(team.data().unitCache(type).get(unitIndex[type.id]).x(), team.data().unitCache(type).get(unitIndex[type.id]).y()));
                             }
                         });
-                    //uut.image(type.uiIcon).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(type.localizedName).style(Styles.outlineLabel));
-                    //uut.label(() -> core == null ? "0" : UI.formatAmount(team.data().countType(type))).padRight(3).minWidth(52f).left();
         
                     if(++i % 5 == 0){
                         uut.row();
@@ -137,14 +144,19 @@ public class CoreInfoMindow extends Mindow2{
                     this.update(() -> {
                         //this.setFontScale(team.data().unitCount <= 1000 ? 0.65f : 0.5f);
                         this.setText(core != null && team.data().unitCount > 0 ? 
-                            (team.data().unitCount>1000?(int)(team.data().unitCount/1000) + "\n":"") + 
+                            (team.data().unitCount>1000 ? (team.data().unitCount/1000) + "\n":"") +
                             Mathf.mod(team.data().unitCount, 1000) + "" : "");
                     });
                 }}
                 ).size(iconSmall).padRight(3);
                 uut.stack(new Label("" + Iconc.blockCoreNucleus){{this.setColor(1,0.6f,0,0.5f);}},
                 new Table(t -> t.label(() -> core != null && team.data().cores.size > 0 ? UI.formatAmount(team.data().cores.size) : "").get().setFontScale(0.65f)).right().bottom()
-                ).size(iconSmall).padRight(3);
+                ).size(iconSmall).padRight(3).get().clicked(() -> {
+                    if(control.input instanceof InputOverwrite inp && team.cores() != null && !team.cores().isEmpty()){
+                        Building b = team.cores().random();
+                        inp.pan(true, MI2UTmp.v1.set(b.x, b.y));
+                    }
+                });
             }).maxHeight(200f).update(p -> {
                 Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
                 if(e != null && e.isDescendantOf(p)){
@@ -154,6 +166,30 @@ public class CoreInfoMindow extends Mindow2{
                 }
             });
         }
+
+        //buildplan popup table
+        if(buildPlanTable == null) buildPlanTable = new PopupTable();
+        buildPlanTable.setBackground(Styles.black6);
+        buildPlanTable.update(() -> {
+            if(player.unit() == null || player.unit().plans().size > 500) return;   //Too many plans cause lag
+            ItemSeq req = new ItemSeq();
+            player.unit().plans().each(plan -> {
+                for(ItemStack stack : plan.block.requirements){
+                    req.add(stack.item, Mathf.floor(stack.amount * (plan.breaking ? state.rules.deconstructRefundMultiplier:-1*state.rules.buildCostMultiplier)));
+                }
+            });
+            for(Item item : content.items()){
+                if(buildPlanTable.getChildren().find(e -> e.name != null && e.name.equals(item.name)) instanceof Label l){
+                    l.setText((req.get(item)>0?"+":"") + req.get(item));
+                    l.setColor(player.team().core().items.get(item) < -req.get(item) ? Color.red:Color.forest);
+                }else{
+                    if(req.get(item) == 0) continue;
+                    if(buildPlanTable.getCells().size % 8 == 0) buildPlanTable.row();
+                    buildPlanTable.image(item.uiIcon).size(16f);
+                    buildPlanTable.add("" + req.get(item)).name(item.name);
+                }
+            }
+        });
     }
 
     public void rebuildSelect(){
