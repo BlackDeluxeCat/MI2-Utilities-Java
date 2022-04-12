@@ -4,6 +4,7 @@ import arc.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import arc.util.serialization.*;
+import mi2u.graphics.MI2UShaders;
 import mi2u.io.*;
 import mi2u.ui.*;
 import mindustry.game.EventType.*;
@@ -46,6 +47,7 @@ public class MI2Utilities extends Mod{
             });
 
         });
+        Events.on(FileTreeInitEvent.class, e -> Core.app.post(MI2UShaders::load));
     }
 
     public void checkUpdate(){

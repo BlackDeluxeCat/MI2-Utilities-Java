@@ -10,6 +10,7 @@ import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.pooling.*;
+import mi2u.graphics.MI2UShaders;
 import mi2u.io.*;
 import mindustry.ai.*;
 import mindustry.ai.types.*;
@@ -28,6 +29,7 @@ import mindustry.ui.dialogs.SchematicsDialog;
 import mindustry.ui.dialogs.SchematicsDialog.*;
 import mindustry.world.*;
 import mindustry.world.blocks.*;
+import mindustry.world.blocks.defense.OverdriveProjector;
 import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.distribution.BufferedItemBridge.*;
 import mindustry.world.blocks.distribution.ItemBridge.*;
@@ -58,7 +60,7 @@ public class MI2UFuncs{
             hiddenUnit.clear();
         });
         Events.run(Trigger.draw, () -> {
-            players.each((u, v) -> {if(!u.isPlayer()||!u.isValid()) players.remove(u);});
+            players.each((u, v) -> {if(u == null||!u.isPlayer()||!u.isValid()) players.remove(u);});
             drawBase();
         });
 
@@ -74,6 +76,7 @@ public class MI2UFuncs{
             hiddenUnit.select(u -> u.isValid()).each(u -> Groups.draw.add(u));
             hiddenUnit.clear();
         }
+
         Groups.draw.each(d -> {
             if(d instanceof Decal && MI2USettings.getBool("disableWreck", false)) d.remove();
             if(d instanceof Unit u){
@@ -87,7 +90,35 @@ public class MI2UFuncs{
             if(d instanceof Bullet b && MI2USettings.getBool("disableBullet", false)) Groups.draw.remove(b);
         });
 
-        if(enDistributionReveal) drawBlackboxBuildings();
+        if(Core.settings.getBool("animatedshields") && MI2USettings.getBool("enOverdriveZone", false) && MI2UShaders.odzone != null){
+            Draw.drawRange(91.1f, 1f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
+                renderer.effectBuffer.end();
+                renderer.effectBuffer.blit(MI2UShaders.odzone);
+            });
+        }
+
+        if(enDistributionReveal){
+            Draw.reset();
+            Lines.stroke(0.5f);
+            Lines.rect(new Rect().setSize(240f).setCenter(Core.input.mouseWorld()));
+        }
+
+        Groups.build.each(build -> {
+            if(enDistributionReveal) drawBlackboxBuilding(build);
+            if(MI2USettings.getBool("enOverdriveZone", false) && build instanceof OverdriveProjector.OverdriveBuild odb){
+                OverdriveProjector block = (OverdriveProjector)odb.block();
+                float phaseHeat = Reflect.get(odb, "phaseHeat");
+                Draw.color(block.baseColor, block.phaseColor, phaseHeat);
+                Draw.z(91.1f);
+                Draw.alpha(Core.settings.getBool("animatedshields")?0.6f:0.2f);
+                Fill.circle(odb.x, odb.y, block.range + phaseHeat * block.phaseRangeBoost);
+
+                Lines.stroke(2f);
+                Draw.alpha(1f);
+                Lines.circle(odb.x, odb.y, block.range + phaseHeat * block.phaseRangeBoost);
+            }
+        });
+
     }
 
     public static void drawUnit(Unit unit){
@@ -326,23 +357,17 @@ public class MI2UFuncs{
     }
     */
 
-    public static void drawBlackboxBuildings(){
-        Draw.reset();
-        Lines.stroke(0.5f);
-        Lines.rect(new Rect().setSize(240f).setCenter(Core.input.mouseWorld()));
+    public static void drawBlackboxBuilding(Building b){
+        Core.camera.bounds(MI2UTmp.r1);
+        if(!MI2UTmp.r1.contains(b.tile().worldx(), b.tile().worldy())) return;
+        MI2UTmp.r1.setSize(240f).setCenter(Core.input.mouseWorld());
+        if(!MI2UTmp.r1.contains(b.tile().worldx(), b.tile().worldy())) return;
 
-        Groups.build.each(b -> {
-            Core.camera.bounds(MI2UTmp.r1);
-            if(!MI2UTmp.r1.contains(b.tile().worldx(), b.tile().worldy())) return;
-            MI2UTmp.r1.setSize(240f).setCenter(Core.input.mouseWorld());
-            if(!MI2UTmp.r1.contains(b.tile().worldx(), b.tile().worldy())) return;
-
-            if(b instanceof JunctionBuild jb) drawJunciton(jb);
-            if(b instanceof ItemBridgeBuild ib) drawItemBridge(ib);
-            if(b instanceof BufferedItemBridgeBuild bb) drawBufferedItemBridge(bb);
-            if(b instanceof UnloaderBuild ub) drawUnloader(ub);
-            if(b instanceof RouterBuild rb) drawRouter(rb);
-        });
+        if(b instanceof JunctionBuild jb) drawJunciton(jb);
+        if(b instanceof ItemBridgeBuild ib) drawItemBridge(ib);
+        if(b instanceof BufferedItemBridgeBuild bb) drawBufferedItemBridge(bb);
+        if(b instanceof UnloaderBuild ub) drawUnloader(ub);
+        if(b instanceof RouterBuild rb) drawRouter(rb);
     }
     public static void drawJunciton(JunctionBuild jb){
         try{

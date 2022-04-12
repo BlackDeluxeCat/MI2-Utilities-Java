@@ -83,6 +83,7 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckSettingEntry("showMapInfo", "@settings.main.mapInfo", b -> mapinfo.addTo(b?Core.scene.root:null)));
         settings.add(new CheckSettingEntry("showLogicHelper", "@settings.main.logicHelper", b -> logicHelper.addTo(b?Vars.ui.logic:null)));
         settings.add(new CheckSettingEntry("enPlayerCursor", "@settings.main.playerCursor"));
+        settings.add(new CheckSettingEntry("enOverdriveZone", "@settings.main.overdriveZone"));
         settings.add(new CheckSettingEntry("disableWreck", "@settings.main.disableWreck"));
         settings.add(new CheckSettingEntry("disableUnit", "@settings.main.disableUnit"));
         settings.add(new CheckSettingEntry("disableBullet", "@settings.main.disableBullet"));
