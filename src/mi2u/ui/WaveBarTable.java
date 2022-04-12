@@ -5,10 +5,14 @@ import arc.graphics.Color;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import mi2u.MI2UTmp;
+import mi2u.input.InputOverwrite;
 import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
+
+import java.util.Set;
 
 import static mindustry.Vars.*;
 
@@ -16,6 +20,7 @@ public class WaveBarTable extends Table{
     public int curWave = 1;
     public Seq<WaveData> waves = new Seq<>();
     public Seq<UnitData> allunits = new Seq<>();
+    ObjectSet<Unit> savedunits = new ObjectSet<>();
     public Interval timer = new Interval(2);
     protected Seq<MI2Bar> hpBars = new Seq<>();
     protected int[] prewave = {1,2,3,4,5};
@@ -36,10 +41,13 @@ public class WaveBarTable extends Table{
                 clearData();
                 return;
             }
-            //if(timer.get(1, 60 * 60f)) clearData();
-            allunits.remove(unit -> unit.unit == null || !unit.unit.isValid());
+            allunits.remove(unit -> {
+                boolean remove = unit.unit == null || !unit.unit.isValid();
+                if(remove) savedunits.remove(unit.unit);
+                return remove;
+            });
             state.teams.get(state.rules.waveTeam).units.each(u -> {
-                if(allunits.contains(data -> data.unit == u)) return;
+                if(!savedunits.add(u)) return;
                 allunits.add(new UnitData(u, -1));
             });
             updateData();
@@ -77,11 +85,14 @@ public class WaveBarTable extends Table{
     public void clearData(){
         waves.clear();
         allunits.clear();
+        savedunits.clear();
         curWave = state.wave;
     }
 
     public void updateData(){
-        waves.each(WaveData::removeDead);
+        waves.each(data -> {
+            data.removeDead();
+        });
         waves.removeAll(waved -> waved.units.isEmpty());
     }
 
@@ -102,8 +113,8 @@ public class WaveBarTable extends Table{
             }
         }
 
-        public void removeDead(){
-            units.removeAll(unit -> unit.unit == null || !unit.unit.isValid() || unit.unit.dead() || unit.unit.health <= 0);
+        public Seq<UnitData> removeDead(){
+            return units.removeAll(unit -> unit.unit == null || !unit.unit.isValid() || unit.unit.dead() || unit.unit.health <= 0);
         }
     }
 

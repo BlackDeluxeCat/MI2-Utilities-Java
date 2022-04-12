@@ -5,6 +5,7 @@ import arc.math.geom.Geometry;
 import arc.math.geom.Position;
 import arc.math.geom.Vec2;
 import arc.struct.Seq;
+import arc.util.Log;
 import mi2u.MI2UTmp;
 import mi2u.input.DesktopInputExt;
 import mi2u.input.InputOverwrite;
@@ -146,6 +147,8 @@ public class FullAI extends AIController{
         }
 
         public void updateList(){
+            list.clear();
+            list.add((Item)content.getByName(ContentType.item, "copper"), (Item)content.getByName(ContentType.item, "lead"));
         }
     }
 
@@ -155,7 +158,8 @@ public class FullAI extends AIController{
         }
         @Override
         public void updateList(){
-            list = content.items();
+            list.clear();
+            list.addAll(content.items());
         }
     }
 

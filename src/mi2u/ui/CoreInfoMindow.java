@@ -175,7 +175,7 @@ public class CoreInfoMindow extends Mindow2{
             ItemSeq req = new ItemSeq();
             player.unit().plans().each(plan -> {
                 for(ItemStack stack : plan.block.requirements){
-                    req.add(stack.item, Mathf.floor(stack.amount * (plan.breaking ? state.rules.deconstructRefundMultiplier:-1*state.rules.buildCostMultiplier)));
+                    req.add(stack.item, Mathf.floor(stack.amount * (plan.breaking ? state.rules.deconstructRefundMultiplier*state.rules.buildCostMultiplier:-1*state.rules.buildCostMultiplier)));
                 }
             });
             for(Item item : content.items()){
