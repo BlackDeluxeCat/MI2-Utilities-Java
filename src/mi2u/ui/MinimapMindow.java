@@ -204,8 +204,8 @@ public class MinimapMindow extends Mindow2{
 
             //draw a linerect of view area
             Lines.stroke(1f, new Color(1f, 1f, 1f, 0.5f));
-            float cx = withLabels ? (Core.camera.position.x - rect.x) / rect.width * w : Core.camera.position.x / (world.width() * tilesize) * w;
-            float cy = withLabels ? (Core.camera.position.y - rect.y) / rect.width * h : Core.camera.position.y / (world.height() * tilesize) * h;
+            float cx = (Core.camera.position.x - rect.x) / rect.width * w;
+            float cy = (Core.camera.position.y - rect.y) / rect.width * h;
             Lines.rect(x + cx - Core.graphics.getWidth() / rect.width * w / renderer.getScale() / 2f,
                     y + cy - Core.graphics.getHeight() / rect.width * h / renderer.getScale() / 2f,
                     Core.graphics.getWidth() / rect.width * w / renderer.getScale() ,
