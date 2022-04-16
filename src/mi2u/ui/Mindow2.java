@@ -204,8 +204,6 @@ public class Mindow2 extends Table{
                 edgeSnap(edgesnap);
                 setPosition(curx, cury);
             }else{
-                curx = Mathf.clamp(curx, 0, (hasParent() ? parent.getWidth() : Core.graphics.getWidth()) - getWidth());
-                cury = Mathf.clamp(cury, 0, (hasParent() ? parent.getHeight() : Core.graphics.getHeight()) -getRealHeight());
                 setPosition(curx, cury);
                 keepInStage();
             }
@@ -219,7 +217,7 @@ public class Mindow2 extends Table{
         switch(s){
             case 0://lefttop
                 curx = 0;
-                cury = parent.getHeight() -getRealHeight();
+                cury = parent.getHeight() - getRealHeight();
                 break;
             case 1://top
                 curx = (parent.getWidth() - getWidth())/2f;
@@ -299,23 +297,21 @@ public class Mindow2 extends Table{
                         t.add(st.getF()).width(Math.min(600, Core.graphics.getWidth())).left();
                         t.row();
                     });
-                    t.table(tt -> {
-                        tt.button("@mindow2.settings.reloadUI", textb, () -> {
-                            loadUISettings();
-                        }).width(100).get().getLabel().setColor(1, 1, 0, 1);
-    
-                        tt.button("@mindow2.settings.cacheUI", textb, () -> {
-                            saveUISettings();
-                        }).width(100).get().getLabel().setColor(0, 0, 1, 1);
-    
-                        tt.button("@mindow2.settings.writeToFile", textb, () -> {
-                            MI2USettings.save();
-                        }).width(100);
-                    }).self(c -> {
-                        c.width(Math.min(530, Core.graphics.getWidth()));
-                    });
-
                 }).grow();
+
+                this.cont.row();
+
+                this.cont.table(tt -> {
+                    tt.button("@mindow2.settings.reloadUI", textb, () -> {
+                        loadUISettings();
+                    }).width(100).get().getLabel().setColor(1, 1, 0, 1);
+
+                    tt.button("@mindow2.settings.cacheUI", textb, () -> {
+                        saveUISettings();
+                    }).width(100).get().getLabel().setColor(0, 0, 1, 1);
+                }).self(c -> {
+                    c.width(Math.min(530, Core.graphics.getWidth()));
+                });
                 show();
             }
         };
@@ -347,7 +343,7 @@ public class Mindow2 extends Table{
      * rebuild() called once finished loading
      */
     public boolean loadUISettingsRaw(){
-        //it is a not-named mindow2, no settings can be loaded.
+        //it is a no-named mindow2, no settings can be loaded.
         if(mindowName == null || mindowName.equals("")) return false;
         minimized = MI2USettings.getBool(mindowName + ".minimized");
         topmost = MI2USettings.getBool(mindowName + ".topmost");

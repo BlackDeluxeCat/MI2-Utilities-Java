@@ -5,23 +5,25 @@ import arc.files.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.Vars;
+import mindustry.game.EventType.*;
 
 public class MI2USettings {
     private static Seq<MI2USetting> map = new Seq<MI2USetting>();
     private static Fi root, dir;
     private static boolean modified = false;
+    private static Interval timer = new Interval();
 
     public static void init(){
         Core.settings.setAppName(Vars.appName);
         root = Vars.dataDirectory.child("mods").child("MI2U_Settings");
         dir = root.child("MI2USettings.mi2u");
         load();
-        Timer.schedule(() -> {
-            if(modified && !Vars.state.isGame()){
+        Events.run(Trigger.update, () -> {
+            if(timer.get(600f) && modified && !Vars.state.isGame()){
                 save();
                 modified = false;
             }
-        }, 600f);
+        });
     }
     
     public static boolean hasField(String name){
@@ -109,7 +111,7 @@ public class MI2USettings {
                 value = reads.str();
                 if(value.equals("end")) break;
                 map.add(new MI2USetting(name, value));
-                Log.info("MI2U loading setting: " + name + "-" + value);
+                //Log.info("MI2U loading setting: " + name + "-" + value);
             }while(index++ < 1000);
             reads.close();
         }catch(Throwable e){
@@ -121,6 +123,7 @@ public class MI2USettings {
     }
 
     public static void save(){
+        Log.infoTag("MI2U Settings", "Saved");
         try{
             Fi predir = root.child("MI2USettings.mi2u");
             if(predir.exists()) {
