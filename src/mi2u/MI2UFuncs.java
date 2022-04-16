@@ -97,13 +97,10 @@ public class MI2UFuncs{
             });
         }
 
-        if(enDistributionReveal){
-            Draw.reset();
-            Lines.stroke(0.5f);
-            Lines.rect(new Rect().setSize(240f).setCenter(Core.input.mouseWorld()));
-        }
-
         Groups.build.each(build -> {
+            Core.camera.bounds(MI2UTmp.r1);
+            if(!MI2UTmp.r1.contains(build.tile().worldx(), build.tile().worldy())) return;
+
             if(enDistributionReveal) drawBlackboxBuilding(build);
             if(MI2USettings.getBool("enOverdriveZone", false) && build instanceof OverdriveProjector.OverdriveBuild odb){
                 OverdriveProjector block = (OverdriveProjector)odb.block();
@@ -119,6 +116,7 @@ public class MI2UFuncs{
             }
         });
 
+        Draw.reset();
     }
 
     public static void drawUnit(Unit unit){
@@ -319,56 +317,14 @@ public class MI2UFuncs{
         }
     }
 
-    /* wouldnt work well if not have subclass of DesktopInput 
-    public static void autoTarget(){
-        if(!state.isGame() || player.dead()) return;
-        if(mobile && control.input instanceof MobileInput mi && mi.manualShooting) return;
-        //autofire targeting
-        Unit unit = player.unit();
-        boolean boosted = (unit instanceof Mechc && unit.isFlying());
-        float range = unit.hasWeapons() ? unit.range() : 0f;
-        boolean manual = Core.input.keyDown(Binding.select);
-        Teamc target = null;
-        if(!(player.unit() instanceof BlockUnitUnit u && u.tile() instanceof ControlBlock c && !c.shouldAutoTarget())){
-            target = Units.closestTarget(unit.team, unit.x, unit.y, range, u -> u.checkTarget(unit.type.targetAir, unit.type.targetGround), u -> unit.type.targetGround);
-
-            if(unit.type.canHeal && target == null){
-                target = Geometry.findClosest(unit.x, unit.y, indexer.getDamaged(Team.sharded));
-                if(target != null && !unit.within(target, range)){
-                    target = null;
-                }
-            }
-        }
-        if(target != null && !manual){
-            Vec2 intercept = Predict.intercept(unit, target, unit.hasWeapons() ? unit.type.weapons.first().bullet.speed : 0f);
-            if(unit.type.omniMovement && player.shooting && unit.type.hasWeapons() && unit.type.faceTarget && !boosted && unit.type.rotateShooting){
-                unit.lookAt(Angles.angle(unit.x, unit.y, intercept.x, intercept.y));
-            }else{
-                unit.lookAt(Angles.mouseAngle(unit.x, unit.y));
-            }
-            unit.aim(intercept.x, intercept.y);
-            unit.controlWeapons(!player.boosting && !boosted);
-            player.mouseX = unit.aimX();
-            player.mouseY = unit.aimY();
-            player.shooting = true;
-        }else{
-            if(!manual) player.shooting = false;
-        }
-    }
-    */
-
     public static void drawBlackboxBuilding(Building b){
-        Core.camera.bounds(MI2UTmp.r1);
-        if(!MI2UTmp.r1.contains(b.tile().worldx(), b.tile().worldy())) return;
-        MI2UTmp.r1.setSize(240f).setCenter(Core.input.mouseWorld());
-        if(!MI2UTmp.r1.contains(b.tile().worldx(), b.tile().worldy())) return;
-
         if(b instanceof JunctionBuild jb) drawJunciton(jb);
         if(b instanceof ItemBridgeBuild ib) drawItemBridge(ib);
         if(b instanceof BufferedItemBridgeBuild bb) drawBufferedItemBridge(bb);
         if(b instanceof UnloaderBuild ub) drawUnloader(ub);
         if(b instanceof RouterBuild rb) drawRouter(rb);
     }
+
     public static void drawJunciton(JunctionBuild jb){
         try{
             int cap = ((Junction)jb.block).capacity;
