@@ -35,10 +35,7 @@ public class MI2Utilities extends Mod{
 
                 MI2UFuncs.schelogic();
                 MI2UFuncs.initBase();
-                if(MI2USettings.getBool("modifyBlockBars")){
-                    ModifyFuncs.modifyVanillaBlockBars();
-                    Events.on(ContentInitEvent.class, e2 -> ModifyFuncs.modifyVanillaBlockBars());
-                }
+                ModifyFuncs.modifyVanilla();
             });
 
             //popup too early will cause font rendering bug.
@@ -47,6 +44,7 @@ public class MI2Utilities extends Mod{
             });
 
         });
+
         Events.on(FileTreeInitEvent.class, e -> Core.app.post(MI2UShaders::load));
     }
 

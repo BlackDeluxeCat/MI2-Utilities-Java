@@ -171,7 +171,7 @@ public class CoreInfoMindow extends Mindow2{
         if(buildPlanTable == null) buildPlanTable = new PopupTable();
         buildPlanTable.setBackground(Styles.black6);
         buildPlanTable.update(() -> {
-            if(player.unit() == null || player.unit().plans().size > 500) return;   //Too many plans cause lag
+            if(player.unit() == null || player.team().core() == null || player.unit().plans().size > 1000) return;   //Too many plans cause lag
             ItemSeq req = new ItemSeq();
             player.unit().plans().each(plan -> {
                 for(ItemStack stack : plan.block.requirements){

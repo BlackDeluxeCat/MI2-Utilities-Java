@@ -1,13 +1,21 @@
-package mi2u.ui;
+package mi2u;
 
 import arc.Core;
+import arc.Events;
 import arc.func.Func;
+import arc.func.Prov;
 import arc.math.Mathf;
+import arc.util.Log;
 import arc.util.Strings;
+import mi2u.io.MI2USettings;
+import mi2u.map.filters.*;
 import mindustry.content.Liquids;
 import mindustry.core.UI;
+import mindustry.game.EventType;
 import mindustry.gen.Building;
 import mindustry.graphics.*;
+import mindustry.maps.Maps;
+import mindustry.maps.filters.GenerateFilter;
 import mindustry.type.Liquid;
 import mindustry.ui.Bar;
 import mindustry.world.Block;
@@ -16,11 +24,36 @@ import mindustry.world.consumers.ConsumeLiquid;
 import mindustry.world.consumers.ConsumePower;
 import mindustry.world.consumers.ConsumeType;
 
+import java.util.Arrays;
+
 import static mindustry.Vars.*;
 
+/** modify vanilla game*/
 public class ModifyFuncs{
 
+    public static void modifyVanilla(){
+        modifyVanillaBlockBars();
+        Events.on(EventType.ContentInitEvent.class, e2 -> modifyVanillaBlockBars());
+        addFilters();
+    }
+
+    public static void addFilters(){
+        if(!MI2USettings.getBool("modifyFilters")) return;
+        addFilter(AdvancedNoiseFilter::new);
+        addFilter(AdvancedOreFilter::new);
+        addFilter(GridFilter::new);
+        addFilter(CopyPasteFilter::new);
+    }
+
+    public static void addFilter(Prov<GenerateFilter> filter){
+        var newArr = Arrays.copyOf(Maps.allFilterTypes, Maps.allFilterTypes.length + 1);
+        newArr[Maps.allFilterTypes.length] = filter;
+        Maps.allFilterTypes = newArr;
+        Log.info("Adding New Filters... Filters Size: " + newArr.length);
+    }
+
     public static void modifyVanillaBlockBars(){
+        if(!MI2USettings.getBool("modifyBlockBars")) return;
         content.blocks().each(block -> {
             addBarToBlock(block, "health", e -> new Bar(() -> Core.bundle.format("stat.health") + ":" + Strings.autoFixed(e.health(), 3) + "(" + Strings.autoFixed(e.health * 100 / e.maxHealth, 2) + "%)", () -> Pal.health, e::healthf));
             if(block.hasLiquids){

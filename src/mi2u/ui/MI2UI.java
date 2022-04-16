@@ -92,6 +92,7 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckSettingEntry("enUnitLogicTimer", "@settings.main.unitLogicTimer"));
         settings.add(new CheckSettingEntry("enUnitPath", "@settings.main.unitPath"));
         settings.add(new CheckSettingEntry("modifyBlockBars", "@settings.main.modifyBlockBars"));
+        settings.add(new CheckSettingEntry("modifyFilters", "@settings.main.modifyMapFilters"));
         settings.add(new CheckSettingEntry("inputReplace", "@settings.main.inputReplace"));
         settings.add(new CheckSettingEntry("forceTapTile", "@settings.main.forceTapTile"));
     }
