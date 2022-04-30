@@ -1,27 +1,20 @@
 package mi2u.map.filters;
 
-import arc.util.Reflect;
-import arc.util.noise.Simplex;
+import mi2u.MI2UTmp;
 import mindustry.content.Blocks;
 import mindustry.gen.Iconc;
 import mindustry.maps.filters.FilterOption;
-import mindustry.maps.filters.GenerateFilter;
 import mindustry.world.Block;
 
 import static mi2u.map.filters.FilterOptions.*;
 
 public class AdvancedNoiseFilter extends MI2UGenerateFilter{
-    public float sclX = 40, sclY = 40, threshold = 0.5f, octaves = 3f, falloff = 0.5f, offX = 0f, offY = 0f, rotate = 0f;
+    public float threshold = 0.5f, octaves = 3f, falloff = 0.5f;
     public Block floor = Blocks.air, block = Blocks.air, target = Blocks.air, target2 = Blocks.air;
 
     @Override
     public FilterOption[] options(){
         return new FilterOption[]{
-                new SliderOption("scaleX", () -> sclX, f -> sclX = f, 1f, 500f),
-                new SliderOption("scaleY", () -> sclY, f -> sclY = f, 1f, 500f),
-                new SliderOption("offsetX", () -> offX, f -> offX = f, -200f, 200f),
-                new SliderOption("offsetY", () -> offY, f -> offY = f, -200f, 200f),
-                new SliderOption("rotation", () -> rotate, f -> rotate = f, 0f, 360f),
                 new SliderOption("threshold", () -> threshold, f -> threshold = f, 0f, 1f),
                 new SliderOption("octaves", () -> octaves, f -> octaves = f, 1f, 10f),
                 new SliderOption("falloff", () -> falloff, f -> falloff = f, 0f, 1f),
@@ -33,8 +26,17 @@ public class AdvancedNoiseFilter extends MI2UGenerateFilter{
     }
 
     @Override
-    public void apply(GenerateFilter.GenerateInput in){
-        float noise = noise(in, sclX, sclY, offX, offY, rotate, 1f, octaves, falloff);
+    public char icon(){
+        return Iconc.blockLogicDisplay;
+    }
+
+    @Override
+    public void apply(GenerateInput in){
+        preConsume(in);
+        if(regionConsumer == this && regionseq.count(r -> r.contains(in.x, in.y)) <= 0) return;
+        var v = MI2UTmp.v3.set(in.x, in.y);
+        if(transConsumer == this) transeq.each(c -> c.get(v));
+        float noise = noise(v.x, v.y, 1f, octaves, falloff);
 
         if(noise > threshold){
             if(floor != Blocks.air && in.floor == target) in.floor = floor;

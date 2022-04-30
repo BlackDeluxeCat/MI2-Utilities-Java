@@ -46,6 +46,8 @@ public class CopyPasteFilter extends MI2UGenerateFilter{
         //copy to buffers before first tile is processed
         if(in.x == 0 && in.y == 0) copyToBuffers(in);
         if(buffers == null) return;
+        preConsume(in);
+        if(regionConsumer == this && regionseq.count(r -> r.contains(in.x, in.y)) <= 0) return;
         int bufx = (int)(in.x - toX);
         int bufy = (int)(in.y - toY);
         if(bufx < 0 || bufx >= buffers.length || bufy < 0 || bufy >= buffers[0].length) return;

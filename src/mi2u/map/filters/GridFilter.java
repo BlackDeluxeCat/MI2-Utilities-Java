@@ -12,7 +12,7 @@ import static mindustry.maps.filters.FilterOption.*;
 import static mi2u.map.filters.FilterOptions.*;
 
 public class GridFilter extends MI2UGenerateFilter{
-    public float width = 40, height = 40, stroke = 3f, offX = 0f, offY = 0f, rotate = 0f;
+    public float width = 40, height = 40, stroke = 3f, offX = 0f, offY = 0f;
     public Block floor = Blocks.air, block = Blocks.air, target = Blocks.air, target2 = Blocks.air;
 
     @Override
@@ -22,7 +22,6 @@ public class GridFilter extends MI2UGenerateFilter{
                 new SliderOption("height", () -> height, f -> height = f, 1f, 500f),
                 new SliderOption("offsetX", () -> offX, f -> offX = f, -200f, 200f),
                 new SliderOption("offsetY", () -> offY, f -> offY = f, -200f, 200f),
-                new SliderOption("rotation", () -> rotate, f -> rotate = f, 0f, 360f),
                 new SliderOption("stroke", () -> stroke, f -> stroke = f, 1f, 100f),
                 new BlockOption("targetFloor", () -> target, b -> target = b, floorsOptional),
                 new BlockOption("floor", () -> floor, b -> floor = b, floorsOptional),
@@ -33,9 +32,11 @@ public class GridFilter extends MI2UGenerateFilter{
 
     @Override
     public void apply(GenerateInput in){
-        Vec2 vec = MI2UTmp.v1;
-        vec.set(in.x, in.y).rotate(rotate);
-        if(Mathf.mod(vec.x + offX, width+stroke) < stroke || Mathf.mod(vec.y + offY, height+stroke) < stroke){
+        preConsume(in);
+        if(regionConsumer == this && regionseq.count(r -> r.contains(in.x, in.y)) <= 0) return;
+        var v = MI2UTmp.v3.set(in.x, in.y);
+        if(transConsumer == this) transeq.each(c -> c.get(v));
+        if(Mathf.mod(v.x + offX, width+stroke) < stroke || Mathf.mod(v.y + offY, height+stroke) < stroke){
             if(floor != Blocks.air && (target == Blocks.air || in.floor == target)) in.floor = floor;
             if(block != Blocks.air && in.block == target2) in.block = block;
         }
