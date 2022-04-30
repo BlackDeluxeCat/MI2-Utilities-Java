@@ -19,7 +19,7 @@ public class MI2USettings {
         dir = root.child("MI2USettings.mi2u");
         load();
         Events.run(Trigger.update, () -> {
-            if(timer.get(600f) && modified && !Vars.state.isGame()){
+            if(modified && timer.get(60f) && !Vars.state.isGame()){
                 save();
                 modified = false;
             }
