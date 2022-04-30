@@ -33,7 +33,7 @@ public class MI2Utilities extends Mod{
                 if(MI2USettings.getBool("showMapInfo")) mapinfo.addTo(mapinfo.hasParent() ? mapinfo.parent : Core.scene.root);
                 if(MI2USettings.getBool("showLogicHelper")) logicHelper.addTo(logicHelper.hasParent() ? logicHelper.parent : ui.logic);
 
-                MI2UFuncs.schelogic();
+                ModifyFuncs.schelogic();
                 MI2UFuncs.initBase();
                 ModifyFuncs.modifyVanilla();
             });
