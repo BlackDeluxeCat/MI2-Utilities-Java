@@ -11,6 +11,7 @@ import arc.util.*;
 import mi2u.MI2UTmp;
 import mi2u.input.InputOverwrite;
 import mi2u.io.*;
+import mindustry.Vars;
 import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.game.Teams.*;
@@ -24,12 +25,13 @@ import static mi2u.MI2UVars.*;
 
 public class CoreInfoMindow extends Mindow2{
     protected Interval interval = new Interval();
+    protected ObjectSet<Item> usedItems = new ObjectSet<>();
     protected ObjectIntMap<Item> lastItemsAmt = new ObjectIntMap<>();
     protected ObjectIntMap<Item> lastLastItemsAmt = new ObjectIntMap<>();
     protected CoreBuild core;
     protected Team select, team;
     protected PowerGraphTable pg = new PowerGraphTable(330);
-    protected PopupTable teamSelect = new PopupTable(), buildPlanTable = new PopupTable();
+    protected PopupTable teamSelect = new PopupTable(), buildPlanTable = new PopupTable(), chartTable = new PopupTable();
     protected int[] unitIndex = new int[content.units().size];
     
     public CoreInfoMindow(){
@@ -62,6 +64,11 @@ public class CoreInfoMindow extends Mindow2{
             }
             core = team.core();
             pg.team = team;
+
+            if(state.isGame() && content.items().contains(item -> core != null && core.items.get(item) > 0 && usedItems.add(item))){
+                rebuild();
+            }
+
             if(state.isGame() && core != null && interval.get(60f)){
                 for(Item item : content.items()){
                     lastLastItemsAmt.put(item, lastItemsAmt.get(item));
@@ -69,10 +76,6 @@ public class CoreInfoMindow extends Mindow2{
                 }
             }
         });
-        if(!MI2USettings.getBool(mindowName + ".showCoreItems")){
-            cont.add().size(80f,20f);
-            cont.row();
-        }
         
         cont.table(ipt -> {
             ipt.table(utt -> {
@@ -88,25 +91,33 @@ public class CoreInfoMindow extends Mindow2{
             }).grow();
 
             ipt.row();
-
-            ipt.table(iut -> {
-                int i = 0;
-                if(MI2USettings.getBool(mindowName + ".showCoreItems")){
+            if(MI2USettings.getBool(mindowName + ".showCoreItems")){
+                ipt.pane(iut -> {
+                    int i = 0;
                     for(Item item : content.items()){
+                        if(i >= 4 && !usedItems.contains(item)) continue;
                         iut.stack(
-                            new Image(item.uiIcon),
-                            new Table(t -> t.label(() -> core == null ? "" : (lastItemsAmt.get(item) - lastLastItemsAmt.get(item) >= 0 ? "[green]+" : "[red]") + (lastItemsAmt.get(item) - lastLastItemsAmt.get(item))).get().setFontScale(0.65f)).right().bottom()
-                            ).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel));
-                        iut.label(() -> core == null ? "0" : 
-                            UI.formatAmount(core.items.get(item)))
-                        .padRight(3).minWidth(52f).left();
-            
-                        if(++i % 4 == 0){
+                                new Image(item.uiIcon),
+                                new Table(t -> t.label(() -> core == null ? "" : (lastItemsAmt.get(item) - lastLastItemsAmt.get(item) >= 0 ? "[green]+" : "[red]") + (lastItemsAmt.get(item) - lastLastItemsAmt.get(item))).get().setFontScale(0.65f)).right().bottom()
+                        ).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel));
+                        iut.label(() -> core == null ? "0" :
+                                UI.formatAmount(core.items.get(item)))
+                                .padRight(3).minWidth(52f).left();
+
+                        if (++i % 4 == 0) {
                             iut.row();
                         }
                     }
-                }
-            }).maxHeight(200f);
+                }).maxHeight(MI2USettings.getInt(mindowName + ".itemsMaxHeight", 150)).update(p -> {
+                    Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
+                    if (e != null && e.isDescendantOf(p)) {
+                        p.requestScroll();
+                    } else if (p.hasScroll()) {
+                        Core.scene.setScrollFocus(null);
+                    }
+                }).with(c -> c.setFadeScrollBars(true));
+            }
+
             if(MI2USettings.getBool(mindowName + ".showPowerGraphs")){
                 ipt.row();
                 ipt.add(pg).fillX();
@@ -157,14 +168,14 @@ public class CoreInfoMindow extends Mindow2{
                         inp.pan(true, MI2UTmp.v1.set(b.x, b.y));
                     }
                 });
-            }).maxHeight(200f).update(p -> {
+            }).maxHeight(MI2USettings.getInt(mindowName + ".unitsMaxHeight", 200)).update(p -> {
                 Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
                 if(e != null && e.isDescendantOf(p)){
                     p.requestScroll();
                 }else if(p.hasScroll()){
                     Core.scene.setScrollFocus(null);
                 }
-            });
+            }).with(c -> c.setFadeScrollBars(true));
         }
 
         //buildplan popup table
@@ -230,5 +241,7 @@ public class CoreInfoMindow extends Mindow2{
         settings.add(new CheckSettingEntry(mindowName + ".showCoreItems", "@settings.coreInfo.showCoreItems", b -> rebuild()));
         settings.add(new CheckSettingEntry(mindowName + ".showUnits", "@settings.coreInfo.showUnits", b -> rebuild()));
         settings.add(new CheckSettingEntry(mindowName + ".showPowerGraphs", "@settings.coreInfo.showPowerGraphs", b -> rebuild()));
+        settings.add(new FieldSettingEntry(SettingType.Int, mindowName + ".itemsMaxHeight", s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, TextField.TextFieldFilter.digitsOnly,"@settings.coreInfo.itemsMaxHeight", c -> rebuild()));
+        settings.add(new FieldSettingEntry(SettingType.Int, mindowName + ".unitsMaxHeight", s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, TextField.TextFieldFilter.digitsOnly,"@settings.coreInfo.unitsMaxHeight", c -> rebuild()));
     }
 }

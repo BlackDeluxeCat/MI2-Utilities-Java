@@ -327,13 +327,13 @@ public class Mindow2 extends Table{
         settings.add(new SettingEntry(mindowName + ".cury", true, true));
         var f = new FieldSettingEntry(SettingType.Int, mindowName + ".edgesnap", s -> {
             return Strings.canParseInt(s) && Strings.parseInt(s) <= 7 && Strings.parseInt(s) >= -1;
-        }, "@settings.mindow.edgesnap");
+        }, "@settings.mindow.edgesnap", null);
         f.isUILoad = true;
         f.isUISave = true;
         settings.add(f);
         f = new FieldSettingEntry(SettingType.Str, mindowName + ".abovesnapTarget", s -> {
             return mindow2s.contains(mi2 -> mi2.mindowName.equals(s)) || s.equals("null");
-        }, "@settings.mindow.abovesnapTarget");
+        }, "@settings.mindow.abovesnapTarget", null);
         f.isUILoad = true;
         settings.add(f);
         settings.add(new CheckSettingEntry(mindowName + ".autoHideTitle", "@settings.mindow.autoHideTitle"));
@@ -467,7 +467,7 @@ public class Mindow2 extends Table{
     public class FieldSettingEntry extends SettingEntry{
         Cons<String> changed;
         /** be careful that {@code Cons<String> changed} input a string */
-        public FieldSettingEntry(SettingType ty, String name, TextFieldValidator val , String help, Cons<String> changed){
+        public FieldSettingEntry(SettingType ty, String name, TextFieldValidator val, TextField.TextFieldFilter filter, String help, Cons<String> changed){
             super(name);
             this.changed = changed;
             cont.clear();
@@ -476,6 +476,7 @@ public class Mindow2 extends Table{
             type = ty;
             TextField tf = new TextField("", Styles.nodeField);
             tf.setValidator(val);
+            tf.setFilter(filter);
             tf.changed(() -> {
                 if(val == null || val.valid(tf.getText())){
                     switch(type){
@@ -507,9 +508,10 @@ public class Mindow2 extends Table{
             });
         }
 
-        public FieldSettingEntry(SettingType ty, String name, TextFieldValidator val , String help){
-            this(ty, name, val , help, null);
+        public FieldSettingEntry(SettingType ty, String name, TextFieldValidator val, String help, Cons<String> changed){
+            this(ty, name, val, null, help, changed);
         }
+
     }
 
     public static enum SettingType{
