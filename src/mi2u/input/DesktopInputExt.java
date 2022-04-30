@@ -43,12 +43,20 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
         Unit unit = player.unit();
         if(ctrlBoost) player.boosting = boost;
         if(ctrlShoot){
-            player.shooting = shoot && !(unit instanceof Mechc && unit.isFlying());
+            boolean boosted = unit instanceof Mechc && unit.isFlying();
+            player.shooting = shoot && !boosted;
             if(player.shooting){
-                unit.rotation(Angles.moveToward(unit.rotation(), Angles.angle(shootXY.x - unit.x, shootXY.y - unit.y), unit.type.rotateSpeed * unit.speedMultiplier() * Time.delta * 1.5f));
                 player.mouseX = shootXY.x;
                 player.mouseY = shootXY.y;
-                unit.aim(player.mouseX, player.mouseY);
+                Vec2 aimxy = MI2UTmp.v1.set(player.mouseX, player.mouseY);
+                unit.aim(unit.type.faceTarget ? aimxy : Tmp.v1.trns(unit.rotation, aimxy.dst(unit)).add(unit.x, unit.y));
+
+                float mouseAngle = Angles.mouseAngle(unit.x, unit.y);
+                boolean aimCursor = unit.type.omniMovement && player.shooting && unit.type.hasWeapons() && unit.type.faceTarget && !boosted && unit.type.rotateShooting;
+                if(aimCursor){
+                    unit.lookAt(mouseAngle - 180);  //cancel out vanilla rotation to mouse
+                    unit.lookAt(aimxy);
+                }
                 unit.controlWeapons(true, player.shooting);
             }
         }
