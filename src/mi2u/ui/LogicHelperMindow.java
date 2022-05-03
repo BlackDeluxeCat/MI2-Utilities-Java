@@ -69,7 +69,7 @@ public class LogicHelperMindow extends Mindow2{
         cont.clear();
         cont.table(tt -> {
             tt.defaults().growX().height(36f);
-            tt.button("" + Iconc.map, textbtoggle, () -> {
+            tt.button("" + Iconc.list, textbtoggle, () -> {
                 mode = Mode.vars;
                 rebuild();
             }).update(b -> b.setChecked(mode == Mode.vars)).with(funcSetTextb);
@@ -96,30 +96,29 @@ public class LogicHelperMindow extends Mindow2{
 
     public void setupCutPasteMode(Table cont){
         cont.table(t -> {
-            t.add("<");
+            t.add("@logicHelper.cutPaste.start");
             t.field("", Styles.nodeField, s -> cutStart = Mathf.clamp(Strings.parseInt(s), 0, 1000)).fillX().width(100f)
                     .update(tf -> tf.setText(String.valueOf(cutStart))).get().setFilter(TextField.TextFieldFilter.digitsOnly);
-            t.add(",");
+            t.add("@logicHelper.cutPaste.end");
             t.field("", Styles.nodeField, s -> cutEnd = Mathf.clamp(Strings.parseInt(s), 0, 1000)).fillX().width(100f)
                     .update(tf -> tf.setText(String.valueOf(cutEnd))).get().setFilter(TextField.TextFieldFilter.digitsOnly);
-            t.add(">");
         });
         cont.row();
 
         cont.table(t -> {
-            t.add("<,>=>}");
+            t.add("@logicHelper.cutPaste.to");
             t.field("", Styles.nodeField, s -> pasteStart = Mathf.clamp(Strings.parseInt(s),0, 1000)).fillX().width(100f)
                     .update(tf -> tf.setText(String.valueOf(pasteStart))).
                     with(tf -> {
                        tf.setFilter(TextField.TextFieldFilter.digitsOnly);
                     });
-            t.button("" + Iconc.copy, textbtoggle, () -> {
+            t.button("" + Iconc.copy + Core.bundle.get("logicHelper.cutPaste.copyMode"), textbtoggle, () -> {
                 copyCode = !copyCode;
-            }).update(b -> b.setChecked(copyCode)).with(funcSetTextb).size(36f);
+            }).update(b -> b.setChecked(copyCode)).with(funcSetTextb).height(36f);
         });
         cont.row();
 
-        cont.button("" + Iconc.play, textb, this::doCutPaste).with(funcSetTextb).height(36f).disabled(tb -> !(parent instanceof LogicDialog ld && cutStart < ld.canvas.statements.getChildren().size && cutEnd < ld.canvas.statements.getChildren().size && pasteStart <= ld.canvas.statements.getChildren().size && cutEnd >= cutStart)).growX();
+        cont.button("||| " + Iconc.play + " |||", textb, this::doCutPaste).with(funcSetTextb).height(36f).disabled(tb -> !(parent instanceof LogicDialog ld && cutStart < ld.canvas.statements.getChildren().size && cutEnd < ld.canvas.statements.getChildren().size && pasteStart <= ld.canvas.statements.getChildren().size && cutEnd >= cutStart)).growX();
     }
 
     public void doCutPaste(){
@@ -198,14 +197,14 @@ public class LogicHelperMindow extends Mindow2{
 
         cont.table(tt -> {
             tt.label(() -> "" + (results.isEmpty()?"NaN/0":(index+1)+"/"+results.size)).growX().get().setColor(Color.gray);
-            tt.button("" + Iconc.up, textb, () -> {
+            tt.button("" + Iconc.up + Core.bundle.get("logicHelper.search.prev"), textb, () -> {
                 index--;
                 locateElement(null);
-            }).with(funcSetTextb).size(36f);
-            tt.button("" + Iconc.down, textb, () -> {
+            }).with(funcSetTextb).height(36f);
+            tt.button("" + Iconc.down + Core.bundle.get("logicHelper.search.next"), textb, () -> {
                 index++;
                 locateElement(null);
-            }).with(funcSetTextb).size(36f);
+            }).with(funcSetTextb).height(36f);
         }).fillX();
         cont.row();
 
@@ -214,7 +213,7 @@ public class LogicHelperMindow extends Mindow2{
 
             tt.table(ttt -> {
                 ttt.defaults().fillX();
-                ttt.button("Replace", textb, () -> {
+                ttt.button("@logicHelper.search.replace", textb, () -> {
                     if(results.isEmpty()) doSearch();
                     locateElement(e -> {
                         if(e instanceof TextField tf){
@@ -229,7 +228,7 @@ public class LogicHelperMindow extends Mindow2{
                 }).with(funcSetTextb).height(36f);
                 ttt.row();
 
-                ttt.button("ReplaceAll", textb, () -> {
+                ttt.button("@logicHelper.search.replaceAll", textb, () -> {
                     if(results.isEmpty()) doSearch();
                     results.each(e -> {
                         if(e instanceof TextField tf){
