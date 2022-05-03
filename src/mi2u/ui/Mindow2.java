@@ -51,7 +51,7 @@ public class Mindow2 extends Table{
     @Nullable public Element aboveSnap; public int edgesnap = -1;
 
     public Mindow2(String title){
-        
+        init();
         Events.on(ResizeEvent.class, e -> {
             loadUISettings();
         });
@@ -64,6 +64,8 @@ public class Mindow2 extends Table{
         this(title);
         helpInfo = help;
     }
+
+    public void init(){}
 
     public void rebuild(){
         clear();
@@ -393,7 +395,7 @@ public class Mindow2 extends Table{
         return false;
     }
 
-    public static void init(){
+    public static void initMindowStyles(){
         var whiteui = (TextureRegionDrawable)Tex.whiteui;
         titleStyleNormal = new LabelStyle(Fonts.def, new Color(0.8f,0.9f,1f,1f));
         //titleStyleNormal.background = whiteui.tint(1f, 0.1f, 0.2f, 0.8f);
