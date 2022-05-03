@@ -20,12 +20,6 @@ import static mi2u.MI2UVars.*;
 
 public class MapInfoMindow extends Mindow2{
 
-    public static Cons<TextButton> funcSetTextb = c -> {
-        c.getLabel().setAlignment(Align.center);
-        c.getLabel().setWrap(false);
-        c.getLabelCell().pad(2);
-    };
-
     public boolean showMapAtts = true, showWaves = true, showWaveBars = true;
     private boolean syncCurWave = true;
     public int curWave = 0; //state.wave is display number, spawner number should sub 1
