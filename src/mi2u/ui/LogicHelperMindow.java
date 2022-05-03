@@ -18,6 +18,7 @@ import mindustry.gen.Iconc;
 import mindustry.logic.LCanvas;
 import mindustry.logic.LExecutor;
 import mindustry.logic.LExecutor.Var;
+import mindustry.logic.LStatements;
 import mindustry.logic.LogicDialog;
 import mindustry.ui.Styles;
 
@@ -116,39 +117,59 @@ public class LogicHelperMindow extends Mindow2{
                 copyCode = !copyCode;
             }).update(b -> b.setChecked(copyCode)).with(funcSetTextb).size(36f);
         });
+        cont.row();
 
         cont.button("" + Iconc.play, textb, this::doCutPaste).with(funcSetTextb).height(36f).disabled(tb -> !(parent instanceof LogicDialog ld && cutStart < ld.canvas.statements.getChildren().size && cutEnd < ld.canvas.statements.getChildren().size && pasteStart <= ld.canvas.statements.getChildren().size && cutEnd >= cutStart)).growX();
     }
 
     public void doCutPaste(){
+        var stats = parent instanceof LogicDialog ld ? ld.canvas.statements : null;
+        if(stats == null) return;
         int times = cutEnd - cutStart + 1;
-        var lca = parent instanceof LogicDialog ld ? ld.canvas : null;
-        if(lca == null) return;
+        int ind = 0;
+        ObjectMap<LCanvas.StatementElem, Integer> toSetup = new ObjectMap<>();
         do{
-            Element dragging;
-            float transY = 0f, space = (float)Reflect.get(lca.statements, "space");
+            LCanvas.StatementElem dragging;
             if(cutStart > pasteStart){
-                for(int i = pasteStart; i < cutEnd; i++){
-                    transY += lca.statements.getChildren().get(i).getPrefHeight();
-                    transY += space;
-                }
-                transY += 2f;
-                dragging = lca.statements.getChildren().get(cutEnd);
-                Reflect.set(lca, "dragging", dragging);
+                if(copyCode){
+                    dragging = (LCanvas.StatementElem)stats.getChildren().get(cutEnd);
+                    dragging.copy();
+                    dragging = (LCanvas.StatementElem)stats.getChildren().get(cutEnd + 1);
+                    if(dragging.st instanceof LStatements.JumpStatement jp){
+                        toSetup.put(dragging, jp.destIndex - dragging.index + (jp.destIndex < dragging.index? 1:0));
+                    }
+                    dragging.remove();
+                    stats.addChildAt(pasteStart, dragging);
+                }else{
+                    dragging = (LCanvas.StatementElem)stats.getChildren().get(cutEnd);
+                    dragging.remove();
+                    stats.addChildAt(pasteStart, dragging);
+                };
             }else{
-                for(int i = cutStart + 1; i < pasteStart; i++){
-                    transY -= lca.statements.getChildren().get(i).getPrefHeight();
-                    transY -= space;
-                }
-                dragging = lca.statements.getChildren().get(cutStart);
-                Reflect.set(lca, "dragging", dragging);
+                if(copyCode){
+                    dragging = (LCanvas.StatementElem)stats.getChildren().get(cutStart + ind);
+                    dragging.copy();
+                    dragging = (LCanvas.StatementElem)stats.getChildren().get(cutStart + ind + 1);
+                    if(dragging.st instanceof LStatements.JumpStatement jp){
+                        toSetup.put(dragging, jp.destIndex - dragging.index + (jp.destIndex < dragging.index? 1:0));
+                    }
+                    dragging.remove();
+                    stats.addChildAt(pasteStart + ind, dragging);
+                }else{
+                    dragging = (LCanvas.StatementElem)stats.getChildren().get(cutStart);
+                    dragging.remove();
+                    stats.addChildAt(pasteStart - 1, dragging);
+                };
             }
-            dragging.setTranslation(0f, transY);
-            lca.statements.layout();
+            stats.layout();
             blinkElement(dragging);
-            //Log.info(Reflect.get(lca.statements, "insertPosition").toString());
-            Reflect.invoke(lca.statements, "finishLayout");
-        }while(--times > 0);
+        }while(++ind < times);
+        toSetup.each((se, delta) -> {
+            if(se.st instanceof LStatements.JumpStatement jp){
+                jp.destIndex = se.index + delta;
+                jp.setupUI();
+            }
+        });
     }
 
     public void setupSearchMode(Table cont){
