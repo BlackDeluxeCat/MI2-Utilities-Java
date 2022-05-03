@@ -11,6 +11,7 @@ import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import mi2u.MI2UTmp;
 import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.gen.*;
@@ -76,7 +77,7 @@ public class PowerGraphTable extends Table{
                 MI2Bar newBar = new MI2Bar();
                 newBar.userObject = p;
                 newBar.set(powertext, () -> p.getLastPowerStored() / p.getLastCapacity(), Pal.accent);
-                newBar.blink(Color.white).outline(new Color(0.3f, 0.3f, 0.6f, 0.3f), 2f);
+                newBar.blink(Color.white).outline(MI2UTmp.c2.set(0.3f, 0.3f, 0.6f, 0.3f), 2f);
 
                 newBar.clicked(() -> {
                     if(control.input instanceof DesktopInput inp){
