@@ -1,7 +1,12 @@
 package mi2u.ui;
 
 import arc.*;
+import arc.func.Floatc;
+import arc.func.Floatc2;
 import arc.graphics.Color;
+import arc.math.Angles;
+import arc.math.Mathf;
+import arc.math.geom.Geometry;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
@@ -11,6 +16,7 @@ import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
+import mindustry.world.Tile;
 
 import java.util.Set;
 
@@ -24,6 +30,9 @@ public class WaveBarTable extends Table{
     public Interval timer = new Interval(2);
     protected Seq<MI2Bar> hpBars = new Seq<>();
     protected int[] prewave = {1,2,3,4,5};
+
+    private int tmpCount = 0;
+    private boolean any = false;
 
     public WaveBarTable(){
         super();
@@ -68,7 +77,7 @@ public class WaveBarTable extends Table{
                 () -> (curWave > d.wave || d.units.sumf(unitdata -> Math.max(unitdata.unit.health(), 0) + unitdata.unit.shield()) > 0) ? d.units.sumf(unitdata -> Math.max(unitdata.unit.health(), 0) + unitdata.unit.shield()) / (d.totalHp + d.totalShield) : 1f,
                 (curWave > d.wave || d.units.sumf(unitdata -> Math.max(unitdata.unit.health(), 0) + unitdata.unit.shield()) > 0) ? Color.scarlet : Color.cyan
                 );
-            hpBars.get(i).blink(Color.white);
+            hpBars.get(i).blink(Color.white).outline(MI2UTmp.c2.set(0.3f, 0.3f, 0.6f, 0.3f), 1f);
             add(hpBars.get(i)).growX().height(18f).minWidth(200f);
             row();
         }
@@ -90,10 +99,14 @@ public class WaveBarTable extends Table{
     }
 
     public void updateData(){
-        waves.each(data -> {
-            data.removeDead();
+        waves.each(WaveData::removeDead);
+        waves.removeAll(waved -> {
+            boolean preview = false;
+            for(int i : prewave){
+                if(preview = waved.wave == curWave - 1 + i) break;
+            }
+            return !preview && waved.units.isEmpty();
         });
-        waves.removeAll(waved -> waved.units.isEmpty());
     }
 
     public class WaveData{
@@ -108,8 +121,67 @@ public class WaveBarTable extends Table{
         public void init(){
             totalHp = totalShield = 0f;
             for(SpawnGroup group : state.rules.spawns){
-                totalHp += group.type.health * group.getSpawned(wave - 1) * (group.type.flying ? spawner.countFlyerSpawns() : spawner.countGroundSpawns());
-                totalShield += group.getShield(wave - 1) * group.getSpawned(wave - 1) * (group.type.flying ? spawner.countFlyerSpawns() : spawner.countGroundSpawns());
+                tmpCount = 0;
+                int filterPos = group.spawn;
+
+                //rewrite Anuke's, as invoking private method "eachGroundSpawn" with private interface param is too hard for me.
+                if(group.type.flying){
+                    for(Tile tile : spawner.getSpawns()){
+                        if(filterPos != -1 && filterPos != tile.pos()) continue;
+                        tmpCount++;
+                    }
+
+                    if(state.rules.attackMode && state.teams.isActive(state.rules.waveTeam)){
+                        for(Building core : state.rules.waveTeam.data().cores){
+                            if(filterPos != -1 && filterPos != core.pos()) continue;
+                            tmpCount++;
+                        }
+                    }
+                }else{
+                    if(state.hasSpawns()){
+                        for(Tile spawn : spawner.getSpawns()){
+                            if(filterPos != -1 && filterPos != spawn.pos()) continue;
+                            tmpCount++;
+                        }
+                    }
+
+                    if(state.rules.attackMode && state.teams.isActive(state.rules.waveTeam) && !state.teams.playerCores().isEmpty()){
+                        Building firstCore = state.teams.playerCores().first();
+                        for(Building core : state.rules.waveTeam.cores()){
+                            if(filterPos != -1 && filterPos != core.pos()) continue;
+
+                            Tmp.v1.set(firstCore).sub(core).limit(16f + core.block.size * tilesize /2f * Mathf.sqrt2);
+
+                            boolean valid = false;
+                            int steps = 0;
+
+                            //keep moving forward until the max step amount is reached
+                            while(steps++ < 30f){
+                                int tx = World.toTile(core.x + Tmp.v1.x), ty = World.toTile(core.y + Tmp.v1.y);
+                                any = false;
+                                Geometry.circle(tx, ty, world.width(), world.height(), 3, (x, y) -> {
+                                    if(world.solid(x, y)){
+                                        any = true;
+                                    }
+                                });
+
+                                //nothing is in the way, spawn it
+                                if(!any){
+                                    valid = true;
+                                    break;
+                                }else{
+                                    //make the vector longer
+                                    Tmp.v1.setLength(Tmp.v1.len() + tilesize*1.1f);
+                                }
+                            }
+
+                            if(valid) tmpCount++;
+                        }
+                    }
+                }
+
+                totalHp += group.type.health * group.getSpawned(wave - 1) * tmpCount;
+                totalShield += group.getShield(wave - 1) * group.getSpawned(wave - 1) * tmpCount;
             }
         }
 
