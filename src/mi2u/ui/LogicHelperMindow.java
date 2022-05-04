@@ -9,7 +9,6 @@ import arc.math.Mathf;
 import arc.scene.*;
 import arc.scene.actions.Actions;
 import arc.scene.ui.TextField;
-import arc.scene.ui.layout.Scl;
 import arc.scene.ui.layout.Table;
 import arc.struct.*;
 import arc.util.*;
@@ -17,7 +16,6 @@ import mi2u.MI2UTmp;
 import mindustry.gen.Iconc;
 import mindustry.logic.LCanvas;
 import mindustry.logic.LExecutor;
-import mindustry.logic.LExecutor.Var;
 import mindustry.logic.LStatements;
 import mindustry.logic.LogicDialog;
 import mindustry.ui.Styles;
@@ -43,7 +41,7 @@ public class LogicHelperMindow extends Mindow2{
 
     public Table cutPasteBaseTable;
     int cutStart = 0, cutEnd = 0, pasteStart = 0;
-    boolean copyCode = false;
+    boolean copyCode = false, transJump = true;
 
     public LogicHelperMindow(){
         super("@logicHelper.MI2U", "@logicHelper.help");
@@ -112,13 +110,26 @@ public class LogicHelperMindow extends Mindow2{
                     with(tf -> {
                        tf.setFilter(TextField.TextFieldFilter.digitsOnly);
                     });
-            t.button("" + Iconc.copy + Core.bundle.get("logicHelper.cutPaste.copyMode"), textbtoggle, () -> {
-                copyCode = !copyCode;
-            }).update(b -> b.setChecked(copyCode)).with(funcSetTextb).height(36f);
+
         });
         cont.row();
 
-        cont.button("||| " + Iconc.play + " |||", textb, this::doCutPaste).with(funcSetTextb).height(36f).disabled(tb -> !(parent instanceof LogicDialog ld && cutStart < ld.canvas.statements.getChildren().size && cutEnd < ld.canvas.statements.getChildren().size && pasteStart <= ld.canvas.statements.getChildren().size && cutEnd >= cutStart)).growX();
+        cont.table(t -> {
+            t.defaults().growX();
+            t.button("" + Iconc.copy + Core.bundle.get("logicHelper.cutPaste.copyMode"), textbtoggle, () -> {
+                copyCode = !copyCode;
+            }).update(b -> b.setChecked(copyCode)).with(funcSetTextb).height(36f);
+
+            t.button("" + Iconc.move + Core.bundle.get("logicHelper.cutPaste.transJump"), textbtoggle, () -> {
+                transJump = !transJump;
+            }).update(b -> b.setChecked(transJump)).with(funcSetTextb).height(36f).disabled(tb -> !copyCode);
+
+            t.row();
+
+            t.button("||| " + Iconc.play + " |||", textb, this::doCutPaste).with(funcSetTextb).height(36f).disabled(tb -> !(parent instanceof LogicDialog ld && cutStart < ld.canvas.statements.getChildren().size && cutEnd < ld.canvas.statements.getChildren().size && pasteStart <= ld.canvas.statements.getChildren().size && cutEnd >= cutStart)).colspan(2);
+        });
+
+
     }
 
     public void doCutPaste(){
@@ -128,7 +139,7 @@ public class LogicHelperMindow extends Mindow2{
         int ind = 0;
         ObjectMap<LCanvas.StatementElem, Integer> toSetup = new ObjectMap<>();
         do{
-            LCanvas.StatementElem dragging;
+            LCanvas.StatementElem dragging = null;
             if(cutStart > pasteStart){
                 if(copyCode){
                     dragging = (LCanvas.StatementElem)stats.getChildren().get(cutEnd);
@@ -144,7 +155,7 @@ public class LogicHelperMindow extends Mindow2{
                     dragging.remove();
                     stats.addChildAt(pasteStart, dragging);
                 };
-            }else{
+            }else if(cutStart < pasteStart){
                 if(copyCode){
                     dragging = (LCanvas.StatementElem)stats.getChildren().get(cutStart + ind);
                     dragging.copy();
@@ -161,14 +172,16 @@ public class LogicHelperMindow extends Mindow2{
                 };
             }
             stats.layout();
-            blinkElement(dragging);
+            if(dragging != null) blinkElement(dragging);
         }while(++ind < times);
-        toSetup.each((se, delta) -> {
-            if(se.st instanceof LStatements.JumpStatement jp){
-                jp.destIndex = se.index + delta;
-                jp.setupUI();
-            }
-        });
+        if(transJump){
+            toSetup.each((se, delta) -> {
+                if(se.st instanceof LStatements.JumpStatement jp){
+                    jp.destIndex = se.index + delta;
+                    jp.setupUI();
+                }
+            });
+        }
     }
 
     public void setupSearchMode(Table cont){
