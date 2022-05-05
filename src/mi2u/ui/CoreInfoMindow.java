@@ -2,6 +2,7 @@ package mi2u.ui;
 
 import arc.*;
 import arc.graphics.*;
+import arc.graphics.g2d.Draw;
 import arc.math.*;
 import arc.scene.*;
 import arc.scene.ui.*;
@@ -11,7 +12,7 @@ import arc.util.*;
 import mi2u.MI2UTmp;
 import mi2u.input.InputOverwrite;
 import mi2u.io.*;
-import mindustry.Vars;
+import mi2u.struct.FloatDataRecorder;
 import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.game.Teams.*;
@@ -25,38 +26,83 @@ import static mi2u.MI2UVars.*;
 
 public class CoreInfoMindow extends Mindow2{
     protected Interval interval = new Interval();
-    protected ObjectSet<Item> usedItems = new ObjectSet<>();
-    protected ObjectIntMap<Item> lastItemsAmt = new ObjectIntMap<>();
-    protected ObjectIntMap<Item> lastLastItemsAmt = new ObjectIntMap<>();
     protected CoreBuild core;
     protected Team select, team;
+
     protected PowerGraphTable pg = new PowerGraphTable(330);
-    protected PopupTable teamSelect = new PopupTable(), buildPlanTable = new PopupTable(), chartTable = new PopupTable();
+    protected PopupTable teamSelect = new PopupTable(), buildPlanTable = new PopupTable(), chartTable;
+
     protected int[] unitIndex = new int[content.units().size];
+
+    protected ObjectSet<Item> usedItems = new ObjectSet<>();
+    protected FloatDataRecorder[] itemRecoders;
+    protected FloatDataRecorder charting = null;
     
     public CoreInfoMindow(){
         super("@coreInfo.MI2U", "@coreInfo.help");
         mindowName = "CoreInfo";
+        itemRecoders = new FloatDataRecorder[content.items().size];
+        content.items().each(item -> {
+            itemRecoders[item.id] = new FloatDataRecorder(60);
+            itemRecoders[item.id].getter = () -> core == null ? 0 : core.items.get(item);
+            itemRecoders[item.id].titleGetter = () -> Iconc.eye + item.localizedName + ": ";
+        });
+
+        chartTable = new PopupTable(){
+            {
+                this.setBackground(Styles.black5);
+                this.addCloseButton();
+                var ch = new Element(){
+                    @Override
+                    public void draw(){
+                        super.draw();
+                        Draw.reset();
+                        if(charting != null) charting.defaultDraw(x, y, width, height, true);
+                    }
+                };
+                this.add(ch).fill().size(200f,100f);
+                this.row();
+                this.label(() -> {
+                    if(charting != null && charting.size() > 0){
+                        float delta;
+                        if(charting.size() < charting.cap()){
+                            delta = (charting.get(0) - charting.get(charting.size() - 2))/(charting.size() - 1f);   //to hide first data on worldload
+                        }else{
+                            delta = (charting.get(0) - charting.get(charting.size() - 1))/(float)charting.size();
+                        }
+                        return charting.titleGetter.get() + (delta > 0 ? "[green]+":"[red]") + Strings.autoFixed(delta, 2) + "/s";
+                    }
+                    return (charting != null ? charting.titleGetter.get():"") + "No Data";
+                }).growX();
+            }
+        };
+
         Events.run(EventType.Trigger.update, () -> {
             if(player.unit() != null && player.unit().plans().size <= 0){
                 buildPlanTable.hide();
                 buildPlanTable.clearChildren();
             }else{
-                buildPlanTable.setPositionInScreen(this.x, this.y - buildPlanTable.getPrefHeight());
                 buildPlanTable.popup();
+                buildPlanTable.setPositionInScreen(this.x, this.y - buildPlanTable.getPrefHeight());
             }
+
+            if(chartTable.hasParent()) chartTable.toFront();
+            //chartTable.hideWithoutFocusOn(this);
         });
+        Events.on(EventType.ContentInitEvent.class, e -> {
+            content.items().each(item -> {
+                itemRecoders[item.id].getter = () -> core == null ? 0 : core.items.get(item);
+            });
+        });
+
         Events.on(EventType.WorldLoadEvent.class, e -> {
-            lastLastItemsAmt.clear();
-            lastItemsAmt.clear();
+            content.items().each(item -> {
+                itemRecoders[item.id].reset();
+            });
             rebuild();
         });
-    }
 
-    @Override
-    public void setupCont(Table cont){
-        cont.clear();
-        cont.update(() -> {
+        update(() -> {
             if(select == null || !select.active()){
                 team = player.team();
             }else{
@@ -70,13 +116,16 @@ public class CoreInfoMindow extends Mindow2{
             }
 
             if(state.isGame() && core != null && interval.get(60f)){
-                for(Item item : content.items()){
-                    lastLastItemsAmt.put(item, lastItemsAmt.get(item));
-                    lastItemsAmt.put(item, core.items.get(item));
+                for(FloatDataRecorder rec : itemRecoders){
+                    if(rec != null) rec.update();
                 }
             }
         });
-        
+    }
+
+    @Override
+    public void setupCont(Table cont){
+        cont.clear();
         cont.table(ipt -> {
             ipt.table(utt -> {
                 utt.image(Mindow2.white).width(36f).growY().update(i -> i.setColor(team.color));
@@ -94,15 +143,26 @@ public class CoreInfoMindow extends Mindow2{
             if(MI2USettings.getBool(mindowName + ".showCoreItems")){
                 ipt.pane(iut -> {
                     int i = 0;
+
                     for(Item item : content.items()){
                         if(i >= 4 && !usedItems.contains(item)) continue;
+
                         iut.stack(
                                 new Image(item.uiIcon),
-                                new Table(t -> t.label(() -> core == null ? "" : (lastItemsAmt.get(item) - lastLastItemsAmt.get(item) >= 0 ? "[green]+" : "[red]") + (lastItemsAmt.get(item) - lastLastItemsAmt.get(item))).get().setFontScale(0.65f)).right().bottom()
-                        ).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel));
+                                new Table(t -> t.label(() -> core == null ? "" : (itemRecoders[item.id].get(0) - itemRecoders[item.id].get(1) >= 0 ? "[green]+" : "[red]") + (itemRecoders[item.id].get(0) - itemRecoders[item.id].get(1))).get().setFontScale(0.65f)).right().bottom()
+                        ).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel)).get().clicked(() -> {
+                            charting = itemRecoders[item.id];
+                            chartTable.popup();
+                            chartTable.setPositionInScreen(this.x - chartTable.getPrefWidth(), this.y);
+                        });
+
                         iut.label(() -> core == null ? "0" :
                                 UI.formatAmount(core.items.get(item)))
-                                .padRight(3).minWidth(52f).left();
+                                .padRight(3).minWidth(52f).left().get().clicked(() -> {
+                            charting = itemRecoders[item.id];
+                            chartTable.popup();
+                            chartTable.setPositionInScreen(this.x - chartTable.getPrefWidth(), this.y);
+                        });;
 
                         if (++i % 4 == 0) {
                             iut.row();
@@ -182,6 +242,7 @@ public class CoreInfoMindow extends Mindow2{
         if(buildPlanTable == null) buildPlanTable = new PopupTable();
         buildPlanTable.setBackground(Styles.black6);
         buildPlanTable.update(() -> {
+            buildPlanTable.setPositionInScreen(this.x, this.y - buildPlanTable.getPrefHeight());
             if(player.unit() == null || player.team().core() == null || player.unit().plans().size > 1000) return;   //Too many plans cause lag
             ItemSeq req = new ItemSeq();
             player.unit().plans().each(plan -> {

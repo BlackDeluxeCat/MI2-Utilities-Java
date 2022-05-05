@@ -4,6 +4,7 @@ import arc.Core;
 import arc.math.Interp;
 import arc.scene.Element;
 import arc.scene.actions.Actions;
+import arc.scene.style.Drawable;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.Align;
@@ -13,6 +14,7 @@ import mi2u.MI2UVars;
 
 public class PopupTable extends Table{
     public boolean shown = false;
+
     public void popup(int align){
         if(shown) return;
         Core.scene.add(this);
@@ -71,7 +73,10 @@ public class PopupTable extends Table{
     public void addCloseButton(){
         TextButton b = new TextButton("X", MI2UVars.textb){{clicked(() -> hide());}};
         b.setSize(36f);
+        b.update(() -> {
+            b.setPosition(getPrefWidth() - b.getWidth(), getPrefHeight() - b.getHeight());
+            b.toFront();
+        });
         addChild(b);
-        b.update(() -> b.setPosition(getPrefWidth() - b.getPrefWidth(), getPrefHeight() - b.getPrefHeight()));
     }
 }

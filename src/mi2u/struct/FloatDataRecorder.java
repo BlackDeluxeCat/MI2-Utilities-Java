@@ -1,0 +1,139 @@
+package mi2u.struct;
+
+import arc.func.*;
+import arc.graphics.g2d.Fill;
+import arc.graphics.g2d.Lines;
+import arc.math.Mathf;
+import mi2u.MI2UTmp;
+
+public class FloatDataRecorder{
+    private float[] values;
+    public Floatp getter = null;
+    private int head = 0;
+    private int size = 0;
+    public boolean disable = false;
+    public Boolf<FloatDataRecorder> disableF = null;
+    public Prov<String> titleGetter = null;
+
+    public FloatDataRecorder(){
+        values = new float[16];
+    }
+
+    public FloatDataRecorder(int initsize){
+        values = new float[initsize];
+    }
+
+    //max bit size
+    public int cap(){
+        return values.length;
+    }
+
+    //used bit size
+    public int size(){
+        return size;
+    }
+
+    public void reset(){
+        head = 0;
+        size = 0;
+        for(int i = 0; i < values.length; i++){
+            values[i] = 0f;
+        }
+    }
+
+    public float get(int before){
+        if(before >= values.length) return values[head + 1];
+        if(before < 0) return values[head];
+        return values[head - before + (head - before < 0 ? values.length : 0)];
+    }
+
+    public void add(float value){
+        if(++head >= values.length) head = 0;
+        values[head] = value;
+        size = Math.min(++size, cap());
+    }
+
+    //starts from latest record.
+    public void each(Cons<Float> cons){
+        for(int i = size - 1; i >= 0; i--){
+            cons.get(get(i));
+        }
+    }
+
+    public float min(){
+        return min(f -> f);
+    }
+
+    public float max(){
+        return max(f -> f);
+    }
+
+    public float min(FloatFloatf func){
+        float min = get(0), check = func.get(min), result;
+        for(int i = size - 1; i >= 1; i--){
+            result = func.get(get(i));
+            if(check > result){
+                min = get(i);
+                check = result;
+            }
+        }
+        return min;
+    }
+
+    public float max(FloatFloatf func){
+        float max = get(0), check = func.get(max), result;
+        for(int i = size - 1; i >= 1; i--){
+            result = func.get(get(i));
+            if(check < result){
+                max = get(i);
+                check = result;
+            }
+        }
+        return max;
+    }
+
+    public float avg(){
+        float result = 0f;
+        for(int i = size - 1; i >= 1; i--){
+            result += get(i);
+        }
+        return result / (float)size;
+    }
+
+    public void update(){
+        if(disableF != null) disable = disableF.get(this);
+        if(disable) return;
+        if(getter == null) return;
+        add(getter.get());
+    }
+
+    public void resize(int newSize){
+        float[] newArray = new float[newSize];
+        if(newSize > values.length){
+            System.arraycopy(values, 0, newArray, 0, head);
+            System.arraycopy(values, head + 1, newArray, newSize - values.length + head + 1, values.length - head - 1);
+        }
+        this.values = newArray;
+    }
+
+    public String getTitle(){
+        return titleGetter != null ? titleGetter.get():"";
+    }
+
+    public void defaultDraw(float x, float y, float width, float height, boolean lineChart){
+        float min = min(), max = max();
+        if(lineChart){
+            //折线图
+            Lines.beginLine();
+            for(int i = cap() - 1; i >= 0; i--){
+                Lines.linePoint(x + i * width/(float) cap(), y + height*Mathf.clamp((get(i)-min+1f)/(max-min+1f)));
+            }
+            Lines.endLine();
+        }else{
+            //柱状图
+            for(int i = cap() - 1; i >= 0; i--){
+                Fill.rect(MI2UTmp.r1.setCentered(x + i * width/(float) cap(), y + height*Mathf.clamp((get(i)-min+1f)/(max-min+1f))/2f, width/(float) cap(), height*Mathf.clamp((get(i)-min+1f)/(max-min+1f))));
+            }
+        }
+    }
+}
