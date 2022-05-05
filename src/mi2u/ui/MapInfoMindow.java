@@ -24,6 +24,7 @@ public class MapInfoMindow extends Mindow2{
     private boolean syncCurWave = true;
     public int curWave = 0; //state.wave is display number, spawner number should sub 1
     public WaveBarTable wavebars = new WaveBarTable();
+    public Table mapAttsTable;
     private Interval timer = new Interval();
 
     public MapInfoMindow() {
@@ -36,36 +37,45 @@ public class MapInfoMindow extends Mindow2{
     }
 
     @Override
+    public void init() {
+        super.init();
+        mapAttsTable = new Table();
+        mapAttsTable.setBackground(Styles.black5);
+        setupMapAtts(mapAttsTable);
+    }
+
+    @Override
     public void setupCont(Table cont){
         cont.clear();
         //if(!state.isGame()) return;
         cont.visible(() -> state.isGame());
         cont.background(Styles.black5);
         cont.table(tt -> {
+            tt.defaults().growX().height(36f);
             tt.button("" + Iconc.map, textbtoggle, () -> {
                 showMapAtts = !showMapAtts;
                 rebuild();
             }).update(b -> {
                 b.setChecked(showMapAtts);
-            }).with(funcSetTextb).size(36f, titleButtonSize);
+            }).with(funcSetTextb);
 
             tt.button("" + Iconc.teamCrux, textbtoggle, () -> {
                 showWaves = !showWaves;
                 rebuild();
             }).update(b -> {
                 b.setChecked(showWaves);
-            }).with(funcSetTextb).fillX().size(36f, titleButtonSize);
+            }).with(funcSetTextb);
 
             tt.button("" + Iconc.chartBar, textbtoggle, () -> {
                 showWaveBars = !showWaveBars;
                 rebuild();
             }).update(b -> {
                 b.setChecked(showWaveBars);
-            }).with(funcSetTextb).fillX().size(36f, titleButtonSize);
-        });
+            }).with(funcSetTextb);
+        }).fillX();
         cont.row();
         if(showMapAtts){
-            cont.table(t -> setupMapAtts(t));
+            cont.add(mapAttsTable);
             cont.row();
         }
         if(showWaves){
@@ -73,12 +83,19 @@ public class MapInfoMindow extends Mindow2{
             cont.row();
         }
         if(showWaveBars){
-            cont.add(wavebars).growX();;
-            cont.row();
+            cont.pane(wavebars).growX().minWidth(100f).maxHeight(200f).update(p -> {
+                Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
+                if(e != null && e.isDescendantOf(p)){
+                    p.requestScroll();
+                }else if(p.hasScroll()){
+                    Core.scene.setScrollFocus(null);
+                }
+            }).with(c -> c.setFadeScrollBars(true));
         }
     }
     
     public void setupMapAtts(Table t){
+        t.clear();
         t.table(rules1 -> {
             rules1.table(tt -> {
                 addBoolIcon(() -> state.rules.pvp , "" + Iconc.modePvp, tt);
@@ -105,6 +122,7 @@ public class MapInfoMindow extends Mindow2{
                 addBoolIcon(() -> state.rules.coreCapture, "" + Iconc.blockCoreFoundation, tt);
                 addBoolIcon(() -> state.rules.polygonCoreProtection, "" + Iconc.grid, tt);
                 tt.label(() -> "Cap: " + state.rules.unitCap + (state.rules.unitCapVariable ? "+"+Iconc.blockCoreShard:"")).pad(2f).get().setFontScale(0.7f);
+                tt.button("@mapinfo.buttons.teams", textb, this::showTeamInfo).growX().get().getLabel().setWrap(false);
             });
         });
         t.row();
@@ -119,7 +137,6 @@ public class MapInfoMindow extends Mindow2{
                 addFloatAttr(() -> Strings.fixed(state.rules.unitBuildSpeedMultiplier, 2), "@mapInfo.unitConstructSpeedMutil", tt);
             });
             rules2.row();
-            rules2.button("@mapinfo.buttons.teams", textb, this::showTeamInfo).fillX().get().getLabel().setWrap(false);
         });
     }
 
