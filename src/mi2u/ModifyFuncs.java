@@ -87,7 +87,7 @@ public class ModifyFuncs{
                 float capacity = cons.capacity;
 
                 addBarToBlock(block, "power", entity -> new Bar(() -> buffered ? Core.bundle.format("bar.poweramount", Float.isNaN(entity.power.status * capacity) ? "<ERROR>" : UI.formatAmount((int)(entity.power.status * capacity))) :
-                        Core.bundle.get("bar.power") + ":" + Strings.autoFixed(-entity.power.status * cons.usage * 60f * (entity.cons().valid()?1:0),2), () -> Pal.powerBar, () -> Mathf.zero(cons.requestedPower(entity)) && entity.power.graph.getPowerProduced() + entity.power.graph.getBatteryStored() > 0f ? 1f : entity.power.status));
+                        Core.bundle.get("bar.power") + ":" + Strings.autoFixed(-entity.power.status * cons.usage * 60f * (entity.cons().valid()?entity.timeScale():0),2), () -> Pal.powerBar, () -> Mathf.zero(cons.requestedPower(entity)) && entity.power.graph.getPowerProduced() + entity.power.graph.getBatteryStored() > 0f ? 1f : entity.power.status));
             }
 
             if(block instanceof Turret) addBarToBlock(block, "logicTimer", (Turret.TurretBuild entity) -> new Bar(() -> "Logic Control: " + Strings.autoFixed(entity.logicControlTime, 1), () -> Pal.logicControl, () -> entity.logicControlTime / Turret.logicControlCooldown));

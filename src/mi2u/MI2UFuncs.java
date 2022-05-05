@@ -146,7 +146,7 @@ public class MI2UFuncs{
                     } 
                 }
                 Draw.z(Layer.playerName);
-                Drawf.target(v.x, v.y, 4f, Pal.remove);
+                Drawf.target(v.x, v.y, 4f, 0.6f, Pal.remove);
             }
 
             if(tmpRect.contains(v.x, v.y) && !tmpRect.contains(unit.x, unit.y)){
