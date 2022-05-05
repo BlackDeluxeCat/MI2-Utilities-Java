@@ -2,19 +2,21 @@
 
 - [English](README.md) | [中文](README_zh.md)
 
-一个原版辅助工具，有爱自取。 
+原版辅助工具，有爱自取。 
+
+早期JS版：[BlackDeluxeCat/MI2-Utilities](https://github.com/BlackDeluxeCat/MI2-Utilities)
 
 安装方法：
 
-- 方法1 在游戏里使用“从github导入”，填BlackDeluxeCat/MI2-Utilities-Java
-- 方法2 进入本mod最新(Lateset)Release，下载文件列表中的MI2-Utilities Java.jar，在游戏里使用“导入文件”，导入所下载的jar。
-- 方法3 若已安装老版本，在游戏里点击mod详情页，重新安装。（仅限移动端）
+- 方法1（推荐） 在游戏里使用“从github导入”，填BlackDeluxeCat/MI2-Utilities-Java
+- 方法2 进入本mod最新(Latest)Release，下载文件列表中的MI2-Utilities Java.jar，在游戏里使用“导入文件”，导入所下载的jar。
+- 方法3 若已安装老版本，在游戏里点击mod详情页，点击重新安装。
 
 中文讨论群：875035496
 
 无力为其他语言做本地化，接受pr。
 
-## 特性列表（0.7.0）
+## 特性列表（0.8.3）
 
 ### ui
 
@@ -24,7 +26,7 @@
 - 该窗口的选项弹窗包含MI2U的大部分选项。
 
 #### 核心信息
-- 原版核心信息+，资源变动数字
+- 原版核心信息+，资源变化折线图
 - 单位计数器
 - 电量条与电网分析
 - 可切换查看其他队伍
@@ -42,6 +44,8 @@
 
 #### 逻辑辅助
 - 整理与快捷复制变量名，可使用分隔符
+- 查找与替换变量名
+- 代码块剪切与复制
 
 #### Emoji
 - 一个emoji查阅工具
@@ -55,5 +59,6 @@
 - 渲染单位血条、逻辑控制、寻路线
 - 关闭残骸、单位、射弹渲染
 - 修改部分方块数值条
+- 添加一套地图筛选器，特色是可复合坐标变换
 - 99.5%的改动可以通过选项关闭
 - MI2U选项存储在$Mindustry/mods/MI2U_Settings/目录下

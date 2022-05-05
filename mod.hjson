@@ -24,7 +24,7 @@ description: "# MI2-Utilities Java
 
 无力为其他语言做本地化，接受pr。
 
-## 特性列表（0.7.0）
+## 特性列表（0.8.3）
 
 ### ui
 
@@ -34,7 +34,7 @@ description: "# MI2-Utilities Java
 - 该窗口的选项弹窗包含MI2U的大部分选项。
 
 #### 核心信息
-- 原版核心信息+，资源变动数字
+- 原版核心信息+，资源变化折线图
 - 单位计数器
 - 电量条与电网分析
 - 可切换查看其他队伍
@@ -52,6 +52,8 @@ description: "# MI2-Utilities Java
 
 #### 逻辑辅助
 - 整理与快捷复制变量名，可使用分隔符
+- 查找与替换变量名
+- 代码块剪切与复制
 
 #### Emoji
 - 一个emoji查阅工具
@@ -65,11 +67,12 @@ description: "# MI2-Utilities Java
 - 渲染单位血条、逻辑控制、寻路线
 - 关闭残骸、单位、射弹渲染
 - 修改部分方块数值条
+- 添加一套地图筛选器，特色是可复合坐标变换
 - 99.5%的改动可以通过选项关闭
 - MI2U选项存储在$Mindustry/mods/MI2U_Settings/目录下"
 
 #the mod version
-version: 0.8.2.a
+version: 0.8.3
 
 #the minimum game build required to run this mod
 minGameVersion: 135
