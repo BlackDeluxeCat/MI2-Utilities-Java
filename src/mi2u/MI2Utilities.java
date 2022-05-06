@@ -5,6 +5,7 @@ import arc.scene.ui.layout.*;
 import arc.util.*;
 import arc.util.serialization.*;
 import mi2u.graphics.MI2UShaders;
+import mi2u.graphics.RendererExt;
 import mi2u.io.*;
 import mi2u.ui.*;
 import mindustry.game.EventType.*;
@@ -34,14 +35,12 @@ public class MI2Utilities extends Mod{
                 if(MI2USettings.getBool("showLogicHelper")) logicHelper.addTo(logicHelper.hasParent() ? logicHelper.parent : ui.logic);
 
                 ModifyFuncs.schelogic();
-                MI2UFuncs.initBase();
+                RendererExt.initBase();
                 ModifyFuncs.modifyVanilla();
             });
 
             //popup too early will cause font rendering bug.
-            Time.runTask(140f, () -> {
-                checkUpdate();
-            });
+            Time.runTask(140f, this::checkUpdate);
 
         });
 

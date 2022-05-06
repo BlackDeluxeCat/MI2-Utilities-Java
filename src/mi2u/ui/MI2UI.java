@@ -87,6 +87,7 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckSettingEntry("disableWreck", "@settings.main.disableWreck"));
         settings.add(new CheckSettingEntry("disableUnit", "@settings.main.disableUnit"));
         settings.add(new CheckSettingEntry("disableBullet", "@settings.main.disableBullet"));
+        settings.add(new CheckSettingEntry("disableBuilding", "@settings.main.disableBuilding"));
         settings.add(new CheckSettingEntry("enUnitHpBar", "@settings.main.unitHpBar"));
         settings.add(new CheckSettingEntry("enUnitLogic", "@settings.main.unitLogic"));
         settings.add(new CheckSettingEntry("enUnitLogicTimer", "@settings.main.unitLogicTimer"));
