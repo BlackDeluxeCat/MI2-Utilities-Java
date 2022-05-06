@@ -65,12 +65,25 @@ public class CoreInfoMindow extends Mindow2{
                 this.label(() -> {
                     if(charting != null && charting.size() > 0){
                         float delta;
+                        if(charting.size() < 10){
+                            delta = (charting.get(0) - charting.get(charting.size() - 2))/(charting.size() - 1f);
+                        }else{
+                            delta = (charting.get(0) - charting.get(9))/10f;
+                        }
+                        return charting.titleGetter.get() + (delta > 0 ? "[green]+":"[red]") + Strings.autoFixed(delta, 2) + "/s (10s)";
+                    }
+                    return (charting != null ? charting.titleGetter.get():"") + "No Data";
+                }).growX();
+                this.row();
+                this.label(() -> {
+                    if(charting != null && charting.size() > 0){
+                        float delta;
                         if(charting.size() < charting.cap()){
-                            delta = (charting.get(0) - charting.get(charting.size() - 2))/(charting.size() - 1f);   //to hide first data on worldload
+                            delta = (charting.get(0) - charting.get(charting.size() - 2))/(charting.size() - 1f);
                         }else{
                             delta = (charting.get(0) - charting.get(charting.size() - 1))/(float)charting.size();
                         }
-                        return charting.titleGetter.get() + (delta > 0 ? "[green]+":"[red]") + Strings.autoFixed(delta, 2) + "/s";
+                        return charting.titleGetter.get() + (delta > 0 ? "[green]+":"[red]") + Strings.autoFixed(delta, 2) + "/s (60s)";
                     }
                     return (charting != null ? charting.titleGetter.get():"") + "No Data";
                 }).growX();
@@ -149,7 +162,7 @@ public class CoreInfoMindow extends Mindow2{
 
                         iut.stack(
                                 new Image(item.uiIcon),
-                                new Table(t -> t.label(() -> core == null ? "" : (itemRecoders[item.id].get(0) - itemRecoders[item.id].get(1) >= 0 ? "[green]+" : "[red]") + (itemRecoders[item.id].get(0) - itemRecoders[item.id].get(1))).get().setFontScale(0.65f)).right().bottom()
+                                new Table(t -> t.label(() -> core == null ? "" : (itemRecoders[item.id].get(0) - itemRecoders[item.id].get(1) >= 0 ? "[green]+" : "[red]") + (int)(itemRecoders[item.id].get(0) - itemRecoders[item.id].get(1))).get().setFontScale(0.65f)).right().bottom()
                         ).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel)).get().clicked(() -> {
                             charting = itemRecoders[item.id];
                             chartTable.popup();

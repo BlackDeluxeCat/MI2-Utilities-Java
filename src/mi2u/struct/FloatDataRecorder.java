@@ -125,14 +125,14 @@ public class FloatDataRecorder{
         if(lineChart){
             //折线图
             Lines.beginLine();
-            for(int i = cap() - 1; i >= 0; i--){
-                Lines.linePoint(x + i * width/(float) cap(), y + height*Mathf.clamp((get(i)-min+1f)/(max-min+1f)));
+            for(int i = 0; i < size; i++){
+                Lines.linePoint(x + (size - i) * width/(float)size, y + height*Mathf.clamp((get(i)-min+1f)/(max-min+1f)));
             }
             Lines.endLine();
         }else{
             //柱状图
-            for(int i = cap() - 1; i >= 0; i--){
-                Fill.rect(MI2UTmp.r1.setCentered(x + i * width/(float) cap(), y + height*Mathf.clamp((get(i)-min+1f)/(max-min+1f))/2f, width/(float) cap(), height*Mathf.clamp((get(i)-min+1f)/(max-min+1f))));
+            for(int i = 0; i < size; i++){
+                Fill.rect(MI2UTmp.r1.setCentered(x + (size - i) * width/(float)size, y + height*Mathf.clamp((get(i)-min+1f)/(max-min+1f))/2f,  width/(float)size, height*Mathf.clamp((get(i)-min+1f)/(max-min+1f))));
             }
         }
     }

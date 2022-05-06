@@ -72,9 +72,11 @@ public class PopupTable extends Table{
 
     public void addCloseButton(){
         TextButton b = new TextButton("X", MI2UVars.textb){{clicked(() -> hide());}};
+        b.setStyle(new TextButton.TextButtonStyle(b.getStyle()));
+        b.getStyle().up = null;
         b.setSize(36f);
         b.update(() -> {
-            b.setPosition(getPrefWidth() - b.getWidth(), getPrefHeight() - b.getHeight());
+            b.setPosition(getWidth() - b.getWidth(), getHeight() - b.getHeight());
             b.toFront();
         });
         addChild(b);
