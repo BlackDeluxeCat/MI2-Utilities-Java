@@ -24,8 +24,8 @@ public class MI2Utilities extends Mod{
     public MI2Utilities(){
 
         Events.on(ClientLoadEvent.class, e -> {
+            MI2USettings.init();
             Time.runTask(40f, () -> {
-                MI2USettings.init();
                 MI2UVars.init();
                 mi2ui.addTo(Core.scene.root);
                 if(MI2USettings.getBool("showEmojis")) emojis.addTo(emojis.hasParent() ? emojis.parent : Core.scene.root);
