@@ -103,7 +103,7 @@ public class MapInfoMindow extends Mindow2{
                 addBoolIcon(() -> state.rules.attackMode , "" + Iconc.modeAttack, tt);
                 addBoolIcon(() -> state.rules.editor , "" + Iconc.edit, tt);
                 addBoolIcon(() -> state.rules.infiniteResources , "" + Iconc.box, tt);
-                addBoolIcon(() -> state.rules.canGameOver , "" + Iconc.blockReconstructorBasis, tt);
+                addBoolIcon(() -> state.rules.canGameOver , "" + Iconc.rightOpen, tt);
                 tt.label(() -> "Size: " + world.width() + "x" + world.height()).pad(2f).get().setFontScale(0.7f);
                 addBoolIcon(() -> state.rules.waves, "" + Iconc.waves, tt);
                 addBoolIcon(() -> state.rules.waveTimer, "" + Iconc.rotate, tt);
@@ -262,7 +262,7 @@ public class MapInfoMindow extends Mindow2{
                 tmap.add("" + teamRule.infiniteAmmo).color(teamData.team.color);
                 tmap.add("" + teamRule.infiniteResources).color(teamData.team.color);
                 tmap.add("" + teamRule.cheat).color(teamData.team.color);
-                tmap.add("" + (teamRule.ai ? Core.bundle.format("mapInfo.aiAndTier", teamRule.aiTier) + (teamRule.aiCoreSpawn ? "" + Core.bundle.format("mapInfo.aiCoreSpawn") : "") : "")).color(teamData.team.color);
+                tmap.add("" + (teamRule.rtsAi ? Core.bundle.format("mapInfo.aiAndTier", teamRule.rtsMinWeight) + (teamRule.aiCoreSpawn ? "" + Core.bundle.format("mapInfo.aiCoreSpawn") : "") : "")).color(teamData.team.color);
             }
         });
         dialog.addCloseButton();

@@ -99,7 +99,7 @@ public class FullAI extends AIController{
             Building core = unit.closestCore();
             boostAction(true);
             if(!(unit.canMine()) || core == null) return;
-            if(unit.mineTile != null && !unit.mineTile.within(unit, unit.type.miningRange)){
+            if(unit.mineTile != null && !unit.mineTile.within(unit, unit.type.mineRange)){
                 unit.mineTile(null);
             }
             if(mining){
@@ -121,7 +121,7 @@ public class FullAI extends AIController{
                     }
                     if(ore != null){
                         moveAction(ore, 50f, false);
-                        if(ore.block() == Blocks.air && unit.within(ore, unit.type.miningRange)){
+                        if(ore.block() == Blocks.air && unit.within(ore, unit.type.mineRange)){
                             unit.mineTile = ore;
                         }
                         if(ore.block() != Blocks.air){
@@ -187,7 +187,7 @@ public class FullAI extends AIController{
             if(!enable) return;
             if(unit.dead || !unit.isValid()) return;
             if(unit.health > unit.maxHealth * 0.6f) return;
-            Tile tile = Geometry.findClosest(unit.x, unit.y, indexer.getAllied(unit.team, BlockFlag.repair));
+            Building tile = Geometry.findClosest(unit.x, unit.y, indexer.getFlagged(unit.team, BlockFlag.repair));
             if(tile == null) return;
             boostAction(true);
             moveAction(tile, 20f, false);

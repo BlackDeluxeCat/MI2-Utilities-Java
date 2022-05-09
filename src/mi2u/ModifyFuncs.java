@@ -18,6 +18,7 @@ import mindustry.io.JsonIO;
 import mindustry.maps.Maps;
 import mindustry.maps.filters.GenerateFilter;
 import mindustry.type.Liquid;
+import mindustry.type.LiquidStack;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.SchematicsDialog;
 import mindustry.world.Block;
@@ -69,6 +70,7 @@ public class ModifyFuncs{
         if(!MI2USettings.getBool("modifyBlockBars")) return;
         content.blocks().each(block -> {
             addBarToBlock(block, "health", e -> new Bar(() -> Core.bundle.format("stat.health") + ":" + Strings.autoFixed(e.health(), 3) + "(" + Strings.autoFixed(e.health * 100 / e.maxHealth, 2) + "%)", () -> Pal.health, e::healthf));
+            /*
             if(block.hasLiquids){
                 Func<Building, Liquid> current;
                 if(block.consumes.has(ConsumeType.liquid) && block.consumes.get(ConsumeType.liquid) instanceof ConsumeLiquid){
@@ -89,15 +91,15 @@ public class ModifyFuncs{
                 addBarToBlock(block, "power", entity -> new Bar(() -> buffered ? Core.bundle.format("bar.poweramount", Float.isNaN(entity.power.status * capacity) ? "<ERROR>" : UI.formatAmount((int)(entity.power.status * capacity))) :
                         Core.bundle.get("bar.power") + ":" + Strings.autoFixed(-entity.power.status * cons.usage * 60f * (entity.cons().valid()?entity.timeScale():0),2), () -> Pal.powerBar, () -> Mathf.zero(cons.requestedPower(entity)) && entity.power.graph.getPowerProduced() + entity.power.graph.getBatteryStored() > 0f ? 1f : entity.power.status));
             }
+            */
 
             if(block instanceof Turret) addBarToBlock(block, "logicTimer", (Turret.TurretBuild entity) -> new Bar(() -> "Logic Control: " + Strings.autoFixed(entity.logicControlTime, 1), () -> Pal.logicControl, () -> entity.logicControlTime / Turret.logicControlCooldown));
 
         });
     }
 
-    public static <T extends Building> boolean addBarToBlock(Block block, String name, Func<T, Bar> sup){
-        block.bars.add(name, sup);
-        return true;
+    public static <T extends Building> void addBarToBlock(Block block, String name, Func<T, Bar> sup){
+        block.addBar(name, sup);
     }
 
     public static void schelogic(){

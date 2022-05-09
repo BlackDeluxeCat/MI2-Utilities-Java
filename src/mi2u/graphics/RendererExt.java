@@ -274,7 +274,8 @@ public class RendererExt{
 
             //Pathfind Renderer
             //if(Core.settings.getBool("unitPathLine") && Core.settings.getInt("unitPathLineLength") > 0){
-            if(MI2USettings.getBool("enUnitPath")){
+            /*
+            if(false && MI2USettings.getBool("enUnitPath")){
                 Draw.z(Layer.power - 4f);
                 Tile tile = unit.tileOn();
                 Draw.reset();
@@ -294,6 +295,8 @@ public class RendererExt{
                 }
                 Draw.reset();
             }
+
+             */
 
             Draw.reset();
         }
@@ -349,8 +352,8 @@ public class RendererExt{
                         if(items[i][idi] != null){
                             Draw.alpha(0.9f);
                             Draw.rect(items[i][idi].fullIcon,
-                            begx + ((endx - begx) / (float)cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale / speed) * cap, cap - loti)),
-                            begy + ((endy - begy) / (float)cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale / speed) * cap, cap - loti)),
+                            begx + ((endx - begx) / (float)cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale() / speed) * cap, cap - loti)),
+                            begy + ((endy - begy) / (float)cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale() / speed) * cap, cap - loti)),
                             4f, 4f);
                         }
                         loti++;
@@ -425,8 +428,8 @@ public class RendererExt{
                     Draw.alpha(0.9f);
 
                     Draw.rect(bufferItems[idi].fullIcon,
-                    begx + ((endx - begx) / (float)bufferItems.length * Math.min(((Time.time - bufferTimes[idi]) * bb.timeScale / speed) * cap, cap - loti)),
-                    begy + ((endy - begy) / (float)bufferItems.length * Math.min(((Time.time - bufferTimes[idi]) * bb.timeScale / speed) * cap, cap - loti)), 4f, 4f);
+                    begx + ((endx - begx) / (float)bufferItems.length * Math.min(((Time.time - bufferTimes[idi]) * bb.timeScale() / speed) * cap, cap - loti)),
+                    begy + ((endy - begy) / (float)bufferItems.length * Math.min(((Time.time - bufferTimes[idi]) * bb.timeScale() / speed) * cap, cap - loti)), 4f, 4f);
                 }
                 loti++;
             }
@@ -444,14 +447,14 @@ public class RendererExt{
             Building tmp;
             boolean toFound = false, fromFound = false;
             boolean canLoad, canUnload;
-            for(Unloader.UnloaderBuild.ContainerStat c : ub.possibleBlocks){
-                f = Unloader.UnloaderBuild.ContainerStat.class.getDeclaredField("canLoad");
+            for(Unloader.ContainerStat c : ub.possibleBlocks){
+                f = Unloader.ContainerStat.class.getDeclaredField("canLoad");
                 f.setAccessible(true);
                 canLoad = f.getBoolean(c);
-                f = Unloader.UnloaderBuild.ContainerStat.class.getDeclaredField("canUnload");
+                f = Unloader.ContainerStat.class.getDeclaredField("canUnload");
                 f.setAccessible(true);
                 canUnload = f.getBoolean(c);
-                f = Unloader.UnloaderBuild.ContainerStat.class.getDeclaredField("building");
+                f = Unloader.ContainerStat.class.getDeclaredField("building");
                 f.setAccessible(true);
                 tmp = (Building)f.get(c);
                 if(!toFound && canLoad){

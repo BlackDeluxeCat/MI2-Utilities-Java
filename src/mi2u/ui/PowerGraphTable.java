@@ -50,8 +50,7 @@ public class PowerGraphTable extends Table{
         if(team == null) return;
         if(state.teams.get(team).buildings == null) return;
         ObjectSet<PowerGraph> graphs = new ObjectSet<PowerGraph>();
-        Seq<Building> builds = new Seq<Building>();
-        state.teams.get(team).buildings.getObjects(builds);
+        Seq<Building> builds = state.teams.get(team).buildings.copy();
         totalCap = 0f;
         Prov<String> powertext;
 
@@ -139,9 +138,9 @@ public class PowerGraphTable extends Table{
             OrderedMap<Block, Float> values = new OrderedMap<Block, Float>();
 
             for(Building consumer : p.consumers){
-                if(!consumer.block.consumes.hasPower()) continue;
+                if(!consumer.block.consumesPower || consumer.block.consPower == null) continue;
                 blocks.put(consumer.block, (blocks.containsKey(consumer.block) ? blocks.get(consumer.block):0f) + 1f);
-                values.put(consumer.block, (values.containsKey(consumer.block) ? values.get(consumer.block):0f) + Mathf.num(consumer.shouldConsume()) * consumer.power.status * consumer.block.consumes.getPower().usage * 60 * consumer.timeScale());
+                values.put(consumer.block, (values.containsKey(consumer.block) ? values.get(consumer.block):0f) + Mathf.num(consumer.shouldConsume()) * consumer.power.status * consumer.block.consPower.usage * 60 * consumer.timeScale());
             }
 
             int cols = (int)(blocks.size / (Core.scene.getHeight() / 48f));
