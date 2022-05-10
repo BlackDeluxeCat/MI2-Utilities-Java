@@ -10,6 +10,7 @@ import mi2u.MI2UFuncs;
 import mi2u.MI2UTmp;
 import mi2u.io.MI2USettings;
 import mindustry.Vars;
+import mindustry.content.Blocks;
 import mindustry.core.World;
 import mindustry.gen.Building;
 import mindustry.gen.Mechc;
