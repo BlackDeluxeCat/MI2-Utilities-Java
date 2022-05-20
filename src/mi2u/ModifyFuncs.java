@@ -2,13 +2,17 @@ package mi2u;
 
 import arc.*;
 import arc.func.*;
+import arc.graphics.Color;
 import arc.math.*;
 import arc.math.geom.*;
+import arc.scene.Element;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
+import arc.struct.Seq;
 import arc.util.*;
 import mi2u.io.*;
 import mi2u.map.filters.*;
+import mi2u.ui.HoverTopTable;
 import mindustry.content.Liquids;
 import mindustry.core.UI;
 import mindustry.game.*;
@@ -17,6 +21,7 @@ import mindustry.graphics.*;
 import mindustry.io.JsonIO;
 import mindustry.maps.Maps;
 import mindustry.maps.filters.GenerateFilter;
+import mindustry.type.ItemStack;
 import mindustry.type.Liquid;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.SchematicsDialog;
@@ -41,6 +46,7 @@ public class ModifyFuncs{
         modifyVanillaBlockBars();
         Events.on(EventType.ContentInitEvent.class, e2 -> modifyVanillaBlockBars());
         addFilters();
+        initBetterTopTable();
     }
 
     public static void addFilters(){
@@ -98,6 +104,42 @@ public class ModifyFuncs{
     public static <T extends Building> boolean addBarToBlock(Block block, String name, Func<T, Bar> sup){
         block.bars.add(name, sup);
         return true;
+    }
+
+    public static void initBetterTopTable(){
+        Events.on(EventType.WorldLoadEvent.class, event -> {
+            Time.runTask(10f, ModifyFuncs::betterTopTable);
+        });
+
+        Events.on(EventType.UnlockEvent.class, event -> {
+            if(event.content instanceof Block){
+                Time.runTask(10f, ModifyFuncs::betterTopTable);
+            }
+        });
+    }
+
+    //TODO 让原版面板只在方块规划显示(+尺寸缩放)，mod面板则在有hover时显示(+尺寸缩放)。还需要调换原版和mod版的布局，让方块规划紧贴方块选择区
+    public static void betterTopTable(){
+        if(!MI2USettings.getBool("modifyTopTable", false)) return;
+
+        Table topTable = Reflect.get(ui.hudfrag.blockfrag, "topTable");
+        if(topTable == null){
+            Log.infoTag("MI2U-Modify", "failed to replace info top-table");
+            return;
+        }
+        Element vanilla = topTable.getChildren().get(topTable.getChildren().size - 1);
+        topTable.clearChildren();
+
+        topTable.add(HoverTopTable.hoverInfo).growX();
+        topTable.row();
+        topTable.add(vanilla).growX().visible(() -> control.input.block != null);
+        topTable.row();
+        topTable.add(new Element()).height(0.5f).update(t -> {
+            var cell = topTable.getCell(vanilla);
+            vanilla.updateVisibility();
+            if(cell != null) cell.height(vanilla.getPrefHeight() * (vanilla.visible ? 1f:0f) + 0.5f);
+        });
+        topTable.visible(() -> HoverTopTable.hoverInfo.hasInfo() || control.input.block != null);
     }
 
     public static void schelogic(){
