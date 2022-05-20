@@ -8,6 +8,7 @@ import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.*;
 import arc.scene.event.*;
+import arc.scene.ui.TextField;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import arc.util.pooling.*;
@@ -15,6 +16,7 @@ import mi2u.MI2UTmp;
 import mi2u.MI2UVars;
 import mi2u.input.InputOverwrite;
 import mi2u.io.*;
+import mi2u.io.MI2USettings.*;
 import mindustry.core.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
@@ -27,6 +29,11 @@ public class MinimapMindow extends Mindow2{
     public static Minimap2 m = new Minimap2(200f);
     public MinimapMindow(){
         super("MindowMap");
+    }
+
+    @Override
+    public void init() {
+        super.init();
         mindowName = "MindowMap";
     }
 
@@ -49,7 +56,7 @@ public class MinimapMindow extends Mindow2{
     @Override
     public void initSettings(){
         super.initSettings();
-        settings.add(new FieldSettingEntry(SettingType.Int, mindowName + ".size", s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 600, "@settings.mindowMap.size", s -> rebuild()));
+        settings.add(new FieldEntry(mindowName + ".size", "@settings.mindowMap.size", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 600, s -> rebuild()));
     }
 
     @Override

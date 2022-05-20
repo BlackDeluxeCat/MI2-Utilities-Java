@@ -24,15 +24,16 @@ public class MI2Utilities extends Mod{
     public MI2Utilities(){
 
         Events.on(ClientLoadEvent.class, e -> {
+            titleButtonSize = 28f;
+            Mindow2.initMindowStyles();
             MI2USettings.init();
             Time.runTask(40f, () -> {
-                MI2UVars.init();
                 mi2ui.addTo(Core.scene.root);
                 if(MI2USettings.getBool("showEmojis")) emojis.addTo(emojis.hasParent() ? emojis.parent : Core.scene.root);
                 if(MI2USettings.getBool("showCoreInfo")) coreInfo.addTo(coreInfo.hasParent() ? coreInfo.parent : Core.scene.root);
                 if(MI2USettings.getBool("showMindowMap")) mindowmap.addTo(mindowmap.hasParent() ? mindowmap.parent : Core.scene.root);
                 if(MI2USettings.getBool("showMapInfo")) mapinfo.addTo(mapinfo.hasParent() ? mapinfo.parent : Core.scene.root);
-                if(MI2USettings.getBool("showLogicHelper")) logicHelper.addTo(logicHelper.hasParent() ? logicHelper.parent : ui.logic);
+                if(MI2USettings.getBool("showLogicHelper", true)) logicHelper.addTo(logicHelper.hasParent() ? logicHelper.parent : ui.logic);
 
                 ModifyFuncs.schelogic();
                 RendererExt.initBase();

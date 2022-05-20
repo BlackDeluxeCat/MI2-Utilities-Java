@@ -12,6 +12,7 @@ import arc.util.*;
 import mi2u.MI2UTmp;
 import mi2u.input.InputOverwrite;
 import mi2u.io.*;
+import mi2u.io.MI2USettings.*;
 import mi2u.struct.FloatDataRecorder;
 import mindustry.core.*;
 import mindustry.game.*;
@@ -34,13 +35,12 @@ public class CoreInfoMindow extends Mindow2{
 
     protected int[] unitIndex = new int[content.units().size];
 
-    protected ObjectSet<Item> usedItems = new ObjectSet<>();
+    protected ObjectSet<Item> usedItems;
     protected FloatDataRecorder[] itemRecoders;
     protected FloatDataRecorder charting = null;
     
     public CoreInfoMindow(){
         super("@coreInfo.MI2U", "@coreInfo.help");
-        mindowName = "CoreInfo";
         itemRecoders = new FloatDataRecorder[content.items().size];
         content.items().each(item -> {
             itemRecoders[item.id] = new FloatDataRecorder(60);
@@ -134,6 +134,13 @@ public class CoreInfoMindow extends Mindow2{
                 }
             }
         });
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        mindowName = "CoreInfo";
+        usedItems = new ObjectSet<>();
     }
 
     @Override
@@ -306,16 +313,14 @@ public class CoreInfoMindow extends Mindow2{
         });
     }
 
-
-
     /** can be overrided, should use super.initSettings(), called in rebuild() */
     @Override
     public void initSettings(){
         super.initSettings();
-        settings.add(new CheckSettingEntry(mindowName + ".showCoreItems", "@settings.coreInfo.showCoreItems", b -> rebuild()));
-        settings.add(new CheckSettingEntry(mindowName + ".showUnits", "@settings.coreInfo.showUnits", b -> rebuild()));
-        settings.add(new CheckSettingEntry(mindowName + ".showPowerGraphs", "@settings.coreInfo.showPowerGraphs", b -> rebuild()));
-        settings.add(new FieldSettingEntry(SettingType.Int, mindowName + ".itemsMaxHeight", s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, TextField.TextFieldFilter.digitsOnly,"@settings.coreInfo.itemsMaxHeight", c -> rebuild()));
-        settings.add(new FieldSettingEntry(SettingType.Int, mindowName + ".unitsMaxHeight", s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, TextField.TextFieldFilter.digitsOnly,"@settings.coreInfo.unitsMaxHeight", c -> rebuild()));
+        settings.add(new CheckEntry(mindowName + ".showCoreItems", "@settings.coreInfo.showCoreItems", true, b -> rebuild()));
+        settings.add(new CheckEntry(mindowName + ".showUnits", "@settings.coreInfo.showUnits", true, b -> rebuild()));
+        settings.add(new CheckEntry(mindowName + ".showPowerGraphs", "@settings.coreInfo.showPowerGraphs", true, b -> rebuild()));
+        settings.add(new FieldEntry(mindowName + ".itemsMaxHeight", "@settings.coreInfo.itemsMaxHeight", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, s -> rebuild()));
+        settings.add(new FieldEntry(mindowName + ".unitsMaxHeight", "@settings.coreInfo.unitsMaxHeight", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, s -> rebuild()));
     }
 }

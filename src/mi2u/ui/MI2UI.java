@@ -3,12 +3,16 @@ package mi2u.ui;
 import arc.Core;
 import arc.func.*;
 import arc.graphics.Color;
+import arc.scene.actions.Actions;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
+import mi2u.MI2UTmp;
+import mi2u.io.MI2USettings.*;
 import mindustry.Vars;
 import mindustry.entities.units.AIController;
 import mindustry.gen.*;
+import mindustry.ui.Styles;
 
 import static mi2u.MI2UVars.*;
 import static mi2u.MI2UFuncs.*;
@@ -20,8 +24,13 @@ public class MI2UI extends Mindow2{
         c.getLabelCell().pad(2);
     };
 
-    public MI2UI() {
+    public MI2UI(){
         super("@main.MI2U", "@main.help");
+    }
+
+    @Override
+    public void init(){
+        super.init();
         closable = false;
         mindowName = "MI2UI";
     }
@@ -76,25 +85,52 @@ public class MI2UI extends Mindow2{
     @Override
     public void initSettings(){
         super.initSettings();
-        settings.add(new CheckSettingEntry("enableUpdate", "@settings.main.enableUpdate"));
-        settings.add(new CheckSettingEntry("showEmojis", "@settings.main.emoji", b -> emojis.addTo(b?Core.scene.root:null)));
-        settings.add(new CheckSettingEntry("showCoreInfo", "@settings.main.coreInfo", b -> coreInfo.addTo(b?Core.scene.root:null)));
-        settings.add(new CheckSettingEntry("showMindowMap", "@settings.main.mindowMap", b -> mindowmap.addTo(b?Core.scene.root:null)));
-        settings.add(new CheckSettingEntry("showMapInfo", "@settings.main.mapInfo", b -> mapinfo.addTo(b?Core.scene.root:null)));
-        settings.add(new CheckSettingEntry("showLogicHelper", "@settings.main.logicHelper", b -> logicHelper.addTo(b?Vars.ui.logic:null)));
-        settings.add(new CheckSettingEntry("enPlayerCursor", "@settings.main.playerCursor"));
-        settings.add(new CheckSettingEntry("enOverdriveZone", "@settings.main.overdriveZone"));
-        settings.add(new CheckSettingEntry("disableWreck", "@settings.main.disableWreck"));
-        settings.add(new CheckSettingEntry("disableUnit", "@settings.main.disableUnit"));
-        settings.add(new CheckSettingEntry("disableBullet", "@settings.main.disableBullet"));
-        settings.add(new CheckSettingEntry("disableBuilding", "@settings.main.disableBuilding"));
-        settings.add(new CheckSettingEntry("enUnitHpBar", "@settings.main.unitHpBar"));
-        settings.add(new CheckSettingEntry("enUnitLogic", "@settings.main.unitLogic"));
-        settings.add(new CheckSettingEntry("enUnitLogicTimer", "@settings.main.unitLogicTimer"));
-        settings.add(new CheckSettingEntry("enUnitPath", "@settings.main.unitPath"));
-        settings.add(new CheckSettingEntry("modifyBlockBars", "@settings.main.modifyBlockBars"));
-        settings.add(new CheckSettingEntry("modifyFilters", "@settings.main.modifyMapFilters"));
-        settings.add(new CheckSettingEntry("inputReplace", "@settings.main.inputReplace"));
-        settings.add(new CheckSettingEntry("forceTapTile", "@settings.main.forceTapTile"));
+        settings.add(new CheckEntry("enableUpdate", "@settings.main.enableUpdate", false, null));
+
+        settings.add(new CheckEntry("showEmojis", "@settings.main.emoji", true, b -> emojis.addTo(b?Core.scene.root:null)));
+        settings.add(new CheckEntry("showCoreInfo", "@settings.main.coreInfo", true, b -> coreInfo.addTo(b?Core.scene.root:null)));
+        settings.add(new CheckEntry("showMindowMap", "@settings.main.mindowMap", true, b -> mindowmap.addTo(b?Core.scene.root:null)));
+        settings.add(new CheckEntry("showMapInfo", "@settings.main.mapInfo", true, b -> mapinfo.addTo(b?Core.scene.root:null)));
+        settings.add(new CheckEntry("showLogicHelper", "@settings.main.logicHelper", true, b -> logicHelper.addTo(b?Vars.ui.logic:null)));
+
+        settings.add(new CheckEntry("enPlayerCursor", "@settings.main.playerCursor", true, null));
+        settings.add(new CheckEntry("enOverdriveZone", "@settings.main.overdriveZone", true, null));
+
+        settings.add(new CheckEntry("disableWreck", "@settings.main.disableWreck", false, null));
+        settings.add(new CheckEntry("disableUnit", "@settings.main.disableUnit", false, null));
+        settings.add(new CheckEntry("disableBullet", "@settings.main.disableBullet", false, null));
+        settings.add(new CheckEntry("disableBuilding", "@settings.main.disableBuilding", false, null));
+
+        settings.add(new CheckEntry("enUnitHpBar", "@settings.main.unitHpBar", false, null));
+        settings.add(new CheckEntry("enUnitLogic", "@settings.main.unitLogic", false, null));
+        settings.add(new CheckEntry("enUnitLogicTimer", "@settings.main.unitLogicTimer", false, null));
+        settings.add(new CheckEntry("enUnitPath", "@settings.main.unitPath", false, null));
+
+        settings.add(new SettingGroupEntry("InputExtension", ""){
+            private CheckEntry check1 = new CheckEntry("inputReplace", "@settings.main.inputReplace", false, null);
+            private CheckEntry check2 = new CheckEntry("forceTapTile", "@settings.main.forceTapTile", false, null);
+            {
+                builder = t -> {
+                    t.clear();
+                    t.setBackground(titleBarbgNormal);
+                    t.table(tt -> {
+                        tt.background(Styles.black);
+                        check1.build(tt);
+                    }).padBottom(5f).padRight(15f).growX();
+                    if(check1.value){
+                        t.row();
+                        t.table(tt -> {
+                            tt.setBackground(Styles.black8);
+                            check2.build(tt);
+                        }).padRight(30f).growX();
+                    }
+                    check1.changed = bool -> build(t);  //TODO 可能造成栈溢出,不是很懂
+                };
+            }
+        });
+
+        settings.add(new CheckEntry("modifyBlockBars", "@settings.main.modifyBlockBars", false, null));
+        settings.add(new CheckEntry("modifyTopTable", "@settings.main.modifyTopTable", false, null));
+        settings.add(new CheckEntry("modifyFilters", "@settings.main.modifyMapFilters", true, null));
     }
 }

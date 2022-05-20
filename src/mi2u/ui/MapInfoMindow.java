@@ -29,7 +29,6 @@ public class MapInfoMindow extends Mindow2{
 
     public MapInfoMindow() {
         super("@mapInfo.MI2U", "@mapInfo.help");
-        mindowName = "MapInfo";
         Events.on(WorldLoadEvent.class, e -> {
             Time.run(60f, this::rebuild);
             curWave = state.wave;
@@ -39,6 +38,7 @@ public class MapInfoMindow extends Mindow2{
     @Override
     public void init() {
         super.init();
+        mindowName = "MapInfo";
         mapAttsTable = new Table();
         mapAttsTable.setBackground(Styles.black5);
         setupMapAtts(mapAttsTable);

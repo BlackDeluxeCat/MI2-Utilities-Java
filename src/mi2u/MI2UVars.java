@@ -32,25 +32,4 @@ public class MI2UVars {
 
     public static boolean enDistributionReveal = false;
 
-
-    public static void init(){
-        //Styles
-        Mindow2.initMindowStyles();
-
-        //add to mindow2s
-        mi2ui.registerName();
-        emojis.registerName();
-        coreInfo.registerName();
-        logicHelper.registerName();
-        mindowmap.registerName();
-        mapinfo.registerName();
-
-        //load ui
-        mi2ui.loadUISettings();
-        emojis.loadUISettings();
-        coreInfo.loadUISettings();
-        logicHelper.loadUISettings();
-        mindowmap.loadUISettings();
-        mapinfo.loadUISettings();
-    }
 }

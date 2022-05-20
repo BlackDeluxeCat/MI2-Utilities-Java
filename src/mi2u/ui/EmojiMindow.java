@@ -31,6 +31,11 @@ public class EmojiMindow extends Mindow2{
 
     public EmojiMindow() {
         super("@emoji.MI2U", "@emoji.help");
+    }
+
+    @Override
+    public void init() {
+        super.init();
         mindowName = "Emojis";
     }
 

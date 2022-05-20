@@ -1,8 +1,9 @@
 package mi2u.ui;
 
 import arc.*;
-import arc.func.*;
 import arc.graphics.*;
+import arc.graphics.g2d.Draw;
+import arc.graphics.g2d.Fill;
 import arc.input.*;
 import arc.math.*;
 import arc.math.geom.*;
@@ -11,12 +12,13 @@ import arc.scene.event.*;
 import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.scene.ui.Label.*;
-import arc.scene.ui.TextField.TextFieldValidator;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import mi2u.MI2UTmp;
+import mi2u.game.MI2UEvents;
 import mi2u.io.*;
+import mi2u.io.MI2USettings.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.ui.*;
@@ -25,11 +27,11 @@ import mindustry.ui.dialogs.*;
 import static mi2u.MI2UVars.*;
 /**  
  * Mindow2 is a dragable Table that partly works like a window. 
- * @param titleText is text shown on titleBar, set in constructor.
- * @param mindowName is inner name, used for window-specific settings, set in overrided constructor.
- * @param helpInfo is text shown in window-specific help dialog, set in constructor.
- * @param cont is a container for user items. 
- * @param settings is a SettingEntry seq.
+ * titleText is text shown on titleBar, set in constructor.
+ * mindowName is inner name, used for window-specific settings, set in overrided constructor.
+ * helpInfo is text shown in window-specific help dialog, set in constructor.
+ * cont is a container for user items.
+ * settings is a SettingEntry seq.
  * <p>
  * {@code setupCont(Table cont)}for cont rebuild, should be overrided.<p>
  * {@code initSettings()}for customize settings, should start with settings.clear()
@@ -52,11 +54,18 @@ public class Mindow2 extends Table{
 
     public Mindow2(String title){
         init();
+
+        Events.on(MI2UEvents.FinishSettingInitEvent.class, e -> {
+            initSettings();
+            loadUISettings();
+        });
+
         Events.on(ResizeEvent.class, e -> {
             loadUISettings();
         });
 
         titleText = title;
+        registerName();
         rebuild();
     }
 
@@ -69,7 +78,6 @@ public class Mindow2 extends Table{
 
     public void rebuild(){
         clear();
-        initSettings();
         setupTitle();
         row();
         if(!minimized){
@@ -187,9 +195,9 @@ public class Mindow2 extends Table{
             if((interval.check(0, 180) && titleBar.scaleY > 0.95f) || (interval.check(1, 15) && titleBar.scaleY < 0.95f)){
                 titleBar.toFront();
                 titleBar.setScale(1, Mathf.lerpDelta(titleBar.scaleY, titleScale, 0.3f));
-                titleBar.keepInStage();
-                titleBar.invalidateHierarchy();
-                titleBar.pack();
+                //titleBar.keepInStage();
+                //titleBar.invalidateHierarchy();
+                //titleBar.pack();
                 titleBar.touchable = Touchable.enabled;
             }else if(titleBar.scaleY < 0.95f){
                 titleBar.touchable = Touchable.disabled;
@@ -202,7 +210,7 @@ public class Mindow2 extends Table{
                 cury = aboveSnap.y - getRealHeight();
                 setPosition(curx, cury);
                 keepInStage();
-            }else if(edgesnap != -1 && hasParent()){
+            }else if(edgesnap != 4 && hasParent()){
                 edgeSnap(edgesnap);
                 setPosition(curx, cury);
             }else{
@@ -217,37 +225,37 @@ public class Mindow2 extends Table{
 
     protected void edgeSnap(int s){
         switch(s){
-            case 0://lefttop
+            case 6://lefttop
                 curx = 0;
                 cury = parent.getHeight() - getRealHeight();
                 break;
-            case 1://top
-                curx = (parent.getWidth() - getWidth())/2f;
+            case 7://top
+                //curx = (parent.getWidth() - getWidth())/2f;
                 cury = (parent.getHeight() -getRealHeight());
                 break;
-            case 2://righttop
+            case 8://righttop
                 curx = (parent.getWidth() - getWidth());
                 cury = (parent.getHeight() -getRealHeight());
                 break;
-            case 3://right
+            case 5://right
                 curx = (parent.getWidth() - getWidth());
-                cury = (parent.getHeight() -getRealHeight())/2f;
+                //cury = (parent.getHeight() -getRealHeight())/2f;
                 break;
-            case 4://rightbottom
+            case 2://rightbottom
                 curx = (parent.getWidth() - getWidth());
                 cury = 0;
                 break;
-            case 5://bottom
-                curx = (parent.getWidth() - getWidth())/2f;
+            case 1://bottom
+                //curx = (parent.getWidth() - getWidth())/2f;
                 cury = 0;
                 break;
-            case 6://leftbottom
+            case 0://leftbottom
                 curx = 0;
                 cury = 0;
                 break;
-            case 7://left
+            case 3://left
                 curx = 0;
-                cury = (parent.getHeight() -getRealHeight())/2f;
+                //cury = (parent.getHeight() -getRealHeight())/2f;
                 break;
         }
     }
@@ -296,7 +304,7 @@ public class Mindow2 extends Table{
                     t.add(mindowName != null && !mindowName.equals("") ? Core.bundle.format("mindow2.settings.curMindowName") + mindowName: "@mindow2.settings.noMindowNameWarning").fontScale(1.2f).get().setAlignment(Align.center);
                     t.row();
                     settings.each(st -> {
-                        t.add(st.getF()).width(Math.min(600, Core.graphics.getWidth())).left();
+                        t.table(tt -> st.build(tt)).width(Math.min(600, Core.graphics.getWidth())).left();
                         t.row();
                     });
                 }).grow();
@@ -323,22 +331,11 @@ public class Mindow2 extends Table{
     public void initSettings(){
         settings.clear();
         if(mindowName == null || mindowName.equals("")) return;
-        settings.add(new SettingEntry(mindowName + ".minimized", true, true));
-        settings.add(new SettingEntry(mindowName + ".topmost", true, true));
-        settings.add(new SettingEntry(mindowName + ".curx", true, true));
-        settings.add(new SettingEntry(mindowName + ".cury", true, true));
-        var f = new FieldSettingEntry(SettingType.Int, mindowName + ".edgesnap", s -> {
-            return Strings.canParseInt(s) && Strings.parseInt(s) <= 7 && Strings.parseInt(s) >= -1;
-        }, "@settings.mindow.edgesnap", null);
-        f.isUILoad = true;
-        f.isUISave = true;
-        settings.add(f);
-        f = new FieldSettingEntry(SettingType.Str, mindowName + ".abovesnapTarget", s -> {
-            return mindow2s.contains(mi2 -> mi2.mindowName.equals(s)) || s.equals("null");
-        }, "@settings.mindow.abovesnapTarget", null);
-        f.isUILoad = true;
-        settings.add(f);
-        settings.add(new CheckSettingEntry(mindowName + ".autoHideTitle", "@settings.mindow.autoHideTitle"));
+
+        settings.add(new MindowUIGroupEntry(mindowName + ".Mindow", ""));
+
+        settings.add(new FieldEntry(mindowName + ".abovesnapTarget", "@settings.mindow.abovesnapTarget", "", null, s -> mindow2s.contains(mi2 -> mi2.mindowName.equals(s)) || s.equals("null"), null));
+        settings.add(new CheckEntry(mindowName + ".autoHideTitle", "@settings.mindow.autoHideTitle", false, null));
     }
 
     /** Override this method for custom UI settings load
@@ -380,9 +377,11 @@ public class Mindow2 extends Table{
         MI2USettings.putBool(mindowName + ".topmost", topmost);
         MI2USettings.putInt(mindowName + ".edgesnap", edgesnap);
         //edgesnap will change curx cury, so xy shouldn't be saved when edgesnapping.
-        if(edgesnap == -1){
-            MI2USettings.putInt(mindowName + ".curx", (int)curx);
+        if(edgesnap != 1 && edgesnap != 5){
             MI2USettings.putInt(mindowName + ".cury", (int)cury);
+        }
+        if(edgesnap != 3 && edgesnap != 7){
+            MI2USettings.putInt(mindowName + ".curx", (int)curx);
         }
         return true;
     }
@@ -406,117 +405,88 @@ public class Mindow2 extends Table{
         white = whiteui.tint(1f, 1f, 1f, 1f);
     }
 
-    public class SettingEntry{
-        public String name = "";
-        public boolean isUILoad = false, isUISave = false;
-        protected SettingType type;
-        protected Table cont;
-        public SettingEntry(String name){
-            this.name = name;
-            cont = new Table();
-            cont.clear();
-            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUILoad ? MI2UTmp.c1.set(1f, 1f, 0f, 0.5f):MI2UTmp.c1.set(1f, 1f, 1f, 0.2f)));
-            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUISave ? MI2UTmp.c1.set(0f, 0f, 1f, 0.6f):MI2UTmp.c1.set(1f, 1f, 1f, 0.2f)));
-            cont.label(() -> this.name + " = " + MI2USettings.getStr(this.name)).align(Align.left).growX();
-        }
-        public SettingEntry(String name, boolean isUILoad, boolean isUISave){
-            this(name);
-            this.isUILoad = isUILoad;
-            this.isUISave = isUISave;
-        }
-        public Table getF(){
-            return cont;
-        }
-    }
+    public class MindowUIGroupEntry extends SettingGroupEntry{
+        SingleEntry entry1 = new SingleEntry(mindowName + ".minimized", "");
+        SingleEntry entry2 = new SingleEntry(mindowName + ".topmost", "");
+        SingleEntry entry3 = new SingleEntry(mindowName + ".curx", "");
+        SingleEntry entry4 = new SingleEntry(mindowName + ".cury", "");
+        SingleEntry entry5 = new SingleEntry(mindowName + ".edgesnap", "");
+        Table buildTarget;
+        public MindowUIGroupEntry(String name, String help) {
+            super(name, help);
+            Events.on(ResizeEvent.class, e -> {
+                if(buildTarget != null && buildTarget.hasParent()) {
+                    build(buildTarget);
+                }else if(buildTarget != null) buildTarget = null;
+            });
 
-    public class CheckSettingEntry extends SettingEntry{
-        Boolc changed;
-        public CheckSettingEntry(String name, String help, Boolc changed){
-            super(name);
-            this.changed = changed;
-            cont.clear();
-            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUILoad ? MI2UTmp.c1.set(1f, 1f, 0f, 0.5f):MI2UTmp.c1.set(1f, 1f, 1f, 0.2f)));
-            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUISave ? MI2UTmp.c1.set(0f, 0f, 1f, 0.6f):MI2UTmp.c1.set(1f, 1f, 1f, 0.2f)));
-            TextButton tb = new TextButton(this.name, textbtoggle);
-            cont.add(tb).left().with(c -> {
-                c.getLabelCell().width(200).height(32);
-                c.getLabel().setWrap(true);
-                c.getLabel().setAlignment(Align.left);
-            });
-            
-            tb.changed(() -> {
-                MI2USettings.putBool(this.name, tb.isChecked());
-                if(this.changed != null){
-                    changed.get(tb.isChecked());
-                }
-            });
-            tb.update(() -> {
-                tb.setChecked(MI2USettings.getBool(this.name));
-            });
-            cont.add(help).right().self(c -> {
-                c.growX();
-                c.get().setWrap(true);
-                c.get().setAlignment(Align.right);
-                c.get().setColor(1, 1, 1, 0.7f);
-            });
+            builder = t -> {
+                buildTarget = t;
+                t.clear();
+                t.defaults().pad(0f, 15f, 0f, 15f);
+                t.margin(10f);
+                t.background(Styles.flatDown);
+                t.stack(new Element(){
+                            @Override
+                            public void draw(){
+                                super.draw();
+                                Draw.color(Color.darkGray);
+                                Draw.alpha(parentAlpha);
+                                float divw = this.getWidth()/3f, divh = this.getHeight()/3f;
+                                Fill.rect(x + this.getWidth()/2f, y + this.getHeight()/2f, this.getWidth(), this.getHeight());
+                                Draw.color(Color.olive);
+                                Draw.alpha(parentAlpha);
+                                Fill.rect(x + this.getWidth() /6f + Mathf.mod(edgesnap, 3) * divw, y + this.getHeight() /6f + (edgesnap/3) * divh, divw, divh);
+                                Draw.reset();
+                            }
+                            {
+                                Element el = this;
+                                addListener(new InputListener(){
+                                    @Override
+                                    public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
+                                        edgesnap = Mathf.floor(x/el.getWidth()*3f) + Mathf.floor(y/el.getHeight()*3f)*3;
+                                        MI2USettings.putInt(mindowName + ".edgesnap", edgesnap);
+                                        return super.touchDown(event, x, y, pointer, button);
+                                    }
+                                });
+                            }
+                        }, new Table(){{
+                            this.add(new Element(){
+                                {this.touchable = Touchable.disabled;}
+                                @Override
+                                public void draw() {
+                                    super.draw();
+                                    Draw.color(Color.grays(0.1f));
+                                    Draw.alpha(parentAlpha * 0.8f);
+                                    Fill.rect(x + this.getWidth()/2f, y + this.getHeight()/2f, this.getWidth(), this.getHeight());
+
+                                    mindow2s.each(mind -> {
+                                        if(mind.parent != Mindow2.this.parent) return;
+                                        Draw.color(mind == Mindow2.this ? Color.coral : mind == aboveSnap ? Color.royal : Color.grays(0.4f));
+                                        Draw.alpha(0.8f * parentAlpha * 0.8f);
+                                        float mindw = (mind.getWidth()/Core.graphics.getWidth())*this.getWidth(),
+                                                mindh = (mind.getHeight()/Core.graphics.getHeight())*this.getHeight();
+                                        float mindx = x + (mind.x/Core.graphics.getWidth())*this.getWidth() + mindw/2f, mindy = y + (mind.y/Core.graphics.getHeight())*this.getHeight() + mindh/2f;
+                                        Fill.rect(mindx, mindy, mindw, mindh);
+                                        Draw.reset();
+                                    });
+                                }
+                            }).self(c -> c.pad(10f).size(200f*Core.graphics.getWidth()/Core.graphics.getHeight(), 200f));
+                        }}
+                ).fill().size(200f*Core.graphics.getWidth()/Core.graphics.getHeight() + 20f, 220f);
+                t.row();
+                t.table(tt -> {
+                    entry1.build(tt);
+                    tt.row();
+                    entry2.build(tt);
+                    tt.row();
+                    entry3.build(tt);
+                    tt.row();
+                    entry4.build(tt);
+                    tt.row();
+                    entry5.build(tt);
+                });
+            };
         }
-
-        public CheckSettingEntry(String name, String help){
-            this(name, help, null);
-        }
-    }
-
-    public class FieldSettingEntry extends SettingEntry{
-        Cons<String> changed;
-        /** be careful that {@code Cons<String> changed} input a string */
-        public FieldSettingEntry(SettingType ty, String name, TextFieldValidator val, TextField.TextFieldFilter filter, String help, Cons<String> changed){
-            super(name);
-            this.changed = changed;
-            cont.clear();
-            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUILoad ? MI2UTmp.c1.set(1f, 1f, 0f, 0.5f):MI2UTmp.c1.set(1f, 1f, 1f, 0.2f)));
-            cont.image(white).width(10f).growY().pad(2f).update(im -> im.setColor(isUISave ? MI2UTmp.c1.set(0f, 0f, 1f, 0.6f):MI2UTmp.c1.set(1f, 1f, 1f, 0.2f)));
-            type = ty;
-            TextField tf = new TextField("", Styles.nodeField);
-            tf.setValidator(val);
-            tf.setFilter(filter);
-            tf.changed(() -> {
-                if(val == null || val.valid(tf.getText())){
-                    switch(type){
-                        case Bool:
-                            MI2USettings.putBool(this.name, tf.getText().equals("true") ? true:false);
-                            break;
-                        case Int:
-                            MI2USettings.putInt(this.name, Strings.parseInt(tf.getText(), 0));
-                            break;
-                        default:
-                            MI2USettings.putStr(this.name, tf.getText() != null ? tf.getText():"");
-                            break;
-                    }
-                    if(this.changed != null){
-                        changed.get(MI2USettings.getStr(this.name));
-                    }
-                }
-            });
-            cont.table(tt -> {
-                tt.add(tf).width(200f).left().padRight(20);
-                tt.row();
-                tt.label(() -> this.name + " = " + MI2USettings.getStr(this.name)).get().setColor(0, 1, 1, 0.7f);
-            });
-            cont.add(help).right().self(c -> {
-                c.growX();
-                c.get().setWrap(true);
-                c.get().setAlignment(Align.right);
-                c.get().setColor(1, 1, 1, 0.7f);
-            });
-        }
-
-        public FieldSettingEntry(SettingType ty, String name, TextFieldValidator val, String help, Cons<String> changed){
-            this(ty, name, val, null, help, changed);
-        }
-
-    }
-
-    public static enum SettingType{
-        Int, Str, Bool
     }
 }
