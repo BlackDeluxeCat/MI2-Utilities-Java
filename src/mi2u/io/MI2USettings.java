@@ -5,6 +5,8 @@ import arc.files.*;
 import arc.func.Boolf;
 import arc.func.Boolp;
 import arc.func.Cons;
+import arc.graphics.Color;
+import arc.scene.Element;
 import arc.scene.ui.TextField;
 import arc.scene.ui.TextField.*;
 import arc.scene.ui.layout.Table;
@@ -12,7 +14,9 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.io.Writes;
 import mi2u.game.MI2UEvents;
+import mi2u.ui.Mindow2;
 import mindustry.game.EventType.*;
+import mindustry.gen.Tex;
 import mindustry.ui.Styles;
 import mindustry.Vars;
 
@@ -251,7 +255,7 @@ public class MI2USettings{
                     c.getLabelCell().width(200).height(32).padLeft(4f).padRight(4f);
                     c.getLabel().setWrap(true);
                     c.getLabel().setAlignment(Align.left);
-                    c.margin(6f);
+                    c.margin(3f);
                 });
 
                 table.add(help).right().self(c -> {
@@ -339,9 +343,25 @@ public class MI2USettings{
         @Override
         public void build(Table table) {
             if(headBuilder == null || builder == null || table == null) return;
-            table.table(t -> headBuilder.get(t));
+            table.margin(2f);
+            table.setBackground(Mindow2.gray5);
+            table.table(t -> {
+                t.margin(2f);
+                headBuilder.get(t);
+            }).growX();
             table.row();
-            table.collapser(t -> builder.get(t), collapsep).get().setCollapsed(true, collapsep);
+            table.collapser(t -> {
+                t.margin(5f);
+                builder.get(t);
+                t.image(Tex.whiteui).growY().width(10f).color(Color.grays(0.8f));
+            }, collapsep).growX().get().setCollapsed(true, collapsep).setDuration(0.1f);
+        }
+
+        public void setDefaultHeader(String title){
+            headBuilder = t -> {
+                var b = t.button(title, textbtoggle, null).get();
+                collapsep = () -> !b.isChecked();
+            };
         }
     }
 }

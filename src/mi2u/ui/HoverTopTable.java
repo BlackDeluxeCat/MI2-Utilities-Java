@@ -74,11 +74,8 @@ public class HoverTopTable extends Table {
                     });
                 }
             }).size(8 * 4);
-            t.labelWrap(() -> tile != null ? tile.floor().localizedName : "").left().padLeft(5);
-        }).left();
+            t.labelWrap(() -> tile != null ? tile.floor().localizedName : "").left().padLeft(5).width(65f);
 
-        tilet.table(t -> {
-            t.left();
             t.add(new Image(){
                 Block last;
                 {
@@ -89,11 +86,8 @@ public class HoverTopTable extends Table {
                     });
                 }
             }).size(8 * 4);
-            t.labelWrap(() -> tile != null && tile.overlay() != null && tile.overlay() != Blocks.air ? tile.overlay().localizedName : "").left().padLeft(5);
-        }).left();
+            t.labelWrap(() -> tile != null && tile.overlay() != null && tile.overlay() != Blocks.air ? tile.overlay().localizedName : "").left().padLeft(5).width(65f);
 
-        tilet.table(t -> {
-            t.left();
             t.add(new Image(){
                 Block last;
                 {
@@ -104,7 +98,7 @@ public class HoverTopTable extends Table {
                     });
                 }
             }).size(8 * 4);
-            t.labelWrap(() -> (tile != null && tile.block() instanceof Prop || tile.block() instanceof TreeBlock) ? tile.block().localizedName : "").left().width(90f).padLeft(5);
+            t.labelWrap(() -> (tile != null && tile.block() instanceof Prop || tile.block() instanceof TreeBlock) ? tile.block().localizedName : "").left().padLeft(5).width(65f);
         }).left();
     }
 

@@ -41,7 +41,7 @@ import static mi2u.MI2UVars.*;
 public class Mindow2 extends Table{
     @Nullable public static Mindow2 currTopmost = null;
     public static LabelStyle titleStyleNormal, titleStyleSnapped;
-    public static Drawable titleBarbgNormal, titleBarbgSnapped, white;
+    public static Drawable titleBarbgNormal, titleBarbgSnapped, white, gray5;
 
     public float fromx = 0, fromy = 0, curx = 0, cury = 0, titleScale = 1f;
     public boolean topmost = false, minimized = false, closable = true;
@@ -403,6 +403,7 @@ public class Mindow2 extends Table{
         titleBarbgNormal = whiteui.tint(1f, 0.1f, 0.2f, 0.8f);
         titleBarbgSnapped = whiteui.tint(1f, 0.1f, 0.2f, 0.2f);
         white = whiteui.tint(1f, 1f, 1f, 1f);
+        gray5 = whiteui.tint(0.5f, 0.5f, 0.5f, 1f);
     }
 
     public class MindowUIGroupEntry extends SettingGroupEntry{
@@ -426,66 +427,93 @@ public class Mindow2 extends Table{
                 t.defaults().pad(0f, 15f, 0f, 15f);
                 t.margin(10f);
                 t.background(Styles.flatDown);
-                t.stack(new Element(){
-                            @Override
-                            public void draw(){
-                                super.draw();
-                                Draw.color(Color.darkGray);
-                                Draw.alpha(parentAlpha);
-                                float divw = this.getWidth()/3f, divh = this.getHeight()/3f;
-                                Fill.rect(x + this.getWidth()/2f, y + this.getHeight()/2f, this.getWidth(), this.getHeight());
-                                Draw.color(Color.olive);
-                                Draw.alpha(parentAlpha);
-                                Fill.rect(x + this.getWidth() /6f + Mathf.mod(edgesnap, 3) * divw, y + this.getHeight() /6f + (edgesnap/3) * divh, divw, divh);
-                                Draw.reset();
-                            }
-                            {
-                                Element el = this;
-                                addListener(new InputListener(){
-                                    @Override
-                                    public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
-                                        edgesnap = Mathf.floor(x/el.getWidth()*3f) + Mathf.floor(y/el.getHeight()*3f)*3;
-                                        MI2USettings.putInt(mindowName + ".edgesnap", edgesnap);
-                                        return super.touchDown(event, x, y, pointer, button);
-                                    }
-                                });
-                            }
-                        }, new Table(){{
-                            this.add(new Element(){
-                                {this.touchable = Touchable.disabled;}
+                t.table(tt -> {
+                    tt.stack(new Element(){
                                 @Override
-                                public void draw() {
+                                public void draw(){
                                     super.draw();
-                                    Draw.color(Color.grays(0.1f));
-                                    Draw.alpha(parentAlpha * 0.8f);
+                                    Draw.color(Color.darkGray);
+                                    Draw.alpha(parentAlpha);
+                                    float divw = this.getWidth()/3f, divh = this.getHeight()/3f;
                                     Fill.rect(x + this.getWidth()/2f, y + this.getHeight()/2f, this.getWidth(), this.getHeight());
-
-                                    mindow2s.each(mind -> {
-                                        if(mind.parent != Mindow2.this.parent) return;
-                                        Draw.color(mind == Mindow2.this ? Color.coral : mind == aboveSnap ? Color.royal : Color.grays(0.4f));
-                                        Draw.alpha(0.8f * parentAlpha * 0.8f);
-                                        float mindw = (mind.getWidth()/Core.graphics.getWidth())*this.getWidth(),
-                                                mindh = (mind.getHeight()/Core.graphics.getHeight())*this.getHeight();
-                                        float mindx = x + (mind.x/Core.graphics.getWidth())*this.getWidth() + mindw/2f, mindy = y + (mind.y/Core.graphics.getHeight())*this.getHeight() + mindh/2f;
-                                        Fill.rect(mindx, mindy, mindw, mindh);
-                                        Draw.reset();
+                                    Draw.color(Color.olive);
+                                    Draw.alpha(parentAlpha);
+                                    Fill.rect(x + this.getWidth() /6f + Mathf.mod(edgesnap, 3) * divw, y + this.getHeight() /6f + (edgesnap/3) * divh, divw, divh);
+                                    Draw.reset();
+                                }
+                                {
+                                    Element el = this;
+                                    addListener(new InputListener(){
+                                        @Override
+                                        public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
+                                            edgesnap = Mathf.floor(x/el.getWidth()*3f) + Mathf.floor(y/el.getHeight()*3f)*3;
+                                            MI2USettings.putInt(mindowName + ".edgesnap", edgesnap);
+                                            return super.touchDown(event, x, y, pointer, button);
+                                        }
                                     });
                                 }
-                            }).self(c -> c.pad(10f).size(200f*Core.graphics.getWidth()/Core.graphics.getHeight(), 200f));
-                        }}
-                ).fill().size(200f*Core.graphics.getWidth()/Core.graphics.getHeight() + 20f, 220f);
-                t.row();
-                t.table(tt -> {
-                    entry1.build(tt);
+                            }, new Table(){{
+                                this.add(new Element(){
+                                    {this.touchable = Touchable.disabled;}
+                                    @Override
+                                    public void draw() {
+                                        super.draw();
+                                        Draw.color(Color.grays(0.1f));
+                                        Draw.alpha(parentAlpha * 0.8f);
+                                        Fill.rect(x + this.getWidth()/2f, y + this.getHeight()/2f, this.getWidth(), this.getHeight());
+
+                                        mindow2s.each(mind -> {
+                                            if(mind.parent != Mindow2.this.parent) return;
+                                            Draw.color(mind == Mindow2.this ? Color.coral : mind == aboveSnap ? Color.royal : Color.grays(0.4f));
+                                            Draw.alpha(0.8f * parentAlpha * 0.8f);
+                                            float mindw = (mind.getWidth()/Core.graphics.getWidth())*this.getWidth(),
+                                                    mindh = (mind.getHeight()/Core.graphics.getHeight())*this.getHeight();
+                                            float mindx = x + (mind.x/Core.graphics.getWidth())*this.getWidth() + mindw/2f, mindy = y + (mind.y/Core.graphics.getHeight())*this.getHeight() + mindh/2f;
+                                            Fill.rect(mindx, mindy, mindw, mindh);
+                                            Draw.reset();
+                                        });
+                                    }
+                                }).self(c -> c.pad(10f).size(200f*Core.graphics.getWidth()/Core.graphics.getHeight(), 200f));
+                            }}
+                    ).fill().size(200f*Core.graphics.getWidth()/Core.graphics.getHeight() + 20f, 220f);
                     tt.row();
-                    entry2.build(tt);
-                    tt.row();
-                    entry3.build(tt);
-                    tt.row();
-                    entry4.build(tt);
-                    tt.row();
-                    entry5.build(tt);
+                    tt.table(ttt -> {
+                        entry1.build(ttt);
+                        ttt.row();
+                        entry2.build(ttt);
+                        ttt.row();
+                        entry3.build(ttt);
+                        ttt.row();
+                        entry4.build(ttt);
+                        ttt.row();
+                        entry5.build(ttt);
+                    });
                 });
+
+                t.table(tt -> {
+                    var b = tt.button("@settings.mindow.abovesnapTarget", textb, null).growX().get();
+                    b.clicked(() -> {
+                        new PopupTable(){{
+                            this.setBackground(Styles.black5);
+                            this.defaults().growX().height(40f);
+                            for(var m : mindow2s){
+                                if(m == Mindow2.this) continue;
+                                this.button(Core.bundle.get(new StringBuilder(m.titleText).substring(1)) + "(" + m.mindowName + ")", textbtoggle, () -> {
+                                    MI2USettings.putStr(mindowName + ".abovesnapTarget", m.mindowName);
+                                    this.hide();
+                                }).with(funcSetTextb).get().setChecked(aboveSnap == m);
+                                this.row();
+                            }
+                            this.button(Iconc.cancel + "null", textbtoggle, () -> {
+                                MI2USettings.putStr(mindowName + ".abovesnapTarget", "null");
+                                this.hide();
+                            }).with(funcSetTextb).get().getLabel().setColor(Color.royal);
+                            this.snapTo(b);
+                            this.addCloseButton();
+                            this.popup();
+                        }};
+                    });
+                }).growX();
             };
         }
     }

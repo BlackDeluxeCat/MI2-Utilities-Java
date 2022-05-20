@@ -28,7 +28,7 @@ import static mindustry.Vars.*;
 public class MinimapMindow extends Mindow2{
     public static Minimap2 m = new Minimap2(200f);
     public MinimapMindow(){
-        super("MindowMap");
+        super("@minimap.MI2U");
     }
 
     @Override

@@ -87,10 +87,10 @@ public class MI2UI extends Mindow2{
         super.initSettings();
         settings.add(new CheckEntry("enableUpdate", "@settings.main.enableUpdate", false, null));
 
-        settings.add(new CheckEntry("showEmojis", "@settings.main.emoji", true, b -> emojis.addTo(b?Core.scene.root:null)));
-        settings.add(new CheckEntry("showCoreInfo", "@settings.main.coreInfo", true, b -> coreInfo.addTo(b?Core.scene.root:null)));
-        settings.add(new CheckEntry("showMindowMap", "@settings.main.mindowMap", true, b -> mindowmap.addTo(b?Core.scene.root:null)));
-        settings.add(new CheckEntry("showMapInfo", "@settings.main.mapInfo", true, b -> mapinfo.addTo(b?Core.scene.root:null)));
+        settings.add(new CheckEntry("showEmojis", "@settings.main.emoji", false, b -> emojis.addTo(b?Core.scene.root:null)));
+        settings.add(new CheckEntry("showCoreInfo", "@settings.main.coreInfo", false, b -> coreInfo.addTo(b?Core.scene.root:null)));
+        settings.add(new CheckEntry("showMindowMap", "@settings.main.mindowMap", false, b -> mindowmap.addTo(b?Core.scene.root:null)));
+        settings.add(new CheckEntry("showMapInfo", "@settings.main.mapInfo", false, b -> mapinfo.addTo(b?Core.scene.root:null)));
         settings.add(new CheckEntry("showLogicHelper", "@settings.main.logicHelper", true, b -> logicHelper.addTo(b?Vars.ui.logic:null)));
 
         settings.add(new CheckEntry("enPlayerCursor", "@settings.main.playerCursor", true, null));
@@ -106,26 +106,13 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("enUnitLogicTimer", "@settings.main.unitLogicTimer", false, null));
         settings.add(new CheckEntry("enUnitPath", "@settings.main.unitPath", false, null));
 
-        settings.add(new SettingGroupEntry("InputExtension", ""){
+        settings.add(new CollapseGroupEntry("InputExtension", ""){
             private CheckEntry check1 = new CheckEntry("inputReplace", "@settings.main.inputReplace", false, null);
             private CheckEntry check2 = new CheckEntry("forceTapTile", "@settings.main.forceTapTile", false, null);
             {
-                builder = t -> {
-                    t.clear();
-                    t.setBackground(titleBarbgNormal);
-                    t.table(tt -> {
-                        tt.background(Styles.black);
-                        check1.build(tt);
-                    }).padBottom(5f).padRight(15f).growX();
-                    if(check1.value){
-                        t.row();
-                        t.table(tt -> {
-                            tt.setBackground(Styles.black8);
-                            check2.build(tt);
-                        }).padRight(30f).growX();
-                    }
-                    check1.changed = bool -> build(t);  //TODO 可能造成栈溢出,不是很懂
-                };
+                collapsep = () -> !check1.value;
+                headBuilder = t -> check1.build(t);
+                builder = t -> check2.build(t);
             }
         });
 
