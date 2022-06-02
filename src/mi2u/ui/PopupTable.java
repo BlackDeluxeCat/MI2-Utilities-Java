@@ -61,7 +61,7 @@ public class PopupTable extends Table{
         boolean hasMouse = false;
         if(elements != null){
             for(Element e : elements){
-                if(e.hasMouse()){
+                if(e != null && e.hasMouse()){
                     hasMouse = true;
                     break;
                 }

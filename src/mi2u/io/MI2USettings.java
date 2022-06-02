@@ -344,8 +344,8 @@ public class MI2USettings{
         public void build(Table table) {
             if(headBuilder == null || builder == null || table == null) return;
             table.margin(2f);
-            table.setBackground(Mindow2.gray5);
             table.table(t -> {
+                t.setBackground(Mindow2.gray5);
                 t.margin(2f);
                 headBuilder.get(t);
             }).growX();

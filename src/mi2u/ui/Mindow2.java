@@ -297,8 +297,6 @@ public class Mindow2 extends Table{
     public void showSettings(){
         new BaseDialog("@mindow2.settings.title"){
             {
-                this.buttons.add("@mindow2.settingHelp").width(Math.min(600, Core.graphics.getWidth())).get().setWrap(true);
-                this.buttons.row();
                 addCloseButton();
                 this.cont.pane(t -> {
                     t.add(mindowName != null && !mindowName.equals("") ? Core.bundle.format("mindow2.settings.curMindowName") + mindowName: "@mindow2.settings.noMindowNameWarning").fontScale(1.2f).get().setAlignment(Align.center);
@@ -308,20 +306,6 @@ public class Mindow2 extends Table{
                         t.row();
                     });
                 }).grow();
-
-                this.cont.row();
-
-                this.cont.table(tt -> {
-                    tt.button("@mindow2.settings.reloadUI", textb, () -> {
-                        loadUISettings();
-                    }).width(100).get().getLabel().setColor(1, 1, 0, 1);
-
-                    tt.button("@mindow2.settings.cacheUI", textb, () -> {
-                        saveUISettings();
-                    }).width(100).get().getLabel().setColor(0, 0, 1, 1);
-                }).self(c -> {
-                    c.width(Math.min(530, Core.graphics.getWidth()));
-                });
                 show();
             }
         };
@@ -333,9 +317,6 @@ public class Mindow2 extends Table{
         if(mindowName == null || mindowName.equals("")) return;
 
         settings.add(new MindowUIGroupEntry(mindowName + ".Mindow", ""));
-
-        settings.add(new FieldEntry(mindowName + ".abovesnapTarget", "@settings.mindow.abovesnapTarget", "", null, s -> mindow2s.contains(mi2 -> mi2.mindowName.equals(s)) || s.equals("null"), null));
-        settings.add(new CheckEntry(mindowName + ".autoHideTitle", "@settings.mindow.autoHideTitle", false, null));
     }
 
     /** Override this method for custom UI settings load
@@ -424,96 +405,133 @@ public class Mindow2 extends Table{
             builder = t -> {
                 buildTarget = t;
                 t.clear();
-                t.defaults().pad(0f, 15f, 0f, 15f);
+                t.defaults().pad(15f);
                 t.margin(10f);
                 t.background(Styles.flatDown);
                 t.table(tt -> {
                     tt.stack(new Element(){
+                            @Override
+                            public void draw(){
+                                super.draw();
+                                Draw.color(Color.darkGray);
+                                Draw.alpha(parentAlpha);
+                                float divw = this.getWidth()/3f, divh = this.getHeight()/3f;
+                                Fill.rect(x + this.getWidth()/2f, y + this.getHeight()/2f, this.getWidth(), this.getHeight());
+                                Draw.color(Color.olive);
+                                Draw.alpha(parentAlpha);
+                                Fill.rect(x + this.getWidth() /6f + Mathf.mod(edgesnap, 3) * divw, y + this.getHeight() /6f + (edgesnap/3) * divh, divw, divh);
+                                Draw.reset();
+                            }
+                            {
+                                Element el = this;
+                                addListener(new InputListener(){
+                                    @Override
+                                    public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
+                                        edgesnap = Mathf.floor(x/el.getWidth()*3f) + Mathf.floor(y/el.getHeight()*3f)*3;
+                                        MI2USettings.putInt(mindowName + ".edgesnap", edgesnap);
+                                        return super.touchDown(event, x, y, pointer, button);
+                                    }
+                                });
+                            }
+                        }, new Table(){{
+                            this.add(new Element(){
+                                {this.touchable = Touchable.disabled;}
                                 @Override
-                                public void draw(){
+                                public void draw() {
                                     super.draw();
-                                    Draw.color(Color.darkGray);
-                                    Draw.alpha(parentAlpha);
-                                    float divw = this.getWidth()/3f, divh = this.getHeight()/3f;
+                                    Draw.color(Color.grays(0.1f));
+                                    Draw.alpha(parentAlpha * 0.8f);
                                     Fill.rect(x + this.getWidth()/2f, y + this.getHeight()/2f, this.getWidth(), this.getHeight());
-                                    Draw.color(Color.olive);
-                                    Draw.alpha(parentAlpha);
-                                    Fill.rect(x + this.getWidth() /6f + Mathf.mod(edgesnap, 3) * divw, y + this.getHeight() /6f + (edgesnap/3) * divh, divw, divh);
-                                    Draw.reset();
-                                }
-                                {
-                                    Element el = this;
-                                    addListener(new InputListener(){
-                                        @Override
-                                        public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
-                                            edgesnap = Mathf.floor(x/el.getWidth()*3f) + Mathf.floor(y/el.getHeight()*3f)*3;
-                                            MI2USettings.putInt(mindowName + ".edgesnap", edgesnap);
-                                            return super.touchDown(event, x, y, pointer, button);
-                                        }
+
+                                    mindow2s.each(mind -> {
+                                        if(mind.parent != Mindow2.this.parent) return;
+                                        Draw.color(mind == Mindow2.this ? Color.coral : mind == aboveSnap ? Color.royal : Color.grays(0.4f));
+                                        Draw.alpha(0.8f * parentAlpha * 0.8f);
+                                        float mindw = (mind.getWidth()/Core.graphics.getWidth())*this.getWidth(),
+                                                mindh = (mind.getHeight()/Core.graphics.getHeight())*this.getHeight();
+                                        float mindx = x + (mind.x/Core.graphics.getWidth())*this.getWidth() + mindw/2f, mindy = y + (mind.y/Core.graphics.getHeight())*this.getHeight() + mindh/2f;
+                                        Fill.rect(mindx, mindy, mindw, mindh);
+                                        Draw.reset();
                                     });
                                 }
-                            }, new Table(){{
-                                this.add(new Element(){
-                                    {this.touchable = Touchable.disabled;}
-                                    @Override
-                                    public void draw() {
-                                        super.draw();
-                                        Draw.color(Color.grays(0.1f));
-                                        Draw.alpha(parentAlpha * 0.8f);
-                                        Fill.rect(x + this.getWidth()/2f, y + this.getHeight()/2f, this.getWidth(), this.getHeight());
+                            }).self(c -> c.pad(10f).size(300f, 300f*Core.graphics.getHeight()/Core.graphics.getWidth()));
+                        }}
+                    ).fill().size(320f, 300f*Core.graphics.getHeight()/Core.graphics.getWidth() + 20f);
 
-                                        mindow2s.each(mind -> {
-                                            if(mind.parent != Mindow2.this.parent) return;
-                                            Draw.color(mind == Mindow2.this ? Color.coral : mind == aboveSnap ? Color.royal : Color.grays(0.4f));
-                                            Draw.alpha(0.8f * parentAlpha * 0.8f);
-                                            float mindw = (mind.getWidth()/Core.graphics.getWidth())*this.getWidth(),
-                                                    mindh = (mind.getHeight()/Core.graphics.getHeight())*this.getHeight();
-                                            float mindx = x + (mind.x/Core.graphics.getWidth())*this.getWidth() + mindw/2f, mindy = y + (mind.y/Core.graphics.getHeight())*this.getHeight() + mindh/2f;
-                                            Fill.rect(mindx, mindy, mindw, mindh);
-                                            Draw.reset();
-                                        });
+                    tt.table(rightt -> {
+                        rightt.table(ttt -> {
+                            entry1.build(ttt);
+                            ttt.row();
+                            entry2.build(ttt);
+                            ttt.row();
+                            entry3.build(ttt);
+                            ttt.row();
+                            entry4.build(ttt);
+                            ttt.row();
+                            entry5.build(ttt);
+                        });
+                        rightt.row();
+
+                        rightt.table(ttt -> {
+                            ttt.button("@mindow2.settings.reloadUI", textb, Mindow2.this::loadUISettings).with(c -> {
+                                c.getLabel().setColor(1, 1, 0, 1);
+                                funcSetTextb.get(c);
+                            }).growX();
+
+                            ttt.button("@mindow2.settings.cacheUI", textb, Mindow2.this::saveUISettings).with(c -> {
+                                c.getLabel().setColor(0, 0, 1, 1);
+                                funcSetTextb.get(c);
+                            }).growX();
+                        }).tooltip(tooltip -> {
+                            tooltip.setBackground(Styles.black9);
+                            tooltip.labelWrap("@mindow2.settingHelp").width(200f);
+                        });
+
+                        rightt.row();
+                        rightt.table(t3 -> {
+                            var b = t3.button("@settings.mindow.abovesnapTarget", textb, null).growX().get();
+                            b.clicked(() -> {
+                                new PopupTable(){{
+                                    this.setBackground(Styles.black5);
+                                    this.defaults().growX().height(40f);
+                                    for(var m : mindow2s){
+                                        if(m == Mindow2.this || m.parent != Mindow2.this.parent) continue;
+                                        this.button(Core.bundle.get(new StringBuilder(m.titleText).substring(1)) + "(" + m.mindowName + ")", textbtoggle, () -> {
+                                            MI2USettings.putStr(mindowName + ".abovesnapTarget", m.mindowName);
+                                            this.hide();
+                                        }).with(funcSetTextb).get().setChecked(aboveSnap == m);
+                                        this.row();
                                     }
-                                }).self(c -> c.pad(10f).size(200f*Core.graphics.getWidth()/Core.graphics.getHeight(), 200f));
-                            }}
-                    ).fill().size(200f*Core.graphics.getWidth()/Core.graphics.getHeight() + 20f, 220f);
-                    tt.row();
-                    tt.table(ttt -> {
-                        entry1.build(ttt);
-                        ttt.row();
-                        entry2.build(ttt);
-                        ttt.row();
-                        entry3.build(ttt);
-                        ttt.row();
-                        entry4.build(ttt);
-                        ttt.row();
-                        entry5.build(ttt);
-                    });
+                                    this.button(Iconc.cancel + "null", textbtoggle, () -> {
+                                        MI2USettings.putStr(mindowName + ".abovesnapTarget", "null");
+                                        this.hide();
+                                    }).with(funcSetTextb).get().getLabel().setColor(Color.royal);
+                                    this.snapTo(b);
+                                    this.update(() -> this.hideWithoutFocusOn(this, buildTarget));
+                                    this.addCloseButton();
+                                    this.popup();
+                                }};
+                            });
+                            b.getLabelCell().pad(5f,2f,5f,2f);
+
+                            t3.row();
+
+                            var b2 = t3.button("@settings.mindow.autoHideTitle", textbtoggle, null).growX().get();
+                            b2.setChecked(MI2USettings.getBool(mindowName + ".autoHideTitle", false));
+                            b2.clicked(() -> {
+                                var bool = MI2USettings.getBool(mindowName + ".autoHideTitle", false);
+                                bool = !bool;
+                                MI2USettings.putBool(mindowName + ".autoHideTitle", bool);
+                                b2.setChecked(bool);
+                            });
+                            b2.getLabelCell().pad(5f,2f,5f,2f);
+                        }).growX();
+                    }).minWidth(220f).pad(4f);
+
+
                 });
 
-                t.table(tt -> {
-                    var b = tt.button("@settings.mindow.abovesnapTarget", textb, null).growX().get();
-                    b.clicked(() -> {
-                        new PopupTable(){{
-                            this.setBackground(Styles.black5);
-                            this.defaults().growX().height(40f);
-                            for(var m : mindow2s){
-                                if(m == Mindow2.this) continue;
-                                this.button(Core.bundle.get(new StringBuilder(m.titleText).substring(1)) + "(" + m.mindowName + ")", textbtoggle, () -> {
-                                    MI2USettings.putStr(mindowName + ".abovesnapTarget", m.mindowName);
-                                    this.hide();
-                                }).with(funcSetTextb).get().setChecked(aboveSnap == m);
-                                this.row();
-                            }
-                            this.button(Iconc.cancel + "null", textbtoggle, () -> {
-                                MI2USettings.putStr(mindowName + ".abovesnapTarget", "null");
-                                this.hide();
-                            }).with(funcSetTextb).get().getLabel().setColor(Color.royal);
-                            this.snapTo(b);
-                            this.addCloseButton();
-                            this.popup();
-                        }};
-                    });
-                }).growX();
+
             };
         }
     }
