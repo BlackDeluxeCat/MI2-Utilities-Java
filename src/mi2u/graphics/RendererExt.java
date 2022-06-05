@@ -158,6 +158,7 @@ public class RendererExt{
                     GlyphLayout layout = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
                     final float nameHeight = 6f;
 
+                    boolean ints = font.usesIntegerPositions();
                     font.setUseIntegerPositions(false);
                     font.getData().setScale(0.25f / Scl.scl(1f));
                     layout.setText(font, p.name);
@@ -179,6 +180,7 @@ public class RendererExt{
                     Pools.free(layout);
                     font.getData().setScale(1f);
                     font.setColor(Color.white);
+                    font.setUseIntegerPositions(ints);
                 }
             }
             Draw.reset();
