@@ -1,26 +1,18 @@
 package mi2u.ui;
 
-import arc.Core;
-import arc.graphics.Color;
-import arc.graphics.Texture;
-import arc.graphics.g2d.TextureRegion;
-import arc.math.geom.Vec2;
-import arc.scene.style.Drawable;
-import arc.scene.style.TextureRegionDrawable;
-import arc.scene.ui.Image;
-import arc.scene.ui.layout.Table;
-import arc.util.Log;
-import arc.util.Nullable;
-import mindustry.content.Blocks;
-import mindustry.entities.Units;
-import mindustry.gen.Tex;
-import mindustry.ui.Displayable;
-import mindustry.ui.Styles;
-import mindustry.world.Block;
-import mindustry.world.Tile;
-import mindustry.world.blocks.environment.Prop;
-import mindustry.world.blocks.environment.StaticWall;
-import mindustry.world.blocks.environment.TreeBlock;
+import arc.*;
+import arc.graphics.*;
+import arc.math.geom.*;
+import arc.scene.style.*;
+import arc.scene.ui.*;
+import arc.scene.ui.layout.*;
+import arc.util.*;
+import mindustry.content.*;
+import mindustry.entities.*;
+import mindustry.gen.*;
+import mindustry.ui.*;
+import mindustry.world.*;
+import mindustry.world.blocks.environment.*;
 
 import static mindustry.Vars.*;
 
@@ -40,11 +32,9 @@ public class HoverTopTable extends Table {
         buildt = new Table();
         tilet = new Table();
 
-        //TODO 更节约性能的update
         unitt.update(() -> {
             if(unit == lastUnit) return;
             lastUnit = unit;
-            Log.info("new unit");
             unitt.clear();
             if(unit != null){
                 unit.display(unitt);
@@ -54,7 +44,6 @@ public class HoverTopTable extends Table {
         buildt.update(() -> {
             if(build == lastBuild) return;
             lastBuild = build;
-            Log.info("new building");
             buildt.clear();
             if(build != null){
                 build.display(buildt);
@@ -66,39 +55,42 @@ public class HoverTopTable extends Table {
             t.left();
             t.add(new Image(){
                 Block last;
+                TextureRegionDrawable icon = new TextureRegionDrawable();
                 {
                     update(() -> {
                         if(tile == null || tile.floor() == last) return;
                         last = tile.floor();
-                        this.setDrawable(tile != null ? new TextureRegionDrawable(tile.floor().uiIcon) : null);
+                        this.setDrawable(tile != null ? icon.set(tile.floor().uiIcon) : null);
                     });
                 }
             }).size(8 * 4);
-            t.labelWrap(() -> tile != null ? tile.floor().localizedName : "").left().padLeft(5).width(65f);
+            t.labelWrap(() -> tile != null ? tile.floor().localizedName : "").left().padLeft(5).width(60f);
 
             t.add(new Image(){
                 Block last;
+                TextureRegionDrawable icon = new TextureRegionDrawable();
                 {
                     update(() -> {
                         if(tile == null || tile.overlay() == last) return;
                         last = tile.overlay();
-                        this.setDrawable((tile != null && tile.overlay() != null && tile.overlay() != Blocks.air) ? new TextureRegionDrawable(tile.overlay().uiIcon) : null);
+                        this.setDrawable((tile != null && tile.overlay() != null && tile.overlay() != Blocks.air) ? icon.set(tile.overlay().uiIcon) : null);
                     });
                 }
             }).size(8 * 4);
-            t.labelWrap(() -> tile != null && tile.overlay() != null && tile.overlay() != Blocks.air ? tile.overlay().localizedName : "").left().padLeft(5).width(65f);
+            t.labelWrap(() -> tile != null && tile.overlay() != null && tile.overlay() != Blocks.air ? tile.overlay().localizedName : "").left().padLeft(5).width(60f);
 
             t.add(new Image(){
                 Block last;
+                TextureRegionDrawable icon = new TextureRegionDrawable();
                 {
                     update(() -> {
                         if(tile == null || tile.block() == last) return;
                         last = tile.block();
-                        this.setDrawable((tile != null && tile.block() instanceof Prop || tile.block() instanceof TreeBlock) ? new TextureRegionDrawable(tile.block().uiIcon) : null);
+                        this.setDrawable((tile != null && tile.block() instanceof Prop || tile.block() instanceof TreeBlock) ? icon.set(tile.block().uiIcon) : null);
                     });
                 }
             }).size(8 * 4);
-            t.labelWrap(() -> (tile != null && tile.block() instanceof Prop || tile.block() instanceof TreeBlock) ? tile.block().localizedName : "").left().padLeft(5).width(65f);
+            t.labelWrap(() -> (tile != null && tile.block() instanceof Prop || tile.block() instanceof TreeBlock) ? tile.block().localizedName : "").left().padLeft(5).width(60f);
         }).left();
     }
 
@@ -107,6 +99,12 @@ public class HoverTopTable extends Table {
         table().growX().update(t -> {
             t.clear();
             t.defaults().growX().padBottom(2f);
+
+            if(build != null){
+                t.add(buildt);
+                t.row();
+            }
+
             if(unit != null){
                 t.add(unitt);
                 t.row();
@@ -117,10 +115,6 @@ public class HoverTopTable extends Table {
                 t.row();
             }
 
-            if(build != null){
-                t.add(buildt);
-                t.row();
-            }
             addColorBar(t);
             t.row();
         });
@@ -147,6 +141,9 @@ public class HoverTopTable extends Table {
             //if(hoverTile.drop() != null || hoverTile.wallDrop() != null){
                 tile = hoverTile;
             //}
+        }else{
+            build = null;
+            tile = null;
         }
     }
 

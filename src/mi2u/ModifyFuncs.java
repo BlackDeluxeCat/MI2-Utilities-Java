@@ -132,14 +132,14 @@ public class ModifyFuncs{
 
         topTable.add(HoverTopTable.hoverInfo).growX();
         topTable.row();
-        topTable.add(vanilla).growX().visible(() -> control.input.block != null);
+        topTable.add(vanilla).growX().visible(() -> control.input.block != null || Reflect.get(ui.hudfrag.blockfrag, "menuHoverBlock") != null);
         topTable.row();
         topTable.add(new Element()).height(0.5f).update(t -> {
             var cell = topTable.getCell(vanilla);
-            vanilla.updateVisibility();
             if(cell != null) cell.height(vanilla.getPrefHeight() * (vanilla.visible ? 1f:0f) + 0.5f);
+            Reflect.set(ui.hudfrag.blockfrag, "hover", HoverTopTable.hoverInfo.unit);
         });
-        topTable.visible(() -> HoverTopTable.hoverInfo.hasInfo() || control.input.block != null);
+        topTable.visible(() -> HoverTopTable.hoverInfo.hasInfo() || vanilla.visible);
     }
 
     public static void schelogic(){
