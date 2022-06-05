@@ -30,7 +30,7 @@ public class MapInfoMindow extends Mindow2{
     public MapInfoMindow() {
         super("@mapInfo.MI2U", "@mapInfo.help");
         Events.on(WorldLoadEvent.class, e -> {
-            Time.run(60f, this::rebuild);
+            rebuild();
             curWave = state.wave;
         });
     }
@@ -226,7 +226,7 @@ public class MapInfoMindow extends Mindow2{
     }
 
     public void addBoolIcon(Boolp p, String icon, Table t){
-        t.label(() -> icon).color(p.get() ? Color.white : Color.red).pad(1f);
+        t.add(icon).color(p.get() ? Color.white : Color.red).pad(1f);
     }
 
     public void addFloatAttr(Prov<CharSequence> p, String name, Table t){

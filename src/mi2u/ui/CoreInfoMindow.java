@@ -90,18 +90,6 @@ public class CoreInfoMindow extends Mindow2{
             }
         };
 
-        Events.run(EventType.Trigger.update, () -> {
-            if(player.unit() != null && player.unit().plans().size <= 0){
-                buildPlanTable.hide();
-                buildPlanTable.clearChildren();
-            }else{
-                buildPlanTable.popup();
-                buildPlanTable.setPositionInScreen(this.x, this.y - buildPlanTable.getPrefHeight());
-            }
-
-            if(chartTable.hasParent()) chartTable.toFront();
-            //chartTable.hideWithoutFocusOn(this);
-        });
         Events.on(EventType.ContentInitEvent.class, e -> {
             content.items().each(item -> {
                 itemRecoders[item.id].getter = () -> core == null ? 0 : core.items.get(item);
@@ -112,7 +100,6 @@ public class CoreInfoMindow extends Mindow2{
             content.items().each(item -> {
                 itemRecoders[item.id].reset();
             });
-            rebuild();
         });
 
         update(() -> {
@@ -124,7 +111,7 @@ public class CoreInfoMindow extends Mindow2{
             core = team.core();
             pg.team = team;
 
-            if(state.isGame() && content.items().contains(item -> core != null && core.items.get(item) > 0 && usedItems.add(item))){
+            if(state.isGame() && content.items().count(item -> core != null && core.items.get(item) > 0 && usedItems.add(item)) > 0){
                 rebuild();
             }
 
@@ -133,6 +120,16 @@ public class CoreInfoMindow extends Mindow2{
                     if(rec != null) rec.update();
                 }
             }
+
+            if(player.unit() != null && player.unit().plans().size <= 0){
+                buildPlanTable.hide();
+                buildPlanTable.clearChildren();
+            }else{
+                buildPlanTable.popup();
+                buildPlanTable.setPositionInScreen(this.x, this.y - buildPlanTable.getPrefHeight());
+            }
+
+            if(chartTable.hasParent()) chartTable.toFront();
         });
     }
 
@@ -168,8 +165,8 @@ public class CoreInfoMindow extends Mindow2{
                         if(i >= 4 && !usedItems.contains(item)) continue;
 
                         iut.stack(
-                                new Image(item.uiIcon),
-                                new Table(t -> t.label(() -> core == null ? "" : (itemRecoders[item.id].get(0) - itemRecoders[item.id].get(1) >= 0 ? "[green]+" : "[red]") + (int)(itemRecoders[item.id].get(0) - itemRecoders[item.id].get(1))).get().setFontScale(0.65f)).right().bottom()
+                            new Image(item.uiIcon),
+                            new Table(t -> t.label(() -> core == null ? "" : (itemRecoders[item.id].get(0) - itemRecoders[item.id].get(1) >= 0 ? "[green]+" : "[red]") + (int)(itemRecoders[item.id].get(0) - itemRecoders[item.id].get(1))).get().setFontScale(0.65f)).right().bottom()
                         ).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel)).get().clicked(() -> {
                             charting = itemRecoders[item.id];
                             chartTable.popup();
