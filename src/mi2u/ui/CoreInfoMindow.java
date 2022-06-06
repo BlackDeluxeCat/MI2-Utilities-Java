@@ -2,15 +2,16 @@ package mi2u.ui;
 
 import arc.*;
 import arc.graphics.*;
-import arc.graphics.g2d.Draw;
+import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.scene.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import arc.util.pooling.*;
 import mi2u.MI2UTmp;
-import mi2u.input.InputOverwrite;
+import mi2u.input.*;
 import mi2u.io.*;
 import mi2u.io.MI2USettings.*;
 import mi2u.struct.FloatDataRecorder;
@@ -45,7 +46,7 @@ public class CoreInfoMindow extends Mindow2{
         content.items().each(item -> {
             itemRecoders[item.id] = new FloatDataRecorder(60);
             itemRecoders[item.id].getter = () -> core == null ? 0 : core.items.get(item);
-            itemRecoders[item.id].titleGetter = () -> Iconc.eye + item.localizedName + ": ";
+            itemRecoders[item.id].titleGetter = () -> item.localizedName + ": ";
         });
 
         chartTable = new PopupTable(){
@@ -57,10 +58,31 @@ public class CoreInfoMindow extends Mindow2{
                     public void draw(){
                         super.draw();
                         Draw.reset();
-                        if(charting != null) charting.defaultDraw(x, y, width, height, true);
+                        if(charting != null){
+                            charting.defaultDraw(x, y, width, height, true);
+                            Draw.color();
+
+                            Font font = Fonts.outline;
+                            font.setColor(1f, 1f, 1f, 0.5f);
+                            GlyphLayout lay = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
+
+                            String text = UI.formatAmount((long)charting.min());
+                            lay.setText(font, text);
+                            font.getCache().clear();
+                            font.getCache().addText(text, this.x, this.y + lay.height);
+                            font.getCache().draw(parentAlpha);
+
+                            text = UI.formatAmount((long)charting.max());
+                            lay.setText(font, text);
+                            font.getCache().clear();
+                            font.getCache().addText(text, this.x, this.y + this.getHeight());
+                            font.getCache().draw(parentAlpha);
+
+                            Pools.free(lay);
+                        }
                     }
                 };
-                this.add(ch).fill().size(200f,100f);
+                this.add(ch).fill().size(200f,120f);
                 this.row();
                 this.label(() -> {
                     if(charting != null && charting.size() > 0){

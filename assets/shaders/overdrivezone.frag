@@ -7,7 +7,9 @@ uniform float u_time;
 uniform float u_dp;
 uniform vec2 u_offset;
 varying vec2 v_texCoords;
-/** Author @BlackDeluxeCat */
+/** Author @BlackDeluxeCat
+* You are not allowed to use this fragment shader in any place except any Mindustry mod.
+*/
 void main(){
     vec2 T = v_texCoords.xy;
     vec2 coords = (T * u_texsize) + u_offset;
