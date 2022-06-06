@@ -229,7 +229,7 @@ public class MI2USettings{
         @Override
         public void build(Table table){
             setting = getSetting(name);
-            table.label(() -> this.name + " = " + (setting != null ? setting.get() : "invaild")).left().growX().get().setColor(0, 1, 1, 0.7f);
+            table.labelWrap(() -> this.name + " = " + (setting != null ? setting.get() : "invaild")).left().growX().get().setColor(0, 1, 1, 0.7f);
         }
     }
 

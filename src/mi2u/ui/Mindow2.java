@@ -43,14 +43,14 @@ public class Mindow2 extends Table{
     public static LabelStyle titleStyleNormal, titleStyleSnapped;
     public static Drawable titleBarbgNormal, titleBarbgSnapped, white, gray5;
 
-    public float fromx = 0, fromy = 0, curx = 0, cury = 0, titleScale = 1f;
+    public float fromx = 0, fromy = 0, curx = 0, cury = 0;
     public boolean topmost = false, minimized = false, closable = true;
-    public String titleText = "", helpInfo = "", mindowName;
+    public String titleText, helpInfo = "", mindowName;
     protected Table titleBar = new Table();
     protected Table cont = new Table();
     protected Seq<SettingEntry> settings = new Seq<>();
-    protected Interval interval = new Interval(2);
-    @Nullable public Element aboveSnap; public int edgesnap = -1;
+    protected Interval interval = new Interval();
+    @Nullable public Element aboveSnap; public int edgesnap = Align.center;
 
     public Mindow2(String title){
         init();
@@ -60,9 +60,7 @@ public class Mindow2 extends Table{
             loadUISettings();
         });
 
-        Events.on(ResizeEvent.class, e -> {
-            loadUISettings();
-        });
+        Events.on(ResizeEvent.class, e -> loadUISettings());
 
         titleText = title;
         registerName();
@@ -117,7 +115,7 @@ public class Mindow2 extends Table{
             public void touchDragged(InputEvent event, float x, float y, int pointer){
                 Vec2 v = localToStageCoordinates(MI2UTmp.v1.set(x, y));
                 Element hit = Core.scene.hit(v.x + title.x + title.parent.x, v.y + title.y + title.parent.y, false);
-                if(hit != null && hit.name == "Mindow2Title" && !hit.isDescendantOf(Mindow2.this)){
+                if(hit != null && hit.name != null && hit.name.equals("Mindow2Title") && !hit.isDescendantOf(Mindow2.this)){
                     aboveSnap = hit.parent.parent;
                     return;
                 }
@@ -128,13 +126,9 @@ public class Mindow2 extends Table{
         });
         titleBar.add(title).pad(0, 1, 0, 1).growX();
 
-        titleBar.button("" + Iconc.info, textb, () -> {
-            showHelp();
-        }).size(titleButtonSize);
+        titleBar.button("" + Iconc.info, textb, this::showHelp).size(titleButtonSize);
 
-        titleBar.button("" + Iconc.settings, textb, () -> {
-            showSettings();
-        }).size(titleButtonSize);
+        titleBar.button("" + Iconc.settings, textb, this::showSettings).size(titleButtonSize);
 
         titleBar.button("" + Iconc.lock, textbtoggle, () -> {
             topmost = !topmost;
@@ -143,7 +137,6 @@ public class Mindow2 extends Table{
             }else{
                 if(currTopmost == this) currTopmost = null;
             }
-            rebuild();
         }).size(titleButtonSize).update(b -> {
             topmost = currTopmost == this;
             b.setChecked(topmost);
@@ -157,105 +150,77 @@ public class Mindow2 extends Table{
                 cury -= cont.getHeight();
             }
             minimize();
-        }).size(titleButtonSize).update(b -> {
-            b.setChecked(minimized);
-        });
+        }).size(titleButtonSize).update(b -> b.setChecked(minimized));
 
-        titleBar.button("X", textb, () -> {
-            close();
-        }).size(titleButtonSize).update(b -> {
-            b.setDisabled(!closable);
-        });
+        titleBar.button("X", textb, this::close).size(titleButtonSize).update(b -> b.setDisabled(!closable));
 
         addListener(new InputListener(){
             @Override
-            public void enter(InputEvent event, float x, float y, int pointer, Element fromActor){
-                if(fromActor != null && fromActor.isDescendantOf(Mindow2.this)) return;
-                titleScale = 1f;
-                interval.get(1, 1);
-            }
-            @Override
             public void exit(InputEvent event, float x, float y, int pointer, Element toActor){
                 if(toActor != null && toActor.isDescendantOf(Mindow2.this)) return;
-                titleScale = 0f;
                 interval.get(0, 1);
             }
         });
 
-        titleBar.setTransform(true);
-        interval.reset(0, 1);
-        interval.reset(1, 1);
+        interval.get(0, 1);
         titleBar.update(() -> {
             cont.touchable = Touchable.enabled;
             //TODO add a abovesnap listener
-            //title.setStyle(aboveSnap == null ? titleStyleNormal : titleStyleSnapped);
             titleBar.setBackground(aboveSnap == null ? titleBarbgNormal : titleBarbgSnapped);
-            //don't collapse when minimized or empty container
-            if(minimized || !MI2USettings.getBool(mindowName + ".autoHideTitle", false) || cont.getPrefHeight() < 20f || !cont.visible) titleScale = 1f;
-            if((interval.check(0, 180) && titleBar.scaleY > 0.95f) || (interval.check(1, 15) && titleBar.scaleY < 0.95f)){
-                titleBar.toFront();
-                titleBar.setScale(1, Mathf.lerpDelta(titleBar.scaleY, titleScale, 0.3f));
-                //titleBar.keepInStage();
-                //titleBar.invalidateHierarchy();
-                //titleBar.pack();
-                titleBar.touchable = Touchable.enabled;
-            }else if(titleBar.scaleY < 0.95f){
-                titleBar.touchable = Touchable.disabled;
-            }
-            edgesnap = MI2USettings.getInt(mindowName + ".edgesnap", -1);
+            edgesnap = MI2USettings.getInt(mindowName + ".edgesnap", Align.center);
             if(this == currTopmost || shouldTopMost()) setZIndex(1000);
 
             if(aboveSnap != null){
-                curx = aboveSnap.x;
-                cury = aboveSnap.y - getRealHeight();
-                setPosition(curx, cury);
-                keepInStage();
-            }else if(edgesnap != 4 && hasParent()){
-                edgeSnap(edgesnap);
-                setPosition(curx, cury);
+                setPosition(aboveSnap.x, aboveSnap.y, Align.topLeft);
+            }else if(edgesnap != Align.center && hasParent()){
+                Vec2 vec = MI2UTmp.v1;
+                vec.set(curx, cury);
+                edgeSnap(edgesnap, vec);
+                setPosition(vec.x, vec.y);
             }else{
                 setPosition(curx, cury);
-                keepInStage();
             }
+            keepInStage();
             invalidateHierarchy();
             pack();
         });
-        add(titleBar).growX();
+
+        collapser(titleBar, true, () -> cont.getPrefHeight() < 20f || !cont.visible || !MI2USettings.getBool(mindowName + ".autoHideTitle", false) || minimized || ((hasMouse() || !interval.check(0, 180)))).growX().with(c -> c.setDuration(0.1f));
     }
 
-    protected void edgeSnap(int s){
-        switch(s){
-            case 6://lefttop
-                curx = 0;
-                cury = parent.getHeight() - getRealHeight();
+    protected void edgeSnap(int align, Vec2 vec){
+        switch(align){
+            case Align.topLeft://lefttop
+                vec.x = 0;
+                vec.y = parent.getHeight() - getPrefHeight();
                 break;
-            case 7://top
-                //curx = (parent.getWidth() - getWidth())/2f;
-                cury = (parent.getHeight() -getRealHeight());
+            case Align.top://top
+                //vec.x = (parent.getWidth() - getWidth())/2f;
+                vec.y = (parent.getHeight() - getPrefHeight());
                 break;
-            case 8://righttop
-                curx = (parent.getWidth() - getWidth());
-                cury = (parent.getHeight() -getRealHeight());
+            case Align.topRight://righttop
+                vec.x = (parent.getWidth() - getWidth());
+                vec.y = (parent.getHeight() - getPrefHeight());
                 break;
-            case 5://right
-                curx = (parent.getWidth() - getWidth());
-                //cury = (parent.getHeight() -getRealHeight())/2f;
+            case Align.right://right
+                vec.x = (parent.getWidth() - getWidth());
+                //vec.y = (parent.getHeight() -getRealHeight())/2f;
                 break;
-            case 2://rightbottom
-                curx = (parent.getWidth() - getWidth());
-                cury = 0;
+            case Align.bottomRight://rightbottom
+                vec.x = (parent.getWidth() - getWidth());
+                vec.y = 0;
                 break;
-            case 1://bottom
-                //curx = (parent.getWidth() - getWidth())/2f;
-                cury = 0;
+            case Align.bottom://bottom
+                //vec.x = (parent.getWidth() - getWidth())/2f;
+                vec.y = 0;
                 break;
-            case 0://leftbottom
-                curx = 0;
-                cury = 0;
+            case Align.bottomLeft://leftbottom
+                vec.x = 0;
+                vec.y = 0;
                 break;
-            case 3://left
-                curx = 0;
-                //cury = (parent.getHeight() -getRealHeight())/2f;
+            case Align.left://left
+                vec.x = 0;
+                //vec.y = (parent.getHeight() -getRealHeight())/2f;
                 break;
         }
     }
@@ -267,10 +232,6 @@ public class Mindow2 extends Table{
         this.remove();
         newParent.addChild(this);
         return true;
-    }
-
-    public float getRealHeight(){
-        return getHeight() - titleBar.getHeight() *  (1 - titleBar.scaleY);
     }
 
     public boolean shouldTopMost(){
@@ -302,7 +263,7 @@ public class Mindow2 extends Table{
                     t.add(mindowName != null && !mindowName.equals("") ? Core.bundle.format("mindow2.settings.curMindowName") + mindowName: "@mindow2.settings.noMindowNameWarning").fontScale(1.2f).get().setAlignment(Align.center);
                     t.row();
                     settings.each(st -> {
-                        t.table(tt -> st.build(tt)).width(Math.min(600, Core.graphics.getWidth())).left();
+                        t.table(st::build).width(Math.min(600, Core.graphics.getWidth())).left();
                         t.row();
                     });
                 }).grow();
@@ -392,7 +353,13 @@ public class Mindow2 extends Table{
         SingleEntry entry2 = new SingleEntry(mindowName + ".topmost", "");
         SingleEntry entry3 = new SingleEntry(mindowName + ".curx", "");
         SingleEntry entry4 = new SingleEntry(mindowName + ".cury", "");
-        SingleEntry entry5 = new SingleEntry(mindowName + ".edgesnap", "");
+        SingleEntry entry5 = new SingleEntry(mindowName + ".edgesnap", ""){
+            @Override
+            public void build(Table table) {
+                setting = MI2USettings.getSetting(name);
+                table.labelWrap(() -> this.name + " = " + (setting != null ? Align.toString(Strings.parseInt(setting.get())) : "invaild")).left().growX().get().setColor(0, 1, 1, 0.7f);
+            }
+        };
         Table buildTarget;
         public MindowUIGroupEntry(String name, String help) {
             super(name, help);
@@ -410,34 +377,38 @@ public class Mindow2 extends Table{
                 t.background(Styles.flatDown);
                 t.table(tt -> {
                     tt.stack(new Element(){
-                            @Override
-                            public void draw(){
-                                super.draw();
-                                Draw.color(Color.darkGray);
-                                Draw.alpha(parentAlpha);
-                                float divw = this.getWidth()/3f, divh = this.getHeight()/3f;
-                                Fill.rect(x + this.getWidth()/2f, y + this.getHeight()/2f, this.getWidth(), this.getHeight());
-                                Draw.color(Color.olive);
-                                Draw.alpha(parentAlpha);
-                                Fill.rect(x + this.getWidth() /6f + Mathf.mod(edgesnap, 3) * divw, y + this.getHeight() /6f + (edgesnap/3) * divh, divw, divh);
-                                Draw.reset();
-                            }
-                            {
-                                Element el = this;
-                                addListener(new InputListener(){
-                                    @Override
-                                    public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
-                                        edgesnap = Mathf.floor(x/el.getWidth()*3f) + Mathf.floor(y/el.getHeight()*3f)*3;
-                                        MI2USettings.putInt(mindowName + ".edgesnap", edgesnap);
-                                        return super.touchDown(event, x, y, pointer, button);
-                                    }
-                                });
-                            }
-                        }, new Table(){{
+                        @Override
+                        public void draw(){
+                            super.draw();
+                            Draw.color(Color.darkGray);
+                            Draw.alpha(parentAlpha);
+                            float divw = this.getWidth()/3f, divh = this.getHeight()/3f;
+                            Fill.rect(x + this.getWidth()/2f, y + this.getHeight()/2f, this.getWidth(), this.getHeight());
+                            Draw.color(Color.olive);
+                            Draw.alpha(parentAlpha);
+                            float drawx = Align.isRight(edgesnap) ? 2*divw : Align.isCenterHorizontal(edgesnap) ? divw : 0f, drawy = Align.isTop(edgesnap) ? 2*divh : Align.isCenterVertical(edgesnap) ? divh : 0f;
+                            Fill.rect(x + this.getWidth()/6f + drawx, y + this.getHeight()/6f + drawy, divw, divh);
+                            Draw.reset();
+                        }
+                        {
+                            Element el = this;
+                            addListener(new InputListener(){
+                                @Override
+                                public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
+                                    int top = y/el.getHeight()*3f > 2f ? Align.top : 0;
+                                    int bottom = y/el.getHeight()*3f < 1f ? Align.bottom : 0;
+                                    int left = x/el.getWidth()*3f < 1f ? Align.left : 0;
+                                    int right = x/el.getWidth()*3f > 2f ? Align.right : 0;
+                                    edgesnap = top | left | right | bottom;
+                                    if(edgesnap == 0) edgesnap = Align.center;
+                                    MI2USettings.putInt(mindowName + ".edgesnap", edgesnap);
+                                    return super.touchDown(event, x, y, pointer, button);
+                                }});
+                        }}, new Table(){{
                             this.add(new Element(){
                                 {this.touchable = Touchable.disabled;}
                                 @Override
-                                public void draw() {
+                                public void draw(){
                                     super.draw();
                                     Draw.color(Color.grays(0.1f));
                                     Draw.alpha(parentAlpha * 0.8f);
@@ -469,7 +440,7 @@ public class Mindow2 extends Table{
                             entry4.build(ttt);
                             ttt.row();
                             entry5.build(ttt);
-                        });
+                        }).growX();
                         rightt.row();
 
                         rightt.table(ttt -> {
@@ -527,11 +498,7 @@ public class Mindow2 extends Table{
                             b2.getLabelCell().pad(5f,2f,5f,2f);
                         }).growX();
                     }).minWidth(220f).pad(4f);
-
-
                 });
-
-
             };
         }
     }

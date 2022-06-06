@@ -57,7 +57,7 @@ public class MI2Utilities extends Mod{
             {
                 addTo(Core.scene.root);
                 curx = (Core.graphics.getWidth() - getPrefWidth()) / 2;
-                cury = (Core.graphics.getHeight() - getRealHeight()) / 2;
+                cury = (Core.graphics.getHeight() - getPrefHeight()) / 2;
                 
                 update(() -> {
                     toFront();
