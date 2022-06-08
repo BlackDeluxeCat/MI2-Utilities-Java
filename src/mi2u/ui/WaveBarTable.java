@@ -1,24 +1,21 @@
 package mi2u.ui;
 
 import arc.*;
-import arc.func.Floatc;
-import arc.func.Floatc2;
-import arc.graphics.Color;
-import arc.math.Angles;
-import arc.math.Mathf;
-import arc.math.geom.Geometry;
+import arc.graphics.*;
+import arc.math.*;
+import arc.math.geom.*;
+import arc.scene.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
-import mi2u.MI2UTmp;
-import mi2u.input.InputOverwrite;
+import mi2u.*;
+import mindustry.content.*;
 import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
-import mindustry.world.Tile;
-
-import java.util.Set;
+import mindustry.ui.*;
+import mindustry.world.*;
 
 import static mindustry.Vars.*;
 
@@ -27,25 +24,35 @@ public class WaveBarTable extends Table{
     public Seq<WaveData> waves = new Seq<>();
     public Seq<UnitData> allunits = new Seq<>();
     ObjectSet<Unit> savedunits = new ObjectSet<>();
-    public Interval timer = new Interval(2);
-    protected Seq<MI2Bar> hpBars = new Seq<>();
-    protected int[] prewave = {1,2,3,4,5};
+    public Interval timer = new Interval();
 
-    private int tmpCount = 0;
-    private boolean any = false;
+    protected Seq<MI2Bar> hpBars = new Seq<>();
+    protected PopupTable detailt = new PopupTable();
+
+    protected int[] prewave = {1,2,3,4,5};
+    public int previewedWave = 0;
+
+    //temp
+    private static boolean any = false;
 
     public WaveBarTable(){
         super();
 
         Events.on(WorldLoadEvent.class, e -> {
             clearData();
+            SpawnerData.update();
             Time.run(Math.min(state.rules.waveSpacing, 60f), this::catchWave);
         });
 
-        Events.on(WaveEvent.class, e -> Time.run(Math.min(state.rules.waveSpacing, 60f), this::catchWave));
+        Events.on(CoreChangeEvent.class, e -> SpawnerData.update());
+
+        Events.on(WaveEvent.class, e -> Time.run(Math.min(state.rules.waveSpacing, 60f), () -> {
+            SpawnerData.update();
+            catchWave();
+        }));
 
         update(() -> {
-            if(!timer.get(0, 19f)) return;
+            if(!timer.get(19f)) return;
             if(!state.isGame()){
                 clearData();
                 return;
@@ -66,28 +73,78 @@ public class WaveBarTable extends Table{
 
     public void setupBars(){
         clear();
-        for(int i : prewave){
-            if(!waves.contains(wavedata -> wavedata.wave == curWave - 1 + i)) waves.add(new WaveData(curWave - 1 + i));
-        }
-        waves.sort(wavedata -> (float)wavedata.wave);
         for(int i = 0; i < waves.size; i++){
             if(i >= hpBars.size) hpBars.add(new MI2Bar());
             WaveData d = waves.get(i);
-            hpBars.get(i).set(() -> "Wave " + d.wave + ": " + "(" + d.units.size + ") " + UI.formatAmount((long)d.units.sumf(unitdata -> Math.max(unitdata.unit.health(), 0) + unitdata.unit.shield())) + "/" + UI.formatAmount((long)(d.totalHp + d.totalShield)),
-                () -> (curWave > d.wave || d.units.sumf(unitdata -> Math.max(unitdata.unit.health(), 0) + unitdata.unit.shield()) > 0) ? d.units.sumf(unitdata -> Math.max(unitdata.unit.health(), 0) + unitdata.unit.shield()) / (d.totalHp + d.totalShield) : 1f,
-                (curWave > d.wave || d.units.sumf(unitdata -> Math.max(unitdata.unit.health(), 0) + unitdata.unit.shield()) > 0) ? Color.scarlet : Color.cyan
-                );
-            hpBars.get(i).blink(Color.white).outline(MI2UTmp.c2.set(0.3f, 0.3f, 0.6f, 0.3f), 1f);
-            add(hpBars.get(i)).growX().height(18f).minWidth(200f);
+            add(hpBars.get(i)).growX().height(18f).minWidth(200f).with(bar -> {
+                bar.clearListeners();
+                bar.set(() -> "Wave " + d.wave + ": " + "(" + d.units.size + ") " + UI.formatAmount((long)d.units.sumf(unitData -> Math.max(unitData.unit.health(), 0) + unitData.unit.shield())) + "/" + UI.formatAmount((long)(d.totalHp + d.totalShield)),
+                        () -> {
+                            float uhp =  d.units.sumf(unitData -> Math.max(unitData.unit.health(), 0) + unitData.unit.shield());
+                            if(curWave <= d.wave && uhp <= 0f) return 1f;
+                            return uhp / (d.totalHp + d.totalShield);
+                        },
+                        (curWave > d.wave || d.units.sumf(unitData -> Math.max(unitData.unit.health(), 0) + unitData.unit.shield()) > 0) ? Color.scarlet : Color.cyan);
+                bar.blink(Color.white).outline(MI2UTmp.c2.set(0.3f, 0.3f, 0.6f, 0.3f), 1f).setFontScale(0.8f);
+                bar.tapped(() -> {
+                    if(detailt.shown) detailt.hide();
+                    detailt.clear();
+                    detailt.background(Styles.black8);
+                    detailt.addCloseButton();
+                    detailt.addDragMove();
+                    buildDetails(detailt, d);
+                    detailt.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
+                    detailt.popup();
+                });
+            });
             row();
         }
     }
 
+    public void buildDetails(Table t, WaveData data){
+        t.add("Wave: " + data.wave);
+        t.row();
+        t.pane(p -> {
+            int i = 0;
+            for(SpawnGroup group : state.rules.spawns){
+                if(group.getSpawned(data.wave - 1) < 1) continue;
+                p.table(g -> {
+                    g.table(eip -> {
+                        if(group.effect != null && group.effect != StatusEffects.none) eip.image(group.effect.uiIcon).size(12f);
+                        if(group.items != null) eip.image(group.items.item.uiIcon).size(12f);
+                        if(group.payloads!=null && !group.payloads.isEmpty()) eip.add("" + Iconc.units).get().setFontScale(0.7f);
+                        eip.image(group.type.uiIcon).size(18f);
+                        eip.add("x" + group.getSpawned(data.wave - 1)).get().setFontScale(0.7f);
+                    });
+                    g.row();
+                    g.add("" + group.getShield(data.wave - 1)).get().setFontScale(0.7f);
+                    g.row();
+                    g.add(new MI2Bar()).with(bar -> {
+                        bar.set(() -> data.units.sum(unitData -> unitData.unit.type() == group.type ? 1:0) + "|" + UI.formatAmount((long)data.units.sumf(unitData -> unitData.unit.type() == group.type ? (Math.max(unitData.unit.health(), 0) + unitData.unit.shield()):0f)),
+                                () -> (curWave > data.wave || data.units.sumf(unitData -> Math.max(unitData.unit.health(), 0) + unitData.unit.shield()) > 0) ? data.units.sumf(unitData -> unitData.unit.type() == group.type ? (Math.max(unitData.unit.health(), 0) + unitData.unit.shield()):0f) / ((group.type.health + group.getShield(data.wave - 1)) * group.getSpawned(data.wave - 1) * (group.type.flying ? spawner.countFlyerSpawns() : spawner.countGroundSpawns())) : 1f, Color.scarlet);
+                        bar.setFontScale(0.6f).blink(Color.white);
+                    }).height(10f).minWidth(60f);
+                }).pad(2f);
+                if(++i >= 5){
+                    i = 0;
+                    p.row();
+                }
+            }
+        }).maxHeight(200f).update(p -> {
+            Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
+            if(e != null && e.isDescendantOf(p)){
+                p.requestScroll();
+            }else if(p.hasScroll()){
+                Core.scene.setScrollFocus(null);
+            }
+        });
+    }
+
     public void catchWave(){
-        if(!waves.contains(wavedata -> wavedata.wave == curWave)) waves.add(new WaveData(curWave)); //curWave is updated first, thus the spawned unit should be signed to wave-1
-        Seq<UnitData> toAdd = allunits.select(unitdata -> unitdata.wave == -1 && unitdata.getSurviveTime() < 240f);
-        toAdd.each(unitdata -> unitdata.wave = curWave);
-        waves.select(wavedata -> wavedata.wave == curWave).first().units.addAll(toAdd);
+        if(!waves.contains(waveData -> waveData.wave == curWave)) waves.add(new WaveData(curWave)); //curWave is updated first, thus the spawned unit should be signed to wave-1
+        Seq<UnitData> toAdd = allunits.select(unitData -> unitData.wave == -1 && unitData.getSurviveTime() < 240f);
+        toAdd.each(unitData -> unitData.wave = curWave);
+        waves.select(waveData -> waveData.wave == curWave).first().units.addAll(toAdd);
         curWave = state.wave;
     }
 
@@ -95,7 +152,7 @@ public class WaveBarTable extends Table{
         waves.clear();
         allunits.clear();
         savedunits.clear();
-        curWave = state.wave;
+        curWave = 1;
     }
 
     public void updateData(){
@@ -105,8 +162,15 @@ public class WaveBarTable extends Table{
             for(int i : prewave){
                 if(preview = waved.wave == curWave - 1 + i) break;
             }
-            return !preview && waved.units.isEmpty();
+            return (!preview || waved.wave != previewedWave) && waved.units.isEmpty();
         });
+
+        for(int i : prewave){
+            if(!waves.contains(waveData -> waveData.wave == curWave - 1 + i)) waves.add(new WaveData(curWave - 1 + i));
+        }
+        if(!waves.contains(waveData -> waveData.wave == previewedWave)) waves.add(new WaveData((previewedWave)));
+
+        waves.sort(waveData -> (float)waveData.wave);
     }
 
     public class WaveData{
@@ -121,79 +185,23 @@ public class WaveBarTable extends Table{
         public void init(){
             totalHp = totalShield = 0f;
             for(SpawnGroup group : state.rules.spawns){
-                tmpCount = 0;
-                int filterPos = group.spawn;
 
-                //rewrite Anuke's, as invoking private method "eachGroundSpawn" with private interface param is too hard for me.
-                if(group.type.flying){
-                    for(Tile tile : spawner.getSpawns()){
-                        if(filterPos != -1 && filterPos != tile.pos()) continue;
-                        tmpCount++;
-                    }
+                float spawns = group.type.flying ? SpawnerData.countFlying(group.spawn) : SpawnerData.countGround(group.spawn);
 
-                    if(state.rules.attackMode && state.teams.isActive(state.rules.waveTeam)){
-                        for(Building core : state.rules.waveTeam.data().cores){
-                            if(filterPos != -1 && filterPos != core.pos()) continue;
-                            tmpCount++;
-                        }
-                    }
-                }else{
-                    if(state.hasSpawns()){
-                        for(Tile spawn : spawner.getSpawns()){
-                            if(filterPos != -1 && filterPos != spawn.pos()) continue;
-                            tmpCount++;
-                        }
-                    }
-
-                    if(state.rules.attackMode && state.teams.isActive(state.rules.waveTeam) && !state.teams.playerCores().isEmpty()){
-                        Building firstCore = state.teams.playerCores().first();
-                        for(Building core : state.rules.waveTeam.cores()){
-                            if(filterPos != -1 && filterPos != core.pos()) continue;
-
-                            Tmp.v1.set(firstCore).sub(core).limit(16f + core.block.size * tilesize /2f * Mathf.sqrt2);
-
-                            boolean valid = false;
-                            int steps = 0;
-
-                            //keep moving forward until the max step amount is reached
-                            while(steps++ < 30f){
-                                int tx = World.toTile(core.x + Tmp.v1.x), ty = World.toTile(core.y + Tmp.v1.y);
-                                any = false;
-                                Geometry.circle(tx, ty, world.width(), world.height(), 3, (x, y) -> {
-                                    if(world.solid(x, y)){
-                                        any = true;
-                                    }
-                                });
-
-                                //nothing is in the way, spawn it
-                                if(!any){
-                                    valid = true;
-                                    break;
-                                }else{
-                                    //make the vector longer
-                                    Tmp.v1.setLength(Tmp.v1.len() + tilesize*1.1f);
-                                }
-                            }
-
-                            if(valid) tmpCount++;
-                        }
-                    }
-                }
-
-                totalHp += group.type.health * group.getSpawned(wave - 1) * tmpCount;
-                totalShield += group.getShield(wave - 1) * group.getSpawned(wave - 1) * tmpCount;
+                totalHp += group.type.health * group.getSpawned(wave - 1) * spawns;
+                totalShield += group.getShield(wave - 1) * group.getSpawned(wave - 1) * spawns;
             }
         }
 
-        public Seq<UnitData> removeDead(){
-            return units.removeAll(unit -> unit.unit == null || !unit.unit.isValid() || unit.unit.dead() || unit.unit.health <= 0);
+        public void removeDead(){
+            units.removeAll(unit -> unit.unit == null || !unit.unit.isValid() || unit.unit.dead() || unit.unit.health <= 0f);
         }
     }
 
     public class UnitData{
         public Unit unit;
         public float spawnTime;
-        public int wave = 1;
+        public int wave;
 
         public UnitData(Unit unit, int wave){
             this.unit = unit;
@@ -203,6 +211,64 @@ public class WaveBarTable extends Table{
 
         public float getSurviveTime(){
             return Time.time - spawnTime;
+        }
+    }
+
+    public static class SpawnerData{
+        public static Seq<Integer> spawnPoints = new Seq<>();
+        public static Seq<Integer> groundSpawns = new Seq<>();
+
+        public static void update(){
+            spawnPoints.clear();
+            groundSpawns.clear();
+
+            for(Tile tile : spawner.getSpawns()){
+                spawnPoints.add(tile.pos());
+                groundSpawns.add(tile.pos());
+            }
+
+            //rewrite Anuke's, as invoking private method "each.*Spawn" with private interface param is too hard for me.
+            if(state.rules.attackMode && state.teams.isActive(state.rules.waveTeam) && !state.teams.playerCores().isEmpty()){
+                Building firstCore = state.teams.playerCores().first();
+                for(Building core : state.rules.waveTeam.cores()){
+                    spawnPoints.add(core.pos());
+
+                    MI2UTmp.v1.set(firstCore).sub(core).limit(16f + core.block.size * tilesize /2f * Mathf.sqrt2);
+
+                    boolean valid = false;
+                    int steps = 0;
+
+                    //keep moving forward until the max step amount is reached
+                    while(steps++ < 30f){
+                        int tx = World.toTile(core.x + MI2UTmp.v1.x), ty = World.toTile(core.y + MI2UTmp.v1.y);
+                        any = false;
+                        Geometry.circle(tx, ty, world.width(), world.height(), 3, (x, y) -> {
+                            if(world.solid(x, y)){
+                                any = true;
+                            }
+                        });
+
+                        //nothing is in the way, spawn it
+                        if(!any){
+                            valid = true;
+                            break;
+                        }else{
+                            //make the vector longer
+                            MI2UTmp.v1.setLength(MI2UTmp.v1.len() + tilesize*1.1f);
+                        }
+                    }
+
+                    if(valid) groundSpawns.add(core.pos());
+                }
+            }
+        }
+
+        public static int countGround(int pos){
+            return pos == -1 ? groundSpawns.size : groundSpawns.contains(pos) ? 1 : 0;
+        }
+
+        public static int countFlying(int pos){
+            return pos == -1 ? spawnPoints.size : spawnPoints.contains(pos) ? 1 : 0;
         }
     }
 }

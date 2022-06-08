@@ -31,7 +31,7 @@ public class MapInfoMindow extends Mindow2{
         super("@mapInfo.MI2U", "@mapInfo.help");
         Events.on(WorldLoadEvent.class, e -> {
             rebuild();
-            curWave = state.wave;
+            setCurWave(state.wave);
         });
     }
 
@@ -79,7 +79,7 @@ public class MapInfoMindow extends Mindow2{
             cont.row();
         }
         if(showWaves){
-            cont.table(t -> setupWaves(t));
+            cont.table(this::setupWaves);
             cont.row();
         }
         if(showWaveBars){
@@ -105,10 +105,6 @@ public class MapInfoMindow extends Mindow2{
                 addBoolIcon(() -> state.rules.infiniteResources , "" + Iconc.box, tt);
                 addBoolIcon(() -> state.rules.canGameOver , "" + Iconc.blockReconstructorBasis, tt);
                 tt.label(() -> "Size: " + world.width() + "x" + world.height()).pad(2f).get().setFontScale(0.7f);
-                addBoolIcon(() -> state.rules.waves, "" + Iconc.waves, tt);
-                addBoolIcon(() -> state.rules.waveTimer, "" + Iconc.rotate, tt);
-                addBoolIcon(() -> state.rules.waitEnemies, "" + Iconc.pause, tt);
-                tt.label(() -> Strings.fixed(state.rules.waveSpacing / 60, 1) + "s").pad(2f).get().setFontScale(0.7f);
             });
             rules1.row();
             rules1.table(tt -> {
@@ -121,6 +117,13 @@ public class MapInfoMindow extends Mindow2{
                 addBoolIcon(() -> state.rules.unitAmmo, "" + Iconc.unitCorvus + Iconc.statusElectrified, tt);
                 addBoolIcon(() -> state.rules.coreCapture, "" + Iconc.blockCoreFoundation, tt);
                 addBoolIcon(() -> state.rules.polygonCoreProtection, "" + Iconc.grid, tt);
+            });
+            rules1.row();
+            rules1.table(tt -> {
+                addBoolIcon(() -> state.rules.waves, "" + Iconc.waves, tt);
+                addBoolIcon(() -> state.rules.waveTimer, "" + Iconc.rotate, tt);
+                addBoolIcon(() -> state.rules.waitEnemies, "" + Iconc.pause, tt);
+                tt.label(() -> Strings.fixed(state.rules.waveSpacing / 60, 1) + "s").pad(2f).get().setFontScale(0.7f);
                 tt.label(() -> "Cap: " + state.rules.unitCap + (state.rules.unitCapVariable ? "+"+Iconc.blockCoreShard:"")).pad(2f).get().setFontScale(0.7f);
                 tt.button("@mapinfo.buttons.teams", textb, this::showTeamInfo).growX().get().getLabel().setWrap(false);
             });
@@ -132,59 +135,64 @@ public class MapInfoMindow extends Mindow2{
                 addFloatAttr(() -> Strings.fixed(state.rules.blockDamageMultiplier, 2), "@mapInfo.buildingDamageMutil", tt);
                 addFloatAttr(() -> Strings.fixed(state.rules.buildCostMultiplier, 2), "@mapInfo.buildCostMutil", tt);
                 addFloatAttr(() -> Strings.fixed(state.rules.buildSpeedMultiplier, 2), "@mapInfo.buildSpeedMutil", tt);
+            });
+            rules2.row();
+            rules2.table(tt -> {
                 addFloatAttr(() -> Strings.fixed(state.rules.deconstructRefundMultiplier, 2), "@mapInfo.buildRefundMutil", tt);
                 addFloatAttr(() -> Strings.fixed(state.rules.unitDamageMultiplier, 2), "@mapInfo.unitDamageMutil", tt);
                 addFloatAttr(() -> Strings.fixed(state.rules.unitBuildSpeedMultiplier, 2), "@mapInfo.unitConstructSpeedMutil", tt);
             });
-            rules2.row();
         });
     }
 
     public void setupWaves(Table t){
         t.clear();
         t.table(tt -> {
-            tt.label(() -> "Wave: " + curWave).get().setFontScale(0.7f);
-            tt.button("<<", textb, () -> {
-                syncCurWave = false;
-                curWave -= 10;
-                curWave = Math.max(curWave, 1);
-            }).with(funcSetTextb).size(titleButtonSize);
-            tt.button("<", textb, () -> {
-                syncCurWave = false;
-                curWave -= 1;
-                curWave = Math.max(curWave, 1);
-            }).with(funcSetTextb).size(titleButtonSize);
-            tt.button("O", textbtoggle, () -> {
-                syncCurWave = !syncCurWave;
-            }).with(funcSetTextb).size(titleButtonSize).update(b -> {
-                b.setChecked(syncCurWave);
-                if(syncCurWave) curWave = state.wave;
+            tt.table(t3 -> {
+                t3.label(() -> "Wave: " + curWave).get().setFontScale(0.7f);
+                t3.button("" + Iconc.redo, textb, () -> {
+                    curWave = Math.max(curWave, 1);
+                    state.wave = curWave;
+                }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).size(titleButtonSize);
+                t3.button("@mapinfo.buttons.forceRunWave", textb, () -> {
+                    logic.runWave();
+                }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).height(titleButtonSize);
             });
-            tt.button(">", textb, () -> {
-                syncCurWave = false;
-                curWave += 1;
-                curWave = Math.max(curWave, 1);
-            }).with(funcSetTextb).size(titleButtonSize);
-            tt.button(">>", textb, () -> {
-                syncCurWave = false;
-                curWave += 10;
-                curWave = Math.max(curWave, 1);
-            }).with(funcSetTextb).size(titleButtonSize);
-            TextField tf = new TextField();
-            tf.changed(() -> {
-                if(Strings.canParseInt(tf.getText()) && Strings.parseInt(tf.getText()) > 0){
+
+            tt.row();
+
+            tt.table(t3 -> {
+                t3.button("<<", textb, () -> {
                     syncCurWave = false;
-                    curWave = Strings.parseInt(tf.getText());
-                }
+                    setCurWave(curWave - 10);
+                }).with(funcSetTextb).size(titleButtonSize);
+                t3.button("<", textb, () -> {
+                    syncCurWave = false;
+                    setCurWave(curWave - 1);
+                }).with(funcSetTextb).size(titleButtonSize);
+                t3.button("O", textbtoggle, () -> {
+                    syncCurWave = !syncCurWave;
+                }).with(funcSetTextb).size(titleButtonSize).update(b -> {
+                    b.setChecked(syncCurWave);
+                    if(syncCurWave) setCurWave(state.wave);
+                });
+                t3.button(">", textb, () -> {
+                    syncCurWave = false;
+                    setCurWave(curWave + 1);
+                }).with(funcSetTextb).size(titleButtonSize);
+                t3.button(">>", textb, () -> {
+                    syncCurWave = false;
+                    setCurWave(curWave + 10);
+                }).with(funcSetTextb).size(titleButtonSize);
+                TextField tf = new TextField();
+                tf.changed(() -> {
+                    if(Strings.canParseInt(tf.getText()) && Strings.parseInt(tf.getText()) > 0){
+                        syncCurWave = false;
+                        setCurWave(Strings.parseInt(tf.getText()));
+                    }
+                });
+                t3.add(tf).width(80f).height(28f);
             });
-            tt.add(tf).width(80f).height(28f);
-            tt.button("" + Iconc.redo, textb, () -> {
-                curWave = Math.max(curWave, 1);
-                state.wave = curWave;
-            }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).size(titleButtonSize);
-            tt.button("@mapinfo.buttons.forceRunWave", textb, () -> {
-                logic.runWave();
-            }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).height(titleButtonSize);
         });
         t.row();
 
@@ -223,6 +231,16 @@ public class MapInfoMindow extends Mindow2{
                 Core.scene.setScrollFocus(null);
             }
         });
+    }
+
+    public void setCurWave(int wave){
+        curWave = Math.max(wave, 1);
+        boolean updateBars = wavebars.previewedWave != curWave;
+        wavebars.previewedWave = curWave;
+        if(updateBars){
+            wavebars.updateData();
+            wavebars.setupBars();
+        }
     }
 
     public void addBoolIcon(Boolp p, String icon, Table t){

@@ -7,13 +7,13 @@ import arc.math.*;
 import arc.scene.*;
 import arc.scene.ui.layout.*;
 import arc.util.pooling.*;
-import mindustry.ui.Fonts;
+import mindustry.ui.*;
 
 public class MI2Bar extends Element{
     private boolean vertical = false;
     private Floatp fraction;
     private CharSequence name = "";
-    private float value, lastValue, blink, outlineRadius;
+    private float value, lastValue, blink, outlineRadius, fontScaleX = 1, fontScaleY = 1;
     private Color blinkColor = new Color(), outlineColor = new Color();
 
     public MI2Bar(String name, Color color, Floatp fraction){
@@ -148,6 +148,10 @@ public class MI2Bar extends Element{
         Draw.color();
 
         Font font = Fonts.outline;
+        float oldScaleX = font.getScaleX();
+        float oldScaleY = font.getScaleY();
+        font.getData().setScale(fontScaleX, fontScaleY);
+
         GlyphLayout lay = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
         lay.setText(font, name);
 
@@ -155,6 +159,8 @@ public class MI2Bar extends Element{
         font.getCache().clear();
         font.getCache().addText(name, centerX() - lay.width / 2f, centerY() + lay.height / 2f + 1);
         font.getCache().draw(parentAlpha);
+
+        font.getData().setScale(oldScaleX, oldScaleY);
 
         Pools.free(lay);
     }
@@ -165,5 +171,29 @@ public class MI2Bar extends Element{
 
     public float centerY(){
         return y + height / 2;
+    }
+
+
+    public MI2Bar setFontScaleX(float scaleX){
+        fontScaleX = scaleX;
+        return this;
+    }
+
+    public MI2Bar setFontScaleY(float scaleY){
+        fontScaleY = scaleY;
+        return this;
+    }
+
+    public MI2Bar setFontScale(float scale){
+        fontScaleX = scale;
+        fontScaleY = scale;
+        return this;
+    }
+    public float getFontScaleX() {
+        return fontScaleX;
+    }
+
+    public float getFontScaleY() {
+        return fontScaleY;
     }
 }
