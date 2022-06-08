@@ -102,35 +102,57 @@ public class WaveBarTable extends Table{
     }
 
     public void buildDetails(Table t, WaveData data){
-        t.add("Wave: " + data.wave);
+        t.add("Wave " + data.wave).growX().minSize(80f, 36f);
         t.row();
         t.pane(p -> {
-            int i = 0;
-            for(SpawnGroup group : state.rules.spawns){
-                if(group.getSpawned(data.wave - 1) < 1) continue;
-                p.table(g -> {
-                    g.table(eip -> {
-                        if(group.effect != null && group.effect != StatusEffects.none) eip.image(group.effect.uiIcon).size(12f);
-                        if(group.items != null) eip.image(group.items.item.uiIcon).size(12f);
-                        if(group.payloads!=null && !group.payloads.isEmpty()) eip.add("" + Iconc.units).get().setFontScale(0.7f);
-                        eip.image(group.type.uiIcon).size(18f);
-                        eip.add("x" + group.getSpawned(data.wave - 1)).get().setFontScale(0.7f);
-                    });
-                    g.row();
-                    g.add("" + group.getShield(data.wave - 1)).get().setFontScale(0.7f);
-                    g.row();
-                    g.add(new MI2Bar()).with(bar -> {
-                        bar.set(() -> data.units.sum(unitData -> unitData.unit.type() == group.type ? 1:0) + "|" + UI.formatAmount((long)data.units.sumf(unitData -> unitData.unit.type() == group.type ? (Math.max(unitData.unit.health(), 0) + unitData.unit.shield()):0f)),
-                                () -> (curWave > data.wave || data.units.sumf(unitData -> Math.max(unitData.unit.health(), 0) + unitData.unit.shield()) > 0) ? data.units.sumf(unitData -> unitData.unit.type() == group.type ? (Math.max(unitData.unit.health(), 0) + unitData.unit.shield()):0f) / ((group.type.health + group.getShield(data.wave - 1)) * group.getSpawned(data.wave - 1) * (group.type.flying ? spawner.countFlyerSpawns() : spawner.countGroundSpawns())) : 1f, Color.scarlet);
-                        bar.setFontScale(0.6f).blink(Color.white);
-                    }).height(10f).minWidth(60f);
-                }).pad(2f);
-                if(++i >= 5){
-                    i = 0;
-                    p.row();
+            p.table(groupt -> {
+                int i = 0;
+                for(SpawnGroup group : state.rules.spawns){
+                    if(group.getSpawned(data.wave - 1) < 1) continue;
+                    groupt.table(g -> {
+                        g.table(eip -> {
+                            if(group.effect != null && group.effect != StatusEffects.none) eip.image(group.effect.uiIcon).size(12f);
+                            if(group.items != null) eip.image(group.items.item.uiIcon).size(12f);
+                            if(group.payloads!=null && !group.payloads.isEmpty()) eip.add("" + Iconc.units).get().setFontScale(0.7f);
+                            eip.image(group.type.uiIcon).size(18f);
+                            eip.add("x" + group.getSpawned(data.wave - 1)).get().setFontScale(0.7f);
+                        });
+                        g.row();
+                        g.add("" + group.getShield(data.wave - 1)).get().setFontScale(0.7f);
+                    }).pad(2f);
+                    if(++i >= 5){
+                        i = 0;
+                        groupt.row();
+                    }
                 }
-            }
-        }).maxHeight(200f).update(p -> {
+            });
+
+            p.row();
+
+            p.table(t2 -> {
+                for(int id = 0; id < data.totalsByType.length; id++){
+                    if(data.totalsByType[id] <= 1f) continue;
+                    var type = content.unit(id);
+                    t2.image(type.uiIcon).size(18f);
+                    t2.add(new MI2Bar()).with(bar -> {
+                        bar.set(() -> {
+                                    Seq<UnitData> units = data.unitsByType[type.id];
+                                    if(units == null) return UI.formatAmount((long)data.totalsByType[type.id]);
+                                    float hp = data.unitsByType[type.id].sumf(udata -> udata.unit.health + udata.unit.shield);
+                                    return units.size + "|" + UI.formatAmount((long)hp) + "/" + UI.formatAmount((long)data.totalsByType[type.id]);
+                                },
+                                () -> {
+                                    Seq<UnitData> units = data.unitsByType[type.id];
+                                    if (units == null) return 1f;
+                                    float hp = data.unitsByType[type.id].sumf(udata -> udata.unit.health + udata.unit.shield);
+                                    return hp / data.totalsByType[type.id];
+                                }, Color.scarlet);
+                        bar.setFontScale(0.8f).blink(Color.white);
+                    }).height(10f).minWidth(100f).growX();
+                    t2.row();
+                }
+            }).growX();
+        }).maxHeight(300f).update(p -> {
             Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
             if(e != null && e.isDescendantOf(p)){
                 p.requestScroll();
@@ -144,7 +166,7 @@ public class WaveBarTable extends Table{
         if(!waves.contains(waveData -> waveData.wave == curWave)) waves.add(new WaveData(curWave)); //curWave is updated first, thus the spawned unit should be signed to wave-1
         Seq<UnitData> toAdd = allunits.select(unitData -> unitData.wave == -1 && unitData.getSurviveTime() < 240f);
         toAdd.each(unitData -> unitData.wave = curWave);
-        waves.select(waveData -> waveData.wave == curWave).first().units.addAll(toAdd);
+        waves.select(waveData -> waveData.wave == curWave).first().addAll(toAdd);
         curWave = state.wave;
     }
 
@@ -160,9 +182,10 @@ public class WaveBarTable extends Table{
         waves.removeAll(waved -> {
             boolean preview = false;
             for(int i : prewave){
-                if(preview = waved.wave == curWave - 1 + i) break;
+                preview = waved.wave == curWave - 1 + i;
+                if(preview) break;
             }
-            return (!preview || waved.wave != previewedWave) && waved.units.isEmpty();
+            return !preview && waved.wave != previewedWave && waved.units.isEmpty();
         });
 
         for(int i : prewave){
@@ -176,25 +199,43 @@ public class WaveBarTable extends Table{
     public class WaveData{
         int wave;
         float totalHp = 1f, totalShield = 1f;
+        float[] totalsByType = new float[content.units().size];
         Seq<UnitData> units = new Seq<>();
+        Seq<UnitData>[] unitsByType;
         public WaveData(int wave){
             this.wave = wave;
             init();
         }
 
         public void init(){
-            totalHp = totalShield = 0f;
-            for(SpawnGroup group : state.rules.spawns){
 
+            unitsByType = new Seq[content.units().size];
+
+            totalHp = totalShield = 0f;
+
+            for(SpawnGroup group : state.rules.spawns){
                 float spawns = group.type.flying ? SpawnerData.countFlying(group.spawn) : SpawnerData.countGround(group.spawn);
 
                 totalHp += group.type.health * group.getSpawned(wave - 1) * spawns;
                 totalShield += group.getShield(wave - 1) * group.getSpawned(wave - 1) * spawns;
+                totalsByType[group.type.id] += (group.type.health + group.getShield(wave - 1)) * group.getSpawned(wave - 1) * spawns;
             }
+        }
+
+        public void addAll(Seq<UnitData> unit){
+            units.addAll(unit);
+            unit.each(unitd -> {
+                int id = unitd.unit.type().id;
+                if(unitsByType[id] == null) unitsByType[id] = new Seq<UnitData>();
+                unitsByType[id].add(unitd);
+            });
         }
 
         public void removeDead(){
             units.removeAll(unit -> unit.unit == null || !unit.unit.isValid() || unit.unit.dead() || unit.unit.health <= 0f);
+            for(var seq : unitsByType){
+                if(seq != null) seq.removeAll(unit -> unit.unit == null || !unit.unit.isValid() || unit.unit.dead() || unit.unit.health <= 0f); //this remove method may cause lagging
+            }
         }
     }
 

@@ -153,6 +153,7 @@ public class MapInfoMindow extends Mindow2{
                 t3.button("" + Iconc.redo, textb, () -> {
                     curWave = Math.max(curWave, 1);
                     state.wave = curWave;
+                    wavebars.curWave = curWave;
                 }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).size(titleButtonSize);
                 t3.button("@mapinfo.buttons.forceRunWave", textb, () -> {
                     logic.runWave();
