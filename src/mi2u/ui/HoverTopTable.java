@@ -52,6 +52,7 @@ public class HoverTopTable extends Table {
 
         tilet.defaults().growX();
         tilet.table(t -> {
+            float lw = 55f;
             t.left();
             t.add(new Image(){
                 Block last;
@@ -64,7 +65,7 @@ public class HoverTopTable extends Table {
                     });
                 }
             }).size(8 * 4);
-            t.labelWrap(() -> tile != null ? tile.floor().localizedName : "").left().padLeft(5).width(60f);
+            t.labelWrap(() -> tile != null ? tile.floor().localizedName : "").left().padLeft(5).width(lw);
 
             t.add(new Image(){
                 Block last;
@@ -77,7 +78,7 @@ public class HoverTopTable extends Table {
                     });
                 }
             }).size(8 * 4);
-            t.labelWrap(() -> tile != null && tile.overlay() != null && tile.overlay() != Blocks.air ? tile.overlay().localizedName : "").left().padLeft(5).width(60f);
+            t.labelWrap(() -> tile != null && tile.overlay() != null && tile.overlay() != Blocks.air ? tile.overlay().localizedName : "").left().padLeft(5).width(lw);
 
             t.add(new Image(){
                 Block last;
@@ -90,7 +91,7 @@ public class HoverTopTable extends Table {
                     });
                 }
             }).size(8 * 4);
-            t.labelWrap(() -> (tile != null && tile.block() instanceof Prop || tile.block() instanceof TreeBlock) ? tile.block().localizedName : "").left().padLeft(5).width(60f);
+            t.labelWrap(() -> (tile != null && tile.block() instanceof Prop || tile.block() instanceof TreeBlock) ? tile.block().localizedName : "").left().padLeft(5).width(lw);
         }).left();
     }
 
@@ -98,7 +99,7 @@ public class HoverTopTable extends Table {
         clear();
         table().growX().update(t -> {
             t.clear();
-            t.defaults().growX().padBottom(2f);
+            t.defaults().growX().padBottom(4f);
 
             if(build != null){
                 t.add(buildt);
