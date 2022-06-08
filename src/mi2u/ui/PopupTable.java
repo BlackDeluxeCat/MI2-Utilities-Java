@@ -1,19 +1,20 @@
 package mi2u.ui;
 
-import arc.Core;
-import arc.math.Interp;
-import arc.scene.Element;
-import arc.scene.actions.Actions;
-import arc.scene.style.Drawable;
+import arc.*;
+import arc.input.*;
+import arc.math.*;
+import arc.math.geom.*;
+import arc.scene.*;
+import arc.scene.actions.*;
+import arc.scene.event.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
-import arc.util.Align;
-import arc.util.Nullable;
-import mi2u.MI2UTmp;
-import mi2u.MI2UVars;
+import arc.util.*;
+import mi2u.*;
 
 public class PopupTable extends Table{
     public boolean shown = false;
+    public float fromx, fromy;
 
     public void popup(int align){
         if(shown) return;
@@ -68,6 +69,23 @@ public class PopupTable extends Table{
             }
         }
         if(!hasMouse) hide();
+    }
+
+    public void addDragMove(){
+        addListener(new InputListener(){
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
+                fromx = x;
+                fromy = y;
+                return true;
+            }
+
+            @Override
+            public void touchDragged(InputEvent event, float x, float y, int pointer){
+                Vec2 v = localToStageCoordinates(MI2UTmp.v1.set(x, y));
+                setPositionInScreen(v.x - fromx, v.y - fromy);
+            }
+        });
     }
 
     public void addCloseButton(){

@@ -51,8 +51,9 @@ public class CoreInfoMindow extends Mindow2{
 
         chartTable = new PopupTable(){
             {
-                this.setBackground(Styles.black5);
+                this.setBackground(Styles.black8);
                 this.addCloseButton();
+                this.addDragMove();
                 var ch = new Element(){
                     @Override
                     public void draw(){
@@ -173,7 +174,7 @@ public class CoreInfoMindow extends Mindow2{
                     teamSelect.popup();
                     teamSelect.snapTo(this);
                 }).growX().height(48f).update(b -> {
-                    b.setText(Core.bundle.get("coreInfo.selectButton.team") + (select == null ? Core.bundle.get("coreInfo.selectButton.playerteam"):team.localized()));
+                    b.setText(Core.bundle.get("coreInfo.selectButton.team") + team.localized() + (select == null ? Core.bundle.get("coreInfo.selectButton.playerteam"):""));
                     b.getLabel().setColor(team == null ? Color.white:team.color);
                 });
             }).grow();
