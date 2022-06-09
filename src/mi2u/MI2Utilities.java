@@ -4,8 +4,7 @@ import arc.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import arc.util.serialization.*;
-import mi2u.graphics.MI2UShaders;
-import mi2u.graphics.RendererExt;
+import mi2u.graphics.*;
 import mi2u.io.*;
 import mi2u.ui.*;
 import mindustry.game.EventType.*;
@@ -34,8 +33,8 @@ public class MI2Utilities extends Mod{
                 if(MI2USettings.getBool("showMindowMap")) mindowmap.addTo(mindowmap.hasParent() ? mindowmap.parent : Core.scene.root);
                 if(MI2USettings.getBool("showMapInfo")) mapinfo.addTo(mapinfo.hasParent() ? mapinfo.parent : Core.scene.root);
                 if(MI2USettings.getBool("showLogicHelper", true)) logicHelper.addTo(logicHelper.hasParent() ? logicHelper.parent : ui.logic);
+                if(MI2USettings.getBool("showUIContainer")) container.addTo(container.hasParent() ? container.parent : ui.logic);
 
-                ModifyFuncs.schelogic();
                 RendererExt.initBase();
                 ModifyFuncs.modifyVanilla();
             });

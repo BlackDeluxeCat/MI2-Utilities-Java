@@ -1,18 +1,15 @@
 package mi2u.ui;
 
-import arc.Core;
+import arc.*;
 import arc.func.*;
-import arc.graphics.Color;
-import arc.scene.actions.Actions;
+import arc.graphics.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
-import mi2u.MI2UTmp;
+import mi2u.game.SpeedController;
 import mi2u.io.MI2USettings.*;
 import mindustry.Vars;
-import mindustry.entities.units.AIController;
 import mindustry.gen.*;
-import mindustry.ui.Styles;
 
 import static mi2u.MI2UVars.*;
 import static mi2u.MI2UFuncs.*;
@@ -38,6 +35,7 @@ public class MI2UI extends Mindow2{
     @Override
     public void setupCont(Table cont){
         cont.clear();
+
         cont.table(tt -> {
             tt.button("" + Iconc.refresh, textb, () -> {
                 Call.sendChatMessage("/sync");
@@ -68,17 +66,24 @@ public class MI2UI extends Mindow2{
                 });
             });
         });
-        
+
         cont.row();
-        cont.image().color(Color.pink).growX().height(2f);
-        cont.row();
-        cont.table(tt -> {
-            tt.button("@main.buttons.container", textbtoggle, () -> {
-                container.addTo(container.hasParent() ? null : Core.scene.root);
-            }).minHeight(36f).update(b -> {
-                b.setChecked(container.hasParent());
-            }).with(funcSetTextb);
-        });
+
+        //TODO the update rate is based on button.update(), and affected by lagging
+        cont.table(t -> {
+            t.button("Speeding", textbtoggle, SpeedController::switchUpdate).update(b -> {
+                b.setChecked(SpeedController.update);
+                b.setText("Speed: x" + Strings.autoFixed(SpeedController.mul, 2));
+                SpeedController.update();
+            }).with(funcSetTextb).with(b -> {
+                b.margin(4f);
+                b.image(Icon.settingsSmall).size(16f).update(img -> {
+                    if(SpeedController.update) img.rotateBy(-1f);
+                    else img.setRotation(0f);
+                    img.setColor(!b.isChecked() ? Color.white : SpeedController.lowerThanMin() ? Color.scarlet : Color.lime);
+                });
+            }).growX();
+        }).name("speed control").growX();
 
     }
 
@@ -92,6 +97,7 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("showMindowMap", "@settings.main.mindowMap", false, b -> mindowmap.addTo(b?Core.scene.root:null)));
         settings.add(new CheckEntry("showMapInfo", "@settings.main.mapInfo", false, b -> mapinfo.addTo(b?Core.scene.root:null)));
         settings.add(new CheckEntry("showLogicHelper", "@settings.main.logicHelper", true, b -> logicHelper.addTo(b?Vars.ui.logic:null)));
+        settings.add(new CheckEntry("showUIContainer", "@settings.main.container", false, b -> container.addTo(b?Core.scene.root:null)));
 
         settings.add(new CheckEntry("enPlayerCursor", "@settings.main.playerCursor", true, null));
         settings.add(new CheckEntry("enOverdriveZone", "@settings.main.overdriveZone", true, null));

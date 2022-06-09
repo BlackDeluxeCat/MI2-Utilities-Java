@@ -2,31 +2,28 @@ package mi2u;
 
 import arc.*;
 import arc.func.*;
-import arc.graphics.Color;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.Element;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
-import arc.struct.Seq;
 import arc.util.*;
 import mi2u.io.*;
 import mi2u.map.filters.*;
-import mi2u.ui.HoverTopTable;
-import mindustry.content.Liquids;
-import mindustry.core.UI;
+import mi2u.ui.*;
+import mindustry.content.*;
+import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
-import mindustry.io.JsonIO;
-import mindustry.maps.Maps;
-import mindustry.maps.filters.GenerateFilter;
-import mindustry.type.ItemStack;
-import mindustry.type.Liquid;
+import mindustry.io.*;
+import mindustry.maps.*;
+import mindustry.maps.filters.*;
+import mindustry.type.*;
 import mindustry.ui.*;
-import mindustry.ui.dialogs.SchematicsDialog;
-import mindustry.world.Block;
-import mindustry.world.blocks.defense.turrets.Turret;
+import mindustry.ui.dialogs.*;
+import mindustry.world.*;
+import mindustry.world.blocks.defense.turrets.*;
 import mindustry.world.blocks.logic.*;
 import mindustry.world.consumers.*;
 
@@ -47,6 +44,7 @@ public class ModifyFuncs{
         Events.on(EventType.ContentInitEvent.class, e2 -> modifyVanillaBlockBars());
         addFilters();
         initBetterTopTable();
+        schelogic();
     }
 
     public static void addFilters(){
@@ -139,7 +137,10 @@ public class ModifyFuncs{
             if(cell != null) cell.height(vanilla.getPrefHeight() * (vanilla.visible ? 1f:0f) + 0.5f);
             Reflect.set(ui.hudfrag.blockfrag, "hover", HoverTopTable.hoverInfo.unit);
         });
-        topTable.visible(() -> HoverTopTable.hoverInfo.hasInfo() || vanilla.visible);
+        topTable.visible(() -> {
+            vanilla.updateVisibility();
+            return HoverTopTable.hoverInfo.hasInfo() || vanilla.visible;
+        });
     }
 
     public static void schelogic(){
