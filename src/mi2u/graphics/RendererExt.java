@@ -13,6 +13,7 @@ import mi2u.MI2UTmp;
 import mi2u.io.MI2USettings;
 import mindustry.ai.Pathfinder;
 import mindustry.ai.types.LogicAI;
+import mindustry.content.Blocks;
 import mindustry.content.StatusEffects;
 import mindustry.core.World;
 import mindustry.entities.units.*;
@@ -63,7 +64,7 @@ public class RendererExt{
     public static void drawBase(){
         if(!state.isGame()) return;
         if(!MI2USettings.getBool("disableUnit", false)){
-            hiddenUnit.select(u -> u.isValid()).each(u -> Groups.draw.add(u));
+            hiddenUnit.select(Healthc::isValid).each(u -> Groups.draw.add(u));
             hiddenUnit.clear();
         }
 
@@ -88,7 +89,6 @@ public class RendererExt{
         }
 
         Seq<Tile> tiles = Reflect.get(renderer.blocks, "tileview");
-
         if(tiles != null){
             if(MI2USettings.getBool("disableBuilding", false)) tiles.clear();
 
@@ -109,8 +109,11 @@ public class RendererExt{
                     Draw.alpha(1f);
                     Lines.circle(odb.x, odb.y, block.range + phaseHeat * block.phaseRangeBoost);
                 }
+
             });
         }
+        if(MI2USettings.getBool("enSpawnZone", true)) drawSpawnPoint();
+
         Draw.reset();
     }
 
@@ -622,6 +625,21 @@ public class RendererExt{
         if(rb.lastItem != null){
             Draw.color();
             Draw.rect(rb.lastItem.uiIcon, rb.x, rb.y, 4f, 4f);
+        }
+        Draw.reset();
+    }
+
+    public static void drawSpawnPoint(){
+        Draw.color(Color.gray, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
+        Draw.alpha(1f);
+        Draw.z(Layer.overlayUI);
+        if(state.hasSpawns()){
+            float len = MI2UTmp.v1.set(Core.camera.width, Core.camera.height).len() + state.rules.dropZoneRadius;
+            for(Tile tile : spawner.getSpawns()){
+                if(MI2UTmp.v1.set(tile).sub(Core.camera.position).len() < len){
+                    Lines.dashCircle(tile.worldx(), tile.worldy(), state.rules.dropZoneRadius);
+                }
+            }
         }
         Draw.reset();
     }

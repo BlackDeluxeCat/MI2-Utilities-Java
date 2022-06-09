@@ -101,6 +101,7 @@ public class MI2UI extends Mindow2{
 
         settings.add(new CheckEntry("enPlayerCursor", "@settings.main.playerCursor", true, null));
         settings.add(new CheckEntry("enOverdriveZone", "@settings.main.overdriveZone", true, null));
+        settings.add(new CheckEntry("enSpawnZone", "@settings.main.spawnZone", true, null));
 
         settings.add(new CheckEntry("disableWreck", "@settings.main.disableWreck", false, null));
         settings.add(new CheckEntry("disableUnit", "@settings.main.disableUnit", false, null));
