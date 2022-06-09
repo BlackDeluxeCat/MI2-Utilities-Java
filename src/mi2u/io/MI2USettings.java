@@ -24,10 +24,10 @@ import static mi2u.MI2UVars.*;
 
 public class MI2USettings{
 
-    private static Seq<MI2USetting> map = new Seq<>();
+    private static final OrderedMap<String, MI2USetting> map = new OrderedMap<>();
     private static Fi root, dir;
     private static boolean modified = false;
-    private static Interval timer = new Interval();
+    private static final Interval timer = new Interval();
 
     public static Seq<SettingEntry> entries = new Seq<>();
 
@@ -47,11 +47,11 @@ public class MI2USettings{
     }
     
     public static MI2USetting getSetting(String name){
-        return map.find(s -> s.name.equals(name));
+        return map.get(name);
     }
 
     public static MI2USetting putInt(String name, int value){
-        MI2USetting ss = map.find(s -> s.name.equals(name));
+        MI2USetting ss = map.get(name);
         if(ss != null){
             ss.value = String.valueOf(value);
         }else{
@@ -62,16 +62,16 @@ public class MI2USettings{
     }
 
     private static void quietPut(String name, String value){
-        MI2USetting ss = map.find(s -> s.name.equals(name));
+        MI2USetting ss = map.get(name);
         if(ss != null){
             ss.value = value;
         }else{
-            ss = new MI2USetting(name, value);
+            new MI2USetting(name, value);
         }
     }
 
     public static MI2USetting putStr(String name, String value){
-        MI2USetting ss = map.find(s -> s.name.equals(name));
+        MI2USetting ss = map.get(name);
         if(ss != null){
             ss.value = value;
         }else{
@@ -82,7 +82,7 @@ public class MI2USettings{
     }
 
     public static MI2USetting putBool(String name, Boolean value){
-        MI2USetting ss = map.find(s -> s.name.equals(name));
+        MI2USetting ss = map.get(name);
         if(ss != null){
             ss.value = String.valueOf(value);
         }else{
@@ -93,7 +93,7 @@ public class MI2USettings{
     }
 
     public static int getInt(String name, int def){
-        MI2USetting obj = map.find(s -> {return s.name.equals(name);});
+        MI2USetting obj = map.get(name);
         if(obj == null) return def;
         return Strings.parseInt(obj.value, 0);
     }
@@ -103,7 +103,7 @@ public class MI2USettings{
     }
 
     public static String getStr(String name, String def){
-        MI2USetting obj = map.find(s -> {return s.name.equals(name);});
+        MI2USetting obj = map.get(name);
         if(obj == null) return def;
         return obj.value;
     }
@@ -113,7 +113,7 @@ public class MI2USettings{
     }
 
     public static boolean getBool(String name, boolean def){
-        MI2USetting obj = map.find(s -> {return s.name.equals(name);});
+        MI2USetting obj = map.get(name);
         if(obj == null) return def;
         return obj.value.equals("true");
     }
@@ -162,9 +162,7 @@ public class MI2USettings{
             }
             var writes = dir.writes();
             writes.str("MI2USettingsHead");
-            map.each(s -> {
-                s.save(writes);
-            });
+            map.orderedKeys().each(s -> map.get(s).save(writes));
             writes.str("end");
             writes.close();
         }catch(Throwable e){
@@ -180,7 +178,7 @@ public class MI2USettings{
         public MI2USetting(String name, String value){
             this.name = name;
             this.value = value;
-            map.add(this);
+            map.put(name, this);
         }
 
         public String get(){
