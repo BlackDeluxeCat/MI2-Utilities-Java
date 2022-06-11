@@ -5,7 +5,6 @@ import arc.graphics.*;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Fill;
 import arc.input.*;
-import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.*;
 import arc.scene.event.*;
@@ -41,7 +40,7 @@ import static mi2u.MI2UVars.*;
 public class Mindow2 extends Table{
     @Nullable public static Mindow2 currTopmost = null;
     public static LabelStyle titleStyleNormal, titleStyleSnapped;
-    public static Drawable titleBarbgNormal, titleBarbgSnapped, white, gray5;
+    public static Drawable titleBarbgNormal, titleBarbgSnapped, white, gray2;
 
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
     public boolean topmost = false, minimized = false, closable = true;
@@ -345,7 +344,7 @@ public class Mindow2 extends Table{
         titleBarbgNormal = whiteui.tint(1f, 0.1f, 0.2f, 0.8f);
         titleBarbgSnapped = whiteui.tint(1f, 0.1f, 0.2f, 0.2f);
         white = whiteui.tint(1f, 1f, 1f, 1f);
-        gray5 = whiteui.tint(0.5f, 0.5f, 0.5f, 1f);
+        gray2 = whiteui.tint(0.2f, 0.2f, 0.2f, 1f);
     }
 
     public class MindowUIGroupEntry extends SettingGroupEntry{
