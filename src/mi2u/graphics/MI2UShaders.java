@@ -10,9 +10,11 @@ import mindustry.graphics.Shaders;
 
 public class MI2UShaders{
     public static OverDriverZoneShader odzone;
+    public static MenderZoneShader mdzone;
 
     public static void load(){
         odzone = new OverDriverZoneShader();
+        mdzone = new MenderZoneShader();
     }
 
     public static class MI2UShader extends Shader{
@@ -32,6 +34,23 @@ public class MI2UShaders{
     public static class OverDriverZoneShader extends MI2UShader{
         public OverDriverZoneShader(){
             super("overdrivezone.frag", "screenspace.vert");
+        }
+
+        @Override
+        public void apply(){
+            setUniformf("u_dp", Scl.scl(1f));
+            setUniformf("u_time", Time.time / Scl.scl(1f));
+            setUniformf("u_offset",
+                    Core.camera.position.x - Core.camera.width / 2,
+                    Core.camera.position.y - Core.camera.height / 2);
+            setUniformf("u_texsize", Core.camera.width, Core.camera.height);
+            setUniformf("u_invsize", 1f/Core.camera.width, 1f/Core.camera.height);
+        }
+    }
+
+    public static class MenderZoneShader extends MI2UShader{
+        public MenderZoneShader(){
+            super("menderzone.frag", "screenspace.vert");
         }
 
         @Override

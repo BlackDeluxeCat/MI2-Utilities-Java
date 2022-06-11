@@ -23,6 +23,7 @@ import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.ui.Fonts;
 import mindustry.world.*;
+import mindustry.world.blocks.defense.MendProjector;
 import mindustry.world.blocks.defense.OverdriveProjector;
 import mindustry.world.blocks.distribution.BufferedItemBridge;
 import mindustry.world.blocks.distribution.ItemBridge;
@@ -81,13 +82,7 @@ public class RendererExt{
             if(d instanceof Bullet b && MI2USettings.getBool("disableBullet", false)) Groups.draw.remove(b);
         });
 
-        if(Core.settings.getBool("animatedshields") && MI2USettings.getBool("enOverdriveZone", false) && MI2UShaders.odzone != null){
-            Draw.drawRange(91.1f, 1f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
-                renderer.effectBuffer.end();
-                renderer.effectBuffer.blit(MI2UShaders.odzone);
-            });
-        }
-
+        drawZoneShader();
         Seq<Tile> tiles = Reflect.get(renderer.blocks, "tileview");
         if(tiles != null){
             if(MI2USettings.getBool("disableBuilding", false)) tiles.clear();
@@ -97,19 +92,7 @@ public class RendererExt{
 
                 if(build == null) return;
                 if(enDistributionReveal) drawBlackboxBuilding(build);
-                if(MI2USettings.getBool("enOverdriveZone", false) && build instanceof OverdriveProjector.OverdriveBuild odb){
-                    OverdriveProjector block = (OverdriveProjector)odb.block();
-                    float phaseHeat = Reflect.get(odb, "phaseHeat");
-                    Draw.color(block.baseColor, block.phaseColor, phaseHeat);
-                    Draw.z(91.1f);
-                    Draw.alpha(Core.settings.getBool("animatedshields")?0.6f:0.2f);
-                    Fill.circle(odb.x, odb.y, block.range + phaseHeat * block.phaseRangeBoost);
-
-                    Lines.stroke(2f);
-                    Draw.alpha(1f);
-                    Lines.circle(odb.x, odb.y, block.range + phaseHeat * block.phaseRangeBoost);
-                }
-
+                drawZoneBuilding(build);
             });
         }
         if(MI2USettings.getBool("enSpawnZone", true)) drawSpawnPoint();
@@ -312,6 +295,53 @@ public class RendererExt{
         if(b instanceof BufferedItemBridge.BufferedItemBridgeBuild bb) drawBufferedItemBridge(bb);
         if(b instanceof Unloader.UnloaderBuild ub) drawUnloader(ub);
         if(b instanceof Router.RouterBuild rb) drawRouter(rb);
+    }
+
+    public static void drawZoneShader(){
+        if(Core.settings.getBool("animatedshields") && MI2USettings.getBool("enOverdriveZone", false) && MI2UShaders.odzone != null){
+            Draw.drawRange(91.1f, 0.02f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
+                renderer.effectBuffer.end();
+                renderer.effectBuffer.blit(MI2UShaders.odzone);
+            });
+        }
+        if(Core.settings.getBool("animatedshields") && MI2USettings.getBool("enMenderZone", false) && MI2UShaders.mdzone != null){
+            Draw.drawRange(91.2f, 0.02f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
+                renderer.effectBuffer.end();
+                renderer.effectBuffer.blit(MI2UShaders.mdzone);
+            });
+        }
+    }
+
+    public static void drawZoneBuilding(Building b){
+        if(MI2USettings.getBool("enOverdriveZone", false) && b instanceof OverdriveProjector.OverdriveBuild odb) drawOverDriver(odb);
+        if(MI2USettings.getBool("enMenderZone", false) && b instanceof MendProjector.MendBuild mb) drawMender(mb);
+        Draw.reset();
+    }
+
+    public static void drawOverDriver(OverdriveProjector.OverdriveBuild odb){
+        OverdriveProjector block = (OverdriveProjector)odb.block();
+        float phaseHeat = Reflect.get(odb, "phaseHeat");
+        Draw.color(block.baseColor, block.phaseColor, phaseHeat);
+        Draw.z(91.1f);
+        Draw.alpha(Core.settings.getBool("animatedshields")?0.6f:0.2f);
+        Fill.circle(odb.x, odb.y, block.range + phaseHeat * block.phaseRangeBoost);
+
+        Lines.stroke(2f);
+        Draw.alpha(1f);
+        Lines.circle(odb.x, odb.y, block.range + phaseHeat * block.phaseRangeBoost);
+    }
+
+    public static void drawMender(MendProjector.MendBuild mb){
+        if(mb.efficiency() <= 0f) return;
+        MendProjector block = (MendProjector)mb.block;
+        float phaseHeat = Reflect.get(mb, "phaseHeat");
+        float charge = Reflect.get(mb, "charge");
+        float alpha = Mathf.pow(1f - (charge / block.reload), 5);
+        Draw.z(91.2f);
+        Draw.color(block.baseColor);
+        Draw.alpha((Core.settings.getBool("animatedshields")?0.6f:0.2f) * (alpha > 0.05 ? alpha : 0f));
+        Fill.circle(mb.x, mb.y, block.range + phaseHeat * block.phaseRangeBoost);
+
     }
 
     public static void drawJunciton(Junction.JunctionBuild jb){
