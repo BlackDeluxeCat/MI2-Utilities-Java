@@ -1,25 +1,27 @@
 package mi2u.input;
 
+import arc.func.*;
 import arc.math.Mathf;
-import arc.math.geom.Position;
-import arc.math.geom.Vec2;
-import mi2u.MI2UTmp;
-import mindustry.gen.Unit;
+import arc.math.geom.*;
+import arc.struct.*;
+import mi2u.*;
+import mindustry.gen.*;
 
 import static mindustry.Vars.*;
 
+/** The inputOverwrite accept commands and change control states, implements of control should be overwritten and run according to states on each update. */
 public interface InputOverwrite{
-    public default void build(Boolean value){};
+    default void build(Boolean build){};
 
-    public default void boost(Boolean value){};
+    default void boost(Boolean boost){};
 
-    public default void pan(Boolean value, Vec2 panXY){};
+    default void pan(Boolean value, Vec2 panXY){};
 
-    public default void shoot(Vec2 vec, Boolean value, Boolean ctrl){};
+    default void shoot(Vec2 vec, Boolean shoot, Boolean ctrl){};
 
-    public default void move(Vec2 value){};
+    default void move(Vec2 movement){};
 
-    public default void approach(Vec2 point, float radius, boolean checkWithin){
+    default void approach(Vec2 point, float radius, boolean checkWithin){
         Vec2 vec = MI2UTmp.v1;
         Unit unit = player.unit();
         if(checkWithin && unit.within(point.x, point.y, radius)){
@@ -37,12 +39,12 @@ public interface InputOverwrite{
         move(vec);
     }
 
-    public default void approach(Position target, float radius, boolean checkWithin){
+    default void approach(Position target, float radius, boolean checkWithin){
         if(target == null) return;
         approach(MI2UTmp.v2.set(target.getX(),target.getY()), radius, checkWithin);
     }
 
-    public default void clear(){};
+    default void clear(){};
 
-    public void replaceInput();
+    void replaceInput();
 }

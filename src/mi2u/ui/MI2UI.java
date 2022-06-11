@@ -3,6 +3,7 @@ package mi2u.ui;
 import arc.*;
 import arc.func.*;
 import arc.graphics.*;
+import arc.scene.Element;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
@@ -10,16 +11,12 @@ import mi2u.game.SpeedController;
 import mi2u.io.MI2USettings.*;
 import mindustry.Vars;
 import mindustry.gen.*;
+import mindustry.ui.Styles;
 
 import static mi2u.MI2UVars.*;
 import static mi2u.MI2UFuncs.*;
 
 public class MI2UI extends Mindow2{
-    public static Cons<TextButton> funcSetTextb = c -> {
-        c.getLabel().setAlignment(Align.left);
-        c.getLabel().setWrap(false);
-        c.getLabelCell().pad(2);
-    };
 
     public MI2UI(){
         super("@main.MI2U", "@main.help");
@@ -39,33 +36,57 @@ public class MI2UI extends Mindow2{
         cont.table(tt -> {
             tt.button("" + Iconc.refresh, textb, () -> {
                 Call.sendChatMessage("/sync");
-            }).minHeight(36f).with(funcSetTextb);
+            }).minSize(36f).with(funcSetTextb);
         
             tt.button("@main.buttons.rebuild", textb, () -> {
                 unitRebuildBlocks();
-            }).minHeight(36f).with(funcSetTextb);
+            }).minSize(36f).with(funcSetTextb);
 
             tt.button("" + Iconc.zoom + Iconc.blockJunction, textbtoggle, () -> {
                 enDistributionReveal = !enDistributionReveal;
             }).update(b -> {
                 b.setChecked(enDistributionReveal);
-            }).minHeight(36f).with(funcSetTextb);
+            }).minSize(36f).with(funcSetTextb);
         });
 
         cont.row();
 
         cont.table(tt -> {
-            tt.add("AI");
-            fullAI.modes.each(mode -> {
-                tt.button(mode.btext, textbtoggle, () -> {
-                    mode.enable = !mode.enable;
-                }).update(b -> {
-                    b.setChecked(mode.enable);
-                }).minSize(30f).with(c -> {
-                    c.getLabel().setAlignment(Align.center);
+            tt.button("AI\n" + Iconc.settings, textb, () -> {
+                var popup = new PopupTable();
+                popup.addCloseButton();
+                popup.addDragMove();
+                popup.setSize(300f, 200f);
+                popup.margin(4f).setBackground(Styles.black8);
+                popup.pane(p -> {
+                    for(var mode : fullAI.modes){
+                        p.table(mode::buildConfig).growX();
+                        p.row();
+                    }
+                }).growX().update(p -> {
+                    Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
+                    if(e != null && e.isDescendantOf(p)) {
+                        p.requestScroll();
+                    }else if(p.hasScroll()){
+                        Core.scene.setScrollFocus(null);
+                    }
+                });
+                popup.popup();
+                popup.update(popup::keepInScreen);
+                popup.setPositionInScreen(Core.graphics.getWidth()/2f, Core.graphics.getHeight()/2f);
+            }).growY().minSize(36f).with(funcSetTextb);
+            tt.table(ttt -> {
+                fullAI.modes.each(mode -> {
+                    ttt.button(mode.btext, textbtoggle, () -> {
+                        mode.enable = !mode.enable;
+                    }).update(b -> {
+                        b.setChecked(mode.enable);
+                    }).minSize(36f).with(c -> {
+                        c.getLabel().setAlignment(Align.center);
+                    });
                 });
             });
-        });
+        }).growX();
 
         cont.row();
 
@@ -100,7 +121,8 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("showUIContainer", "@settings.main.container", false, b -> container.addTo(b?Core.scene.root:null)));
 
         settings.add(new CheckEntry("enPlayerCursor", "@settings.main.playerCursor", true, null));
-        settings.add(new CheckEntry("enOverdriveZone", "@settings.main.overdriveZone", true, null));
+        settings.add(new CheckEntry("enOverdriveZone", "@settings.main.overdriveZone", false, null));
+        settings.add(new CheckEntry("enMenderZone", "@settings.main.menderZone", false, null));
         settings.add(new CheckEntry("enSpawnZone", "@settings.main.spawnZone", true, null));
 
         settings.add(new CheckEntry("disableWreck", "@settings.main.disableWreck", false, null));

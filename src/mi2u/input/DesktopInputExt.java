@@ -1,20 +1,14 @@
 package mi2u.input;
 
-import arc.Core;
-import arc.graphics.g2d.Draw;
+import arc.*;
+import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
-import arc.util.Log;
 import arc.util.*;
-import mi2u.MI2UFuncs;
-import mi2u.MI2UTmp;
+import mi2u.*;
 import mi2u.io.MI2USettings;
-import mindustry.Vars;
-import mindustry.core.World;
-import mindustry.gen.Building;
-import mindustry.gen.Mechc;
-import mindustry.gen.Sounds;
-import mindustry.gen.Unit;
+import mindustry.core.*;
+import mindustry.gen.*;
 import mindustry.input.*;
 
 import static mindustry.Vars.*;
@@ -60,13 +54,11 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
                 unit.controlWeapons(true, player.shooting);
             }
         }
-        //panning state is stored on desktop. ctrl panning action only for one time is ok
-        if(ctrlPan){
-            if(ctrlPan && !panXY.isZero()){
-                panning = true;
-                Core.camera.position.set(panXY);
-                ctrlPan = false;
-            }
+        //panning state is stored on desktop. ctrlPan should be set to true to use overwritten states. Set ctrlPan to false after panning is ok.
+        if(ctrlPan && !panXY.isZero()){
+            panning = true;
+            Core.camera.position.set(panXY);
+            ctrlPan = false;
         }
 
         if(ctrlMove && unit != null) unit.movePref(move);
@@ -76,29 +68,29 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
     }
 
     @Override
-    public void boost(Boolean value){
+    public void boost(Boolean boost){
         ctrlBoost = true;
-        boost = value;
+        this.boost = boost;
     }
 
     /** set panXY to zero to cancel control, this may be useless on desktop input*/
     @Override
-    public void pan(Boolean value, Vec2 panXY){
-        ctrlPan = value;
+    public void pan(Boolean ctrl, Vec2 panXY){
+        ctrlPan = ctrl;
         this.panXY.set(panXY);
     }
 
     @Override
-    public void shoot(Vec2 vec, Boolean value, Boolean ctrl){
+    public void shoot(Vec2 vec, Boolean shoot, Boolean ctrl){
         ctrlShoot = ctrl;
         shootXY.set(vec);
-        shoot = value;
+        this.shoot = shoot;
     }
 
     @Override
-    public void move(Vec2 value){
+    public void move(Vec2 movement){
         ctrlMove = true;
-        move.set(value);
+        move.set(movement);
     }
 
     @Override

@@ -1,44 +1,33 @@
 package mi2u.ai;
 
-import arc.Core;
-import arc.math.geom.Geometry;
-import arc.math.geom.Position;
-import arc.math.geom.Vec2;
-import arc.struct.Seq;
+import arc.*;
+import arc.graphics.Color;
+import arc.math.geom.*;
+import arc.scene.ui.layout.*;
+import arc.struct.*;
 import arc.util.Log;
 import mi2u.MI2UTmp;
-import mi2u.input.DesktopInputExt;
-import mi2u.input.InputOverwrite;
-import mi2u.input.MobileInputExt;
-import mi2u.io.MI2USettings;
-import mindustry.content.Blocks;
-import mindustry.ctype.ContentType;
-import mindustry.entities.Predict;
-import mindustry.entities.Units;
-import mindustry.entities.units.AIController;
-import mindustry.gen.Building;
-import mindustry.gen.Call;
-import mindustry.gen.Iconc;
-import mindustry.input.Binding;
-import mindustry.type.Item;
-import mindustry.world.Tile;
-import mindustry.world.meta.BlockFlag;
+import mi2u.input.*;
+import mi2u.io.*;
+import mi2u.ui.Mindow2;
+import mindustry.content.*;
+import mindustry.entities.*;
+import mindustry.entities.units.*;
+import mindustry.gen.*;
+import mindustry.input.*;
+import mindustry.type.*;
+import mindustry.world.*;
+import mindustry.world.meta.*;
 
 import static mindustry.Vars.*;
+import static mi2u.MI2UVars.*;
 
 public class FullAI extends AIController{
     public Seq<Mode> modes = new Seq<>();
 
     public FullAI(){
         super();
-        modes.add(new MineMode());
-        modes.add(new BaseMineMode(){
-            @Override
-            public void updateList() {
-                list.clear();
-                list.add(content.getByID(ContentType.item, 0), content.getByID(ContentType.item, 1));
-            }
-        });
+        modes.add(new BaseMineMode());
         modes.add(new AutoBuildMode());
         modes.add(new SelfRepairMode());
         modes.add(new AutoTargetMode());
@@ -80,6 +69,15 @@ public class FullAI extends AIController{
         }
         /** override it. enable should be checked first */
         public void act(){}
+
+        public void buildConfig(Table table){
+            table.table(t -> {
+                t.setBackground(Mindow2.gray2);
+                t.add(btext).color(Color.sky).left();
+                t.add().growX();
+            }).growX().minHeight(18f).padTop(8f);
+            table.row();
+        }
     }
 
     public class BaseMineMode extends Mode{
@@ -90,12 +88,12 @@ public class FullAI extends AIController{
         
         public BaseMineMode(){
             btext = Iconc.unitMono + "";
+            list.add(Items.copper, Items.lead);
         }
 
         @Override
         public void act(){
             if(!enable) return;
-            updateList();
             Building core = unit.closestCore();
             boostAction(true);
             if(!(unit.canMine()) || core == null) return;
@@ -146,20 +144,31 @@ public class FullAI extends AIController{
             }
         }
 
-        public void updateList(){
-            list.clear();
-            list.add((Item)content.getByName(ContentType.item, "copper"), (Item)content.getByName(ContentType.item, "lead"));
-        }
-    }
-
-    public class MineMode extends BaseMineMode{
-        public MineMode(){
-            btext = Iconc.unitMono + "+";
-        }
         @Override
-        public void updateList(){
-            list.clear();
-            list.addAll(content.items());
+        public void buildConfig(Table table) {
+            super.buildConfig(table);
+            table.table(t -> {
+                int i = 0;
+                for(var item : content.items()){
+                    if(!content.blocks().contains(b -> b.itemDrop == item)) continue;
+                    t.button(b -> {
+                        b.image(item.uiIcon).size(16f);
+                        b.add(item.localizedName);
+                        b.margin(4f);
+                        }, textbtoggle, () -> {
+                        if(list.contains(item)){
+                            list.remove(item);
+                        }else {
+                            list.add(item);
+                        }
+                    }).fill().update(b -> b.setChecked(list.contains(item)));
+                    i++;
+                    if(i >= 3){
+                        i = 0;
+                        t.row();
+                    }
+                }
+            });
         }
     }
 
@@ -172,9 +181,25 @@ public class FullAI extends AIController{
         public void act(){
             if(!enable) return;
             if(!control.input.isBuilding) return;
-            if(unit.plans().isEmpty() || !unit.canBuild()) return;
+            if(!unit.canBuild()) return;
+            Log.info(rebuild + "" + unit.plans().isEmpty());
+            if(rebuild && unit.plans().isEmpty() && !unit.team.data().blocks.isEmpty()){
+                var block = unit.team.data().blocks.first();
+                if(world.tile(block.x, block.y) != null && world.tile(block.x, block.y).block().id == block.block){
+                    state.teams.get(player.team()).blocks.remove(block);
+                }else{
+                    unit.addBuild(new BuildPlan(block.x, block.y, block.rotation, content.block(block.block), block.config));
+                }
+            }
+            if(unit.plans().isEmpty()) return;
             boostAction(true);
             moveAction(unit.plans().first(), buildingRange / 1.4f, true);
+        }
+
+        @Override
+        public void buildConfig(Table table) {
+            super.buildConfig(table);
+            table.button("AutoRebuild", textbtoggle, () -> rebuild = !rebuild).update(b -> b.setChecked(rebuild)).with(funcSetTextb);
         }
     }
 
@@ -195,6 +220,7 @@ public class FullAI extends AIController{
     }
 
     public class AutoTargetMode extends Mode{
+        public boolean attack = true, heal = true;
         public AutoTargetMode(){
             btext = "AT";
         }
@@ -204,9 +230,10 @@ public class FullAI extends AIController{
             if(Core.input.keyDown(Binding.select)) return;
 
             if(timer.get(timerTarget2, 30f)){
+                target = null;
                 float range = unit.hasWeapons() ? unit.range() : 0f;
-                target = Units.closestTarget(unit.team, unit.x, unit.y, range, u -> u.checkTarget(unit.type.targetAir, unit.type.targetGround), u -> unit.type.targetGround);
-                if(unit.type.canHeal && target == null){
+                if(attack) target = Units.closestTarget(unit.team, unit.x, unit.y, range, u -> u.checkTarget(unit.type.targetAir, unit.type.targetGround), u -> unit.type.targetGround);
+                if(heal && unit.type.canHeal && target == null){
                     target = Geometry.findClosest(unit.x, unit.y, indexer.getDamaged(unit.team));
                     if(target != null && !unit.within(target, range)){
                         target = null;
@@ -220,6 +247,15 @@ public class FullAI extends AIController{
             }else{
                 shootAction(MI2UTmp.v1.set(player.mouseX, player.mouseY), false);
             }
+        }
+
+        @Override
+        public void buildConfig(Table table) {
+            super.buildConfig(table);
+            table.table(t -> {
+                t.button("Attack", textbtoggle, () -> attack = !attack).update(b -> b.setChecked(attack)).with(funcSetTextb);
+                t.button("Heal", textbtoggle, () -> heal = !heal).update(b -> b.setChecked(heal)).with(funcSetTextb);
+            }).growX();
         }
     }
 }
