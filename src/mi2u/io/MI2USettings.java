@@ -2,12 +2,9 @@ package mi2u.io;
 
 import arc.*;
 import arc.files.*;
-import arc.func.Boolf;
 import arc.func.Boolp;
 import arc.func.Cons;
 import arc.graphics.Color;
-import arc.scene.Element;
-import arc.scene.ui.TextField;
 import arc.scene.ui.TextField.*;
 import arc.scene.ui.layout.Table;
 import arc.struct.*;
@@ -343,7 +340,7 @@ public class MI2USettings{
             if(headBuilder == null || builder == null || table == null) return;
             table.margin(2f);
             table.table(t -> {
-                t.setBackground(Mindow2.gray5);
+                t.setBackground(Mindow2.gray2);
                 t.margin(2f);
                 headBuilder.get(t);
             }).growX();

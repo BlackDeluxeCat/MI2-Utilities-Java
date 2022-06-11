@@ -210,9 +210,9 @@ public class CoreInfoMindow extends Mindow2{
                     }
                 }).maxHeight(MI2USettings.getInt(mindowName + ".itemsMaxHeight", 150)).update(p -> {
                     Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-                    if (e != null && e.isDescendantOf(p)) {
+                    if(e != null && e.isDescendantOf(p)) {
                         p.requestScroll();
-                    } else if (p.hasScroll()) {
+                    }else if(p.hasScroll()) {
                         Core.scene.setScrollFocus(null);
                     }
                 }).with(c -> c.setFadeScrollBars(true));

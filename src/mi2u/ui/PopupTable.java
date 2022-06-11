@@ -11,6 +11,7 @@ import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.*;
+import mindustry.gen.*;
 
 public class PopupTable extends Table{
     public boolean shown = false;
@@ -53,6 +54,10 @@ public class PopupTable extends Table{
 
     public void setPositionInScreen(float x, float y){
         setPosition(x, y);
+        keepInScreen();
+    }
+
+    public void keepInScreen(){
         keepInStage();
         invalidateHierarchy();
         pack();
@@ -89,10 +94,10 @@ public class PopupTable extends Table{
     }
 
     public void addCloseButton(){
-        TextButton b = new TextButton("X", MI2UVars.textb){{clicked(() -> hide());}};
+        TextButton b = new TextButton("" + Iconc.cancel, MI2UVars.textb){{clicked(() -> hide());}};
         b.setStyle(new TextButton.TextButtonStyle(b.getStyle()));
         b.getStyle().up = null;
-        b.setSize(36f);
+        b.setSize(24f);
         b.update(() -> {
             b.setPosition(getWidth() - b.getWidth(), getHeight() - b.getHeight());
             b.toFront();

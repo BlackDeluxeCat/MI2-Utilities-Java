@@ -15,7 +15,7 @@ public class MI2UVars {
     public static Cons<TextButton> funcSetTextb = c -> {
         c.getLabel().setAlignment(Align.center);
         c.getLabel().setWrap(false);
-        c.getLabelCell().pad(2);
+        c.margin(6f);
     };
 
     public static Seq<Mindow2> mindow2s = new Seq<Mindow2>();
