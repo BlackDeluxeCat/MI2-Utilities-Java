@@ -94,7 +94,7 @@ public class MI2UI extends Mindow2{
         cont.table(t -> {
             t.button("Speeding", textbtoggle, SpeedController::switchUpdate).update(b -> {
                 b.setChecked(SpeedController.update);
-                b.setText(Core.bundle.get("") + "x" + Strings.autoFixed(SpeedController.mul, 2));
+                b.setText(Core.bundle.get("main.buttons.speeding") + "x" + Strings.autoFixed(SpeedController.mul, 2));
                 SpeedController.update();
             }).with(funcSetTextb).with(b -> {
                 b.margin(4f);
