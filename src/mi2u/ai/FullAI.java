@@ -5,6 +5,7 @@ import arc.graphics.Color;
 import arc.math.geom.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
+import arc.util.Interval;
 import arc.util.Log;
 import mi2u.MI2UTmp;
 import mi2u.input.*;
@@ -24,6 +25,7 @@ import static mi2u.MI2UVars.*;
 
 public class FullAI extends AIController{
     public Seq<Mode> modes = new Seq<>();
+    protected Interval timer = new Interval(8);
 
     public FullAI(){
         super();
@@ -101,7 +103,7 @@ public class FullAI extends AIController{
                 unit.mineTile(null);
             }
             if(mining){
-                if(timer.get(timerTarget2, 60 * 4) || targetItem == null){
+                if(timer.get(0, 60 * 4) || targetItem == null){
                     targetItem = list.min(i -> indexer.hasOre(i) && unit.canMine(i), i -> core.items.get(i));
                 }
                 //core full of the target item, do nothing
@@ -114,7 +116,7 @@ public class FullAI extends AIController{
                 if(unit.stack.amount >= unit.type.itemCapacity || (targetItem != null && !unit.acceptsItem(targetItem))){
                     mining = false;
                 }else{
-                    if(timer.get(timerTarget3, 60) && targetItem != null){
+                    if(timer.get(1, 60) && targetItem != null){
                         ore = indexer.findClosestOre(unit, targetItem);
                     }
                     if(ore != null){
@@ -133,7 +135,7 @@ public class FullAI extends AIController{
                     mining = true;
                     return;
                 }
-                if(unit.within(core, itemTransferRange / 1.5f) && timer.get(timerTarget4, 120f)){
+                if(unit.within(core, itemTransferRange / 1.5f) && timer.get(2, 120f)){
                     if(core.acceptStack(unit.stack.item, unit.stack.amount, unit) > 0){
                         Call.transferInventory(unit.getPlayer(), core);
                     }
@@ -183,7 +185,7 @@ public class FullAI extends AIController{
             if(!control.input.isBuilding) return;
             if(!unit.canBuild()) return;
             Log.info(rebuild + "" + unit.plans().isEmpty());
-            if(rebuild && unit.plans().isEmpty() && !unit.team.data().blocks.isEmpty()){
+            if(rebuild && timer.get(3, 30f) && unit.plans().isEmpty() && !unit.team.data().blocks.isEmpty()){
                 var block = unit.team.data().blocks.first();
                 if(world.tile(block.x, block.y) != null && world.tile(block.x, block.y).block().id == block.block){
                     state.teams.get(player.team()).blocks.remove(block);
@@ -199,7 +201,7 @@ public class FullAI extends AIController{
         @Override
         public void buildConfig(Table table) {
             super.buildConfig(table);
-            table.button("AutoRebuild", textbtoggle, () -> rebuild = !rebuild).update(b -> b.setChecked(rebuild)).with(funcSetTextb);
+            table.button("@ai.config.autorebuild", textbtoggle, () -> rebuild = !rebuild).update(b -> b.setChecked(rebuild)).with(funcSetTextb);
         }
     }
 
@@ -229,7 +231,7 @@ public class FullAI extends AIController{
             if(!enable) return;
             if(Core.input.keyDown(Binding.select)) return;
 
-            if(timer.get(timerTarget2, 30f)){
+            if(timer.get(4, 30f)){
                 target = null;
                 float range = unit.hasWeapons() ? unit.range() : 0f;
                 if(attack) target = Units.closestTarget(unit.team, unit.x, unit.y, range, u -> u.checkTarget(unit.type.targetAir, unit.type.targetGround), u -> unit.type.targetGround);
@@ -253,8 +255,8 @@ public class FullAI extends AIController{
         public void buildConfig(Table table) {
             super.buildConfig(table);
             table.table(t -> {
-                t.button("Attack", textbtoggle, () -> attack = !attack).update(b -> b.setChecked(attack)).with(funcSetTextb);
-                t.button("Heal", textbtoggle, () -> heal = !heal).update(b -> b.setChecked(heal)).with(funcSetTextb);
+                t.button("@ai.config.attack", textbtoggle, () -> attack = !attack).update(b -> b.setChecked(attack)).with(funcSetTextb);
+                t.button("@ai.config.heal", textbtoggle, () -> heal = !heal).update(b -> b.setChecked(heal)).with(funcSetTextb);
             }).growX();
         }
     }
