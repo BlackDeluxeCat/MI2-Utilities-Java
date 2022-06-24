@@ -191,14 +191,16 @@ public class CoreInfoMindow extends Mindow2{
                         rebuild();
                     });
                 });
-                rebuild();
+                shown(this::rebuild);
             }
             public void rebuild(){
+                WorldData.scanWorld();
                 this.cont.clear();
                 this.cont.pane(t -> {
                     t.defaults().fillX().left().uniform();
                     int i = 0;
                     for(var block : content.blocks()){
+                        if(WorldData.getSeq(block, null) == null) continue;
                         if(withName){
                             t.button(block.localizedName, new TextureRegionDrawable(block.uiIcon), textb, 24f,() -> {
                                 finder.findTarget = block;
