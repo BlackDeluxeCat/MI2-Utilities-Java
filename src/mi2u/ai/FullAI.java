@@ -184,7 +184,6 @@ public class FullAI extends AIController{
             if(!enable) return;
             if(!control.input.isBuilding) return;
             if(!unit.canBuild()) return;
-            Log.info(rebuild + "" + unit.plans().isEmpty());
             if(rebuild && timer.get(3, 30f) && unit.plans().isEmpty() && !unit.team.data().blocks.isEmpty()){
                 var block = unit.team.data().blocks.first();
                 if(world.tile(block.x, block.y) != null && world.tile(block.x, block.y).block().id == block.block){

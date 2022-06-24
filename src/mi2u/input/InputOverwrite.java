@@ -15,7 +15,7 @@ public interface InputOverwrite{
 
     default void boost(Boolean boost){};
 
-    default void pan(Boolean value, Vec2 panXY){};
+    default void pan(Boolean ctrl, Vec2 panXY){};
 
     default void shoot(Vec2 vec, Boolean shoot, Boolean ctrl){};
 
