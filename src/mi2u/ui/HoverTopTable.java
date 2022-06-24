@@ -140,7 +140,7 @@ public class HoverTopTable extends Table {
         table.table(bars -> {
             bars.defaults().growX().height(20f).pad(4);
 
-            bars.add(new Bar(() -> Core.bundle.get("stat.health") + ":" + Strings.autoFixed(unit.health(), 3) + "(" + Strings.autoFixed(unit.health * 100 / unit.maxHealth, 2) + "%)", () -> Pal.health, unit::healthf).blink(Color.white));
+            bars.add(new Bar(() -> Core.bundle.get("stat.health") + ":" + Strings.autoFixed(unit.health(), 3) + "(" + Strings.fixed(unit.health * 100 / unit.maxHealth, 0) + "%) + " + Strings.autoFixed(unit.shield, 2), () -> Pal.health, unit::healthf).blink(Color.white));
             bars.row();
 
             if(state.rules.unitAmmo){
