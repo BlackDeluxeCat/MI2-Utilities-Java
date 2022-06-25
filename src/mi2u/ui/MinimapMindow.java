@@ -27,6 +27,7 @@ import static mindustry.Vars.*;
 
 public class MinimapMindow extends Mindow2{
     public static Minimap2 m = new Minimap2(200f);
+    public static WorldFinderTable finderTable = new WorldFinderTable();
     public MinimapMindow(){
         super("@minimap.MI2U");
     }
@@ -49,7 +50,13 @@ public class MinimapMindow extends Mindow2{
                 tt.row();
                 tt.label(() -> Iconc.commandAttack + "  " + Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1));
             }).growX();
-            t.table(tt -> tt.button(Iconc.players + "", MI2UVars.textbtoggle, () -> m.drawLabel = !m.drawLabel).update(b -> b.setChecked(m.drawLabel)).size(48f));
+            t.table(tt -> {
+                tt.button(Iconc.players + "", MI2UVars.textbtoggle, () -> m.drawLabel = !m.drawLabel).update(b -> b.setChecked(m.drawLabel)).size(48f);
+                tt.button(Iconc.zoom + "", MI2UVars.textb, () -> {
+                    finderTable.popup();
+                    finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
+                }).size(48f);
+            });
         }).growX();
     }
 
@@ -57,6 +64,15 @@ public class MinimapMindow extends Mindow2{
     public void initSettings(){
         super.initSettings();
         settings.add(new FieldEntry(mindowName + ".size", "@settings.mindowMap.size", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 600, s -> rebuild()));
+        settings.add(new CollapseGroupEntry("WorldData", ""){
+            private CheckEntry check1 = new CheckEntry("worldDataUpdate", "@settings.mindowMap.worldDataUpdate", true, null);
+            private FieldEntry field1 = new FieldEntry("worldDataUpdate.interval", "@settings.mindowMap.worldDataUpdate.interval", String.valueOf(10), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 3 && Strings.parseInt(s) <= 60, null);
+            {
+                collapsep = () -> !check1.value;
+                headBuilder = t -> check1.build(t);
+                builder = t -> field1.build(t);
+            }
+        });
     }
 
     @Override

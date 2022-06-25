@@ -5,10 +5,8 @@ import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.input.*;
 import arc.math.*;
-import arc.math.geom.*;
 import arc.scene.*;
 import arc.scene.event.*;
-import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
@@ -19,14 +17,12 @@ import mi2u.input.*;
 import mi2u.io.*;
 import mi2u.io.MI2USettings.*;
 import mi2u.struct.*;
-import mi2u.struct.WorldData.*;
 import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.game.Teams.*;
 import mindustry.gen.*;
 import mindustry.type.*;
 import mindustry.ui.*;
-import mindustry.ui.dialogs.*;
 import mindustry.world.blocks.storage.CoreBlock.*;
 
 import static mindustry.Vars.*;
@@ -37,13 +33,8 @@ public class CoreInfoMindow extends Mindow2{
     protected CoreBuild core;
     protected Team select, team;
 
-    protected WorldFinder finder = new WorldFinder();
-
     protected PowerGraphTable pg = new PowerGraphTable(330);
     protected PopupTable teamSelect = new PopupTable(), buildPlanTable = new PopupTable(), chartTable;
-    protected BaseDialog blockSelect, replaceSelect;
-    TextureRegionDrawable tmp1 = new TextureRegionDrawable();
-
     protected int[] unitIndex = new int[content.units().size];
 
     protected ObjectSet<Item> usedItems;
@@ -179,82 +170,22 @@ public class CoreInfoMindow extends Mindow2{
                 }).growX();
             }
         };
-
-        blockSelect = new BaseDialog("Block Select"){
-            boolean withName = false;
-            {
-                this.addCloseButton();
-                this.buttons.button("Block Name", textbtoggle, null).size(210f, 64f).with(b -> {
-                    b.clicked(() -> {
-                        withName = ! withName;
-                        b.setChecked(withName);
-                        rebuild();
-                    });
-                });
-                shown(this::rebuild);
-            }
-            public void rebuild(){
-                WorldData.scanWorld();
-                this.cont.clear();
-                this.cont.pane(t -> {
-                    t.defaults().fillX().left().uniform();
-                    int i = 0;
-                    for(var block : content.blocks()){
-                        if(WorldData.getSeq(block, null) == null) continue;
-                        if(withName){
-                            t.button(block.localizedName, new TextureRegionDrawable(block.uiIcon), textb, 24f,() -> {
-                                finder.findTarget = block;
-                                blockSelect.hide();
-                                finder.findIndex = 0;
-                            }).with(funcSetTextb);
-                        }else{
-                            t.button(b -> b.image(block.uiIcon), textb,() -> {
-                                finder.findTarget = block;
-                                blockSelect.hide();
-                                finder.findIndex = 0;
-                            }).size(36f).pad(2f);
-                        }
-                        if(i++ >= (withName ? 4 : 25)){
-                            t.row();
-                            i = 0;
-                        }
-                    }
-                });
-            }
-        };
     }
 
     @Override
     public void setupCont(Table cont){
         cont.clear();
         cont.table(ipt -> {
-            float size = 36f;
             ipt.table(utt -> {
-                utt.image(Mindow2.white).width(size).growY().update(i -> i.setColor(team.color));
+                utt.image(Mindow2.white).width(48f).growY().update(i -> i.setColor(team.color));
                 utt.button("Select", textb, () -> {
                     rebuildSelect();
                     teamSelect.popup();
                     teamSelect.snapTo(this);
-                }).growX().height(size).update(b -> {
+                }).growX().height(48f).update(b -> {
                     b.setText(Core.bundle.get("coreInfo.selectButton.team") + team.localized() + (select == null ? Core.bundle.get("coreInfo.selectButton.playerteam"):""));
                     b.getLabel().setColor(team == null ? Color.white:team.color);
                 });
-            }).grow();
-
-            ipt.row();
-
-            ipt.table(utt -> {
-                utt.button("", textb, blockSelect::show).height(48f).update(b -> b.setText(finder.findTarget.localizedName)).with(funcSetTextb).with(b -> {
-                    b.image().size(size).update(i -> i.setDrawable(tmp1.set(finder.findTarget.uiIcon))).pad(2f);
-                    b.getCells().reverse();
-                });
-                utt.button("", textb, () -> {
-                    finder.team = team;
-                    int pos = finder.findNext();
-                    if(pos != -1 && control.input instanceof InputOverwrite ipo) ipo.pan(true, MI2UTmp.v1.set(Point2.x(pos), Point2.y(pos)).scl(tilesize));
-                }).height(48f).update(b -> {
-                    b.setText(Iconc.zoom + "" + (finder.findIndex) + "/" + WorldData.countBlock(finder.findTarget, team));
-                }).with(funcSetTextb);
             }).grow();
 
             ipt.row();
@@ -386,11 +317,11 @@ public class CoreInfoMindow extends Mindow2{
     public void rebuildSelect(){
         teamSelect.clear();
         teamSelect.table(p -> {
-            p.button(Iconc.cancel + "", textb, () -> {
+            p.button(Iconc.map + "", textb, () -> {
                 select = null;
                 rebuild();
                 teamSelect.hide();
-            }).minSize(titleButtonSize).grow().disabled(select == null).get().getLabel().setWrap(false);
+            }).minSize(titleButtonSize * 2f).grow().disabled(select == null).get().getLabel().setWrap(false);
             int i = 1;
             for(TeamData t : state.teams.getActive()){
                 p.button(t.team.localized(), textb, () -> {

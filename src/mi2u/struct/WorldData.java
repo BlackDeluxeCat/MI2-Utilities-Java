@@ -2,6 +2,7 @@ package mi2u.struct;
 
 import arc.struct.*;
 import arc.util.*;
+import mi2u.io.MI2USettings;
 import mindustry.content.*;
 import mindustry.game.*;
 import mindustry.gen.*;
@@ -16,9 +17,13 @@ public class WorldData{
      * */
     public static ObjectMap<Block, IntSeq[]> tiles = new ObjectMap<>();
     private static ObjectSet<Building> scanned = new ObjectSet<>();
+    public static boolean[] activeTeams = new boolean[256];
 
     public static void clear(){
         scanned.clear();
+        for(boolean i : activeTeams){
+            i = false;
+        }
         tiles.each((b, array) -> {
             for(var intSeq : array){
                 if(intSeq != null) intSeq.clear();
@@ -52,7 +57,10 @@ public class WorldData{
                     scanned.add(tile.build);
                 }
                 putBlock(tile.block(), tile.pos(), 256);
-                if(tile.build != null) putBlock(tile.block(), tile.pos(), tile.build.team.id);
+                if(tile.build != null){
+                    activeTeams[tile.build.team.id] = true;
+                    putBlock(tile.block(), tile.pos(), tile.build.team.id);
+                }
             }
         }
     }
@@ -67,10 +75,11 @@ public class WorldData{
 
     public static class WorldFinder{
         public Block findTarget = Blocks.air;
-        public int findIndex = 0;
+        public int findIndex = 0, lastPos = -1;
         @Nullable public Team team;
 
         public int findNext(){
+            if(!MI2USettings.getBool("worldDataUpdate") && getSeq(findTarget, team) == null) scanWorld();
             if(getSeq(findTarget, team) == null){
                 findIndex = 0;
                 return -1;
@@ -78,7 +87,8 @@ public class WorldData{
             int size = getSeq(findTarget, team).size;
             if(size == 0) return -1;
             if(findIndex >= size) findIndex = 0;
-            return getSeq(findTarget, team).get(findIndex++);
+            lastPos = getSeq(findTarget, team).get(findIndex++);
+            return lastPos;
         }
     }
 }
