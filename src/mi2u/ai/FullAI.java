@@ -1,16 +1,15 @@
 package mi2u.ai;
 
 import arc.*;
-import arc.graphics.Color;
+import arc.graphics.*;
 import arc.math.geom.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
-import arc.util.Interval;
-import arc.util.Log;
+import arc.util.*;
 import mi2u.MI2UTmp;
 import mi2u.input.*;
 import mi2u.io.*;
-import mi2u.ui.Mindow2;
+import mi2u.ui.*;
 import mindustry.content.*;
 import mindustry.entities.*;
 import mindustry.entities.units.*;
@@ -18,6 +17,7 @@ import mindustry.gen.*;
 import mindustry.input.*;
 import mindustry.type.*;
 import mindustry.world.*;
+import mindustry.world.blocks.*;
 import mindustry.world.meta.*;
 
 import static mindustry.Vars.*;
@@ -175,7 +175,8 @@ public class FullAI extends AIController{
     }
 
     public class AutoBuildMode extends Mode{
-        public boolean rebuild = false;
+        public boolean rebuild = false, follow = true;
+        private BuildPlan cobuildplan;
         public AutoBuildMode(){
             btext = Iconc.unitPoly + "";
         }
@@ -184,12 +185,61 @@ public class FullAI extends AIController{
             if(!enable) return;
             if(!control.input.isBuilding) return;
             if(!unit.canBuild()) return;
-            if(rebuild && timer.get(3, 30f) && unit.plans().isEmpty() && !unit.team.data().blocks.isEmpty()){
+            //help others building
+            if(follow && timer.get(3, 20f) && unit.plans().isEmpty()){
+                cobuildplan = null;
+
+                for(var player : Groups.player){
+                    var u = player.unit();
+                    if(u == null || u.team != unit.team) continue;
+
+                    if(u.canBuild() && u != unit && u.activelyBuilding() && u.buildPlan() != null){
+                        BuildPlan plan = u.buildPlan();
+                        Building build = world.build(plan.x, plan.y);
+                        if(build instanceof ConstructBlock.ConstructBuild cons){
+                            float dist = Math.min(cons.dst(unit) - buildingRange, 0);
+
+                            //make sure you can reach the request in time
+                            if(dist / unit.speed() < cons.buildCost * 0.9f && (cobuildplan == null || MI2UTmp.v1.set(u.buildPlan()).dst(unit) < MI2UTmp.v2.set(cobuildplan).dst(unit))){
+                                cobuildplan = u.buildPlan();
+                            }
+                        }
+                    }
+                }
+
+                if(cobuildplan != null) unit.plans.addFirst(cobuildplan);
+
+            }else if(rebuild && timer.get(4, 30f) && unit.plans().isEmpty() && !unit.team.data().blocks.isEmpty()){
+                //rebuild
                 var block = unit.team.data().blocks.first();
                 if(world.tile(block.x, block.y) != null && world.tile(block.x, block.y).block().id == block.block){
                     state.teams.get(player.team()).blocks.remove(block);
                 }else{
                     unit.addBuild(new BuildPlan(block.x, block.y, block.rotation, content.block(block.block), block.config));
+                }
+
+            }else if(timer.get(5, 60f) && unit.buildPlan() != null){
+                //cancel co-op plan that someone has conflicting idea or no player is building anymore
+                boolean cobuilding = false;
+                for(var player : Groups.player){
+                    var u = player.unit();
+                    if(u == null || u.team != unit.team) continue;
+                    if(u.canBuild() && u != unit && u.activelyBuilding() && u.buildPlan() != null){
+                        BuildPlan plan = u.buildPlan();
+                        if(cobuildplan != null && plan.samePos(cobuildplan) && plan.block == cobuildplan.block){
+                            if(plan.breaking != cobuildplan.breaking){
+                                cobuilding = false;
+                                break;
+                            }else{
+                                cobuilding = true;
+                            }
+                        }
+                    }
+                }
+                //cancel co-build plan that no other unit is building.
+                if(!cobuilding && cobuildplan != null){
+                    unit.plans().remove(bp -> bp.x == cobuildplan.x && bp.y == cobuildplan.y && bp.block == cobuildplan.block && bp.breaking == cobuildplan.breaking);
+                    cobuildplan = null;
                 }
             }
             if(unit.plans().isEmpty()) return;
@@ -200,7 +250,11 @@ public class FullAI extends AIController{
         @Override
         public void buildConfig(Table table) {
             super.buildConfig(table);
-            table.button("@ai.config.autorebuild", textbtoggle, () -> rebuild = !rebuild).update(b -> b.setChecked(rebuild)).with(funcSetTextb);
+            table.table(t -> {
+                t.button("@ai.config.autorebuild", textbtoggle, () -> rebuild = !rebuild).update(b -> b.setChecked(rebuild)).with(funcSetTextb);
+                t.button("@ai.config.follow", textbtoggle, () -> follow = !follow).update(b -> b.setChecked(follow)).with(funcSetTextb);
+            }).growX();
+
         }
     }
 
@@ -230,7 +284,7 @@ public class FullAI extends AIController{
             if(!enable) return;
             if(Core.input.keyDown(Binding.select)) return;
 
-            if(timer.get(4, 30f)){
+            if(timer.get(6, 30f)){
                 target = null;
                 float range = unit.hasWeapons() ? unit.range() : 0f;
                 if(attack) target = Units.closestTarget(unit.team, unit.x, unit.y, range, u -> u.checkTarget(unit.type.targetAir, unit.type.targetGround), u -> unit.type.targetGround);
