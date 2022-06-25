@@ -2,36 +2,38 @@ package mi2u.game;
 
 import arc.Core;
 import arc.math.Mathf;
-import arc.util.Log;
 import arc.util.Time;
+import mi2u.io.*;
 
 public class SpeedController{
-    public static float mul = 1f, rawMul = 1f, min = 0.05f;
+    public static float scl = 1f, rawScl = 1f, reference = 60f, min = 3f;
     public static boolean update = false, auto = true;
     public static float lastAuto = 0f;
 
     public static void auto(){
         //Log.info(Time.globalTime - lastAuto);
-        if(Time.globalTime - lastAuto < 30f) return;
+        if(Time.globalTime - lastAuto < 20f) return;
         lastAuto = Time.globalTime;
-        rawMul = Core.graphics.getFramesPerSecond()/60f;
-        if(Math.abs(rawMul - 1f) < 0.05f) rawMul = 1f;
+        rawScl = Core.graphics.getFramesPerSecond() / reference;
+        if(Math.abs(rawScl - 1f) < 0.05f) rawScl = 1f;
     }
 
     public static void update(){
         if(!update) return;
         if(auto) auto();
-        mul = Mathf.lerp(mul, rawMul, 0.2f);
-        if(Math.abs(rawMul - mul) < 0.01f) mul = rawMul;
-        if(mul < min) mul = min;
+        scl = Mathf.lerp(scl, rawScl, 0.2f);
+        if(Math.abs(rawScl - scl) < 0.01f) scl = rawScl;
+        reference = Mathf.clamp(MI2USettings.getInt("speedctrl.basefps", 60), 10, 1000);
+        min = MI2USettings.getInt("speedctrl.cutoff", 300) / 100f / reference;
+        if(scl < min) scl = min;
     }
 
     public static boolean lowerThanMin(){
-        return rawMul <= min;
+        return rawScl <= min;
     }
 
     public static void reset(){
-        mul = rawMul = 1f;
+        scl = rawScl = 1f;
     }
 
     public static void switchUpdate(){
@@ -41,7 +43,7 @@ public class SpeedController{
     public static void switchUpdate(boolean enable){
         update = enable;
         if(!enable) stop();
-        else Time.setDeltaProvider(() -> Core.graphics.getDeltaTime()*60f*mul);
+        else Time.setDeltaProvider(() -> Core.graphics.getDeltaTime()*reference* scl);
     }
 
     public static void stop(){

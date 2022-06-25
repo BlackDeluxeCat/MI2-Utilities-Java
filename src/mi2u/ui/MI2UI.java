@@ -1,10 +1,8 @@
 package mi2u.ui;
 
 import arc.*;
-import arc.func.*;
 import arc.graphics.*;
 import arc.scene.Element;
-import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.game.SpeedController;
@@ -94,7 +92,7 @@ public class MI2UI extends Mindow2{
         cont.table(t -> {
             t.button("Speeding", textbtoggle, SpeedController::switchUpdate).update(b -> {
                 b.setChecked(SpeedController.update);
-                b.setText(Core.bundle.get("main.buttons.speeding") + "x" + Strings.autoFixed(SpeedController.mul, 2));
+                b.setText(Core.bundle.get("main.buttons.speeding") + "x" + Strings.autoFixed(SpeedController.scl, 2));
                 SpeedController.update();
             }).with(funcSetTextb).with(b -> {
                 b.margin(4f);
@@ -134,6 +132,19 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("enUnitLogic", "@settings.main.unitLogic", false, null));
         settings.add(new CheckEntry("enUnitLogicTimer", "@settings.main.unitLogicTimer", false, null));
         settings.add(new CheckEntry("enUnitPath", "@settings.main.unitPath", false, null));
+
+        settings.add(new CollapseGroupEntry("SpeedController", ""){
+            private ChooseEntry choose1 = new ChooseEntry("speedctrl.basefps", "@settings.main.speedctrl.basefps", new String[]{"10", "20", "30", "60", "120", "144"}, null);
+            private ChooseEntry choose3 = new ChooseEntry("speedctrl.cutoff", "@settings.main.speedctrl.cutoff", new String[]{"50", "100", "200", "300"}, s -> String.valueOf(Strings.parseInt(s)/100f));
+            {
+                setDefaultHeader("@settings.main.speedctrl");
+                builder = t -> {
+                    choose1.build(t);
+                    t.row();
+                    choose3.build(t);
+                };
+            }
+        });
 
         settings.add(new CollapseGroupEntry("InputExtension", ""){
             private CheckEntry check1 = new CheckEntry("inputReplace", "@settings.main.inputReplace", false, null);

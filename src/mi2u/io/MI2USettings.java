@@ -4,7 +4,9 @@ import arc.*;
 import arc.files.*;
 import arc.func.Boolp;
 import arc.func.Cons;
+import arc.func.Func;
 import arc.graphics.Color;
+import arc.math.Mathf;
 import arc.scene.ui.TextField.*;
 import arc.scene.ui.layout.Table;
 import arc.struct.*;
@@ -92,7 +94,7 @@ public class MI2USettings{
     public static int getInt(String name, int def){
         MI2USetting obj = map.get(name);
         if(obj == null) return def;
-        return Strings.parseInt(obj.value, 0);
+        return Strings.parseInt(obj.value, def);
     }
 
     public static int getInt(String name){
@@ -219,12 +221,17 @@ public class MI2USettings{
         public SingleEntry(String name, String help){
             super(name, help);
             setting = getSetting(name);
+            checkInitSetting();
         }
 
         @Override
         public void build(Table table){
             setting = getSetting(name);
             table.labelWrap(() -> this.name + " = " + (setting != null ? setting.get() : "invaild")).left().growX().get().setColor(0, 1, 1, 0.7f);
+        }
+
+        public void checkInitSetting(){
+            if(setting == null) setting = new MI2USetting(name, "");
         }
     }
 
@@ -307,6 +314,49 @@ public class MI2USettings{
         }
     }
 
+    //Still don't know how to fit integer, boolean items array
+    public static class ChooseEntry extends SingleEntry{
+        public String[] items;
+        /** process item to display on TextButton */
+        public Func<String, String> buttonTextFunc;
+        public ChooseEntry(String name, String help, String[] items, Func<String, String> buttonTextFunc){
+            super(name, help);
+            this.items = items;
+            this.buttonTextFunc = buttonTextFunc;
+        }
+
+        @Override
+        public void build(Table table){
+            if(table != null){
+                if(items != null){
+                    table.table(t -> {
+                        t.table(it -> {
+                            it.defaults().growX().uniform();
+                            int i = 0;
+                            for(var item : items){
+                                it.button(buttonTextFunc != null ? buttonTextFunc.get(item) : item, textbtoggle, () -> setting.put(item)).with(funcSetTextb).update(b -> b.setChecked(setting.get().equals(item)));
+                                if(Mathf.mod(++i, 4) == 0){
+                                    it.row();
+                                    i = 0;
+                                }
+                            }
+
+                        }).growX();
+
+                        t.row();
+                        t.label(() -> name + " = " + setting.get()).left().get().setColor(0, 1, 1, 0.7f);
+                    }).width(200f).left();
+                }
+
+                table.add(help).right().self(c -> {
+                    c.growX();
+                    c.get().setWrap(true);
+                    c.get().setAlignment(Align.right);
+                });
+            }
+        }
+    }
+
     /** SettingGroup主要用于自定义交互界面。创建实例时自动注册到静态类变量groups中，可以通过静态类方法按名字获取指定选项组。
      * 应提供选项组交互界面的生成方法，选项的修改与保存通过界面的自定义操作完成。
      * //创建时必须生成相应的MI2USetting对象（如果没有）。
@@ -328,7 +378,7 @@ public class MI2USettings{
     }
 
     public static class CollapseGroupEntry extends SettingGroupEntry{
-        public Boolp collapsep = () -> true;
+        public Boolp collapsep = () -> false;
         public Cons<Table> headBuilder = null;
 
         public CollapseGroupEntry(String name, String help) {
@@ -341,7 +391,7 @@ public class MI2USettings{
             table.margin(2f);
             table.table(t -> {
                 t.setBackground(Mindow2.gray2);
-                t.margin(2f);
+                t.margin(2f,4f,2f,4f);
                 headBuilder.get(t);
             }).growX();
             table.row();
@@ -354,7 +404,7 @@ public class MI2USettings{
 
         public void setDefaultHeader(String title){
             headBuilder = t -> {
-                var b = t.button(title, textbtoggle, null).get();
+                var b = t.button(title, textbtoggle, null).growX().pad(0f,20f,0f,20f).height(32f).get();
                 collapsep = () -> !b.isChecked();
             };
         }
