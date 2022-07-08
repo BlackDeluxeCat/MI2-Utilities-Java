@@ -86,14 +86,15 @@ public class RendererExt{
         Seq<Tile> tiles = Reflect.get(renderer.blocks, "tileview");
         if(tiles != null){
             if(MI2USettings.getBool("disableBuilding", false)) tiles.clear();
+            boolean enOverdriveZone = MI2USettings.getBool("enOverdriveZone", false), enMenderZone = MI2USettings.getBool("enMenderZone", false);
 
-            tiles.each(tile -> {
-                Building build = tile.build;
+            for(var tile : tiles){
+                if(tile.build == null) continue;
+                if(enDistributionReveal) drawBlackboxBuilding(tile.build);
+                if(enOverdriveZone && tile.build instanceof OverdriveProjector.OverdriveBuild odb) drawOverDriver(odb);
+                if(enMenderZone && tile.build instanceof MendProjector.MendBuild mb) drawMender(mb);
+            }
 
-                if(build == null) return;
-                if(enDistributionReveal) drawBlackboxBuilding(build);
-                drawZoneBuilding(build);
-            });
         }
         if(MI2USettings.getBool("enSpawnZone", true)) drawSpawnPoint();
 
@@ -310,12 +311,6 @@ public class RendererExt{
                 renderer.effectBuffer.blit(MI2UShaders.mdzone);
             });
         }
-    }
-
-    public static void drawZoneBuilding(Building b){
-        if(MI2USettings.getBool("enOverdriveZone", false) && b instanceof OverdriveProjector.OverdriveBuild odb) drawOverDriver(odb);
-        if(MI2USettings.getBool("enMenderZone", false) && b instanceof MendProjector.MendBuild mb) drawMender(mb);
-        Draw.reset();
     }
 
     public static void drawOverDriver(OverdriveProjector.OverdriveBuild odb){
