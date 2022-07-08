@@ -185,31 +185,36 @@ public class FullAI extends AIController{
             if(!enable) return;
             if(!control.input.isBuilding) return;
             if(!unit.canBuild()) return;
-            //help others building
-            if(follow && timer.get(3, 20f) && unit.plans().isEmpty()){
+            //help others building, catching the closest plan to co-op.
+            if(follow && timer.get(3, 15f) && (unit.plans().isEmpty() || (cobuildplan != null && unit.buildPlan().samePos(cobuildplan) && unit.buildPlan().block == cobuildplan.block && unit.buildPlan().breaking == cobuildplan.breaking))){
+                Point2 last = cobuildplan == null ? null : MI2UTmp.p1.set(cobuildplan.x, cobuildplan.y);
                 cobuildplan = null;
 
                 for(var player : Groups.player){
-                    var u = player.unit();
-                    if(u == null || u.team != unit.team) continue;
+                    if(player.unit() == null || player.team() != unit.team) continue;
 
+                    var u = player.unit();
                     if(u.canBuild() && u != unit && u.activelyBuilding() && u.buildPlan() != null){
                         BuildPlan plan = u.buildPlan();
-                        Building build = world.build(plan.x, plan.y);
-                        if(build instanceof ConstructBlock.ConstructBuild cons){
+                        if(world.build(plan.x, plan.y) instanceof ConstructBlock.ConstructBuild cons){
                             float dist = Math.min(cons.dst(unit) - buildingRange, 0);
 
                             //make sure you can reach the request in time
                             if(dist / unit.speed() < cons.buildCost * 0.9f && (cobuildplan == null || MI2UTmp.v1.set(u.buildPlan()).dst(unit) < MI2UTmp.v2.set(cobuildplan).dst(unit))){
-                                cobuildplan = u.buildPlan();
+                                cobuildplan = plan;
                             }
                         }
                     }
                 }
 
-                if(cobuildplan != null) unit.plans.addFirst(cobuildplan);
+                if(cobuildplan != null){
+                    if(last != null) unit.plans.remove(bp -> bp.x == last.x && bp.y == last.y);
+                    unit.plans.addFirst(cobuildplan);
+                }
 
-            }else if(rebuild && timer.get(4, 30f) && unit.plans().isEmpty() && !unit.team.data().blocks.isEmpty()){
+            }
+
+            if(rebuild && timer.get(4, 30f) && unit.plans().isEmpty() && !unit.team.data().blocks.isEmpty()){
                 //rebuild
                 var block = unit.team.data().blocks.first();
                 if(world.tile(block.x, block.y) != null && world.tile(block.x, block.y).block().id == block.block){
@@ -218,15 +223,17 @@ public class FullAI extends AIController{
                     unit.addBuild(new BuildPlan(block.x, block.y, block.rotation, content.block(block.block), block.config));
                 }
 
-            }else if(timer.get(5, 60f) && unit.buildPlan() != null){
+            }
+
+            if(timer.get(5, 60f) && unit.buildPlan() != null && cobuildplan != null){
                 //cancel co-op plan that someone has conflicting idea or no player is building anymore
                 boolean cobuilding = false;
                 for(var player : Groups.player){
+                    if(player.unit() == null || player.team() != unit.team) continue;
                     var u = player.unit();
-                    if(u == null || u.team != unit.team) continue;
                     if(u.canBuild() && u != unit && u.activelyBuilding() && u.buildPlan() != null){
                         BuildPlan plan = u.buildPlan();
-                        if(cobuildplan != null && plan.samePos(cobuildplan) && plan.block == cobuildplan.block){
+                        if(plan.samePos(cobuildplan) && plan.block == cobuildplan.block){
                             if(plan.breaking != cobuildplan.breaking){
                                 cobuilding = false;
                                 break;
@@ -237,14 +244,27 @@ public class FullAI extends AIController{
                     }
                 }
                 //cancel co-build plan that no other unit is building.
-                if(!cobuilding && cobuildplan != null){
-                    unit.plans().remove(bp -> bp.x == cobuildplan.x && bp.y == cobuildplan.y && bp.block == cobuildplan.block && bp.breaking == cobuildplan.breaking);
+                if(!cobuilding){
+                    unit.plans.remove(bp -> bp.samePos(cobuildplan) && bp.breaking == cobuildplan.breaking);
                     cobuildplan = null;
                 }
             }
+
             if(unit.plans().isEmpty()) return;
             boostAction(true);
-            moveAction(unit.plans().first(), buildingRange / 1.4f, true);
+            float mindst = Float.MAX_VALUE, tmp;
+            BuildPlan min = unit.plans.first();
+            if(unit.plans.size < 128){
+                for(var bp : unit.plans){
+                    tmp = MI2UTmp.v1.set(bp).dst(unit);
+                    if(tmp < mindst){
+                        min = bp;
+                        mindst = tmp;
+                    }
+                    if(tmp < buildingRange) break;
+                }
+            }
+            moveAction(min, buildingRange / 1.4f, true);
         }
 
         @Override
