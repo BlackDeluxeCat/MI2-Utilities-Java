@@ -1,24 +1,17 @@
 package mi2u.map.filters;
 
-import arc.graphics.g2d.Draw;
-import arc.graphics.g2d.Lines;
-import arc.math.geom.Vec2;
-import arc.scene.ui.Image;
-import arc.scene.ui.layout.Scl;
-import arc.struct.Seq;
-import arc.util.Log;
-import arc.util.Reflect;
-import arc.util.Scaling;
-import mi2u.MI2UTmp;
-import mindustry.content.Blocks;
-import mindustry.graphics.Pal;
-import mindustry.maps.filters.FilterOption;
-import mindustry.maps.filters.GenerateFilter;
-import mindustry.world.Block;
-import mindustry.world.Tile;
-import mindustry.world.blocks.environment.Prop;
-import mindustry.world.blocks.environment.StaticWall;
-import mindustry.world.blocks.environment.TreeBlock;
+import arc.graphics.g2d.*;
+import arc.math.geom.*;
+import arc.scene.ui.*;
+import arc.scene.ui.layout.*;
+
+import arc.util.*;
+
+import mindustry.content.*;
+import mindustry.graphics.*;
+import mindustry.maps.filters.*;
+import mindustry.world.*;
+import mindustry.world.blocks.environment.*;
 
 public class CopyPasteFilter extends MI2UGenerateFilter{
     private static TileBuffer[][] buffers;
