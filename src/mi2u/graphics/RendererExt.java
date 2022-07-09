@@ -10,6 +10,7 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.pooling.Pools;
 import mi2u.MI2UTmp;
+import mi2u.MI2Utils;
 import mi2u.io.MI2USettings;
 import mindustry.ai.Pathfinder;
 import mindustry.ai.types.LogicAI;
@@ -83,7 +84,7 @@ public class RendererExt{
         });
 
         drawZoneShader();
-        Seq<Tile> tiles = Reflect.get(renderer.blocks, "tileview");
+        Seq<Tile> tiles = MI2Utils.getValue(renderer.blocks, "tileview");
         if(tiles != null){
             if(MI2USettings.getBool("disableBuilding", false)) tiles.clear();
             boolean enOverdriveZone = MI2USettings.getBool("enOverdriveZone", false), enMenderZone = MI2USettings.getBool("enMenderZone", false);
@@ -315,7 +316,7 @@ public class RendererExt{
 
     public static void drawOverDriver(OverdriveProjector.OverdriveBuild odb){
         OverdriveProjector block = (OverdriveProjector)odb.block();
-        float phaseHeat = Reflect.get(odb, "phaseHeat");
+        float phaseHeat = MI2Utils.getValue(odb, "phaseHeat");
         Draw.color(block.baseColor, block.phaseColor, phaseHeat);
         Draw.z(91.1f);
         Draw.alpha(Core.settings.getBool("animatedshields")?0.6f:0.2f);
@@ -329,8 +330,8 @@ public class RendererExt{
     public static void drawMender(MendProjector.MendBuild mb){
         if(mb.efficiency() <= 0f) return;
         MendProjector block = (MendProjector)mb.block;
-        float phaseHeat = Reflect.get(mb, "phaseHeat");
-        float charge = Reflect.get(mb, "charge");
+        float phaseHeat = MI2Utils.getValue(mb, "phaseHeat");
+        float charge = MI2Utils.getValue(mb, "charge");
         float alpha = Mathf.pow(1f - (charge / block.reload), 5);
         Draw.z(91.2f);
         Draw.color(block.baseColor);

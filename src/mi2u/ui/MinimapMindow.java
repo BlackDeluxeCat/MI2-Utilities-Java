@@ -14,6 +14,7 @@ import arc.util.*;
 import arc.util.pooling.*;
 import mi2u.MI2UTmp;
 import mi2u.MI2UVars;
+import mi2u.MI2Utils;
 import mi2u.input.InputOverwrite;
 import mi2u.io.*;
 import mi2u.io.MI2USettings.*;
@@ -304,24 +305,11 @@ public class MinimapMindow extends Mindow2{
         }
 
         public static Texture getTextureRef(){
-            Texture texture;
-            try{
-                texture = Reflect.get(renderer.minimap, "texture");
-            }catch (Exception e){
-                return null;
-            }
-            return texture;
+            return MI2Utils.getValue(renderer.minimap, "texture");
         }
 
         public static TextureRegion getRegionRef(){
-            TextureRegion region;
-            try{
-                if(getTextureRef() == null) return null;
-                region = Reflect.get(renderer.minimap, "region");
-            }catch (Exception e){
-                return null;
-            }
-            return region;
+            return MI2Utils.getValue(renderer.minimap, "region");
         }
 
     }

@@ -116,7 +116,7 @@ public class ModifyFuncs{
         });
     }
 
-    //TODO 让原版面板只在方块规划显示(+尺寸缩放)，mod面板则在有hover时显示(+尺寸缩放)。还需要调换原版和mod版的布局，让方块规划紧贴方块选择区
+    //让原版面板只在方块规划显示(+尺寸缩放)，mod面板则在有hover时显示(+尺寸缩放)。还需要调换原版和mod版的布局，让方块规划紧贴方块选择区
     public static void betterTopTable(){
         if(!MI2USettings.getBool("modifyTopTable", false)) return;
 
@@ -130,12 +130,12 @@ public class ModifyFuncs{
 
         topTable.add(HoverTopTable.hoverInfo).growX();
         topTable.row();
-        topTable.add(vanilla).growX().visible(() -> control.input.block != null || Reflect.get(ui.hudfrag.blockfrag, "menuHoverBlock") != null);
+        topTable.add(vanilla).growX().visible(() -> control.input.block != null || MI2Utils.getValue(ui.hudfrag.blockfrag, "menuHoverBlock") != null);
         topTable.row();
         topTable.add(new Element()).height(0.5f).update(t -> {
             var cell = topTable.getCell(vanilla);
             if(cell != null) cell.height(vanilla.getPrefHeight() * (vanilla.visible ? 1f:0f) + 0.5f);
-            Reflect.set(ui.hudfrag.blockfrag, "hover", HoverTopTable.hoverInfo.unit);
+            MI2Utils.setValue(ui.hudfrag.blockfrag, "hover", HoverTopTable.hoverInfo.unit);
         });
         topTable.visible(() -> {
             vanilla.updateVisibility();
