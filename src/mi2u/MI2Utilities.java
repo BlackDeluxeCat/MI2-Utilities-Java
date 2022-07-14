@@ -11,6 +11,8 @@ import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.mod.*;
 
+import java.util.regex.Pattern;
+
 import static mindustry.Vars.*;
 import static mi2u.MI2UVars.*;
 
@@ -40,24 +42,31 @@ public class MI2Utilities extends Mod{
             });
 
             //popup too early will cause font rendering bug.
-            Time.runTask(140f, this::checkUpdate);
+            Time.runTask(140f, () -> {
+                if(MI2USettings.getBool("enableUpdate", true)) checkUpdate();
+            });
 
         });
 
         Events.on(FileTreeInitEvent.class, e -> Core.app.post(MI2UShaders::load));
     }
 
-    public void checkUpdate(){
-        if(!MI2USettings.getBool("enableUpdate", false)) return;
-        MOD = mods.getMod(getClass());
+    public static void checkUpdate(){
+        Pattern pattern = Pattern.compile("^([hH][tT]{2}[pP]://|[hH][tT]{2}[pP][sS]://).*");
+        if(!pattern.matcher(MI2USettings.getStr("ghApi", ghApi)).matches()){
+            MI2USettings.putStr("ghApi", ghApi);
+        }
+        MOD = mods.getMod(MI2Utilities.class);
         new Mindow2("Update Check"){
             Interval in = new Interval();
+            String intro, version = "Checking Update...";
             float delay = 900f;
             {
                 addTo(Core.scene.root);
                 curx = (Core.graphics.getWidth() - getPrefWidth()) / 2;
                 cury = (Core.graphics.getHeight() - getPrefHeight()) / 2;
-                
+                in.get(1);
+
                 update(() -> {
                     toFront();
                     if(in.check(0, delay)) addTo(null);
@@ -69,40 +78,60 @@ public class MI2Utilities extends Mod{
             }
             @Override
             public void setupCont(Table cont){
-                cont.table(t -> {
-                    t.add(gitRepo);
-                    t.button("" + Iconc.paste, textb, () -> {
-                        Core.app.setClipboardText(gitRepo);
-                    }).size(titleButtonSize);
-                    t.button("" + Iconc.github, textb, () -> {
-                        Core.app.setClipboardText(gitURL);
-                    }).size(titleButtonSize);
+                cont.label(() -> MOD.meta.version.equals(version) ? "Current Is Latest!" : "New Release Available!").align(Align.left).fillX().pad(5f).get().setColor(0f, 1f, 0.3f, 1f);
+                cont.row();
+
+                cont.button(gitRepo + "\n" + Iconc.paste + Iconc.github, textb, () -> {
+                    Core.app.setClipboardText(gitURL);
+                }).growX().height(50f);
+                cont.row();
+                cont.button("Download", textb, () -> {
+                    ui.loadfrag.show("@downloading");
+                    ui.loadfrag.setProgress(() -> Reflect.get(ui.mods, "modImportProgress"));
+                    Http.get(MI2USettings.getStr("ghApi", ghApi) + "/repos/" + gitRepo + "/releases/latest", res -> {
+                        var json = Jval.read(res.getResultAsString());
+                        var assets = json.get("assets").asArray();
+
+                        //prioritize dexed jar, as that's what Sonnicon's mod template outputs
+                        var dexedAsset = assets.find(j -> j.getString("name").startsWith("dexed") && j.getString("name").endsWith(".jar"));
+                        var asset = dexedAsset == null ? assets.find(j -> j.getString("name").endsWith(".jar")) : dexedAsset;
+
+                        if(asset != null){
+                            //grab actual file
+                            var url = asset.getString("browser_download_url");
+
+                            Http.get(url, result -> {
+                                Reflect.invoke(ui.mods, "handleMod", new Object[]{gitRepo, result}, String.class, Http.HttpResponse.class);
+                            }, e -> Reflect.invoke(ui.mods, "modError", new Object[]{e}, Throwable.class));
+                        }else{
+                            throw new ArcRuntimeException("No JAR file found in releases. Make sure you have a valid jar file in the mod's latest Github Release.");
+                        }
+                    }, e -> Reflect.invoke(ui.mods, "modError", new Object[]{e}, Throwable.class));
+                }).growX().height(50f).update(b -> {
+                    b.getLabelCell().update(l -> {
+                        l.setText("Download: " + MOD.meta.version + " -> " + version);
+                    }).get().setColor(1f, 1f, 0.3f, 1f);
                 });
                 cont.row();
                 cont.button("", textb, () -> this.addTo(null)).growX().height(50f).update(b -> {
-                    b.setText("Close At " + Strings.fixed((delay - in.getTime(0))/60 , 1)+ "s");
+                    b.setText("Close (At " + Strings.fixed((delay - in.getTime(0))/60 , 1)+ "s)");
                 });
                 cont.row();
-                Http.get(ghApi + "/repos/" + gitRepo + "/releases/latest", res -> {
+
+                cont.pane(t -> {
+                    t.labelWrap(() -> intro).align(Align.left).growX();  //drawing update discription possibly cause font color bug.
+                }).width(400f).maxHeight(500f);
+
+                Http.get(MI2USettings.getStr("ghApi", ghApi) + "/repos/" + gitRepo + "/releases/latest", res -> {
                     var json = Jval.read(res.getResultAsString());
-                    cont.pane(t -> {
-                        if(!MOD.meta.version.equals(json.getString("name"))){
-                            t.add("New Release Available!").align(Align.left).fillX().pad(5f).get().setColor(0f, 1f, 0.3f, 1f);
-                            t.row(); 
-                            t.add(json.getString("name")).align(Align.left).fillX().pad(5f).get().setColor(1f, 1f, 0.3f, 1f);
-                            t.row();
-                            //t.add(json.getString("body")).align(Align.left).growX();  //drawing update discription possibly cause font color bug.
-                        }else{
-                            in.get(1);
-                            delay = 120f;
-                            t.add("Current Is Latest!").align(Align.left).fillX().pad(5f).get().setColor(0.75f, 0.25f, 1f, 1f); 
-                        }
-                    }).width(400f).maxHeight(600f);
-                    //Log.info(json.toString());
+                    version = json.getString("name");
+                    intro = json.getString("body");
+                    if(MOD.meta.version.equals(version)) delay = 120f;
                 }, e -> {
                     in.get(1);
                     delay = 120f;
-                    cont.add("Failed to check update.");
+                    version = "" + Iconc.cancel;
+                    intro = "Failed to check update.";
                     Log.err(e);
                 });
 

@@ -5,6 +5,7 @@ import arc.graphics.*;
 import arc.scene.Element;
 import arc.scene.ui.layout.*;
 import arc.util.*;
+import mi2u.MI2Utilities;
 import mi2u.game.SpeedController;
 import mi2u.io.MI2USettings.*;
 import mindustry.Vars;
@@ -109,7 +110,6 @@ public class MI2UI extends Mindow2{
     @Override
     public void initSettings(){
         super.initSettings();
-        settings.add(new CheckEntry("enableUpdate", "@settings.main.enableUpdate", false, null));
 
         settings.add(new CheckEntry("showEmojis", "@settings.main.emoji", false, b -> emojis.addTo(b?Core.scene.root:null)));
         settings.add(new CheckEntry("showCoreInfo", "@settings.main.coreInfo", false, b -> coreInfo.addTo(b?Core.scene.root:null)));
@@ -134,8 +134,8 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("enUnitPath", "@settings.main.unitPath", false, null));
 
         settings.add(new CollapseGroupEntry("SpeedController", ""){
-            private ChooseEntry choose1 = new ChooseEntry("speedctrl.basefps", "@settings.main.speedctrl.basefps", new String[]{"10", "20", "30", "60", "120", "144"}, null);
-            private ChooseEntry choose3 = new ChooseEntry("speedctrl.cutoff", "@settings.main.speedctrl.cutoff", new String[]{"50", "100", "200", "300"}, s -> String.valueOf(Strings.parseInt(s)/100f));
+            ChooseEntry choose1 = new ChooseEntry("speedctrl.basefps", "@settings.main.speedctrl.basefps", new String[]{"10", "20", "30", "60", "120", "144"}, null);
+            ChooseEntry choose3 = new ChooseEntry("speedctrl.cutoff", "@settings.main.speedctrl.cutoff", new String[]{"50", "100", "200", "300"}, s -> String.valueOf(Strings.parseInt(s)/100f));
             {
                 setDefaultHeader("@settings.main.speedctrl");
                 builder = t -> {
@@ -147,8 +147,8 @@ public class MI2UI extends Mindow2{
         });
 
         settings.add(new CollapseGroupEntry("InputExtension", ""){
-            private CheckEntry check1 = new CheckEntry("inputReplace", "@settings.main.inputReplace", false, null);
-            private CheckEntry check2 = new CheckEntry("forceTapTile", "@settings.main.forceTapTile", false, null);
+            CheckEntry check1 = new CheckEntry("inputReplace", "@settings.main.inputReplace", false, null);
+            CheckEntry check2 = new CheckEntry("forceTapTile", "@settings.main.forceTapTile", false, null);
             {
                 collapsep = () -> !check1.value;
                 headBuilder = t -> check1.build(t);
@@ -159,5 +159,21 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("modifyBlockBars", "@settings.main.modifyBlockBars", false, null));
         settings.add(new CheckEntry("modifyTopTable", "@settings.main.modifyTopTable", false, null));
         settings.add(new CheckEntry("modifyFilters", "@settings.main.modifyMapFilters", true, null));
+
+        settings.add(new CollapseGroupEntry("UpdateCheck", ""){
+            CheckEntry check1 = new CheckEntry("enableUpdate", "@settings.main.enableUpdate", true, b -> {
+                if(b) MI2Utilities.checkUpdate();
+            });
+            FieldEntry field2 = new FieldEntry("ghApi", "@settings.main.ghApi", Vars.ghApi, null, null, null);
+
+            {
+                setDefaultHeader("@settings.main.updateCheck");
+                builder = t -> {
+                    check1.build(t);
+                    t.row();
+                    field2.build(t);
+                };
+            }
+        });
     }
 }
