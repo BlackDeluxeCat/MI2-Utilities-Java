@@ -172,13 +172,13 @@ public class MinimapMindow extends Mindow2{
                             float dy = (Core.camera.position.y / tilesize);
                             dx = (2 * sz) <= world.width() ? Mathf.clamp(dx, sz, world.width() - sz) : world.width() / 2f;
                             dy = (2 * sz) <= world.height() ? Mathf.clamp(dy, sz, world.height() - sz) : world.height() / 2f;
-                            if(control.input instanceof DesktopInput inp){
+                            if(control.input instanceof InputOverwrite ino){
+                                ino.pan(true, MI2UTmp.v1.set((x / width - 0.5f) * 2f * sz * tilesize + dx * tilesize, (y / height - 0.5f) * 2f * sz * tilesize + dy * tilesize));
+                            }else if(control.input instanceof DesktopInput inp){
                                 inp.panning = true;
                                 Core.camera.position.set(
                                         ((x / width - 0.5f) * 2f * sz * tilesize + dx * tilesize),
                                         ((y / height - 0.5f) * 2f * sz * tilesize + dy * tilesize));
-                            }else if(control.input instanceof InputOverwrite ino){
-                                ino.pan(true, MI2UTmp.v1.set((x / width - 0.5f) * 2f * sz * tilesize + dx * tilesize, (y / height - 0.5f) * 2f * sz * tilesize + dy * tilesize));
                             }
                         }catch(Exception e){
                             Log.err("Minimap", e);

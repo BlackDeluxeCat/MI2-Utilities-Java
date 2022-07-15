@@ -12,7 +12,7 @@ import mindustry.gen.*;
 import mindustry.input.*;
 
 import static mindustry.Vars.*;
-import static mindustry.input.PlaceMode.breaking;
+import static mindustry.input.PlaceMode.*;
 
 /**
  * An extented desktop input handler.
@@ -24,7 +24,9 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
     public static DesktopInputExt desktopExt = new DesktopInputExt();
 
     public boolean ctrlBoost = false, boost = false;
-    public boolean ctrlPan = false; Vec2 panXY = new Vec2();
+    /** A timer for panning. Check returning true means moving camera.*/
+    public Interval panTimer = new Interval();
+    public Vec2 panXY = new Vec2();
     public boolean ctrlShoot = false, shoot = false; Vec2 shootXY = new Vec2();
     public boolean ctrlMove = false; Vec2 move = new Vec2();
 
@@ -55,10 +57,28 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
             }
         }
         //panning state is stored on desktop. ctrlPan should be set to true to use overwritten states. Set ctrlPan to false after panning is ok.
-        if(ctrlPan && !panXY.isZero()){
+        if(!panTimer.check(0, 30f)){
             panning = true;
-            Core.camera.position.set(panXY);
-            ctrlPan = false;
+            Core.camera.position.lerpDelta(panXY, 0.3f);
+        }else if(MI2USettings.getBool("edgePanning", true) && state.isGame()){
+            float camSpeed = (!Core.input.keyDown(Binding.boost) ? this.panSpeed : this.panBoostSpeed) * Time.delta;
+            float margin = Mathf.clamp(Math.min(Core.graphics.getWidth() * 0.05f, Core.graphics.getHeight() * 0.05f), 10f, 50f);
+            if(Core.input.mouseX() < margin){
+                panning = true;
+                Core.camera.position.add(-camSpeed, 0f);
+            }
+            if(Core.input.mouseX() > (float)Core.graphics.getWidth() - margin){
+                panning = true;
+                Core.camera.position.add(camSpeed, 0f);
+            }
+            if(Core.input.mouseY() < margin){
+                panning = true;
+                Core.camera.position.add(0f, -camSpeed);
+            }
+            if(Core.input.mouseY() > (float)Core.graphics.getHeight() - margin){
+                panning = true;
+                Core.camera.position.add(0f, camSpeed);
+            }
         }
 
         if(ctrlMove && unit != null) unit.movePref(move);
@@ -73,10 +93,11 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
         this.boost = boost;
     }
 
-    /** set panXY to zero to cancel control, this may be useless on desktop input*/
+    /** set ctrl to false to cancel control*/
     @Override
     public void pan(Boolean ctrl, Vec2 panXY){
-        ctrlPan = ctrl;
+        if(ctrl) panTimer.reset(0,0f);  //set a timer for extended smooth panning
+        panning = ctrl;
         this.panXY.set(panXY);
     }
 

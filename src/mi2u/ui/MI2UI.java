@@ -5,6 +5,7 @@ import arc.graphics.*;
 import arc.scene.Element;
 import arc.scene.ui.layout.*;
 import arc.util.*;
+import mi2u.MI2UFuncs;
 import mi2u.MI2Utilities;
 import mi2u.game.SpeedController;
 import mi2u.io.MI2USettings.*;
@@ -37,9 +38,7 @@ public class MI2UI extends Mindow2{
                 Call.sendChatMessage("/sync");
             }).minSize(36f).with(funcSetTextb);
         
-            tt.button("@main.buttons.rebuild", textb, () -> {
-                unitRebuildBlocks();
-            }).minSize(36f).with(funcSetTextb);
+            tt.button("@main.buttons.rebuild", textb, MI2UFuncs::unitRebuildBlocks).minSize(36f).with(funcSetTextb);
 
             tt.button("" + Iconc.zoom + Iconc.blockJunction, textbtoggle, () -> {
                 enDistributionReveal = !enDistributionReveal;
@@ -149,10 +148,15 @@ public class MI2UI extends Mindow2{
         settings.add(new CollapseGroupEntry("InputExtension", ""){
             CheckEntry check1 = new CheckEntry("inputReplace", "@settings.main.inputReplace", false, null);
             CheckEntry check2 = new CheckEntry("forceTapTile", "@settings.main.forceTapTile", false, null);
+            CheckEntry check3 = new CheckEntry("edgePanning", "@settings.main.edgePanning", true, null);
             {
                 collapsep = () -> !check1.value;
                 headBuilder = t -> check1.build(t);
-                builder = t -> check2.build(t);
+                builder = t -> {
+                    check2.build(t);
+                    t.row();
+                    if(!Vars.mobile) check3.build(t);
+                };
             }
         });
 
