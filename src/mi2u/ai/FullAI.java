@@ -2,6 +2,7 @@ package mi2u.ai;
 
 import arc.*;
 import arc.graphics.*;
+import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
@@ -25,10 +26,11 @@ import static mi2u.MI2UVars.*;
 
 public class FullAI extends AIController{
     public Seq<Mode> modes = new Seq<>();
-    protected Interval timer = new Interval(8);
+    protected Interval timer = new Interval(9);
 
     public FullAI(){
         super();
+        modes.add(new CenterFollowMode());
         modes.add(new BaseMineMode());
         modes.add(new AutoBuildMode());
         modes.add(new SelfRepairMode());
@@ -135,11 +137,13 @@ public class FullAI extends AIController{
                     mining = true;
                     return;
                 }
-                if(unit.within(core, itemTransferRange / 1.5f) && timer.get(2, 120f)){
-                    if(core.acceptStack(unit.stack.item, unit.stack.amount, unit) > 0){
-                        Call.transferInventory(unit.getPlayer(), core);
+
+                if(unit.within(core, itemTransferRange / 1.5f)){
+                    if(!timer.check(2, 120f)) shootAction(MI2UTmp.v1.set(core).lerpDelta(Mathf.range(-12f, 12f), Mathf.range(-8f, 8f), 0.1f), true);
+                    if(timer.get(2, 120f)){
+                        control.input.droppingItem = true;
+                        control.input.tryDropItems(core, unit.aimX, unit.aimY);
                     }
-                    unit.clearItem();
                     mining = true;
                 }
                 moveAction(core, itemTransferRange / 2f, false);
@@ -319,6 +323,7 @@ public class FullAI extends AIController{
             if(target != null){
                 Vec2 intercept = Predict.intercept(unit, target, unit.hasWeapons() ? unit.type.weapons.first().bullet.speed : 0f);
                 shootAction(intercept, true);
+
             }else{
                 shootAction(MI2UTmp.v1.set(player.mouseX, player.mouseY), false);
             }
@@ -331,6 +336,68 @@ public class FullAI extends AIController{
                 t.button("@ai.config.attack", textbtoggle, () -> attack = !attack).update(b -> b.setChecked(attack)).with(funcSetTextb);
                 t.button("@ai.config.heal", textbtoggle, () -> heal = !heal).update(b -> b.setChecked(heal)).with(funcSetTextb);
             }).growX();
+        }
+    }
+
+    public class CenterFollowMode extends Mode{
+        public Vec2 unitPos = new Vec2();
+        Item targetItem;
+        public CenterFollowMode(){
+            btext = Iconc.move + "";
+            enable = mobile;
+        }
+        @Override
+        public void act(){
+            if(unit.dead || !unit.isValid()) return;
+
+            if(targetItem != null && (unit.stack.item != targetItem || unit.stack.amount < 10)){
+                Building core = unit.closestCore();
+                boostAction(true);
+                moveAction(core, itemTransferRange / 2f, false);
+
+                if(unit.within(core, itemTransferRange / 1.5f)){
+                    if(timer.get(8, 120f)){
+                        if(unit.stack.amount > 0 && unit.stack.item != null && unit.stack.item != targetItem){
+                            control.input.droppingItem = true;
+                            control.input.tryDropItems(core, unit.aimX, unit.aimY);
+                        }else{
+                            Call.requestItem(player, core, targetItem, unit.itemCapacity());
+                            if(unit.stack.item == targetItem) targetItem = null;
+                        }
+                    }
+                }
+
+            }else if(mobile){
+                if(!enable){
+                    boostAction(true);
+                    moveAction(unit, 0.01f, false);
+                }
+
+            }else if(enable){
+                boostAction(true);
+                moveAction(Core.camera.position, 15f, false);
+            }
+        }
+
+        @Override
+        public void buildConfig(Table table) {
+            super.buildConfig(table);
+            table.table(t -> {
+                int i = 0;
+                for(var item : content.items()){
+                    t.button(b -> {
+                        b.image(item.uiIcon).size(24f);
+                        b.margin(4f);
+                    }, textbtoggle, () -> {
+                        targetItem = targetItem == item ? null : item;
+                    }).fill().update(b -> b.setChecked(targetItem == item));
+                    i++;
+                    if(i >= 5){
+                        i = 0;
+                        t.row();
+                    }
+                }
+            });
         }
     }
 }
