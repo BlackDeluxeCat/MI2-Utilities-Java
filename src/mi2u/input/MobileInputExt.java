@@ -3,6 +3,7 @@ package mi2u.input;
 import arc.*;
 import arc.math.*;
 import arc.math.geom.*;
+import arc.util.Interval;
 import arc.util.Time;
 import mindustry.gen.*;
 import mindustry.input.MobileInput;
@@ -14,7 +15,9 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
     public static MobileInputExt mobileExt = new MobileInputExt();
 
     public boolean ctrlBoost = false, boost = false;
-    public boolean ctrlPan = false, pan = false; Vec2 panXY = new Vec2();
+    public Vec2 panXY = new Vec2();
+    /** A timer for panning. Check returning true means moving camera.*/
+    public Interval panTimer = new Interval();
     public boolean ctrlShoot = false, shoot = false; Vec2 shootXY = new Vec2();
     public boolean ctrlMove = false; Vec2 move = new Vec2();
 
@@ -32,13 +35,11 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
                 unit.controlWeapons(true, player.shooting);
             }
         }
-        //camera panning will stop unit
-        if(ctrlPan && pan) {
-            Core.camera.position.set(panXY);
-            movement.setZero();
-            unit.vel.approachDelta(Vec2.ZERO, unit.speed() * unit.type.accel / 2f);
-            unit.movePref(movement);
+        //camera moving, shouldn't consider unit follow movement
+        if(!panTimer.check(0, 30f)){
+            Core.camera.position.lerpDelta(panXY, 0.3f);
         }
+
         //unit move will let camera position disassociates with unit position
         if(ctrlMove && unit != null){
             //camera-centered movement offset
@@ -57,9 +58,8 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
     }
 
     @Override
-    public void pan(Boolean value, Vec2 panXY){
-        ctrlPan = true;
-        pan = value;
+    public void pan(Boolean ctrl, Vec2 panXY){
+        if(ctrl) panTimer.reset(0,0f);  //set a timer for extended smooth panning
         this.panXY.set(panXY);
     }
 
@@ -79,7 +79,6 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
     @Override
     public void clear() {
         ctrlBoost = false;
-        ctrlPan = false;
         ctrlShoot = false;
         ctrlMove = false;
         move.setZero();

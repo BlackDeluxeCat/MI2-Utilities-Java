@@ -342,6 +342,7 @@ public class FullAI extends AIController{
     public class CenterFollowMode extends Mode{
         public Vec2 unitPos = new Vec2();
         Item targetItem;
+        boolean onetimePick = true;
         public CenterFollowMode(){
             btext = Iconc.move + "";
             enable = mobile;
@@ -362,10 +363,10 @@ public class FullAI extends AIController{
                             control.input.tryDropItems(core, unit.aimX, unit.aimY);
                         }else{
                             Call.requestItem(player, core, targetItem, unit.itemCapacity());
-                            if(unit.stack.item == targetItem) targetItem = null;
                         }
                     }
                 }
+                if(onetimePick && unit.stack.item == targetItem) targetItem = null;
 
             }else if(mobile){
                 if(!enable){
@@ -398,6 +399,8 @@ public class FullAI extends AIController{
                     }
                 }
             });
+            table.row();
+            table.button("@ai.config.oneTime", textbtoggle, () -> onetimePick = !onetimePick).growX().update(b -> b.setChecked(onetimePick)).with(funcSetTextb);
         }
     }
 }
