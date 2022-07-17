@@ -391,7 +391,7 @@ public class FullAI extends AIController{
                         b.margin(4f);
                     }, textbtoggle, () -> {
                         targetItem = targetItem == item ? null : item;
-                    }).fill().update(b -> b.setChecked(targetItem == item)).disabled(b -> !player.team().core().items.has(item));
+                    }).fill().update(b -> b.setChecked(targetItem == item)).disabled(b -> player.team().core() == null || !player.team().core().items.has(item));
                     i++;
                     if(i >= 5){
                         i = 0;

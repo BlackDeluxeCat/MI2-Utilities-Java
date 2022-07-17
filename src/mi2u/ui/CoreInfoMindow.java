@@ -63,6 +63,14 @@ public class CoreInfoMindow extends Mindow2{
             WorldData.clear();
         });
 
+        Events.run(EventType.Trigger.update, () -> {
+            if(state.isGame() && core != null && interval.get(0, 60f)){
+                for(FloatDataRecorder rec : itemRecoders){
+                    if(rec != null) rec.update();
+                }
+            }
+        });
+
         Core.scene.addListener(new InputListener(){
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
@@ -81,12 +89,6 @@ public class CoreInfoMindow extends Mindow2{
 
             if(state.isGame() && content.items().count(item -> core != null && core.items.get(item) > 0 && usedItems.add(item)) > 0){
                 rebuild();
-            }
-
-            if(state.isGame() && core != null && interval.get(0, 60f)){
-                for(FloatDataRecorder rec : itemRecoders){
-                    if(rec != null) rec.update();
-                }
             }
 
             if(player.unit() != null && player.unit().plans().size <= 0){

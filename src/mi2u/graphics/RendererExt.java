@@ -258,70 +258,58 @@ public class RendererExt{
 
             //v7 rts pathfind render, making your device an oven.
             //Pathfind Renderer
-            if(unit.isCommandable() && unit.controller() instanceof CommandAI ai && ai.targetPos != null && MI2USettings.getBool("enUnitPath")){
-                Draw.reset();
-                Draw.z(Layer.power - 4f);
-                Lines.stroke(1.5f);
-                Tile tile = unit.tileOn();
+            if(MI2USettings.getBool("enUnitPath")){
+                if(unit.isCommandable() && unit.controller() instanceof CommandAI ai && ai.targetPos != null){
+                    Draw.reset();
+                    Draw.z(Layer.power - 4f);
+                    Lines.stroke(1.5f);
+                    Tile tile = unit.tileOn();
 
-                try{
-                    ObjectMap requests = MI2Utils.getValue(controlPath, "requests");
-                    Object req = requests.get(unit);
-                    IntSeq result = MI2Utils.getValue(req, "result");
-                    int start = MI2Utils.getValue(req, "rayPathIndex");
-                    for(int tileIndex = start; tileIndex < result.size; tileIndex++){
-                        Tile nextTile = world.tiles.geti(result.get(tileIndex));
+                    try{
+                        ObjectMap requests = MI2Utils.getValue(controlPath, "requests");
+                        Object req = requests.get(unit);
+                        IntSeq result = MI2Utils.getValue(req, "result");
+                        int start = MI2Utils.getValue(req, "rayPathIndex");
+                        for(int tileIndex = start; tileIndex < result.size; tileIndex++){
+                            Tile nextTile = world.tiles.geti(result.get(tileIndex));
+                            if(nextTile == null) break;
+                            if(!Core.camera.bounds(MI2UTmp.r1).contains(tile.worldx(), tile.worldy()) && !Core.camera.bounds(MI2UTmp.r1).contains(nextTile.worldx(), nextTile.worldy())) continue;  //Skip paths outside screen
+                            if(nextTile == tile) break;
+                            Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
+                            if(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) > 4000f) break;
+                            Lines.dashLine(tile.worldx(), tile.worldy(), nextTile.worldx(), nextTile.worldy(), (int)(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) / 4f));
+                            tile = nextTile;
+                        }
+                    }catch(Exception ignore){
+                        boolean move = controlPath.getPathPosition(unit, MI2Utils.getValue(ai, "pathId"), ai.targetPos, MI2UTmp.v1);
+                        if(move){
+                            Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
+                            Lines.dashLine(tile.worldx(), tile.worldy(), MI2UTmp.v1.x, MI2UTmp.v1.y, (int)(Mathf.len(MI2UTmp.v1.x - tile.worldx(), MI2UTmp.v1.y - tile.worldy()) / 4f));
+                        }
+                    }
+
+                    if(ai.targetPos != null){
+                        Position lineDest = ai.attackTarget != null ? ai.attackTarget : ai.targetPos;
+                        Drawf.square(lineDest.getX(), lineDest.getY(), 3.5f);
+                    }
+
+                }else{
+                    Draw.reset();
+                    Draw.z(Layer.power - 4f);
+                    Tile tile = unit.tileOn();
+                    for(int tileIndex = 1; tileIndex <= 40; tileIndex++){
+                        Tile nextTile = pathfinder.getTargetTile(tile, pathfinder.getField(unit.team, unit.pathType(), Pathfinder.fieldCore));
                         if(nextTile == null) break;
-                        if(!Core.camera.bounds(MI2UTmp.r1).contains(tile.worldx(), tile.worldy()) && !Core.camera.bounds(MI2UTmp.r1).contains(nextTile.worldx(), nextTile.worldy())) continue;  //Skip paths outside screen
                         if(nextTile == tile) break;
+                        Lines.stroke(1.5f);
                         Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
-                        if(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) > 4000f) break;
                         Lines.dashLine(tile.worldx(), tile.worldy(), nextTile.worldx(), nextTile.worldy(), (int)(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) / 4f));
                         tile = nextTile;
                     }
-                }catch(Exception ignore){
-                    boolean move = controlPath.getPathPosition(unit, MI2Utils.getValue(ai, "pathId"), ai.targetPos, MI2UTmp.v1);
-                    if(move){
-                        Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
-                        Lines.dashLine(tile.worldx(), tile.worldy(), MI2UTmp.v1.x, MI2UTmp.v1.y, (int)(Mathf.len(MI2UTmp.v1.x - tile.worldx(), MI2UTmp.v1.y - tile.worldy()) / 4f));
-                    }else{
-                        //Draw.color(unit.team.color, Color.black, Mathf.absin(Time.time, 4f, 1f));
-                        //Lines.poly(unit.x, unit.y, 6, unit.hitSize());
-                    }
                 }
-
-                if(ai.targetPos != null){
-                    Position lineDest = ai.attackTarget != null ? ai.attackTarget : ai.targetPos;
-                    Drawf.limitLine(unit, lineDest, unit.hitSize / 2f, 3.5f);
-
-                    if(ai.attackTarget == null){
-                        Drawf.square(lineDest.getX(), lineDest.getY(), 3.5f);
-                    }
-                }
-
-            }else{
                 Draw.reset();
-                Draw.z(Layer.power - 4f);
-                Tile tile = unit.tileOn();
-                for(int tileIndex = 1; tileIndex <= 40; tileIndex++){
-                    Tile nextTile = pathfinder.getTargetTile(tile, pathfinder.getField(unit.team, unit.pathType(), Pathfinder.fieldCore));
-                    if(nextTile == null) break;
-                    Lines.stroke(2);
-                    if(nextTile == tile){
-                        Draw.color(unit.team.color, Color.black, Mathf.absin(Time.time, 4f, 1f));
-                        Lines.poly(unit.x, unit.y, 6, unit.hitSize());
-                        break;
-                    }
-                    Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
-                    Lines.dashLine(tile.worldx(), tile.worldy(), nextTile.worldx(), nextTile.worldy(), (int)(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) / 4f));
-                    tile = nextTile;
-                }
             }
-
-            Draw.reset();
         }
-
-
     }
 
     public static void drawBlackboxBuilding(Building b){
