@@ -2,6 +2,7 @@ package mi2u;
 
 import arc.*;
 import arc.func.*;
+import arc.graphics.Color;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.Element;
@@ -73,35 +74,52 @@ public class ModifyFuncs{
         if(!MI2USettings.getBool("modifyBlockBars")) return;
         content.blocks().each(block -> {
             addBarToBlock(block, "health", e -> new Bar(() -> Core.bundle.format("stat.health") + ":" + Strings.autoFixed(e.health(), 3) + "(" + Strings.autoFixed(e.health * 100 / e.maxHealth, 2) + "%)", () -> Pal.health, e::healthf));
+
             if(block.hasLiquids){
-                Func<Building, Liquid> current;
-                if(block.consumes.has(ConsumeType.liquid) && block.consumes.get(ConsumeType.liquid) instanceof ConsumeLiquid){
-                    Liquid liquid = block.consumes.<ConsumeLiquid>get(ConsumeType.liquid).liquid;
-                    current = entity -> liquid;
-                }else{
-                    current = entity -> entity.liquids == null ? Liquids.water : entity.liquids.current();
+                //Anuke
+                boolean added = false;
+
+                for(var consl : block.consumers){
+                    if(consl instanceof ConsumeLiquid liq){
+                        added = true;
+                        addLiquidBarToBlock(block, liq.liquid);
+                    }else if(consl instanceof ConsumeLiquids multi){
+                        added = true;
+                        for(var stack : multi.liquids){
+                            addLiquidBarToBlock(block, stack.liquid);
+                        }
+                    }
                 }
-                addBarToBlock(block, "liquid", entity -> new Bar(() -> entity.liquids.get(current.get(entity)) <= 0.001f ? Core.bundle.get("bar.liquid") : (current.get(entity).localizedName + ":" + Strings.autoFixed(entity.liquids.get(current.get(entity)),2) + "/" + block.liquidCapacity),
-                        () -> current.get(entity).barColor(), () -> entity == null || entity.liquids == null ? 0f : entity.liquids.get(current.get(entity)) / block.liquidCapacity));
+
+                //nothing was added, so it's safe to add a dynamic liquid bar (probably?)
+                if(!added){
+                    addBarToBlock(block, "liquid", entity -> new Bar(
+                            () -> entity.liquids.current() == null || entity.liquids.get(entity.liquids.current()) <= 0.001f ? Core.bundle.get("bar.liquid") : entity.liquids.current().localizedName + ":" + Strings.autoFixed(entity.liquids.get(entity.liquids.current()), 2) + "/" + block.liquidCapacity,
+                            () -> entity.liquids.current() == null ? Color.clear : entity.liquids.current().barColor(),
+                            () -> entity.liquids.current() == null ? 0f : entity.liquids.get(entity.liquids.current()) / block.liquidCapacity)
+                    );
+                }
             }
 
-            if(block.hasPower && block.consumes.hasPower()){
-                ConsumePower cons = block.consumes.getPower();
-                boolean buffered = cons.buffered;
-                float capacity = cons.capacity;
-
-                addBarToBlock(block, "power", entity -> new Bar(() -> buffered ? Core.bundle.format("bar.poweramount", Float.isNaN(entity.power.status * capacity) ? "<ERROR>" : UI.formatAmount((int)(entity.power.status * capacity))) :
-                        Core.bundle.get("bar.power") + ":" + Strings.autoFixed(-entity.power.status * cons.usage * 60f * (entity.cons().valid()?entity.timeScale():0),2), () -> Pal.powerBar, () -> Mathf.zero(cons.requestedPower(entity)) && entity.power.graph.getPowerProduced() + entity.power.graph.getBatteryStored() > 0f ? 1f : entity.power.status));
+            if(block.hasPower && block.consumesPower && block.consPower != null){
+                addBarToBlock(block, "power", entity -> new Bar(() -> block.consPower.buffered ? Core.bundle.format("bar.poweramount", Float.isNaN(entity.power.status * block.consPower.capacity) ? "<ERROR>" : UI.formatAmount((int)(entity.power.status * block.consPower.capacity))) :
+                        Core.bundle.get("bar.power") + ":" + Strings.autoFixed(-entity.power.status * block.consPower.usage * 60f * (entity.canConsume()?entity.timeScale():0),2), () -> Pal.powerBar, () -> Mathf.zero(block.consPower.requestedPower(entity)) && entity.power.graph.getPowerProduced() + entity.power.graph.getBatteryStored() > 0f ? 1f : entity.power.status));
             }
 
             if(block instanceof Turret) addBarToBlock(block, "logicTimer", (Turret.TurretBuild entity) -> new Bar(() -> "Logic Control: " + Strings.autoFixed(entity.logicControlTime, 1), () -> Pal.logicControl, () -> entity.logicControlTime / Turret.logicControlCooldown));
-
         });
     }
 
-    public static <T extends Building> boolean addBarToBlock(Block block, String name, Func<T, Bar> sup){
-        block.bars.add(name, sup);
-        return true;
+    public static <T extends Building> void addBarToBlock(Block block, String name, Func<T, Bar> sup){
+        block.addBar(name, sup);
+    }
+
+    public static void addLiquidBarToBlock(Block block, Liquid liq){
+        block.addBar("liquid-" + liq.name, entity -> !liq.unlockedNow() ? null : new Bar(
+                () -> liq.localizedName + ":" + Strings.autoFixed(entity.liquids.get(liq), 2) + "/" + block.liquidCapacity,
+                liq::barColor,
+                () -> entity.liquids.get(liq) / block.liquidCapacity
+        ));
     }
 
     public static void initBetterTopTable(){

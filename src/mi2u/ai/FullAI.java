@@ -101,7 +101,7 @@ public class FullAI extends AIController{
             Building core = unit.closestCore();
             boostAction(true);
             if(!(unit.canMine()) || core == null) return;
-            if(unit.mineTile != null && !unit.mineTile.within(unit, unit.type.miningRange)){
+            if(unit.mineTile != null && !unit.mineTile.within(unit, unit.type.mineRange)){
                 unit.mineTile(null);
             }
             if(mining){
@@ -123,7 +123,7 @@ public class FullAI extends AIController{
                     }
                     if(ore != null){
                         moveAction(ore, 50f, false);
-                        if(ore.block() == Blocks.air && unit.within(ore, unit.type.miningRange)){
+                        if(ore.block() == Blocks.air && unit.within(ore, unit.type.mineRange)){
                             unit.mineTile = ore;
                         }
                         if(ore.block() != Blocks.air){
@@ -218,11 +218,11 @@ public class FullAI extends AIController{
 
             }
 
-            if(rebuild && timer.get(4, 30f) && unit.plans().isEmpty() && !unit.team.data().blocks.isEmpty()){
+            if(rebuild && timer.get(4, 30f) && unit.plans().isEmpty() && !unit.team.data().plans.isEmpty()){
                 //rebuild
-                var block = unit.team.data().blocks.first();
+                var block = unit.team.data().plans.first();
                 if(world.tile(block.x, block.y) != null && world.tile(block.x, block.y).block().id == block.block){
-                    state.teams.get(player.team()).blocks.remove(block);
+                    state.teams.get(player.team()).plans.remove(block);
                 }else{
                     unit.addBuild(new BuildPlan(block.x, block.y, block.rotation, content.block(block.block), block.config));
                 }
@@ -291,7 +291,7 @@ public class FullAI extends AIController{
             if(!enable) return;
             if(unit.dead || !unit.isValid()) return;
             if(unit.health > unit.maxHealth * 0.6f) return;
-            Tile tile = Geometry.findClosest(unit.x, unit.y, indexer.getAllied(unit.team, BlockFlag.repair));
+            Building tile = Geometry.findClosest(unit.x, unit.y, indexer.getFlagged(unit.team, BlockFlag.repair));
             if(tile == null) return;
             boostAction(true);
             moveAction(tile, 20f, false);
@@ -391,7 +391,7 @@ public class FullAI extends AIController{
                         b.margin(4f);
                     }, textbtoggle, () -> {
                         targetItem = targetItem == item ? null : item;
-                    }).fill().update(b -> b.setChecked(targetItem == item));
+                    }).fill().update(b -> b.setChecked(targetItem == item)).disabled(b -> !player.team().core().items.has(item));
                     i++;
                     if(i >= 5){
                         i = 0;

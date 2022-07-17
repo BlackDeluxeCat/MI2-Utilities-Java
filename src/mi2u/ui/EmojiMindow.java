@@ -44,21 +44,21 @@ public class EmojiMindow extends Mindow2{
         cont.clear();
         cont.table(t -> {
             t.table(tt -> {
-                tt.button("" + Iconc.list, Styles.clearToggleMenut, () -> {
+                tt.button("" + Iconc.list, textbtoggle, () -> {
                     listMode = !listMode;
                     rebuild();
                 }).size(titleButtonSize).update(b -> {
                     b.setChecked(listMode);
                 });
 
-                tt.button("" + Blocks.message.emoji(), Styles.clearToggleMenut, () -> {
+                tt.button("" + Blocks.message.emoji(), textbtoggle, () -> {
                     category = IconCategory.contents;
                     rebuild();
                 }).size(titleButtonSize).update(b -> {
                     b.setChecked(category == IconCategory.contents);
                 });
 
-                tt.button("" + Iconc.terrain, Styles.clearToggleMenut, () -> {
+                tt.button("" + Iconc.terrain, textbtoggle, () -> {
                     category = IconCategory.iconc;
                     rebuild();
                 }).size(titleButtonSize).update(b -> {

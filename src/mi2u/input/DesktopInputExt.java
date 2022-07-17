@@ -48,7 +48,7 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
                 unit.aim(unit.type.faceTarget ? aimxy : Tmp.v1.trns(unit.rotation, aimxy.dst(unit)).add(unit.x, unit.y));
 
                 float mouseAngle = Angles.mouseAngle(unit.x, unit.y);
-                boolean aimCursor = unit.type.omniMovement && player.shooting && unit.type.hasWeapons() && unit.type.faceTarget && !boosted && unit.type.rotateShooting;
+                boolean aimCursor = unit.type.omniMovement && player.shooting && unit.type.hasWeapons() && unit.type.faceTarget && !boosted;
                 if(aimCursor){
                     unit.lookAt(mouseAngle - 180);  //cancel out vanilla rotation to mouse
                     unit.lookAt(aimxy);
@@ -139,7 +139,7 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
         if(Core.input.keyRelease(Binding.schematic_select) && !Core.scene.hasKeyboard() && selectX == -1 && selectY == -1 && schemX_Ext != -1 && schemY_Ext != -1){
             lastSchematic = MI2UFuncs.createSchematic(schemX_Ext, schemY_Ext, World.toTile(Core.input.mouseWorld().x), World.toTile(Core.input.mouseWorld().y));
             useSchematic(lastSchematic);
-            if(selectRequests.isEmpty()){
+            if(selectPlans.isEmpty()){
                 lastSchematic = null;
             }
             schemX_Ext = -1;
@@ -166,23 +166,23 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
         if(build == forceTapped) return;
         forceTapped = build;
         if(build.block.configurable){
-            if((!frag.config.isShown() && build.shouldShowConfigure(player)) //if the config fragment is hidden, show
+            if((!config.isShown() && build.shouldShowConfigure(player)) //if the config fragment is hidden, show
                     //alternatively, the current selected block can 'agree' to switch config tiles
-                    || (frag.config.isShown() && frag.config.getSelectedTile().onConfigureTileTapped(build))){
-                frag.config.showConfig(build);
+                    || (config.isShown() && config.getSelected().onConfigureBuildTapped(build))){
+                config.showConfig(build);
             }
             //otherwise...
-        }else if(!frag.config.hasConfigMouse()){ //make sure a configuration fragment isn't on the cursor
+        }else if(!config.hasConfigMouse()){ //make sure a configuration fragment isn't on the cursor
             //then, if it's shown and the current block 'agrees' to hide, hide it.
-            if(frag.config.isShown() && frag.config.getSelectedTile().onConfigureTileTapped(build)){
-                frag.config.hideConfig();
+            if(config.isShown() && config.getSelected().onConfigureBuildTapped(build)){
+                config.hideConfig();
             }
         }
 
         //consume tap event if necessary
         if(build.block.synthetic() && (build.block.allowConfigInventory)){
             if(build.block.hasItems && build.items.total() > 0){
-                frag.inv.showFor(build);
+                inv.showFor(build);
             }
         }
     }

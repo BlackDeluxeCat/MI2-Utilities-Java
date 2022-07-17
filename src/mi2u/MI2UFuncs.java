@@ -20,8 +20,8 @@ public class MI2UFuncs{
     public static void unitRebuildBlocks(){
         if(!state.isGame() || !player.unit().canBuild()) return;
         int p = 0;
-        for(BlockPlan block : state.teams.get(player.team()).blocks){
-            if(world.tile(block.x, block.y) != null && world.tile(block.x, block.y).block().id == block.block) state.teams.get(player.team()).blocks.remove(block);
+        for(BlockPlan block : state.teams.get(player.team()).plans){
+            if(world.tile(block.x, block.y) != null && world.tile(block.x, block.y).block().id == block.block) state.teams.get(player.team()).plans.remove(block);
             if(Mathf.len(block.x - player.tileX(), block.y - player.tileY()) >= 200) continue;
             p++;
             if(p > 511) break;

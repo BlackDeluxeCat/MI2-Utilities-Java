@@ -65,7 +65,7 @@ public class WorldData{
         }
     }
 
-    //TODO null checks cost large amount of memory.
+    //null checks cost large amount of memory.
     private static void putBlock(Block block, int pos, int team){
         if(block == null) return;
         if(tiles.get(block) == null) tiles.put(block, new IntSeq[257]);

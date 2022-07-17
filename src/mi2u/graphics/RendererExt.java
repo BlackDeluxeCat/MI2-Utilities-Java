@@ -5,32 +5,26 @@ import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
-import arc.scene.ui.layout.Scl;
+import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
-import arc.util.pooling.Pools;
-import mi2u.MI2UTmp;
-import mi2u.MI2Utils;
-import mi2u.io.MI2USettings;
-import mindustry.ai.Pathfinder;
-import mindustry.ai.types.LogicAI;
-import mindustry.content.Blocks;
-import mindustry.content.StatusEffects;
-import mindustry.core.World;
+import arc.util.pooling.*;
+import mi2u.*;
+import mi2u.io.*;
+import mindustry.ai.*;
+import mindustry.ai.types.*;
+import mindustry.content.*;
+import mindustry.core.*;
 import mindustry.entities.units.*;
-import mindustry.game.EventType;
+import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.ui.Fonts;
 import mindustry.world.*;
-import mindustry.world.blocks.defense.MendProjector;
-import mindustry.world.blocks.defense.OverdriveProjector;
-import mindustry.world.blocks.distribution.BufferedItemBridge;
-import mindustry.world.blocks.distribution.ItemBridge;
-import mindustry.world.blocks.distribution.Junction;
-import mindustry.world.blocks.distribution.Router;
-import mindustry.world.blocks.storage.Unloader;
+import mindustry.world.blocks.defense.*;
+import mindustry.world.blocks.distribution.*;
+import mindustry.world.blocks.storage.*;
 
 import java.lang.reflect.Field;
 
@@ -262,14 +256,55 @@ public class RendererExt{
                 }
             }
 
+            //v7 rts pathfind render, making your device an oven.
             //Pathfind Renderer
-            //if(Core.settings.getBool("unitPathLine") && Core.settings.getInt("unitPathLineLength") > 0){
-            if(MI2USettings.getBool("enUnitPath")){
+            if(unit.isCommandable() && unit.controller() instanceof CommandAI ai && ai.targetPos != null && MI2USettings.getBool("enUnitPath")){
+                Draw.reset();
+                Draw.z(Layer.power - 4f);
+                Lines.stroke(1.5f);
+                Tile tile = unit.tileOn();
+
+                try{
+                    ObjectMap requests = MI2Utils.getValue(controlPath, "requests");
+                    Object req = requests.get(unit);
+                    IntSeq result = MI2Utils.getValue(req, "result");
+                    int start = MI2Utils.getValue(req, "rayPathIndex");
+                    for(int tileIndex = start; tileIndex < result.size; tileIndex++){
+                        Tile nextTile = world.tiles.geti(result.get(tileIndex));
+                        if(nextTile == null) break;
+                        if(!Core.camera.bounds(MI2UTmp.r1).contains(tile.worldx(), tile.worldy()) && !Core.camera.bounds(MI2UTmp.r1).contains(nextTile.worldx(), nextTile.worldy())) continue;  //Skip paths outside screen
+                        if(nextTile == tile) break;
+                        Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
+                        if(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) > 4000f) break;
+                        Lines.dashLine(tile.worldx(), tile.worldy(), nextTile.worldx(), nextTile.worldy(), (int)(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) / 4f));
+                        tile = nextTile;
+                    }
+                }catch(Exception ignore){
+                    boolean move = controlPath.getPathPosition(unit, MI2Utils.getValue(ai, "pathId"), ai.targetPos, MI2UTmp.v1);
+                    if(move){
+                        Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
+                        Lines.dashLine(tile.worldx(), tile.worldy(), MI2UTmp.v1.x, MI2UTmp.v1.y, (int)(Mathf.len(MI2UTmp.v1.x - tile.worldx(), MI2UTmp.v1.y - tile.worldy()) / 4f));
+                    }else{
+                        //Draw.color(unit.team.color, Color.black, Mathf.absin(Time.time, 4f, 1f));
+                        //Lines.poly(unit.x, unit.y, 6, unit.hitSize());
+                    }
+                }
+
+                if(ai.targetPos != null){
+                    Position lineDest = ai.attackTarget != null ? ai.attackTarget : ai.targetPos;
+                    Drawf.limitLine(unit, lineDest, unit.hitSize / 2f, 3.5f);
+
+                    if(ai.attackTarget == null){
+                        Drawf.square(lineDest.getX(), lineDest.getY(), 3.5f);
+                    }
+                }
+
+            }else{
+                Draw.reset();
                 Draw.z(Layer.power - 4f);
                 Tile tile = unit.tileOn();
-                Draw.reset();
                 for(int tileIndex = 1; tileIndex <= 40; tileIndex++){
-                    Tile nextTile = pathfinder.getTargetTile(tile, pathfinder.getField(unit.team, unit.pathType(), (unit.team.data().command == UnitCommand.attack)? Pathfinder.fieldCore : Pathfinder.fieldRally));
+                    Tile nextTile = pathfinder.getTargetTile(tile, pathfinder.getField(unit.team, unit.pathType(), Pathfinder.fieldCore));
                     if(nextTile == null) break;
                     Lines.stroke(2);
                     if(nextTile == tile){
@@ -279,10 +314,8 @@ public class RendererExt{
                     }
                     Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
                     Lines.dashLine(tile.worldx(), tile.worldy(), nextTile.worldx(), nextTile.worldy(), (int)(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) / 4f));
-                    //Fill.poly(nextTile.worldx(), nextTile.worldy(), 4, tilesize - 2, 90);
                     tile = nextTile;
                 }
-                Draw.reset();
             }
 
             Draw.reset();
@@ -316,28 +349,24 @@ public class RendererExt{
 
     public static void drawOverDriver(OverdriveProjector.OverdriveBuild odb){
         OverdriveProjector block = (OverdriveProjector)odb.block();
-        float phaseHeat = MI2Utils.getValue(odb, "phaseHeat");
-        Draw.color(block.baseColor, block.phaseColor, phaseHeat);
+        Draw.color(block.baseColor, block.phaseColor, odb.phaseHeat);
         Draw.z(91.1f);
         Draw.alpha(Core.settings.getBool("animatedshields")?0.6f:0.2f);
-        Fill.circle(odb.x, odb.y, block.range + phaseHeat * block.phaseRangeBoost);
+        Fill.circle(odb.x, odb.y, block.range + odb.phaseHeat * block.phaseRangeBoost);
 
         Lines.stroke(2f);
         Draw.alpha(1f);
-        Lines.circle(odb.x, odb.y, block.range + phaseHeat * block.phaseRangeBoost);
+        Lines.circle(odb.x, odb.y, block.range + odb.phaseHeat * block.phaseRangeBoost);
     }
 
     public static void drawMender(MendProjector.MendBuild mb){
         if(mb.efficiency() <= 0f) return;
         MendProjector block = (MendProjector)mb.block;
-        float phaseHeat = MI2Utils.getValue(mb, "phaseHeat");
-        float charge = MI2Utils.getValue(mb, "charge");
-        float alpha = Mathf.pow(1f - (charge / block.reload), 5);
+        float alpha = Mathf.pow(1f - (mb.charge / block.reload), 5);
         Draw.z(91.2f);
         Draw.color(block.baseColor);
         Draw.alpha((Core.settings.getBool("animatedshields")?0.6f:0.2f) * (alpha > 0.05 ? alpha : 0f));
-        Fill.circle(mb.x, mb.y, block.range + phaseHeat * block.phaseRangeBoost);
-
+        Fill.circle(mb.x, mb.y, block.range + mb.phaseHeat * block.phaseRangeBoost);
     }
 
     public static void drawJunciton(Junction.JunctionBuild jb){
@@ -380,8 +409,8 @@ public class RendererExt{
                         if(items[i][idi] != null){
                             Draw.alpha(0.9f);
                             Draw.rect(items[i][idi].fullIcon,
-                            begx + ((endx - begx) / (float)cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale / speed) * cap, cap - loti)),
-                            begy + ((endy - begy) / (float)cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale / speed) * cap, cap - loti)),
+                            begx + ((endx - begx) / (float)cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale() / speed) * cap, cap - loti)),
+                            begy + ((endy - begy) / (float)cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale() / speed) * cap, cap - loti)),
                             4f, 4f);
                         }
                         loti++;
@@ -411,15 +440,9 @@ public class RendererExt{
 
     public static void drawBufferedItemBridge(BufferedItemBridge.BufferedItemBridgeBuild bb){
         try{
-            Field f = bb.getClass().getDeclaredField("buffer");
-            f.setAccessible(true);
-            ItemBuffer buffer = (ItemBuffer)f.get(bb);
-            f = buffer.getClass().getDeclaredField("buffer");
-            f.setAccessible(true);
-            long[] bufferbuffer = (long[])f.get(buffer);
-            f = buffer.getClass().getDeclaredField("index");
-            f.setAccessible(true);
-            int index = (int)f.get(buffer);
+            ItemBuffer buffer = MI2Utils.getValue(bb, "buffer");
+            long[] bufferbuffer = MI2Utils.getValue(buffer, "buffer");
+            int index = MI2Utils.getValue(buffer, "index");
 
             Item[] bufferItems = new Item[bufferbuffer.length];
             for(int ii = 0; ii < bufferbuffer.length; ii++){
@@ -456,8 +479,8 @@ public class RendererExt{
                     Draw.alpha(0.9f);
 
                     Draw.rect(bufferItems[idi].fullIcon,
-                    begx + ((endx - begx) / (float)bufferItems.length * Math.min(((Time.time - bufferTimes[idi]) * bb.timeScale / speed) * cap, cap - loti)),
-                    begy + ((endy - begy) / (float)bufferItems.length * Math.min(((Time.time - bufferTimes[idi]) * bb.timeScale / speed) * cap, cap - loti)), 4f, 4f);
+                    begx + ((endx - begx) / (float)bufferItems.length * Math.min(((Time.time - bufferTimes[idi]) * bb.timeScale() / speed) * cap, cap - loti)),
+                    begy + ((endy - begy) / (float)bufferItems.length * Math.min(((Time.time - bufferTimes[idi]) * bb.timeScale() / speed) * cap, cap - loti)), 4f, 4f);
                 }
                 loti++;
             }
@@ -475,14 +498,14 @@ public class RendererExt{
             Building tmp;
             boolean toFound = false, fromFound = false;
             boolean canLoad, canUnload;
-            for(Unloader.UnloaderBuild.ContainerStat c : ub.possibleBlocks){
-                f = Unloader.UnloaderBuild.ContainerStat.class.getDeclaredField("canLoad");
+            for(Unloader.ContainerStat c : ub.possibleBlocks){
+                f = Unloader.ContainerStat.class.getDeclaredField("canLoad");
                 f.setAccessible(true);
                 canLoad = f.getBoolean(c);
-                f = Unloader.UnloaderBuild.ContainerStat.class.getDeclaredField("canUnload");
+                f = Unloader.ContainerStat.class.getDeclaredField("canUnload");
                 f.setAccessible(true);
                 canUnload = f.getBoolean(c);
-                f = Unloader.UnloaderBuild.ContainerStat.class.getDeclaredField("building");
+                f = Unloader.ContainerStat.class.getDeclaredField("building");
                 f.setAccessible(true);
                 tmp = (Building)f.get(c);
                 if(!toFound && canLoad){
