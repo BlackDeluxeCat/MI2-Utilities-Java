@@ -185,7 +185,7 @@ public class HoverTopTable extends Table {
 
         table.row();
 
-        table.add(Blocks.microProcessor.emoji() + " " + Core.bundle.get("units.processorcontrol") + " " + (long)unit.flag).growX().wrap().left().update(l -> l.setColor(unit.controller() instanceof LogicAI ? Color.white : Color.darkGray));
+        table.label(() -> Blocks.microProcessor.emoji() + (unit.controller() instanceof LogicAI ? "" : Core.bundle.get("units.processorcontrol")) + " " + (long)unit.flag).growX().wrap().left();
 
         table.row();
     }

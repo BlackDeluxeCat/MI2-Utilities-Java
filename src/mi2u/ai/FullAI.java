@@ -17,6 +17,7 @@ import mindustry.entities.units.*;
 import mindustry.gen.*;
 import mindustry.input.*;
 import mindustry.type.*;
+import mindustry.type.weapons.RepairBeamWeapon;
 import mindustry.world.*;
 import mindustry.world.blocks.*;
 import mindustry.world.meta.*;
@@ -102,7 +103,7 @@ public class FullAI extends AIController{
             boostAction(true);
             if(!(unit.canMine()) || core == null) return;
             if(unit.mineTile != null && !unit.mineTile.within(unit, unit.type.mineRange)){
-                unit.mineTile(null);
+                unit.mineTile = null;
             }
             if(mining){
                 if(timer.get(0, 60 * 4) || targetItem == null){
@@ -312,7 +313,7 @@ public class FullAI extends AIController{
                 target = null;
                 float range = unit.hasWeapons() ? unit.range() : 0f;
                 if(attack) target = Units.closestTarget(unit.team, unit.x, unit.y, range, u -> u.checkTarget(unit.type.targetAir, unit.type.targetGround), u -> unit.type.targetGround);
-                if(heal && unit.type.canHeal && target == null){
+                if(heal && (unit.type.canHeal || unit.type.weapons.contains(w -> w instanceof RepairBeamWeapon)) && target == null){
                     target = Geometry.findClosest(unit.x, unit.y, indexer.getDamaged(unit.team));
                     if(target != null && !unit.within(target, range)){
                         target = null;

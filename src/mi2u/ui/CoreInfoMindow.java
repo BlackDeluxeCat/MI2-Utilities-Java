@@ -63,6 +63,10 @@ public class CoreInfoMindow extends Mindow2{
             WorldData.clear();
         });
 
+        Events.on(EventType.ResetEvent.class, e -> {
+            usedItems.clear();
+        });
+
         Events.run(EventType.Trigger.update, () -> {
             if(state.isGame() && core != null && interval.get(0, 60f)){
                 for(FloatDataRecorder rec : itemRecoders){
@@ -197,7 +201,7 @@ public class CoreInfoMindow extends Mindow2{
                     int i = 0;
 
                     for(Item item : content.items()){
-                        if(i >= 4 && !usedItems.contains(item)) continue;
+                        if(!usedItems.contains(item)) continue;
 
                         iut.stack(
                             new Image(item.uiIcon),
