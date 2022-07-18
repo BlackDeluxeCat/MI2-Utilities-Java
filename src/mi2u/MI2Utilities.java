@@ -5,6 +5,7 @@ import arc.scene.ui.layout.*;
 import arc.util.*;
 import arc.util.serialization.*;
 import mi2u.graphics.*;
+import mi2u.input.RtsCommand;
 import mi2u.io.*;
 import mi2u.ui.*;
 import mindustry.game.EventType.*;
@@ -45,6 +46,7 @@ public class MI2Utilities extends Mod{
 
                 RendererExt.initBase();
                 ModifyFuncs.modifyVanilla();
+                RtsCommand.init();
             });
 
             //popup too early will cause font rendering bug.

@@ -36,6 +36,8 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
     @Override
     public void update(){
         super.update();
+        desktopFormation();
+
         Unit unit = player.unit();
         if(ctrlBoost) player.boosting = boost;
         if(ctrlShoot){
@@ -183,6 +185,37 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
         if(build.block.synthetic() && (build.block.allowConfigInventory)){
             if(build.block.hasItems && build.items.total() > 0){
                 inv.showFor(build);
+            }
+        }
+    }
+
+    public void desktopFormation(){
+        if(commandMode){
+            if(Core.input.keyDown(Binding.control)) RtsCommand.creatingFormation = true;
+            if(Core.input.keyRelease(Binding.control)) RtsCommand.creatingFormation = false;
+
+            if(RtsCommand.creatingFormation){
+                if(Core.input.keyTap(Binding.block_select_01)) RtsCommand.createFormation(selectedUnits, 0);
+                if(Core.input.keyTap(Binding.block_select_02)) RtsCommand.createFormation(selectedUnits, 1);
+                if(Core.input.keyTap(Binding.block_select_03)) RtsCommand.createFormation(selectedUnits, 2);
+                if(Core.input.keyTap(Binding.block_select_04)) RtsCommand.createFormation(selectedUnits, 3);
+                if(Core.input.keyTap(Binding.block_select_05)) RtsCommand.createFormation(selectedUnits, 4);
+                if(Core.input.keyTap(Binding.block_select_06)) RtsCommand.createFormation(selectedUnits, 5);
+                if(Core.input.keyTap(Binding.block_select_07)) RtsCommand.createFormation(selectedUnits, 6);
+                if(Core.input.keyTap(Binding.block_select_08)) RtsCommand.createFormation(selectedUnits, 7);
+                if(Core.input.keyTap(Binding.block_select_09)) RtsCommand.createFormation(selectedUnits, 8);
+                if(Core.input.keyTap(Binding.block_select_10)) RtsCommand.createFormation(selectedUnits, 9);
+            }else{
+                if(Core.input.keyTap(Binding.block_select_01)) RtsCommand.callFormation(0);
+                if(Core.input.keyTap(Binding.block_select_02)) RtsCommand.callFormation(1);
+                if(Core.input.keyTap(Binding.block_select_03)) RtsCommand.callFormation(2);
+                if(Core.input.keyTap(Binding.block_select_04)) RtsCommand.callFormation(3);
+                if(Core.input.keyTap(Binding.block_select_05)) RtsCommand.callFormation(4);
+                if(Core.input.keyTap(Binding.block_select_06)) RtsCommand.callFormation(5);
+                if(Core.input.keyTap(Binding.block_select_07)) RtsCommand.callFormation(6);
+                if(Core.input.keyTap(Binding.block_select_08)) RtsCommand.callFormation(7);
+                if(Core.input.keyTap(Binding.block_select_09)) RtsCommand.callFormation(8);
+                if(Core.input.keyTap(Binding.block_select_10)) RtsCommand.callFormation(9);
             }
         }
     }

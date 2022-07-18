@@ -2,22 +2,21 @@ package mi2u.ui;
 
 import arc.*;
 import arc.graphics.*;
-import arc.scene.Element;
+import arc.math.*;
+import arc.scene.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
-import mi2u.MI2UFuncs;
-import mi2u.MI2Utilities;
-import mi2u.game.SpeedController;
+import mi2u.*;
+import mi2u.game.*;
+import mi2u.input.*;
 import mi2u.io.MI2USettings.*;
 import mindustry.Vars;
 import mindustry.gen.*;
 import mindustry.ui.Styles;
 
 import static mi2u.MI2UVars.*;
-import static mi2u.MI2UFuncs.*;
 
 public class MI2UI extends Mindow2{
-
     public MI2UI(){
         super("@main.MI2U", "@main.help");
     }
@@ -46,6 +45,25 @@ public class MI2UI extends Mindow2{
                 b.setChecked(enDistributionReveal);
             }).minSize(36f).with(funcSetTextb);
         });
+
+
+        cont.row();
+
+        //TODO the update rate is based on button.update(), and affected by lagging
+        cont.table(t -> {
+            t.button("Speeding", textbtoggle, SpeedController::switchUpdate).update(b -> {
+                b.setChecked(SpeedController.update);
+                b.setText(Core.bundle.get("main.buttons.speeding") + "x" + Strings.autoFixed(SpeedController.scl, 2));
+                SpeedController.update();
+            }).with(funcSetTextb).with(b -> {
+                b.margin(4f);
+                b.image(Icon.settingsSmall).size(16f).update(img -> {
+                    if(SpeedController.update) img.rotateBy(-1f);
+                    else img.setRotation(0f);
+                    img.setColor(!b.isChecked() ? Color.white : SpeedController.lowerThanMin() ? Color.scarlet : Color.lime);
+                });
+            }).growX();
+        }).name("speed control").growX();
 
         cont.row();
 
@@ -77,9 +95,7 @@ public class MI2UI extends Mindow2{
                 fullAI.modes.each(mode -> {
                     ttt.button(mode.btext, textbtoggle, () -> {
                         mode.enable = !mode.enable;
-                    }).update(b -> {
-                        b.setChecked(mode.enable);
-                    }).minSize(36f).with(c -> {
+                    }).checked(b -> mode.enable).minSize(36f).with(c -> {
                         c.getLabel().setAlignment(Align.center);
                     });
                 });
@@ -88,21 +104,33 @@ public class MI2UI extends Mindow2{
 
         cont.row();
 
-        //TODO the update rate is based on button.update(), and affected by lagging
-        cont.table(t -> {
-            t.button("Speeding", textbtoggle, SpeedController::switchUpdate).update(b -> {
-                b.setChecked(SpeedController.update);
-                b.setText(Core.bundle.get("main.buttons.speeding") + "x" + Strings.autoFixed(SpeedController.scl, 2));
-                SpeedController.update();
-            }).with(funcSetTextb).with(b -> {
-                b.margin(4f);
-                b.image(Icon.settingsSmall).size(16f).update(img -> {
-                    if(SpeedController.update) img.rotateBy(-1f);
-                    else img.setRotation(0f);
-                    img.setColor(!b.isChecked() ? Color.white : SpeedController.lowerThanMin() ? Color.scarlet : Color.lime);
-                });
+        cont.collapser(t -> {
+            t.button("Create Forms", textbtoggle, () -> {
+                RtsCommand.creatingFormation = !RtsCommand.creatingFormation;
+            }).checked(b -> RtsCommand.creatingFormation).minSize(36f).growX().with(c -> {
+                c.getLabel().setAlignment(Align.center);
+            });
+            t.row();
+            t.table(tt -> {
+                for(int i = 0; i < 10; i++){
+                    int ii = i;
+                    if(i == 5) tt.row();
+                    tt.button("" + Mathf.mod(ii + 1, 10), textb, () -> {
+                        if(RtsCommand.creatingFormation){
+                            RtsCommand.createFormation(Vars.control.input.selectedUnits, ii);
+                        }else{
+                            RtsCommand.callFormation(ii);
+                        }
+                    }).disabled(b -> !RtsCommand.creatingFormation && !RtsCommand.checkFormation(ii)).update(b -> {
+                        boolean check = RtsCommand.checkFormation(ii);
+                        b.setDisabled(!RtsCommand.creatingFormation && !check);
+                        b.getLabel().setColor(RtsCommand.creatingFormation ? check ? Color.cyan : Color.acid : Color.white);
+                    }).minSize(36f).with(c -> {
+                        c.getLabel().setAlignment(Align.center);
+                    });
+                }
             }).growX();
-        }).name("speed control").growX();
+        }, () -> true).growX().get().setDuration(0.5f).setCollapsed(true, () -> !Vars.control.input.commandMode);
 
     }
 
