@@ -25,7 +25,9 @@ import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.turrets.*;
+import mindustry.world.blocks.heat.HeatConsumer;
 import mindustry.world.blocks.logic.*;
+import mindustry.world.blocks.production.HeatCrafter;
 import mindustry.world.consumers.*;
 
 import java.io.ByteArrayInputStream;
@@ -99,6 +101,14 @@ public class ModifyFuncs{
                             () -> entity.liquids.current() == null ? 0f : entity.liquids.get(entity.liquids.current()) / block.liquidCapacity)
                     );
                 }
+            }
+
+            if(block instanceof HeatCrafter hc){
+                addBarToBlock(block, "heat", (HeatCrafter.HeatCrafterBuild entity) ->
+                        new Bar(() ->
+                                Core.bundle.format("bar.heatpercent", (int)entity.heat, (int)(entity.efficiencyScale() * 100)) + "/" + (int)hc.heatRequirement,
+                                () -> Pal.lightOrange,
+                                () -> entity.heat / hc.heatRequirement));
             }
 
             if(block.hasPower && block.consumesPower && block.consPower != null){
