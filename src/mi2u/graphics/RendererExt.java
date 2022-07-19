@@ -263,9 +263,9 @@ public class RendererExt{
                     Draw.reset();
                     Draw.z(Layer.power - 4f);
                     Lines.stroke(1.5f);
-                    Tile tile = unit.tileOn();
 
                     try{
+                        Tile tile = unit.tileOn();
                         ObjectMap requests = MI2Utils.getValue(controlPath, "requests");
                         Object req = requests.get(unit);
                         IntSeq result = MI2Utils.getValue(req, "result");
@@ -284,7 +284,7 @@ public class RendererExt{
                         boolean move = controlPath.getPathPosition(unit, MI2Utils.getValue(ai, "pathId"), ai.targetPos, MI2UTmp.v1);
                         if(move){
                             Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
-                            Lines.dashLine(tile.worldx(), tile.worldy(), MI2UTmp.v1.x, MI2UTmp.v1.y, (int)(Mathf.len(MI2UTmp.v1.x - tile.worldx(), MI2UTmp.v1.y - tile.worldy()) / 4f));
+                            Lines.dashLine(unit.x, unit.y, MI2UTmp.v1.x, MI2UTmp.v1.y, (int)(Mathf.len(MI2UTmp.v1.x - unit.x, MI2UTmp.v1.y - unit.y) / 4f));
                         }
                     }
 
