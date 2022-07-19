@@ -27,6 +27,7 @@ public class HoverTopTable extends Table {
     public Building build;
     public Unit unit;
     public Table unitt, buildt, tilet;
+    Table floort, oret, blockt;
 
     public HoverTopTable(){
         initChild();
@@ -58,47 +59,67 @@ public class HoverTopTable extends Table {
 
         tilet.defaults().growX();
         tilet.table(t -> {
-            float lw = 55f;
             t.left();
-            t.add(new Image(){
-                Block last;
-                TextureRegionDrawable icon = new TextureRegionDrawable();
-                {
-                    update(() -> {
-                        if(tile == null || tile.floor() == last) return;
-                        last = tile.floor();
-                        this.setDrawable(tile != null ? icon.set(tile.floor().uiIcon) : null);
-                    });
-                }
-            }).size(8 * 4);
-            t.labelWrap(() -> tile != null ? tile.floor().localizedName : "").left().padLeft(5).width(lw);
+            floort = new Table(tt -> {
+                tt.add(new Image(){
+                    Block last;
+                    TextureRegionDrawable icon = new TextureRegionDrawable();
+                    {
+                        update(() -> {
+                            if(tile == null || tile.floor() == last) return;
+                            last = tile.floor();
+                            this.setDrawable(tile != null ? icon.set(tile.floor().uiIcon) : null);
+                        });
+                    }
+                }).size(8 * 4);
+                tt.label(() -> tile != null ? tile.floor().localizedName : "").left().padLeft(5);
+            });
 
-            t.add(new Image(){
-                Block last;
-                TextureRegionDrawable icon = new TextureRegionDrawable();
-                {
-                    update(() -> {
-                        if(tile == null || tile.overlay() == last) return;
-                        last = tile.overlay();
-                        this.setDrawable((tile != null && tile.overlay() != null && tile.overlay() != Blocks.air) ? icon.set(tile.overlay().uiIcon) : null);
-                    });
-                }
-            }).size(8 * 4);
-            t.labelWrap(() -> tile != null && tile.overlay() != null && tile.overlay() != Blocks.air ? tile.overlay().localizedName : "").left().padLeft(5).width(lw);
+            oret = new Table(tt -> {
+                tt.add(new Image(){
+                    Block last;
+                    TextureRegionDrawable icon = new TextureRegionDrawable();
+                    {
+                        update(() -> {
+                            if(tile == null || tile.overlay() == last) return;
+                            last = tile.overlay();
+                            this.setDrawable((tile != null && tile.overlay() != null && tile.overlay() != Blocks.air) ? icon.set(tile.overlay().uiIcon) : null);
+                        });
+                    }
+                }).size(8 * 4);
+                tt.label(() -> tile != null && tile.overlay() != null && tile.overlay() != Blocks.air ? tile.overlay().localizedName : "").left().padLeft(5);
+            });
 
-            t.add(new Image(){
-                Block last;
-                TextureRegionDrawable icon = new TextureRegionDrawable();
-                {
-                    update(() -> {
-                        if(tile == null || tile.block() == last) return;
-                        last = tile.block();
-                        this.setDrawable((tile != null && tile.block() instanceof Prop || tile.block() instanceof TreeBlock) ? icon.set(tile.block().uiIcon) : null);
-                    });
-                }
-            }).size(8 * 4);
-            t.labelWrap(() -> (tile != null && tile.block() instanceof Prop || tile.block() instanceof TreeBlock) ? tile.block().localizedName : "").left().padLeft(5).width(lw);
-        }).left();
+            blockt = new Table(tt -> {
+                tt.add(new Image(){
+                    Block last;
+                    TextureRegionDrawable icon = new TextureRegionDrawable();
+                    {
+                        update(() -> {
+                            if(tile == null || tile.block() == last) return;
+                            last = tile.block();
+                            this.setDrawable((tile != null && tile.block() instanceof Prop || tile.block() instanceof TreeBlock) ? icon.set(tile.block().uiIcon) : null);
+                        });
+                    }
+                }).size(8 * 4);
+                tt.label(() -> (tile != null && tile.block() instanceof Prop || tile.block() instanceof TreeBlock) ? tile.block().localizedName : "").left().padLeft(5);
+            });
+
+        }).left().update(t -> {
+            floort.act(0.1f);
+            blockt.act(0.1f);
+            oret.act(0.1f);
+            boolean row = (blockt.getPrefWidth() + floort.getPrefWidth() + oret.getPrefWidth()) >= 250f;
+            boolean rebuild = row != (t.getColumns() == 1) || t.getCells().size == 0;
+            if(!rebuild) return;
+            t.clear();
+            Log.info(blockt.getPrefWidth() + floort.getPrefWidth() + oret.getPrefWidth());
+            t.add(floort).left();
+            if(row) t.row();
+            t.add(oret).left();
+            if(row) t.row();
+            t.add(blockt).left();
+        });
     }
 
     public void build(){

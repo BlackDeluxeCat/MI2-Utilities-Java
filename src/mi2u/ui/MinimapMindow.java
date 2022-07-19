@@ -43,21 +43,21 @@ public class MinimapMindow extends Mindow2{
     public void setupCont(Table cont){
         cont.clear();
         m.setMapSize(MI2USettings.getInt(mindowName + ".size", 200));
-        cont.add(m).fill();
+        cont.add(m).right();
         cont.row();
         cont.table(t -> {
             t.table(tt -> {
-                tt.label(() -> "    " + Strings.fixed(World.conv(player.x), 1) + ", "+ Strings.fixed(World.conv(player.y), 1));
+                tt.label(() -> Strings.fixed(World.conv(player.x), 1) + ", "+ Strings.fixed(World.conv(player.y), 1)).right();
                 tt.row();
-                tt.label(() -> Iconc.commandAttack + "  " + Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1));
+                tt.label(() -> Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1)).right().color(Color.scarlet);
             }).growX();
             t.table(tt -> {
-                tt.button(Iconc.players + "", MI2UVars.textbtoggle, () -> m.drawLabel = !m.drawLabel).update(b -> b.setChecked(m.drawLabel)).size(48f);
+                tt.button(Iconc.players + "", MI2UVars.textbtoggle, () -> m.drawLabel = !m.drawLabel).update(b -> b.setChecked(m.drawLabel)).width(36f).growY();
                 tt.button(Iconc.zoom + "", MI2UVars.textb, () -> {
                     finderTable.popup();
                     finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
-                }).size(48f);
-            });
+                }).width(36f).growY();
+            }).fillX().growY();
         }).growX();
     }
 

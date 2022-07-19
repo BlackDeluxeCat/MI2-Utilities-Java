@@ -224,7 +224,7 @@ public class CoreInfoMindow extends Mindow2{
                             iut.row();
                         }
                     }
-                }).maxHeight(MI2USettings.getInt(mindowName + ".itemsMaxHeight", 150)).update(p -> {
+                }).minWidth(300f).maxHeight(MI2USettings.getInt(mindowName + ".itemsMaxHeight", 150)).update(p -> {
                     Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
                     if(e != null && e.isDescendantOf(p)) {
                         p.requestScroll();
@@ -323,11 +323,14 @@ public class CoreInfoMindow extends Mindow2{
     public void rebuildSelect(){
         teamSelect.clear();
         teamSelect.table(p -> {
-            p.button(Iconc.map + "", textb, () -> {
+            p.button(Iconc.players + "", textb, () -> {
                 select = null;
                 rebuild();
                 teamSelect.hide();
-            }).minSize(titleButtonSize * 2f).grow().disabled(select == null).get().getLabel().setWrap(false);
+            }).minSize(titleButtonSize * 2f).grow().disabled(select == null).with(b -> {
+                b.getLabel().setWrap(false);
+                b.getLabel().setColor(player.team().color);
+            });
             int i = 1;
             for(TeamData t : state.teams.getActive()){
                 p.button(t.team.localized(), textb, () -> {

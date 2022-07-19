@@ -1,6 +1,7 @@
 package mi2u;
 
 import arc.*;
+import arc.scene.ui.Label;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import arc.util.serialization.*;
@@ -65,9 +66,10 @@ public class MI2Utilities extends Mod{
             MI2USettings.putStr("ghApi", ghApi);
         }
         MOD = mods.getMod(MI2Utilities.class);
-        new Mindow2("Update Check"){
+        new Mindow2("@update.title"){
             Interval in = new Interval();
-            String intro, version = "Checking Update...";
+            String intro, version = "@update.checking";
+            Label introl;
             float delay = 900f;
             {
                 addTo(Core.scene.root);
@@ -86,14 +88,14 @@ public class MI2Utilities extends Mod{
             }
             @Override
             public void setupCont(Table cont){
-                cont.label(() -> MOD.meta.version.equals(version) ? "Current Is Latest!" : "New Release Available!").align(Align.left).fillX().pad(5f).get().setColor(0f, 1f, 0.3f, 1f);
+                cont.label(() -> MOD.meta.version.equals(version) ? "@update.latest" : "@update.updateAvailable").align(Align.left).fillX().pad(5f).get().setColor(0f, 1f, 0.3f, 1f);
                 cont.row();
 
                 cont.button(gitRepo + "\n" + Iconc.paste + Iconc.github, textb, () -> {
                     Core.app.setClipboardText(gitURL);
                 }).growX().height(50f);
                 cont.row();
-                cont.button("Download", textb, () -> {
+                cont.button("", textb, () -> {
                     ui.loadfrag.show("@downloading");
                     ui.loadfrag.setProgress(() -> Reflect.get(ui.mods, "modImportProgress"));
                     Http.get(MI2USettings.getStr("ghApi", ghApi) + "/repos/" + gitRepo + "/releases/latest", res -> {
@@ -117,29 +119,31 @@ public class MI2Utilities extends Mod{
                     }, e -> Reflect.invoke(ui.mods, "modError", new Object[]{e}, Throwable.class));
                 }).growX().height(50f).update(b -> {
                     b.getLabelCell().update(l -> {
-                        l.setText("Download: " + MOD.meta.version + " -> " + version);
+                        l.setText(Core.bundle.get("update.download") + ": " + MOD.meta.version + " -> " + version);
                     }).get().setColor(1f, 1f, 0.3f, 1f);
                 });
                 cont.row();
                 cont.button("", textb, () -> this.addTo(null)).growX().height(50f).update(b -> {
-                    b.setText("Close (At " + Strings.fixed((delay - in.getTime(0))/60 , 1)+ "s)");
+                    b.setText(Core.bundle.get("update.close") + " (" + Strings.fixed((delay - in.getTime(0))/60 , 1)+ "s)");
                 });
                 cont.row();
 
                 cont.pane(t -> {
-                    t.labelWrap(() -> intro).align(Align.left).growX();  //drawing update discription possibly cause font color bug.
+                    introl = t.add(intro).align(Align.left).growX().get();  //drawing update discription possibly cause font color bug.
                 }).width(400f).maxHeight(500f);
 
                 Http.get(MI2USettings.getStr("ghApi", ghApi) + "/repos/" + gitRepo + "/releases/latest", res -> {
                     var json = Jval.read(res.getResultAsString());
                     version = json.getString("name");
                     intro = json.getString("body");
+                    if(introl != null) introl.setText(intro);
                     if(MOD.meta.version.equals(version)) delay = 120f;
                 }, e -> {
                     in.get(1);
                     delay = 120f;
                     version = "" + Iconc.cancel;
-                    intro = "Failed to check update.";
+                    intro = "@update.failCheck";
+                    if(introl != null) introl.setText(intro);
                     Log.err(e);
                 });
 
