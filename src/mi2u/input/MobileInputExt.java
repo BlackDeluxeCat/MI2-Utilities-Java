@@ -83,7 +83,6 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
         ctrlMove = false;
         move.setZero();
         shootXY.setZero();
-        panXY.setZero();
     }
 
     @Override
