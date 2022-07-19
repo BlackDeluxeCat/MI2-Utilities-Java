@@ -1,7 +1,10 @@
 package mi2u.input;
 
-import arc.Events;
+import arc.*;
 import arc.struct.*;
+import arc.util.Time;
+import mi2u.MI2UTmp;
+import mi2u.io.MI2USettings;
 import mindustry.game.EventType;
 import mindustry.gen.*;
 
@@ -10,6 +13,11 @@ import static mindustry.Vars.*;
 public class RtsCommand{
     public static Seq<Unit>[] formations = new Seq[10];
     public static boolean creatingFormation = false;
+
+    public static long lastCallTime;
+    public static int lastCallId;
+    public static long doubleTapInterval = MI2USettings.getInt("rtsFormDoubleTap", 300);
+
 
     public static void init(){
         Events.on(EventType.WorldLoadEvent.class, e -> {
@@ -45,8 +53,14 @@ public class RtsCommand{
 
     public static void callFormation(int id){
         if(!checkFormation(id)) return;
-        control.input.selectedUnits.clear();
-        control.input.selectedUnits.add(formations[id]);
+        if(lastCallId == id && Time.timeSinceMillis(lastCallTime) < doubleTapInterval && control.input instanceof InputOverwrite iow){
+            iow.pan(true, MI2UTmp.v1.set(formations[id].random()));
+        }else{
+            control.input.selectedUnits.clear();
+            control.input.selectedUnits.add(formations[id]);
+            lastCallId = id;
+        }
+        lastCallTime = Time.millis();
     }
 
 }

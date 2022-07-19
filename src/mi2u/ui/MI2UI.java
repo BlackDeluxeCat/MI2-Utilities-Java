@@ -4,6 +4,7 @@ import arc.*;
 import arc.graphics.*;
 import arc.math.*;
 import arc.scene.*;
+import arc.scene.ui.TextField;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.*;
@@ -105,7 +106,7 @@ public class MI2UI extends Mindow2{
         cont.row();
 
         cont.collapser(t -> {
-            t.button("Create Forms", textbtoggle, () -> {
+            t.button("@main.buttons.createForm", textbtoggle, () -> {
                 RtsCommand.creatingFormation = !RtsCommand.creatingFormation;
             }).checked(b -> RtsCommand.creatingFormation).minSize(36f).growX().with(c -> {
                 c.getLabel().setAlignment(Align.center);
@@ -187,6 +188,8 @@ public class MI2UI extends Mindow2{
                 };
             }
         });
+
+        settings.add(new FieldEntry("rtsFormDoubleTap", "@settings.main.rtsFormDoubleTap", Vars.ghApi, TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) > 0, s -> RtsCommand.doubleTapInterval = Strings.parseInt(s)));
 
         settings.add(new CheckEntry("modifyBlockBars", "@settings.main.modifyBlockBars", false, null));
         settings.add(new CheckEntry("modifyTopTable", "@settings.main.modifyTopTable", false, null));

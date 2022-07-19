@@ -4,6 +4,7 @@ import arc.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
+import arc.struct.ObjectMap;
 import arc.util.*;
 import mi2u.*;
 import mi2u.io.MI2USettings;
@@ -193,7 +194,11 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
         if(commandMode){
             if(Core.input.keyDown(Binding.control)) RtsCommand.creatingFormation = true;
             if(Core.input.keyRelease(Binding.control)) RtsCommand.creatingFormation = false;
-
+            //force block selection short-cut to switch category
+            MI2Utils.setValue(ui.hudfrag.blockfrag, "blockSelectEnd", true);
+            //cancel any stored block selections
+            ObjectMap selectBlocks = MI2Utils.getValue(ui.hudfrag.blockfrag, "selectedBlocks");
+            selectBlocks.each((cat, block) -> selectBlocks.put(cat, null));
             if(RtsCommand.creatingFormation){
                 if(Core.input.keyTap(Binding.block_select_01)) RtsCommand.createFormation(selectedUnits, 0);
                 if(Core.input.keyTap(Binding.block_select_02)) RtsCommand.createFormation(selectedUnits, 1);
