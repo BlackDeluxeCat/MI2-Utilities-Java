@@ -103,9 +103,13 @@ public class WorldFinderTable extends PopupTable{
 
         table(t -> {
             t.defaults().growX();
+            t.button("@minimap.finder.unitPos", textb, () -> {
+                planReplace(find, replace, 8f);
+            }).height(size).with(funcSetTextb);
             t.button("@minimap.finder.unitRange", textb, () -> {
                 planReplace(find, replace, player.unit().range());
             }).height(size).with(funcSetTextb);
+            t.row();
             t.button("@minimap.finder.buildRange", textb, () -> {
                 planReplace(find, replace, buildingRange);
             }).height(size).with(funcSetTextb);
@@ -119,9 +123,11 @@ public class WorldFinderTable extends PopupTable{
         if(!state.isGame() || player.unit() == null || !player.unit().canBuild()) return;
         var seq = WorldData.getSeq(from, player.team());
         if(seq == null) return;
+
         seq.each(pos -> {
-            if(range > 0f && (world.tile(pos).build == null || MI2UTmp.v1.set(Point2.x(pos), Point2.y(pos)).scl(tilesize).sub(player.unit().x, player.unit().y).len() > range)) return;
-            player.unit().addBuild(new BuildPlan(Point2.x(pos), Point2.y(pos), world.tile(pos).build.rotation, to, world.tile(pos).build.config()));
+            if((world.tile(pos).build == null && world.tile(pos).block() != Blocks.air) || MI2UTmp.v1.set(Point2.x(pos), Point2.y(pos)).scl(tilesize).sub(player.unit().x, player.unit().y).len() > range) return;
+            if(player.unit().plans().size > 500) return;
+            player.unit().addBuild(new BuildPlan(Point2.x(pos), Point2.y(pos), world.tile(pos).block() == Blocks.air ? 0 : world.tile(pos).build.rotation, to, world.tile(pos).build == null ? null : world.tile(pos).build.config()));
         });
     }
 
@@ -196,6 +202,7 @@ public class WorldFinderTable extends PopupTable{
                     int i = 0;
                     for(var block : content.blocks()){
                         if(!block.canReplace(find)) continue;
+                        //if(block.isHidden() && (!state.rules.infiniteResources || !state.isEditor())) continue;
                         if(withName){
                             t.button("" + WorldData.countBlock(block, team), new TextureRegionDrawable(block.uiIcon), textb, 24f,() -> {
                                 replace = block;
