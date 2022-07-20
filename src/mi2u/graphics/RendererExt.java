@@ -25,6 +25,9 @@ import mindustry.world.*;
 import mindustry.world.blocks.defense.*;
 import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.storage.*;
+import mindustry.world.blocks.units.Reconstructor;
+import mindustry.world.blocks.units.UnitAssembler;
+import mindustry.world.blocks.units.UnitFactory;
 
 import java.lang.reflect.Field;
 
@@ -81,10 +84,12 @@ public class RendererExt{
         Seq<Tile> tiles = MI2Utils.getValue(renderer.blocks, "tileview");
         if(tiles != null){
             if(MI2USettings.getBool("disableBuilding", false)) tiles.clear();
-            boolean enOverdriveZone = MI2USettings.getBool("enOverdriveZone", false), enMenderZone = MI2USettings.getBool("enMenderZone", false);
+            boolean enOverdriveZone = MI2USettings.getBool("enOverdriveZone", false), enMenderZone = MI2USettings.getBool("enMenderZone", false),
+            enBlockHpBar = MI2USettings.getBool("enBlockHpBar", true);
 
             for(var tile : tiles){
                 if(tile.build == null) continue;
+                if(enBlockHpBar) drawBlockHpBar(tile.build);
                 if(enDistributionReveal) drawBlackboxBuilding(tile.build);
                 if(enOverdriveZone && tile.build instanceof OverdriveProjector.OverdriveBuild odb) drawOverDriver(odb);
                 if(enMenderZone && tile.build instanceof MendProjector.MendBuild mb) drawMender(mb);
@@ -172,57 +177,7 @@ public class RendererExt{
             //display healthbar by MI2
             Draw.z(Layer.shields + 6f);
             if(MI2USettings.getBool("enUnitHpBar")){
-                Draw.reset();
-                if(unit.hitTime > 0f){
-                    Lines.stroke(4f + Mathf.lerp(0f, 2f, Mathf.clamp(unit.hitTime)));
-                    Draw.color(Color.white, Mathf.lerp(0.1f, 1f, Mathf.clamp(unit.hitTime)));
-                    Lines.line(unit.x - unit.hitSize() * 0.6f, unit.y + (unit.hitSize() / 2f), unit.x + unit.hitSize() * 0.6f, unit.y + (unit.hitSize() / 2f));
-                }
-                Lines.stroke(4f);
-                Draw.color(unit.team.color, 0.5f);
-                Lines.line(unit.x - unit.hitSize() * 0.6f, unit.y + (unit.hitSize() / 2f), unit.x + unit.hitSize() * 0.6f, unit.y + (unit.hitSize() / 2f));
-                Draw.color((unit.health > 0 ? Pal.health:Color.gray), 0.8f);
-                Lines.stroke(2);
-                Lines.line(
-                    unit.x - unit.hitSize() * 0.6f, unit.y + (unit.hitSize() / 2f),
-                    unit.x + unit.hitSize() * ((unit.health > 0 ? unit.health : Mathf.maxZero(unit.maxHealth + unit.health)) / unit.maxHealth * 1.2f - 0.6f), unit.y + (unit.hitSize() / 2f));
-                Lines.stroke(2f);
-                if(unit.shield > 0){
-                    for(int didgt = 1; didgt <= Mathf.digits((int)(unit.shield / unit.maxHealth)) + 1; didgt++){
-                        //if(didgt == Mathf.digits((int)(unit.shield / unit.maxHealth)) + 1) continue;
-                        Draw.color(Pal.shield, 0.8f);
-                        float barLength = Mathf.mod(unit.shield / unit.maxHealth, Mathf.pow(10f, (float)didgt - 1f)) / Mathf.pow(10f, (float)didgt - 1f);
-                        if(didgt > 1){
-                            //float x = unit.x - (1f - Mathf.floor(barLength * 10f) / 10f) / 2f * 1.2f * unit.hitSize();
-                            float y = unit.y + unit.hitSize() / 2f + didgt * 2f;
-                            float h = 2f;
-                            //float w = 1.2f * Mathf.floor(barLength * 10f) / 10f * unit.hitSize();
-                            for(float i = 1; i <= Mathf.floor(barLength * 10f); i++){
-                                Fill.rect(unit.x - 0.55f * unit.hitSize() + (i - 1f) * 0.12f * unit.hitSize(), y, 0.1f * unit.hitSize(), h);
-                            }
-                        }else{
-                            float x = unit.x - (1f - barLength) / 2f * 1.2f * unit.hitSize();
-                            float y = unit.y + unit.hitSize() / 2f + didgt * 2f;
-                            float h = 2f;
-                            float w = 1.2f * barLength * unit.hitSize();
-                            Fill.rect(x, y, w, h);
-                        }
-                    }
-                }
-                Draw.reset();
-
-                float index = 0f;
-                for(StatusEffect eff : content.statusEffects()){
-                    if(eff == StatusEffects.none) continue;
-                    if(unit.hasEffect(eff)){
-                        float iconSize = Mathf.ceil(unit.hitSize() / 4f);
-                        Draw.rect(eff.uiIcon,
-                        unit.x - unit.hitSize() * 0.6f + 0.5f * iconSize * Mathf.mod(index, 4f),
-                        unit.y + (unit.hitSize() / 2f) + 3f + iconSize * Mathf.floor(index / 4f),
-                        4f, 4f);
-                        index++;
-                    }
-                }
+                drawUnitHpBar(unit);
             }
 
             //display logicAI info by MI2
@@ -256,7 +211,7 @@ public class RendererExt{
                 }
             }
 
-            //v7 rts pathfind render, making your device an oven.
+            //v7 rts pathfind render, making your device a barbecue.
             //Pathfind Renderer
             if(MI2USettings.getBool("enUnitPath")){
                 if(unit.isCommandable() && unit.controller() instanceof CommandAI ai && ai.targetPos != null){
@@ -291,6 +246,9 @@ public class RendererExt{
                     if(ai.targetPos != null){
                         Position lineDest = ai.attackTarget != null ? ai.attackTarget : ai.targetPos;
                         Drawf.square(lineDest.getX(), lineDest.getY(), 3.5f);
+                        Draw.color(Color.white, 0.4f);
+                        MI2UTmp.v1.set(lineDest).sub(unit).limit(1000f);
+                        Lines.line(unit.x, unit.y, unit.x + MI2UTmp.v1.x, unit.y + MI2UTmp.v1.y);
                     }
 
                 }else{
@@ -307,7 +265,171 @@ public class RendererExt{
                         tile = nextTile;
                     }
                 }
-                Draw.reset();
+            }
+
+            Draw.reset();
+        }
+    }
+
+    //TODO set a Runnable list.
+    public static void drawBlockHpBar(Building build){
+        Draw.z(Layer.shields + 3f);
+        float width = 0.8f, halfwidth = width / 2f;
+        float offy = -build.hitSize() * 0.4f;
+        float barLength, x, y, h, w;
+
+        if(build.health < build.maxHealth){
+            if(build.hitTime > 0f){
+                Lines.stroke(4f + Mathf.lerp(0f, 2f, Mathf.clamp(build.hitTime)));
+                Draw.color(Color.white, Mathf.lerp(0.1f, 1f, Mathf.clamp(build.hitTime)));
+                Lines.line(build.x - build.hitSize() * halfwidth, build.y + offy, build.x + build.hitSize() * halfwidth, build.y + offy);
+            }
+
+            //Lines.stroke(4f);
+            //Draw.color(build.team.color, 0.5f);
+            //Lines.line(build.x - build.hitSize() * halfwidth, build.y + offy, build.x + build.hitSize() * halfwidth, build.y + offy);
+
+            Draw.color((build.health > 0 ? Pal.health:Color.gray), 0.8f);
+            //Lines.stroke(2);
+            /*Lines.line(
+                    build.x - build.hitSize() * halfwidth, build.y + offy,
+                    build.x + build.hitSize() * ((build.health > 0 ? build.health : Mathf.maxZero(build.maxHealth + build.health)) / build.maxHealth * width - halfwidth), build.y + offy);
+            */
+            barLength = Mathf.clamp(build.health / build.maxHealth);
+
+            x = build.x - (1f - barLength) * halfwidth * build.hitSize();
+            y = build.y + offy;
+            h = 2f;
+            w = width * barLength * build.hitSize();
+            Fill.rect(x, y, w, h);
+            offy += 2f;
+        }
+
+        if(build instanceof ShieldWall.ShieldWallBuild sw && sw.shield > 0f){
+            Draw.color(Pal.shield, 0.8f);
+            barLength = Mathf.clamp(sw.shield / ((ShieldWall)sw.block).shieldHealth);
+
+            x = sw.x - (1f - barLength) * halfwidth * sw.hitSize();
+            y = sw.y + offy;
+            h = 2f;
+            w = width * barLength * sw.hitSize();
+            Fill.rect(x, y, w, h);
+            offy += 2f;
+        }
+
+        if(build instanceof UnitFactory.UnitFactoryBuild uf){
+            Draw.color(Pal.accent, 0.8f);
+            barLength = uf.fraction();
+
+            x = uf.x - (1f - barLength) * halfwidth * uf.hitSize();
+            y = uf.y + offy;
+            h = 2f;
+            w = width * barLength * uf.hitSize();
+            Fill.rect(x, y, w, h);
+            offy += 2f;
+
+            drawText((uf.currentPlan == -1 ? "":((UnitFactory)uf.block).plans.get(uf.currentPlan).unit.emoji()) + (Strings.autoFixed(uf.fraction() * 100f, 1) + "% | " + (uf.currentPlan == -1 ? Core.bundle.get("none") : Strings.autoFixed((((UnitFactory)uf.block).plans.get(uf.currentPlan).time - uf.progress) / (60f * state.rules.unitBuildSpeed(uf.team) * uf.timeScale()), 1))), uf.x, uf.y + offy, Pal.accent, uf.block.size > 3 ? 1.0f : 0.8f, Align.center);
+            offy += 2f;
+        }
+
+        if(build instanceof Reconstructor.ReconstructorBuild uf){
+            Draw.color(Pal.accent, 0.8f);
+            barLength = uf.fraction();
+
+            x = uf.x - (1f - barLength) * halfwidth * uf.hitSize();
+            y = uf.y + offy;
+            h = 2f;
+            w = width * barLength * uf.hitSize();
+            Fill.rect(x, y, w, h);
+            offy += 2f;
+
+            drawText((uf.unit() == null ? "":uf.unit().emoji()) + (Strings.autoFixed(uf.fraction() * 100f, 1) + "% | " + Strings.autoFixed((((Reconstructor)uf.block).constructTime - uf.progress) / (60f * state.rules.unitBuildSpeed(uf.team) * uf.timeScale()), 1)), uf.x, uf.y + offy, Pal.accent, uf.block.size > 3 ? 1.0f : 0.8f, Align.center);
+            offy += 2f;
+        }
+
+        if(build instanceof UnitAssembler.UnitAssemblerBuild uf){
+            Draw.color(Pal.accent, 0.8f);
+            barLength = uf.progress;
+
+            x = uf.x - (1f - barLength) * halfwidth * uf.hitSize();
+            y = uf.y + offy;
+            h = 2f;
+            w = width * barLength * uf.hitSize();
+            Fill.rect(x, y, w, h);
+            offy += 2f;
+
+            drawText((uf.unit() == null ? "":uf.unit().emoji()) + (Strings.autoFixed(barLength * 100f, 1) + "% | " + Strings.autoFixed(uf.plan().time * (1 - uf.progress) / (60f * state.rules.unitBuildSpeed(uf.team) * uf.timeScale()), 1)), uf.x, uf.y + offy, Pal.accent, uf.block.size > 3 ? 1.0f : 0.8f, Align.center);
+            offy += 2f;
+        }
+    }
+
+    public static void drawUnitHpBar(Unit unit){
+        float width = 1.2f, halfwidth = width / 2f;
+
+        if(unit.hitTime > 0f){
+            Lines.stroke(4f + Mathf.lerp(0f, 2f, Mathf.clamp(unit.hitTime)));
+            Draw.color(Color.white, Mathf.lerp(0.1f, 1f, Mathf.clamp(unit.hitTime)));
+            Lines.line(unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f), unit.x + unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f));
+        }
+
+        Lines.stroke(4f);
+        Draw.color(unit.team.color, 0.5f);
+        Lines.line(unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f), unit.x + unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f));
+
+        Draw.color((unit.health > 0 ? Pal.health:Color.gray), 0.8f);
+        Lines.stroke(2);
+        Lines.line(
+                unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f),
+                unit.x + unit.hitSize * ((unit.health > 0 ? unit.health : Mathf.maxZero(unit.maxHealth + unit.health)) / unit.maxHealth * width - halfwidth), unit.y + (unit.hitSize / 2f));
+
+        if(unit.shield > 0){
+            for(int didgt = 1; didgt <= Mathf.digits((int)(unit.shield / unit.maxHealth)) + 1; didgt++){
+                Draw.color(Pal.shield, 0.8f);
+                float barLength = Mathf.mod(unit.shield / unit.maxHealth, Mathf.pow(10f, (float)didgt - 1f)) / Mathf.pow(10f, (float)didgt - 1f);
+                if(didgt > 1){
+                    float y = unit.y + unit.hitSize / 2f + didgt * 2f;
+                    float h = 2f;
+                    int counts = Mathf.floor(barLength * 10f);
+                    for(float i = 1; i <= counts; i++){
+                        Fill.rect(unit.x - 0.55f * unit.hitSize + (i - 1f) * 0.12f * unit.hitSize, y, 0.1f * unit.hitSize, h);
+                    }
+                }else{
+                    float x = unit.x - (1f - barLength) * halfwidth * unit.hitSize;
+                    float y = unit.y + unit.hitSize / 2f + didgt * 2f;
+                    float h = 2f;
+                    float w = width * barLength * unit.hitSize;
+                    Fill.rect(x, y, w, h);
+                }
+            }
+        }
+
+        Draw.reset();
+
+        float index = 0f;
+        int columns = Mathf.floor(unit.hitSize * width / 4f);
+        for(StatusEffect eff : content.statusEffects()){
+            if(eff == StatusEffects.none) continue;
+            if(unit.hasEffect(eff)){
+                Draw.alpha(unit.getDuration(eff) < 180f ? 0.3f + 0.7f * Math.abs(Mathf.sin(Time.time / 20f)) : 1f);
+                Draw.rect(eff.uiIcon,
+                        unit.x - unit.hitSize * halfwidth + 2f + 4f * Mathf.mod(index, columns),
+                        unit.y + (unit.hitSize / 2f) + 3f + 5f * Mathf.floor(index / columns),
+                        eff.uiIcon.width / (float)eff.uiIcon.height * 5f, 5f);
+                index++;
+            }
+        }
+
+        if(unit instanceof PayloadUnit pu && pu.payloads != null){
+            Draw.alpha(0.9f);
+            //the smaller pui is, the further payload is in drop list. And those further ones can be slightly covered.
+            float fullIconCells = width * unit.hitSize / pu.payloads.size < 6f ? Mathf.floor(unit.hitSize * width * 0.5f / 6f) : 100f;
+            for(int pui = 0; pui < pu.payloads.size; pui++){
+                var p = pu.payloads.get(pu.payloads.size - 1 - pui);
+                if(p == null) continue;
+                Draw.rect(p.icon(),
+                        unit.x + (1f + (pui > fullIconCells ? unit.hitSize * -halfwidth + fullIconCells * 6f + (pui - fullIconCells) * (unit.hitSize * width - fullIconCells * 6f) / (pu.payloads.size - fullIconCells) : unit.hitSize * -halfwidth + pui * 6f)),
+                        unit.y + (unit.hitSize / 2f) - 4f,
+                        6f, 6f);
             }
         }
     }
@@ -679,5 +801,23 @@ public class RendererExt{
             }
         }
         Draw.reset();
+    }
+
+    public static void drawText(String text, float x, float y, Color color, float scl,  int align){
+        Font font = Fonts.outline;
+        GlyphLayout layout = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
+        boolean ints = font.usesIntegerPositions();
+        font.setUseIntegerPositions(false);
+        font.getData().setScale(1f / 4f / Scl.scl(1f) * scl);
+        layout.setText(font, text);
+
+        font.setColor(color);
+        font.draw(text, x, y + layout.height + 1, align);
+
+        font.setUseIntegerPositions(ints);
+        font.setColor(Color.white);
+        font.getData().setScale(1f);
+        Draw.reset();
+        Pools.free(layout);
     }
 }
