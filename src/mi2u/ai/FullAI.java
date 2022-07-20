@@ -388,11 +388,16 @@ public class FullAI extends AIController{
                 int i = 0;
                 for(var item : content.items()){
                     t.button(b -> {
-                        b.image(item.uiIcon).size(24f);
+                        b.image(item.uiIcon).size(24f).update(img -> {
+                            img.setColor(b.isDisabled() ? Color.gray : Color.white);
+                        });
                         b.margin(4f);
                     }, textbtoggle, () -> {
                         targetItem = targetItem == item ? null : item;
-                    }).fill().update(b -> b.setChecked(targetItem == item)).disabled(b -> player.team().core() == null || !player.team().core().items.has(item));
+                    }).fill().checked(b -> targetItem == item).disabled(b -> {
+                        var core = player.team().core();
+                        return !state.isGame() || core == null || core.items == null || !core.items.has(item);
+                    });
                     i++;
                     if(i >= 5){
                         i = 0;
