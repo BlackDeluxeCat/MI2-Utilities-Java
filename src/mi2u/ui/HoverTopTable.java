@@ -153,7 +153,7 @@ public class HoverTopTable extends Table {
         table.table(t -> {
             t.left();
             t.add(new Image(unit.type.uiIcon)).size(iconMed).scaling(Scaling.fit);
-            t.labelWrap(unit.type.localizedName).left().width(190f).padLeft(5);
+            t.labelWrap(unit.type.localizedName).left().padLeft(5).growX();
             t.labelWrap(unit.team.localized()).left().width(20f).padLeft(5).color(unit.team.color);
         }).growX().left();
         table.row();
@@ -206,9 +206,11 @@ public class HoverTopTable extends Table {
 
         table.row();
 
-        table.label(() -> Blocks.microProcessor.emoji() + (unit.controller() instanceof LogicAI ? "" : Core.bundle.get("units.processorcontrol")) + " " + (long)unit.flag).growX().wrap().left();
+        table.label(() -> Blocks.microProcessor.emoji() + (unit.controller() instanceof LogicAI ? Core.bundle.get("units.processorcontrol") : "") + " " + (long)unit.flag).growX().wrap().left();
 
         table.row();
+
+        table.label(() -> Core.bundle.format("lastcommanded", unit.lastCommanded)).growX().wrap().left();
     }
 
     /** Returns the thing being hovered over. */
