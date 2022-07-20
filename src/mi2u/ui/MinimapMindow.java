@@ -23,6 +23,7 @@ import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.input.*;
 import mindustry.ui.*;
+import mindustry.world.Tile;
 
 import static mindustry.Vars.*;
 
@@ -53,6 +54,7 @@ public class MinimapMindow extends Mindow2{
             }).growX();
             t.table(tt -> {
                 tt.button(Iconc.players + "", MI2UVars.textbtoggle, () -> m.drawLabel = !m.drawLabel).update(b -> b.setChecked(m.drawLabel)).width(36f).growY();
+                tt.button(Iconc.blockSpawn + "", MI2UVars.textbtoggle, () -> m.drawSpawn = !m.drawSpawn).update(b -> b.setChecked(m.drawSpawn)).width(36f).growY();
                 tt.button(Iconc.zoom + "", MI2UVars.textb, () -> {
                     finderTable.popup();
                     finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
@@ -87,7 +89,7 @@ public class MinimapMindow extends Mindow2{
     
     public static class Minimap2 extends Table{
         protected Element map;
-        public boolean drawLabel = true;
+        public boolean drawLabel = true, drawSpawn = true;
         private static final float baseSize = 16f;
         public float zoom = 4;
 
@@ -117,6 +119,7 @@ public class MinimapMindow extends Mindow2{
                     if(renderer.minimap.getTexture() != null){
                         Draw.alpha(parentAlpha);
                         drawEntities(x, y, width, height, 0.75f, drawLabel);
+                        drawSpawns(x, y, width, height, 0.75f);
                     }
     
                     clipEnd();
@@ -258,6 +261,40 @@ public class MinimapMindow extends Mindow2{
                         drawLabel(x + rx, y + ry, player.name, player.team().color);
                     }
                 }
+            }
+
+            Draw.reset();
+        }
+
+        public void drawSpawns(float x, float y, float w, float h, float scaling){
+            if(!state.rules.showSpawns || !state.hasSpawns() || !state.rules.waves) return;
+
+            TextureRegion icon = Icon.units.getRegion();
+
+            Lines.stroke(Scl.scl(1f));
+
+            Draw.color(state.rules.waveTeam.color, Tmp.c2.set(state.rules.waveTeam.color).value(1.2f), Mathf.absin(Time.time, 16f, 1f));
+
+
+            float curve = Mathf.curve(Time.time % 240f, 120f, 240f);
+
+            float sz = baseSize * zoom;
+            float dx = (Core.camera.position.x / tilesize);
+            float dy = (Core.camera.position.y / tilesize);
+            dx = (2 * sz) <= world.width() ? Mathf.clamp(dx, sz, world.width() - sz) : world.width() / 2f;
+            dy = (2 * sz) <= world.height() ? Mathf.clamp(dy, sz, world.height() - sz) : world.height() / 2f;
+            float rad = state.rules.dropZoneRadius / (2 * sz * tilesize) * w;
+
+            Rect rect = MI2UTmp.r1.set((dx - sz) * tilesize, (dy - sz) * tilesize, sz * 2 * tilesize, sz * 2 * tilesize);
+
+            for(Tile tile : spawner.getSpawns()){
+                if(!rect.contains(tile.worldx(), tile.worldy())) continue;
+                float tx = (tile.worldx() - rect.x) / rect.width * w;
+                float ty = (tile.worldy() - rect.y) / rect.height * w;
+
+                Draw.rect(icon, x + tx, y + ty, icon.width * scaling / zoom, icon.height * scaling / zoom);
+                Lines.circle(x + tx, y + ty, rad);
+                if(curve > 0f) Lines.circle(x + tx, y + ty, rad * Interp.pow3Out.apply(curve));
             }
 
             Draw.reset();
