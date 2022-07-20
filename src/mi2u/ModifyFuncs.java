@@ -162,7 +162,7 @@ public class ModifyFuncs{
         topTable.row();
         topTable.add(new Element()).height(0.5f).update(t -> {
             var cell = topTable.getCell(vanilla);
-            if(cell != null) cell.height(vanilla.getPrefHeight() * (vanilla.visible ? 1f:0f) + 0.5f);
+            if(cell != null) cell.height(vanilla.getPrefHeight() * (vanilla.visible ? 1f:0f) / Scl.scl() + 0.5f);   //affected by ui scale, I don't know why it's necessary here.
             MI2Utils.setValue(ui.hudfrag.blockfrag, "hover", HoverTopTable.hoverInfo.unit);
         });
         topTable.visible(() -> {
