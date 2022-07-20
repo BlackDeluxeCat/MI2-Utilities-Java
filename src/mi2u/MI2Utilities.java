@@ -68,11 +68,10 @@ public class MI2Utilities extends Mod{
         MOD = mods.getMod(MI2Utilities.class);
         new Mindow2("@update.title"){
             Interval in = new Interval();
-            String intro, version = "@update.checking";
+            String intro = "", version = "" + Iconc.cancel;;
             Label introl;
             float delay = 900f;
             {
-                addTo(Core.scene.root);
                 curx = (Core.graphics.getWidth() - getPrefWidth()) / 2;
                 cury = (Core.graphics.getHeight() - getPrefHeight()) / 2;
                 in.get(1);
@@ -88,7 +87,7 @@ public class MI2Utilities extends Mod{
             }
             @Override
             public void setupCont(Table cont){
-                cont.label(() -> MOD.meta.version.equals(version) ? "@update.latest" : "@update.updateAvailable").align(Align.left).fillX().pad(5f).get().setColor(0f, 1f, 0.3f, 1f);
+                cont.label(() -> intro.isEmpty() ? "@update.checking" : MOD.meta.version.equals(version) ? "@update.latest" : "@update.updateAvailable").align(Align.left).fillX().pad(5f).get().setColor(0f, 1f, 0.3f, 1f);
                 cont.row();
 
                 cont.button(gitRepo + "\n" + Iconc.paste + Iconc.github, textb, () -> {
@@ -137,13 +136,13 @@ public class MI2Utilities extends Mod{
                     version = json.getString("name");
                     intro = json.getString("body");
                     if(introl != null) introl.setText(intro);
-                    if(MOD.meta.version.equals(version)) delay = 120f;
+                    if(!MOD.meta.version.equals(version)) addTo(Core.scene.root);
                 }, e -> {
                     in.get(1);
-                    delay = 120f;
-                    version = "" + Iconc.cancel;
+                    delay = 10f;
                     intro = "@update.failCheck";
                     if(introl != null) introl.setText(intro);
+                    remove();
                     Log.err(e);
                 });
 
