@@ -26,22 +26,37 @@ public class MapInfoMindow extends Mindow2{
     public WaveBarTable wavebars = new WaveBarTable();
     public Table mapAttsTable;
     private Interval timer = new Interval();
+    private long runTime = 0, lastRunTime = 0, realRunTime = 0, lastRealRun = 0;
 
     public MapInfoMindow() {
         super("@mapInfo.MI2U", "@mapInfo.help");
         Events.on(WorldLoadEvent.class, e -> {
+            realRunTime = runTime = 0;
+            lastRealRun = lastRunTime = Time.millis();
             rebuild();
             setCurWave(state.wave);
+        });
+
+        Events.run(Trigger.update, () -> {
+            if(state.isGame()){
+                if(!state.isPaused()){
+                    realRunTime += Time.timeSinceMillis(lastRealRun);
+                    lastRealRun = Time.millis();
+                }
+                runTime += Time.timeSinceMillis(lastRunTime);
+                lastRunTime = Time.millis();
+            }
         });
     }
 
     @Override
-    public void init() {
+    public void init(){
         super.init();
         mindowName = "MapInfo";
         mapAttsTable = new Table();
         mapAttsTable.setBackground(Styles.black5);
         setupMapAtts(mapAttsTable);
+
     }
 
     @Override
@@ -96,6 +111,12 @@ public class MapInfoMindow extends Mindow2{
     
     public void setupMapAtts(Table t){
         t.clear();
+        t.table(timet -> {
+            timet.label(() -> Iconc.save + Strings.formatMillis(control.saves.getTotalPlaytime())).padRight(8f).get().setFontScale(0.8f);
+            timet.label(() -> Iconc.play + Strings.formatMillis(runTime)).get().setFontScale(0.8f);
+            timet.label(() -> Iconc.pause + Strings.formatMillis(realRunTime)).get().setFontScale(0.8f);
+        });
+        t.row();
         t.table(rules1 -> {
             rules1.table(tt -> {
                 addBoolIcon(() -> state.rules.pvp , "" + Iconc.modePvp, tt);
