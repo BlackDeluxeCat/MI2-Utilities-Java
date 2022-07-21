@@ -22,7 +22,7 @@ void main(){
 	if(texture2D(u_texture, T).a < 0.02 && maxed.a > 0.02){
 		gl_FragColor = vec4(maxed.rgb, 0.3);
     }else{
-        if(color.a < 0.1){
+        if(color.a >= 0.03 && color.a < 0.1){
             color.a = 0.1;
         }
         gl_FragColor = color;

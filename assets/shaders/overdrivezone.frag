@@ -24,8 +24,6 @@ void main(){
     }else{
         if(color.a > 0.03){
             color.a = (0.05 + (mod(coords.y / 1.0 + coords.x / 1.8 - u_time / 12.0, 32.0) > 20.0 ? 0.2 * (step(mod((coords.x / 4.0 + coords.y / 16.0 - u_time / 6.0) / 4.0, 2.0), 1.0)) : 0.0));
-        }else{
-            color.a = 0.0;
         }
         gl_FragColor = color;
     }   
