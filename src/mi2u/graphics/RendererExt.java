@@ -20,7 +20,7 @@ import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
-import mindustry.ui.Fonts;
+import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.*;
 import mindustry.world.blocks.distribution.*;
@@ -28,8 +28,6 @@ import mindustry.world.blocks.storage.*;
 import mindustry.world.blocks.units.Reconstructor;
 import mindustry.world.blocks.units.UnitAssembler;
 import mindustry.world.blocks.units.UnitFactory;
-
-import java.lang.reflect.Field;
 
 import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
@@ -440,6 +438,7 @@ public class RendererExt{
         if(b instanceof BufferedItemBridge.BufferedItemBridgeBuild bb) drawBufferedItemBridge(bb);
         if(b instanceof Unloader.UnloaderBuild ub) drawUnloader(ub);
         if(b instanceof Router.RouterBuild rb) drawRouter(rb);
+        if(b instanceof DuctBridge.DuctBridgeBuild db) drawDuctBridge(db);
     }
 
     public static void drawZoneShader(){
@@ -484,15 +483,9 @@ public class RendererExt{
             int cap = ((Junction)jb.block).capacity;
             float speed = ((Junction)jb.block).speed;
 
-            Field f = jb.getClass().getDeclaredField("buffer");
-            f.setAccessible(true);
-            DirectionalItemBuffer buffer = (DirectionalItemBuffer)f.get(jb);
-            f = buffer.getClass().getDeclaredField("buffers");
-            f.setAccessible(true);
-            long[][] bufferbuffers = (long[][])f.get(buffer);
-            f = buffer.getClass().getDeclaredField("indexes");
-            f.setAccessible(true);
-            int[] indexes = (int[])f.get(buffer);
+            DirectionalItemBuffer buffer = jb.buffer;
+            long[][] bufferbuffers = buffer.buffers;
+            int[] indexes = buffer.indexes;
 
             Item[][] items = new Item[4][bufferbuffers[0].length];
             for(int i = 0; i < 4; i++){
@@ -540,7 +533,25 @@ public class RendererExt{
             for(int iid = 0; iid < ib.items.length(); iid++){
                 if(ib.items.get(iid) > 0){
                     for(int itemid = 1; itemid <= ib.items.get(iid); itemid++){
-                        Draw.rect(content.item(iid).fullIcon, ib.x, ib.y - tilesize/2f + 1f + 0.6f * (float)loti, 4f, 4f);
+                        Draw.rect(content.item(iid).fullIcon, ib.x, ib.y + tilesize * (-0.5f + 0.8f * loti / (float)ib.block.itemCapacity) + 1f, 4f, 4f);
+                        loti++;
+                    }
+                }
+            }
+        }
+    }
+
+    public static void drawDuctBridge(DuctBridge.DuctBridgeBuild ib){
+        Draw.reset();
+        Draw.z(Layer.power);
+        //draw each item this bridge have
+        if(ib.items != null){
+            Draw.color(Color.white, 0.8f);
+            int loti = 0;
+            for(int iid = 0; iid < ib.items.length(); iid++){
+                if(ib.items.get(iid) > 0){
+                    for(int itemid = 1; itemid <= ib.items.get(iid); itemid++){
+                        Draw.rect(content.item(iid).fullIcon, ib.x, ib.y + tilesize * (-0.5f + 0.8f * loti / (float)ib.block.itemCapacity) + 1f, 4f, 4f);
                         loti++;
                     }
                 }
@@ -549,52 +560,50 @@ public class RendererExt{
     }
 
     public static void drawBufferedItemBridge(BufferedItemBridge.BufferedItemBridgeBuild bb){
-        try{
-            ItemBuffer buffer = MI2Utils.getValue(bb, "buffer");
-            long[] bufferbuffer = MI2Utils.getValue(buffer, "buffer");
-            int index = MI2Utils.getValue(buffer, "index");
+        ItemBuffer buffer = MI2Utils.getValue(bb, "buffer");
+        long[] bufferbuffer = MI2Utils.getValue(buffer, "buffer");
+        int index = MI2Utils.getValue(buffer, "index");
 
-            Item[] bufferItems = new Item[bufferbuffer.length];
-            for(int ii = 0; ii < bufferbuffer.length; ii++){
-                bufferItems[ii] = (ii < index)? content.item(Pack.leftShort(Pack.rightInt(bufferbuffer[ii]))) : null;
+        Item[] bufferItems = new Item[bufferbuffer.length];
+        for(int ii = 0; ii < bufferbuffer.length; ii++){
+            bufferItems[ii] = (ii < index)? content.item(Pack.leftShort(Pack.rightInt(bufferbuffer[ii]))) : null;
+        }
+        float[] bufferTimes = new float[bufferbuffer.length];
+        for(int ii = 0; ii < bufferbuffer.length; ii++){
+            bufferTimes[ii] = (ii < index)? Float.intBitsToFloat(Pack.leftInt(bufferbuffer[ii])) : 999999999f;
+        }
+
+        Tile other = world.tile(bb.link);
+        float begx, begy, endx, endy;
+        if(!((ItemBridge)bb.block()).linkValid(bb.tile, other)){
+            begx = bb.x - tilesize / 2f;
+            begy = bb.y - tilesize / 2f;
+            endx = bb.x + tilesize / 2f;
+            endy = bb.y - tilesize / 2f;
+        }else{
+            int i = bb.tile.absoluteRelativeTo(other.x, other.y);
+            float ex = other.worldx() - bb.x - Geometry.d4(i).x * tilesize / 2f,
+            ey = other.worldy() - bb.y - Geometry.d4(i).y * tilesize / 2f;
+
+            begx = bb.x + Geometry.d4(i).x * tilesize / 2f;
+            begy = bb.y + Geometry.d4(i).y * tilesize / 2f;
+            endx = bb.x + ex;
+            endy = bb.y + ey;
+        }
+
+        float loti = 0f;
+        int cap = ((BufferedItemBridge)bb.block).bufferCapacity;
+        float speed = ((BufferedItemBridge)bb.block).speed;
+        for(int idi = 0; idi < bufferItems.length; idi++){
+            if(bufferItems[idi] != null){
+                Draw.alpha(0.9f);
+
+                Draw.rect(bufferItems[idi].fullIcon,
+                begx + ((endx - begx) / (float)bufferItems.length * Math.min(((Time.time - bufferTimes[idi]) * bb.timeScale() / speed) * cap, cap - loti)),
+                begy + ((endy - begy) / (float)bufferItems.length * Math.min(((Time.time - bufferTimes[idi]) * bb.timeScale() / speed) * cap, cap - loti)), 4f, 4f);
             }
-            float[] bufferTimes = new float[bufferbuffer.length];
-            for(int ii = 0; ii < bufferbuffer.length; ii++){
-                bufferTimes[ii] = (ii < index)? Float.intBitsToFloat(Pack.leftInt(bufferbuffer[ii])) : 999999999f;
-            }
-
-            Tile other = world.tile(bb.link);
-            float begx, begy, endx, endy;
-            if(!((ItemBridge)bb.block()).linkValid(bb.tile, other)){
-                begx = bb.x - tilesize / 2f;
-                begy = bb.y - tilesize / 2f;
-                endx = bb.x + tilesize / 2f;
-                endy = bb.y - tilesize / 2f;
-            }else{
-                int i = bb.tile.absoluteRelativeTo(other.x, other.y);
-                float ex = other.worldx() - bb.x - Geometry.d4(i).x * tilesize / 2f,
-                ey = other.worldy() - bb.y - Geometry.d4(i).y * tilesize / 2f;
-
-                begx = bb.x + Geometry.d4(i).x * tilesize / 2f;
-                begy = bb.y + Geometry.d4(i).y * tilesize / 2f;
-                endx = bb.x + ex;
-                endy = bb.y + ey;
-            }
-
-            float loti = 0f;
-            int cap = ((BufferedItemBridge)bb.block).bufferCapacity;
-            float speed = ((BufferedItemBridge)bb.block).speed;
-            for(int idi = 0; idi < bufferItems.length; idi++){
-                if(bufferItems[idi] != null){
-                    Draw.alpha(0.9f);
-
-                    Draw.rect(bufferItems[idi].fullIcon,
-                    begx + ((endx - begx) / (float)bufferItems.length * Math.min(((Time.time - bufferTimes[idi]) * bb.timeScale() / speed) * cap, cap - loti)),
-                    begy + ((endy - begy) / (float)bufferItems.length * Math.min(((Time.time - bufferTimes[idi]) * bb.timeScale() / speed) * cap, cap - loti)), 4f, 4f);
-                }
-                loti++;
-            }
-        }catch(Exception e){if(!interval.get(30)) return; Log.err(e.toString());}
+            loti++;
+        }
     }
 
     public static void drawUnloader(Unloader.UnloaderBuild ub){
@@ -604,20 +613,13 @@ public class RendererExt{
             Item drawItem = content.item(ub.rotations);
             Building fromb = null, tob = null;
 
-            Field f;
             Building tmp;
             boolean toFound = false, fromFound = false;
             boolean canLoad, canUnload;
             for(Unloader.ContainerStat c : ub.possibleBlocks){
-                f = Unloader.ContainerStat.class.getDeclaredField("canLoad");
-                f.setAccessible(true);
-                canLoad = f.getBoolean(c);
-                f = Unloader.ContainerStat.class.getDeclaredField("canUnload");
-                f.setAccessible(true);
-                canUnload = f.getBoolean(c);
-                f = Unloader.ContainerStat.class.getDeclaredField("building");
-                f.setAccessible(true);
-                tmp = (Building)f.get(c);
+                canLoad = MI2Utils.getField(Unloader.ContainerStat.class, "canLoad").getBoolean(c);
+                canUnload = MI2Utils.getField(Unloader.ContainerStat.class, "canUnload").getBoolean(c);
+                tmp = MI2Utils.getValue(c, "building");
                 if(!toFound && canLoad){
                     tob = tmp;
                     toFound = true;
