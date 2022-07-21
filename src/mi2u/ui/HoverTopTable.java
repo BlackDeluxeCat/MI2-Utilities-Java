@@ -48,6 +48,7 @@ public class HoverTopTable extends Table {
             }
         });
 
+        //I don't know why item flow doesn't appear.
         buildt.update(() -> {
             if(build == lastBuild) return;
             lastBuild = build;
@@ -113,7 +114,6 @@ public class HoverTopTable extends Table {
             boolean rebuild = row != (t.getColumns() == 1) || t.getCells().size == 0;
             if(!rebuild) return;
             t.clear();
-            Log.info(blockt.getPrefWidth() + floort.getPrefWidth() + oret.getPrefWidth());
             t.add(floort).left();
             if(row) t.row();
             t.add(oret).left();
