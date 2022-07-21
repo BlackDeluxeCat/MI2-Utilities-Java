@@ -7,6 +7,8 @@ import arc.math.geom.*;
 import arc.scene.Element;
 import arc.scene.event.*;
 import arc.scene.style.*;
+import arc.scene.ui.Image;
+import arc.scene.ui.Label;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.*;
@@ -125,9 +127,19 @@ public class WorldFinderTable extends PopupTable{
         if(seq == null) return;
 
         seq.each(pos -> {
-            if((world.tile(pos).build == null && world.tile(pos).block() != Blocks.air) || MI2UTmp.v1.set(Point2.x(pos), Point2.y(pos)).scl(tilesize).sub(player.unit().x, player.unit().y).len() > range) return;
-            if(player.unit().plans().size > 500) return;
-            player.unit().addBuild(new BuildPlan(Point2.x(pos), Point2.y(pos), world.tile(pos).block() == Blocks.air ? 0 : world.tile(pos).build.rotation, to, world.tile(pos).build == null ? null : world.tile(pos).build.config()));
+            if(MI2UTmp.v1.set(Point2.x(pos), Point2.y(pos)).scl(tilesize).sub(player.unit().x, player.unit().y).len() > range) return;
+            if(player.unit().plans().size > 1000) return;
+            if(world.tile(pos).build != null && to == Blocks.air){
+                //break
+                player.unit().addBuild(new BuildPlan(Point2.x(pos), Point2.y(pos)));
+            }else{
+                //build
+                if(from == Blocks.air && world.tile(pos).block() != to){
+                    player.unit().addBuild(new BuildPlan(Point2.x(pos), Point2.y(pos), 0, to, null));
+                }else if(world.tile(pos).build != null && world.tile(pos).block() != to){
+                    player.unit().addBuild(new BuildPlan(Point2.x(pos), Point2.y(pos), world.tile(pos).build.rotation, to, world.tile(pos).build.config()));
+                }
+            }
         });
     }
 
@@ -144,7 +156,7 @@ public class WorldFinderTable extends PopupTable{
             //block selection
             case 0 -> {
                 if(!MI2USettings.getBool("worldDataUpdate")) WorldData.scanWorld();
-                selectTable.button("@minimap.finder.showBlockCounts", textbtoggle, null).height(36f).growX().with(funcSetTextb).with(b -> {
+                selectTable.button("@minimap.finder.showBlockNames", textbtoggle, null).height(36f).growX().with(funcSetTextb).with(b -> {
                     b.clicked(() -> {
                         withName = !withName;
                         setupSelect();
@@ -159,19 +171,25 @@ public class WorldFinderTable extends PopupTable{
                     for(var block : content.blocks()){
                         if(WorldData.countBlock(block, null) <= 0) continue;
                         if(withName){
-                            t.button("" + WorldData.countBlock(block, team), new TextureRegionDrawable(block.uiIcon), textb, 24f,() -> {
+                            t.button("" + block.localizedName, new TextureRegionDrawable(block.uiIcon), textb, 24f,() -> {
                                 find = block;
                                 finder.findTarget = find;
                                 finder.findIndex = 0;
                             }).with(funcSetTextb);
                         }else{
-                            t.button(b -> b.image(block.uiIcon), textb,() -> {
+                            t.button(b -> b.stack(new Image(block.uiIcon), new Label(""){{
+                                int count = WorldData.countBlock(block, team);
+                                this.setText(count == 0 ? "" : count + "");
+                                this.setFillParent(true);
+                                this.setFontScale(count >= 1000 ? 0.5f : 0.8f);
+                                this.setAlignment(Align.bottomRight);
+                            }}), textb,() -> {
                                 find = block;
                                 finder.findTarget = find;
                                 finder.findIndex = 0;
-                            }).size(24f).pad(2f);
+                            }).size(32f).pad(2f);
                         }
-                        if(i++ >= (withName ? 3 : 12)){
+                        if(i++ >= (withName ? 3 : 10)){
                             t.row();
                             i = 0;
                         }
@@ -180,7 +198,7 @@ public class WorldFinderTable extends PopupTable{
                     Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
                     if(e != null && e.isDescendantOf(p)) {
                         p.requestScroll();
-                    }else if(p.hasScroll()) {
+                    }else if(p.hasScroll()){
                         Core.scene.setScrollFocus(null);
                     }
                 });
@@ -188,7 +206,8 @@ public class WorldFinderTable extends PopupTable{
 
             //replace block selection
             case 1 -> {
-                selectTable.button("@minimap.finder.showBlockCounts", textbtoggle, null).height(36f).growX().with(funcSetTextb).with(b -> {
+                if(!MI2USettings.getBool("worldDataUpdate")) WorldData.scanWorld();
+                selectTable.button("@minimap.finder.showBlockNames", textbtoggle, null).height(36f).growX().with(funcSetTextb).with(b -> {
                     b.clicked(() -> {
                         withName = !withName;
                         setupSelect();
@@ -201,18 +220,24 @@ public class WorldFinderTable extends PopupTable{
                     t.defaults().fillX().left().uniform();
                     int i = 0;
                     for(var block : content.blocks()){
-                        if(!block.canReplace(find)) continue;
+                        if(!block.canReplace(find) && block != Blocks.air) continue;
                         //if(block.isHidden() && (!state.rules.infiniteResources || !state.isEditor())) continue;
                         if(withName){
-                            t.button("" + WorldData.countBlock(block, team), new TextureRegionDrawable(block.uiIcon), textb, 24f,() -> {
+                            t.button("" + block.localizedName, new TextureRegionDrawable(block.uiIcon), textb, 24f,() -> {
                                 replace = block;
                             }).with(funcSetTextb);
                         }else{
-                            t.button(b -> b.image(block.uiIcon), textb,() -> {
+                            t.button(b -> b.stack(new Image(block.uiIcon), new Label(""){{
+                                int count = WorldData.countBlock(block, team);
+                                this.setText(count == 0 ? "" : count + "");
+                                this.setFillParent(true);
+                                this.setFontScale(count >= 1000 ? 0.5f : 0.8f);
+                                this.setAlignment(Align.bottomRight);
+                            }}), textb,() -> {
                                 replace = block;
-                            }).size(24f).pad(2f);
+                            }).size(32f).pad(2f);
                         }
-                        if(i++ >= (withName ? 3 : 12)){
+                        if(i++ >= (withName ? 3 : 10)){
                             t.row();
                             i = 0;
                         }
