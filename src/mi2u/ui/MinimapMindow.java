@@ -38,6 +38,13 @@ public class MinimapMindow extends Mindow2{
     public void init() {
         super.init();
         mindowName = "MindowMap";
+        update(() -> {
+            if(control.input instanceof InputOverwrite && control.input.block != null && Core.input.keyDown(KeyCode.controlLeft) && Core.input.keyDown(KeyCode.f)){
+                finderTable.find = control.input.block;
+                finderTable.popup();
+                finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
+            }
+        });
     }
 
     @Override
