@@ -83,7 +83,7 @@ public class RendererExt{
         if(tiles != null){
             if(MI2USettings.getBool("disableBuilding", false)) tiles.clear();
             boolean enOverdriveZone = MI2USettings.getBool("enOverdriveZone", false), enMenderZone = MI2USettings.getBool("enMenderZone", false),
-            enBlockHpBar = MI2USettings.getBool("enBlockHpBar", true);
+            enBlockHpBar = MI2USettings.getBool("enBlockHpBar", true), enDistributionReveal = MI2USettings.getBool("enDistributionReveal", false);
 
             for(var tile : tiles){
                 if(tile.build == null) continue;

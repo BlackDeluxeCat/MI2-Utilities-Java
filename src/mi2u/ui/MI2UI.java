@@ -10,6 +10,7 @@ import arc.util.*;
 import mi2u.*;
 import mi2u.game.*;
 import mi2u.input.*;
+import mi2u.io.*;
 import mi2u.io.MI2USettings.*;
 import mindustry.Vars;
 import mindustry.gen.*;
@@ -34,17 +35,20 @@ public class MI2UI extends Mindow2{
         cont.clear();
 
         cont.table(tt -> {
+            if(MI2USettings.getEntry("enDistributionReveal") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.zoom + Iconc.blockJunction)).minSize(24f);
+            if(MI2USettings.getEntry("disableWreck") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.alphaaaa)).minSize(24f);
+            if(MI2USettings.getEntry("disableUnit") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.unitGamma)).minSize(24f);
+            if(MI2USettings.getEntry("disableBullet") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.unitScatheMissile)).minSize(24f);
+            if(MI2USettings.getEntry("disableBuilding") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.blockDuo)).minSize(24f);
+        });
+        cont.row();
+
+        cont.table(tt -> {
             tt.button("" + Iconc.refresh, textb, () -> {
                 Call.sendChatMessage("/sync");
             }).minSize(36f).with(funcSetTextb);
-        
-            tt.button("@main.buttons.rebuild", textb, MI2UFuncs::unitRebuildBlocks).minSize(36f).with(funcSetTextb);
 
-            tt.button("" + Iconc.zoom + Iconc.blockJunction, textbtoggle, () -> {
-                enDistributionReveal = !enDistributionReveal;
-            }).update(b -> {
-                b.setChecked(enDistributionReveal);
-            }).minSize(36f).with(funcSetTextb);
+            tt.button("@main.buttons.rebuild", textb, MI2UFuncs::unitRebuildBlocks).minSize(36f).with(funcSetTextb);
         });
 
 
@@ -150,17 +154,17 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("enOverdriveZone", "@settings.main.overdriveZone", false, null));
         settings.add(new CheckEntry("enMenderZone", "@settings.main.menderZone", false, null));
         settings.add(new CheckEntry("enSpawnZone", "@settings.main.spawnZone", true, null));
-
-        settings.add(new CheckEntry("disableWreck", "@settings.main.disableWreck", false, null));
-        settings.add(new CheckEntry("disableUnit", "@settings.main.disableUnit", false, null));
-        settings.add(new CheckEntry("disableBullet", "@settings.main.disableBullet", false, null));
-        settings.add(new CheckEntry("disableBuilding", "@settings.main.disableBuilding", false, null));
-
+        settings.add(new CheckEntry("enDistributionReveal", "@settings.main.distributionReveal", true, null));
         settings.add(new CheckEntry("enBlockHpBar", "@settings.main.blockHpBar", false, null));
         settings.add(new CheckEntry("enUnitHpBar", "@settings.main.unitHpBar", false, null));
         settings.add(new CheckEntry("enUnitLogic", "@settings.main.unitLogic", false, null));
         settings.add(new CheckEntry("enUnitLogicTimer", "@settings.main.unitLogicTimer", false, null));
         settings.add(new CheckEntry("enUnitPath", "@settings.main.unitPath", false, null));
+
+        settings.add(new CheckEntry("disableWreck", "@settings.main.disableWreck", false, null));
+        settings.add(new CheckEntry("disableUnit", "@settings.main.disableUnit", false, null));
+        settings.add(new CheckEntry("disableBullet", "@settings.main.disableBullet", false, null));
+        settings.add(new CheckEntry("disableBuilding", "@settings.main.disableBuilding", false, null));
 
         settings.add(new CollapseGroupEntry("SpeedController", ""){
             ChooseEntry choose1 = new ChooseEntry("speedctrl.basefps", "@settings.main.speedctrl.basefps", new String[]{"10", "20", "30", "60", "120", "144"}, null);

@@ -29,7 +29,4 @@ public class MI2UVars {
     public static CustomContainerMindow container = new CustomContainerMindow();
     public static MinimapMindow mindowmap = new MinimapMindow();
     public static MapInfoMindow mapinfo = new MapInfoMindow();
-
-    public static boolean enDistributionReveal = false;
-
 }

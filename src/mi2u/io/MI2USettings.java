@@ -7,11 +7,14 @@ import arc.func.Cons;
 import arc.func.Func;
 import arc.graphics.Color;
 import arc.math.Mathf;
+import arc.scene.ui.Button;
+import arc.scene.ui.TextButton;
 import arc.scene.ui.TextField.*;
 import arc.scene.ui.layout.Table;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.io.Writes;
+import mi2u.MI2UVars;
 import mi2u.game.MI2UEvents;
 import mi2u.ui.Mindow2;
 import mindustry.game.EventType.*;
@@ -266,6 +269,19 @@ public class MI2USettings{
                     c.get().setAlignment(Align.right);
                 });
             }
+        }
+
+        public Button newTextButton(String text){
+            var b = new TextButton(text);
+            b.setStyle(textbtoggle);
+            funcSetTextb.get(b);
+            b.clicked(() -> {
+                value = !value;
+                setting.put(String.valueOf(value));
+                if(changed != null) changed.get(value);
+            });
+            b.update(() -> b.setChecked(value = setting.get().equals("true")));
+            return b;
         }
     }
 
