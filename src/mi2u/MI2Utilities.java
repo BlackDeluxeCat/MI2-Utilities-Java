@@ -25,11 +25,14 @@ public class MI2Utilities extends Mod{
     public static Mods.LoadedMod MOD;
 
     public MI2Utilities(){
-
         Events.on(ClientLoadEvent.class, e -> {
+            MOD = mods.getMod(MI2Utilities.class);
             titleButtonSize = 28f;
+
             Mindow2.initMindowStyles();
             MI2USettings.init();
+
+            maxSchematicSize = MI2USettings.getInt("maxSchematicSize", 32);
             Time.runTask(40f, () -> {
                 mi2ui.addTo(Core.scene.root);
                 mi2ui.visible(() -> !state.isGame() || ui.hudfrag.shown);
@@ -65,7 +68,6 @@ public class MI2Utilities extends Mod{
         if(!pattern.matcher(MI2USettings.getStr("ghApi", ghApi)).matches()){
             MI2USettings.putStr("ghApi", ghApi);
         }
-        MOD = mods.getMod(MI2Utilities.class);
         new Mindow2("@update.title"){
             Interval in = new Interval();
             String intro = "", version = "" + Iconc.cancel;;

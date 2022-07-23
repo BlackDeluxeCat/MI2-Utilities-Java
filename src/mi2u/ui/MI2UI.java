@@ -49,14 +49,9 @@ public class MI2UI extends Mindow2{
             }).minSize(36f).with(funcSetTextb);
 
             tt.button("@main.buttons.rebuild", textb, MI2UFuncs::unitRebuildBlocks).minSize(36f).with(funcSetTextb);
-        });
 
-
-        cont.row();
-
-        //TODO the update rate is based on button.update(), and affected by lagging
-        cont.table(t -> {
-            t.button("Speeding", textbtoggle, SpeedController::switchUpdate).update(b -> {
+            //TODO the update rate is based on button.update(), and affected by lagging
+            tt.button("Speeding", textbtoggle, SpeedController::switchUpdate).update(b -> {
                 b.setChecked(SpeedController.update);
                 b.setText(Core.bundle.get("main.buttons.speeding") + "x" + Strings.autoFixed(SpeedController.scl, 2));
                 SpeedController.update();
@@ -68,7 +63,7 @@ public class MI2UI extends Mindow2{
                     img.setColor(!b.isChecked() ? Color.white : SpeedController.lowerThanMin() ? Color.scarlet : Color.lime);
                 });
             }).growX();
-        }).name("speed control").growX();
+        });
 
         cont.row();
 
@@ -193,6 +188,8 @@ public class MI2UI extends Mindow2{
                 };
             }
         });
+
+        settings.add(new FieldEntry("maxSchematicSize", "@settings.main.maxSchematicSize", String.valueOf(32), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 16 && Strings.parseInt(s) <= 512, s -> Vars.maxSchematicSize = Mathf.clamp(Strings.parseInt(s), 16, 512)));
 
         settings.add(new FieldEntry("rtsFormDoubleTap", "@settings.main.rtsFormDoubleTap", Vars.ghApi, TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) > 0, s -> RtsCommand.doubleTapInterval = Strings.parseInt(s)));
 
