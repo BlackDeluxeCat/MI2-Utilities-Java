@@ -113,7 +113,8 @@ public class WaveBarTable extends Table{
                         g.table(eip -> {
                             if(group.effect != null && group.effect != StatusEffects.none) eip.image(group.effect.uiIcon).size(12f);
                             if(group.items != null) eip.image(group.items.item.uiIcon).size(12f);
-                            if(group.payloads!=null && !group.payloads.isEmpty()) eip.add("" + Iconc.units).get().setFontScale(0.7f);
+                            if(group.payloads != null && !group.payloads.isEmpty()) eip.add("" + Iconc.units).get().setFontScale(0.7f);
+                            if(group.spawn != -1) eip.add("" + Iconc.blockSpawn).get().setFontScale(0.7f);
                             eip.image(group.type.uiIcon).size(18f);
                             eip.add("x" + group.getSpawned(data.wave - 1)).get().setFontScale(0.7f);
                         });
