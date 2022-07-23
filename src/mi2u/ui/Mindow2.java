@@ -39,7 +39,6 @@ import static mi2u.MI2UVars.*;
 
 public class Mindow2 extends Table{
     @Nullable public static Mindow2 currTopmost = null;
-    public static LabelStyle titleStyleNormal, titleStyleSnapped;
     public static Drawable titleBarbgNormal, titleBarbgSnapped, white, gray2;
 
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
@@ -166,6 +165,7 @@ public class Mindow2 extends Table{
             cont.touchable = Touchable.enabled;
             //TODO add a abovesnap listener
             titleBar.setBackground(aboveSnap == null ? titleBarbgNormal : titleBarbgSnapped);
+            title.color.set(aboveSnap == null ? MI2UTmp.c1.set(0.8f,0.9f,1f,1f) : MI2UTmp.c1.set(0.1f,0.6f,0.6f,1f));
             edgesnap = MI2USettings.getInt(mindowName + ".edgesnap", Align.center);
             if(this == currTopmost || shouldTopMost()) setZIndex(1000);
 
@@ -317,11 +317,11 @@ public class Mindow2 extends Table{
         MI2USettings.putBool(mindowName + ".minimized", minimized);
         MI2USettings.putBool(mindowName + ".topmost", topmost);
         MI2USettings.putInt(mindowName + ".edgesnap", edgesnap);
-        //edgesnap will change curx cury, so xy shouldn't be saved when edgesnapping.
-        if(edgesnap != 1 && edgesnap != 5){
+        //edgesnap will disable curx / cury changes, so they shouldn't be saved when edgesnapping.
+        if(!Align.isTop(edgesnap) && !Align.isBottom(edgesnap)){
             MI2USettings.putInt(mindowName + ".cury", (int)cury);
         }
-        if(edgesnap != 3 && edgesnap != 7){
+        if(!Align.isLeft(edgesnap) && !Align.isRight(edgesnap)){
             MI2USettings.putInt(mindowName + ".curx", (int)curx);
         }
         return true;
@@ -337,10 +337,6 @@ public class Mindow2 extends Table{
 
     public static void initMindowStyles(){
         var whiteui = (TextureRegionDrawable)Tex.whiteui;
-        titleStyleNormal = new LabelStyle(Fonts.def, new Color(0.8f,0.9f,1f,1f));
-        //titleStyleNormal.background = whiteui.tint(1f, 0.1f, 0.2f, 0.8f);
-        titleStyleSnapped = new LabelStyle(Fonts.def, new Color(0.1f,0.6f,0.6f,1f));
-        //titleStyleSnapped.background = whiteui.tint(1f, 0.1f, 0.2f, 0.2f);
         titleBarbgNormal = whiteui.tint(1f, 0.1f, 0.2f, 0.8f);
         titleBarbgSnapped = whiteui.tint(1f, 0.1f, 0.2f, 0.2f);
         white = whiteui.tint(1f, 1f, 1f, 1f);
@@ -429,6 +425,8 @@ public class Mindow2 extends Table{
                     ).fill().size(320f, 300f*Core.graphics.getHeight()/Core.graphics.getWidth() + 20f);
 
                     tt.table(rightt -> {
+                        rightt.add(Mindow2.this.mindowName);
+                        rightt.row();
                         rightt.table(ttt -> {
                             entry1.build(ttt);
                             ttt.row();
