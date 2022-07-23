@@ -420,7 +420,7 @@ public class MI2USettings{
 
         public void setDefaultHeader(String title){
             headBuilder = t -> {
-                var b = t.button(title, textbtoggle, null).growX().pad(0f,20f,0f,20f).height(32f).get();
+                var b = t.button(title, textbtoggle, null).growX().pad(0f,20f,0f,20f).height(36f).get();
                 collapsep = () -> !b.isChecked();
             };
         }
