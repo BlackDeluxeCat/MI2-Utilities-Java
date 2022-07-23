@@ -69,4 +69,4 @@
 
 ---
 
-看看[MinerTools](github.com/RlCCJ/MinerTools), 可以找到其他实用功能. 
+看看[MinerTools](https://github.com/RlCCJ/MinerTools), 可以找到其他实用功能. 
