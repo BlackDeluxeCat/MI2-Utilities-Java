@@ -52,6 +52,10 @@ public class RendererExt{
             drawBase();
         });
 
+        Events.run(EventType.Trigger.drawOver, () -> {
+            if(MI2USettings.getBool("forceTapTile", false)) forceDrawSelect();
+        });
+
         Events.run(EventType.Trigger.update, () -> {
             fullAI.unit(player.unit());
             fullAI.updateUnit();
@@ -483,20 +487,16 @@ public class RendererExt{
             int cap = ((Junction)jb.block).capacity;
             float speed = ((Junction)jb.block).speed;
 
-            DirectionalItemBuffer buffer = jb.buffer;
-            long[][] bufferbuffers = buffer.buffers;
-            int[] indexes = buffer.indexes;
-
-            Item[][] items = new Item[4][bufferbuffers[0].length];
+            Item[][] items = new Item[4][jb.buffer.buffers[0].length];
             for(int i = 0; i < 4; i++){
-                for(int ii = 0; ii < bufferbuffers[i].length; ii++){
-                    items[i][ii] = (ii < indexes[i])? content.item(BufferItem.item(bufferbuffers[i][ii])) : null;
+                for(int ii = 0; ii < jb.buffer.buffers[i].length; ii++){
+                    items[i][ii] = (ii < jb.buffer.indexes[i])? content.item(BufferItem.item(jb.buffer.buffers[i][ii])) : null;
                 }
             }
-            float[][] times = new float[4][bufferbuffers[0].length];
+            float[][] times = new float[4][jb.buffer.buffers[0].length];
             for(int i = 0; i < 4; i++){
-                for(int ii = 0; ii < bufferbuffers[i].length; ii++){
-                    times[i][ii] = (ii < indexes[i])? BufferItem.time(bufferbuffers[i][ii]) : 9999999999999f;
+                for(int ii = 0; ii < jb.buffer.buffers[i].length; ii++){
+                    times[i][ii] = (ii < jb.buffer.indexes[i])? BufferItem.time(jb.buffer.buffers[i][ii]) : 9999999999999f;
                 }
             }
 
@@ -506,9 +506,9 @@ public class RendererExt{
                 endy = jb.y + Geometry.d4(i).y * tilesize / 2f + Geometry.d4(Math.floorMod(i + 1, 4)).y * tilesize / 4f;
                 begx = jb.x - Geometry.d4(i).x * tilesize / 4f + Geometry.d4(Math.floorMod(i + 1, 4)).x * tilesize / 4f;
                 begy = jb.y - Geometry.d4(i).y * tilesize / 4f + Geometry.d4(Math.floorMod(i + 1, 4)).y * tilesize / 4f;
-                if(buffer.indexes[i] > 0){
+                if(jb.buffer.indexes[i] > 0){
                     float loti = 0f;
-                    for(int idi = 0; idi < buffer.indexes[i]; idi++){
+                    for(int idi = 0; idi < jb.buffer.indexes[i]; idi++){
                         if(items[i][idi] != null){
                             Draw.alpha(0.9f);
                             Draw.rect(items[i][idi].fullIcon,
@@ -561,7 +561,9 @@ public class RendererExt{
 
     public static void drawBufferedItemBridge(BufferedItemBridge.BufferedItemBridgeBuild bb){
         ItemBuffer buffer = MI2Utils.getValue(bb, "buffer");
+        if(buffer == null) return;
         long[] bufferbuffer = MI2Utils.getValue(buffer, "buffer");
+        if(bufferbuffer == null) return;
         int index = MI2Utils.getValue(buffer, "index");
 
         Item[] bufferItems = new Item[bufferbuffer.length];
@@ -821,5 +823,21 @@ public class RendererExt{
         font.getData().setScale(1f);
         Draw.reset();
         Pools.free(layout);
+    }
+
+    public static void forceDrawSelect(){
+        //draw selected block
+        if(control.input.block == null && !Core.scene.hasMouse()){
+            Vec2 vec = Core.input.mouseWorld(control.input.getMouseX(), control.input.getMouseY());
+            Building build = world.buildWorld(vec.x, vec.y);
+
+            //draw different teams
+            if(build != null && build.team != player.team()){
+                build.drawSelect();
+                if(!build.enabled && build.block.drawDisabled){
+                    build.drawDisabled();
+                }
+            }
+        }
     }
 }

@@ -1,15 +1,23 @@
 package mi2u.input;
 
 import arc.*;
+import arc.graphics.g2d.Draw;
+import arc.input.KeyCode;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.util.Interval;
+import arc.util.Nullable;
 import arc.util.Time;
+import mi2u.MI2UFuncs;
+import mi2u.MI2UTmp;
+import mi2u.io.MI2USettings;
+import mindustry.core.World;
 import mindustry.gen.*;
+import mindustry.input.Binding;
 import mindustry.input.MobileInput;
 
-import static mindustry.Vars.control;
-import static mindustry.Vars.player;
+import static mindustry.Vars.*;
+import static mindustry.input.PlaceMode.breaking;
 
 public class MobileInputExt extends MobileInput implements InputOverwrite{
     public static MobileInputExt mobileExt = new MobileInputExt();
@@ -20,6 +28,7 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
     public Interval panTimer = new Interval();
     public boolean ctrlShoot = false, shoot = false; Vec2 shootXY = new Vec2();
     public boolean ctrlMove = false; Vec2 move = new Vec2();
+    protected Building forceTapped;
 
     public void update(){
         super.update();
@@ -49,6 +58,15 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
             //control move
             unit.movePref(move);
         }
+    }
+
+    @Override
+    public boolean tap(float x, float y, int count, KeyCode button){
+        if(MI2USettings.getBool("forceTapTile", false) && Core.input.keyTap(Binding.select) && !Core.scene.hasMouse()){
+            var build = world.buildWorld(Core.input.mouseWorldX(), Core.input.mouseWorldY());
+            forceTap(build, player.dead());
+        }
+        return super.tap(x, y, count, button);
     }
 
     @Override
@@ -88,5 +106,37 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
     @Override
     public void replaceInput() {
         control.setInput(this);
+    }
+
+    public void forceTap(@Nullable Building build, boolean includeSelfTeam){
+        if(build == null) return;
+        if(!includeSelfTeam && build.interactable(player.team())) return;//handled by vanilla
+        if(build == forceTapped){
+            inv.hide();
+            config.hideConfig();
+            return;
+        }
+        forceTapped = build;
+
+        if(build.block.configurable){
+            if((!config.isShown() && build.shouldShowConfigure(player)) //if the config fragment is hidden, show
+                    //alternatively, the current selected block can 'agree' to switch config tiles
+                    || (config.isShown() && config.getSelected().onConfigureBuildTapped(build))){
+                config.showConfig(build);
+            }
+            //otherwise...
+        }else if(!config.hasConfigMouse()){ //make sure a configuration fragment isn't on the cursor
+            //then, if it's shown and the current block 'agrees' to hide, hide it.
+            if(config.isShown() && config.getSelected().onConfigureBuildTapped(build)){
+                config.hideConfig();
+            }
+        }
+
+        //consume tap event if necessary
+        if(build.block.synthetic() && (build.block.allowConfigInventory)){
+            if(build.block.hasItems && build.items.total() > 0){
+                inv.showFor(build);
+            }
+        }
     }
 }
