@@ -66,4 +66,4 @@ Position, snap, etc. can be saved through options.
 
 ---
 
-See [MinerTools](github.com/RlCCJ/MinerTools) with other practical functions. 
+See [MinerTools](https://github.com/RlCCJ/MinerTools) with other practical functions. 
