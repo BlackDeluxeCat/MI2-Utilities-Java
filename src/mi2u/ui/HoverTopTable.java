@@ -153,8 +153,7 @@ public class HoverTopTable extends Table {
         table.table(t -> {
             t.left();
             t.add(new Image(unit.type.uiIcon)).size(iconMed).scaling(Scaling.fit);
-            t.labelWrap(unit.type.localizedName).left().padLeft(5).growX();
-            t.labelWrap(unit.team.localized()).left().width(20f).padLeft(5).color(unit.team.color);
+            t.labelWrap(unit.type.localizedName + " | " + unit.team.localized()).left().padLeft(5).growX().color(unit.team.color);
         }).growX().left();
         table.row();
 
