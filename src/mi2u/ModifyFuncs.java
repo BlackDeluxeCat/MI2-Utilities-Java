@@ -3,9 +3,11 @@ package mi2u;
 import arc.*;
 import arc.func.*;
 import arc.graphics.Color;
+import arc.graphics.g2d.TextureRegion;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.Element;
+import arc.scene.style.TextureRegionDrawable;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
@@ -48,6 +50,7 @@ public class ModifyFuncs{
         addFilters();
         initBetterTopTable();
         schelogic();
+        settingsMenuDialog();
     }
 
     public static void addFilters(){
@@ -290,5 +293,20 @@ public class ModifyFuncs{
                 }
             }
         }));
+    }
+
+    public static void settingsMenuDialog(){
+        ui.settings.addCategory("@mindow2.settings.title", new TextureRegionDrawable(new TextureRegion(MI2Utilities.MOD.iconTexture)), st ->{
+            st.add("@mindow2.settings.allIntro");
+            st.row();
+            st.table(t -> {
+                int index = 0;
+                for(var entry : MI2USettings.entries){
+                    t.add("" + ++index).size(32f).color(Color.gray);
+                    t.table(entry::build).growX();
+                    t.row();
+                }
+            });
+        });
     }
 }
