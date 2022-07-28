@@ -253,7 +253,7 @@ public class RendererExt{
                         Lines.line(unit.x, unit.y, unit.x + MI2UTmp.v1.x, unit.y + MI2UTmp.v1.y);
                     }
 
-                }else{
+                }else if(unit.controller() instanceof GroundAI || unit.controller() instanceof HugAI || unit.controller() instanceof SuicideAI){
                     Draw.reset();
                     Draw.z(Layer.power - 4f);
                     Tile tile = unit.tileOn();
