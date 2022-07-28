@@ -290,6 +290,8 @@ public class MapInfoMindow extends Mindow2{
 
                     addBoolString(() -> state.rules.waves, "@rules.waves", tt);
                     tt.row();
+                    tt.label(() -> Core.bundle.get("mapInfo.winWave") + ": " + state.rules.winWave).pad(2f).get().setColor(state.rules.waves ? Color.white : Color.darkGray);;
+                    tt.row();
                     addBoolString(() -> state.rules.waveTimer, "@rules.wavetimer", tt);
                     tt.row();
                     addBoolString(() -> state.rules.waitEnemies, "@rules.waitForWaveToEnd", tt);
@@ -300,7 +302,7 @@ public class MapInfoMindow extends Mindow2{
                     tt.row();
                     tt.label(() -> Core.bundle.get("rules.dropzoneradius") + ": " + Strings.fixed(state.rules.dropZoneRadius / tilesize, 1)).pad(2f);
                     tt.row();
-                    tt.label(() -> Core.bundle.get("rules.enemycorebuildradius") + ": " + Strings.fixed(state.rules.enemyCoreBuildRadius / tilesize, 1)).pad(2f);
+                    addBoolString(() -> state.rules.showSpawns, "@mapInfo.showSpawns", tt);
                     tt.row();
 
                     tt.label(() -> Core.bundle.get("rules.fog") + ": " + state.rules.dynamicColor.toString()).pad(2f).get().setColor(state.rules.fog ? Color.white : Color.darkGray);
@@ -326,15 +328,19 @@ public class MapInfoMindow extends Mindow2{
                     tt.row();
                     addBoolString(() -> state.rules.coreIncinerates, "@rules.coreincinerates", tt);
                     tt.row();
-                    addBoolString(() -> state.rules.coreDestroyClear, "@mapInfo.coreDestroyClear", tt);
-                    tt.row();
                     addBoolString(() -> state.rules.onlyDepositCore, "@rules.onlydepositcore", tt);
                     tt.row();
                     addBoolString(() -> state.rules.unitAmmo, "@rules.unitammo", tt);
                     tt.row();
+                    addBoolString(() -> state.rules.possessionAllowed, "@mapInfo.possessionAllowed", tt);
+                    tt.row();
                     addBoolString(() -> state.rules.coreCapture, "@rules.corecapture", tt);
                     tt.row();
+                    tt.label(() -> Core.bundle.get("rules.enemycorebuildradius") + ": " + Strings.fixed(state.rules.enemyCoreBuildRadius / tilesize, 1)).pad(2f);
+                    tt.row();
                     addBoolString(() -> state.rules.polygonCoreProtection, "@rules.polygoncoreprotection", tt);
+                    tt.row();
+                    addBoolString(() -> state.rules.coreDestroyClear, "@mapInfo.coreDestroyClear", tt);
                     tt.row();
                     addBoolString(() -> state.rules.cleanupDeadTeams , "@rules.cleanupdeadteams", tt);
                     tt.row();
