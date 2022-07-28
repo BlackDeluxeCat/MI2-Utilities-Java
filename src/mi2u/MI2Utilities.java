@@ -27,7 +27,7 @@ public class MI2Utilities extends Mod{
     public MI2Utilities(){
         Events.on(ClientLoadEvent.class, e -> {
             MOD = mods.getMod(MI2Utilities.class);
-            titleButtonSize = 28f;
+            titleButtonSize = 32f;
 
             Mindow2.initMindowStyles();
             MI2USettings.init();
