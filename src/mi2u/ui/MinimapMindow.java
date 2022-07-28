@@ -274,7 +274,7 @@ public class MinimapMindow extends Mindow2{
         }
 
         public void drawSpawns(float x, float y, float w, float h, float scaling){
-            if(!state.rules.showSpawns || !state.hasSpawns() || !state.rules.waves) return;
+            if(!state.hasSpawns() || !state.rules.waves) return;
 
             TextureRegion icon = Icon.units.getRegion();
 
