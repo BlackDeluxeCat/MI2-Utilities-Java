@@ -7,6 +7,7 @@ import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
+import mi2u.MI2Utils;
 import mindustry.ai.types.*;
 import mindustry.content.*;
 import mindustry.core.UI;
@@ -228,6 +229,7 @@ public class HoverTopTable extends Table {
         if(hoverTile != null){
             //if the tile has a building, display it
             build = hoverTile.build;
+            MI2Utils.setValue(ui.hudfrag.blockfrag, "nextFlowBuild", build);
 
             //if the tile has a drop, display the drop
             //if(hoverTile.drop() != null || hoverTile.wallDrop() != null){
@@ -235,6 +237,7 @@ public class HoverTopTable extends Table {
             //}
         }else{
             build = null;
+            MI2Utils.setValue(ui.hudfrag.blockfrag, "nextFlowBuild", build);
             tile = null;
         }
     }
