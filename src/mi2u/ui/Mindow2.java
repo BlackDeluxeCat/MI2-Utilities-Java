@@ -122,33 +122,50 @@ public class Mindow2 extends Table{
                 cury = v.y - fromy;
             }
         });
-        titleBar.add(title).pad(0, 1, 0, 1).growX();
 
-        titleBar.button("" + Iconc.info, textb, this::showHelp).size(titleButtonSize);
+        if(!minimized){
+            titleBar.add(title).pad(0, 1, 0, 1).growX();
 
-        titleBar.button("" + Iconc.settings, textb, this::showSettings).size(titleButtonSize);
+            titleBar.button("" + Iconc.info, textb, this::showHelp).size(titleButtonSize);
 
-        titleBar.button("" + Iconc.lock, textbtoggle, () -> {
-            topmost = !topmost;
-            if(topmost){
-                currTopmost = this;
-            }else{
-                if(currTopmost == this) currTopmost = null;
-            }
-        }).size(titleButtonSize).update(b -> {
-            topmost = currTopmost == this;
-            b.setChecked(topmost);
-        });
+            titleBar.button("" + Iconc.settings, textb, this::showSettings).size(titleButtonSize);
 
-        titleBar.button("-", textbtoggle, () -> {
-            minimized = !minimized;
-            if(minimized){
-                cury += cont.getHeight();
-            }else{
-                cury -= cont.getHeight();
-            }
-            minimize();
-        }).size(titleButtonSize).update(b -> b.setChecked(minimized));
+            titleBar.button("" + Iconc.lock, textbtoggle, () -> {
+                topmost = !topmost;
+                if(topmost){
+                    currTopmost = this;
+                }else{
+                    if(currTopmost == this) currTopmost = null;
+                }
+            }).size(titleButtonSize).update(b -> {
+                topmost = currTopmost == this;
+                b.setChecked(topmost);
+            });
+
+            titleBar.button("-", textbtoggle, () -> {
+                minimized = !minimized;
+                if(minimized){
+                    cury += cont.getHeight();
+                }else{
+                    cury -= cont.getHeight();
+                }
+                minimize();
+            }).size(titleButtonSize).update(b -> {
+                b.setChecked(minimized);
+            });
+        }else{
+            titleBar.button(titleText != null ? titleText : "-", textbtoggle, () -> {
+                minimized = !minimized;
+                if(minimized){
+                    cury += cont.getHeight();
+                }else{
+                    cury -= cont.getHeight();
+                }
+                minimize();
+            }).height(titleButtonSize).update(b -> {
+                b.setChecked(minimized);
+            }).with(funcSetTextb);
+        }
 
         titleBar.button("X", textb, this::close).size(titleButtonSize).update(b -> b.setDisabled(!closable));
 
