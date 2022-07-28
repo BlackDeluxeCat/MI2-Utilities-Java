@@ -130,7 +130,7 @@ public class MI2UI extends Mindow2{
                     });
                 }
             }).growX();
-        }, () -> true).growX().get().setDuration(0.5f).setCollapsed(true, () -> !Vars.control.input.commandMode);
+        }, () -> true).growX().get().setDuration(0.25f).setCollapsed(true, () -> !Vars.control.input.commandMode);
 
     }
 
