@@ -25,9 +25,9 @@ import mindustry.world.*;
 import mindustry.world.blocks.defense.*;
 import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.storage.*;
-import mindustry.world.blocks.units.Reconstructor;
-import mindustry.world.blocks.units.UnitAssembler;
-import mindustry.world.blocks.units.UnitFactory;
+import mindustry.world.blocks.units.*;
+
+import java.lang.reflect.*;
 
 import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
@@ -36,10 +36,12 @@ import static mindustry.Vars.*;
  * Modify and add additional render
  */
 public class RendererExt{
-
     protected static Interval interval = new Interval();
     protected static ObjectMap<Unit, Vec2> players = new ObjectMap<Unit, Vec2>();
     protected static Seq<Unit> hiddenUnit = new Seq<>();
+    public static Field itemBridgeBuffer = MI2Utils.getField(BufferedItemBridge.BufferedItemBridgeBuild.class, "buffer"),
+            itemBridgeBufferBuffer = MI2Utils.getField(ItemBuffer.class, "buffer"), itemBridgeBufferIndex = MI2Utils.getField(ItemBuffer.class, "index"),
+            unloaderCanLoad = MI2Utils.getField(Unloader.ContainerStat.class, "canLoad"), unloaderCanUnload = MI2Utils.getField(Unloader.ContainerStat.class, "canUnload"), unloaderBuilding = MI2Utils.getField(Unloader.ContainerStat.class, "building");
 
     public static void initBase(){
         Events.on(EventType.WorldLoadEvent.class, e -> {
@@ -560,20 +562,12 @@ public class RendererExt{
     }
 
     public static void drawBufferedItemBridge(BufferedItemBridge.BufferedItemBridgeBuild bb){
-        ItemBuffer buffer = MI2Utils.getValue(bb, "buffer");
+        Draw.reset();
+        ItemBuffer buffer = MI2Utils.getValue(itemBridgeBuffer, bb);
         if(buffer == null) return;
-        long[] bufferbuffer = MI2Utils.getValue(buffer, "buffer");
+        long[] bufferbuffer = MI2Utils.getValue(itemBridgeBufferBuffer, buffer);
         if(bufferbuffer == null) return;
-        int index = MI2Utils.getValue(buffer, "index");
-
-        Item[] bufferItems = new Item[bufferbuffer.length];
-        for(int ii = 0; ii < bufferbuffer.length; ii++){
-            bufferItems[ii] = (ii < index)? content.item(Pack.leftShort(Pack.rightInt(bufferbuffer[ii]))) : null;
-        }
-        float[] bufferTimes = new float[bufferbuffer.length];
-        for(int ii = 0; ii < bufferbuffer.length; ii++){
-            bufferTimes[ii] = (ii < index)? Float.intBitsToFloat(Pack.leftInt(bufferbuffer[ii])) : 999999999f;
-        }
+        int index = MI2Utils.getValue(itemBridgeBufferIndex, buffer);
 
         Tile other = world.tile(bb.link);
         float begx, begy, endx, endy;
@@ -596,13 +590,14 @@ public class RendererExt{
         float loti = 0f;
         int cap = ((BufferedItemBridge)bb.block).bufferCapacity;
         float speed = ((BufferedItemBridge)bb.block).speed;
-        for(int idi = 0; idi < bufferItems.length; idi++){
-            if(bufferItems[idi] != null){
-                Draw.alpha(0.9f);
-
-                Draw.rect(bufferItems[idi].fullIcon,
-                begx + ((endx - begx) / (float)bufferItems.length * Math.min(((Time.time - bufferTimes[idi]) * bb.timeScale() / speed) * cap, cap - loti)),
-                begy + ((endy - begy) / (float)bufferItems.length * Math.min(((Time.time - bufferTimes[idi]) * bb.timeScale() / speed) * cap, cap - loti)), 4f, 4f);
+        Draw.alpha(0.9f);
+        for(int idi = 0; idi < bufferbuffer.length && idi < index; idi++){
+            float time = Float.intBitsToFloat(Pack.leftInt(bufferbuffer[idi]));
+            var item = content.item(Pack.leftShort(Pack.rightInt(bufferbuffer[idi])));
+            if(item != null){
+                Draw.rect(item.fullIcon,
+                begx + ((endx - begx) / (float)bufferbuffer.length * Math.min(((Time.time - time) * bb.timeScale() / speed) * cap, cap - loti)),
+                begy + ((endy - begy) / (float)bufferbuffer.length * Math.min(((Time.time - time) * bb.timeScale() / speed) * cap, cap - loti)), 4f, 4f);
             }
             loti++;
         }
@@ -619,9 +614,9 @@ public class RendererExt{
             boolean toFound = false, fromFound = false;
             boolean canLoad, canUnload;
             for(Unloader.ContainerStat c : ub.possibleBlocks){
-                canLoad = MI2Utils.getField(Unloader.ContainerStat.class, "canLoad").getBoolean(c);
-                canUnload = MI2Utils.getField(Unloader.ContainerStat.class, "canUnload").getBoolean(c);
-                tmp = MI2Utils.getValue(c, "building");
+                canLoad = unloaderCanLoad.getBoolean(c);
+                canUnload = unloaderCanUnload.getBoolean(c);
+                tmp = MI2Utils.getValue(unloaderBuilding, c);
                 if(!toFound && canLoad){
                     tob = tmp;
                     toFound = true;

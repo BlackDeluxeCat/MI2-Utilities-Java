@@ -9,12 +9,12 @@ public class MI2Utils{
     public static ObjectMap<String, Field> fields = new ObjectMap<>();
 
     public static Field getField(Class<?> clazz, String name){
-        Field f = fields.get(clazz.getCanonicalName() + "." + name);
+        Field f = fields.get(clazz.getName() + "." + name);
         if(f == null){
             try{
                 Field f2 = clazz.getDeclaredField(name);
                 f2.setAccessible(true);
-                fields.put(clazz.getCanonicalName() + "." + name, f2);
+                fields.put(clazz.getName() + "." + name, f2);
                 return f2;
             }catch(Exception e){
                 return null;
