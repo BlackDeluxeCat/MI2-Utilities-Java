@@ -26,9 +26,9 @@ import static mi2u.MI2UVars.*;
 
 public class MI2USettings{
 
-    private static final OrderedMap<String, MI2USetting> map = new OrderedMap<>();
+    public static final OrderedMap<String, MI2USetting> map = new OrderedMap<>();
     private static Fi root, dir;
-    private static boolean modified = false;
+    public static boolean modified = false;
     private static final Interval timer = new Interval();
 
     public static Seq<SettingEntry> entries = new Seq<>();
