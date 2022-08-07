@@ -217,33 +217,36 @@ public class RendererExt{
 
             //v7 rts pathfind render, making your device a barbecue.
             //Pathfind Renderer
+            //TODO line length limitation to prevent lagging
             if(MI2USettings.getBool("enUnitPath")){
                 if(unit.isCommandable() && unit.controller() instanceof CommandAI ai && ai.targetPos != null){
                     Draw.reset();
                     Draw.z(Layer.power - 4f);
                     Lines.stroke(1.5f);
 
-                    try{
-                        Tile tile = unit.tileOn();
-                        ObjectMap requests = MI2Utils.getValue(controlPath, "requests");
-                        Object req = requests.get(unit);
-                        IntSeq result = MI2Utils.getValue(req, "result");
-                        int start = MI2Utils.getValue(req, "rayPathIndex");
-                        for(int tileIndex = start; tileIndex < result.size; tileIndex++){
-                            Tile nextTile = world.tiles.geti(result.get(tileIndex));
-                            if(nextTile == null) break;
-                            if(!Core.camera.bounds(MI2UTmp.r1).contains(tile.worldx(), tile.worldy()) && !Core.camera.bounds(MI2UTmp.r1).contains(nextTile.worldx(), nextTile.worldy())) continue;  //Skip paths outside screen
-                            if(nextTile == tile) break;
-                            Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
-                            if(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) > 4000f) break;
-                            Lines.dashLine(tile.worldx(), tile.worldy(), nextTile.worldx(), nextTile.worldy(), (int)(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) / 4f));
-                            tile = nextTile;
-                        }
-                    }catch(Exception ignore){
-                        boolean move = controlPath.getPathPosition(unit, MI2Utils.getValue(ai, "pathId"), ai.targetPos, MI2UTmp.v1);
-                        if(move){
-                            Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
-                            Lines.dashLine(unit.x, unit.y, MI2UTmp.v1.x, MI2UTmp.v1.y, (int)(Mathf.len(MI2UTmp.v1.x - unit.x, MI2UTmp.v1.y - unit.y) / 4f));
+                    if(unit.isGrounded()){
+                        try{
+                            Tile tile = unit.tileOn();
+                            ObjectMap requests = MI2Utils.getValue(controlPath, "requests");
+                            Object req = requests.get(unit);
+                            IntSeq result = MI2Utils.getValue(req, "result");
+                            int start = MI2Utils.getValue(req, "rayPathIndex");
+                            for(int tileIndex = start; tileIndex < result.size; tileIndex++){
+                                Tile nextTile = world.tiles.geti(result.get(tileIndex));
+                                if(nextTile == null) break;
+                                if(!Core.camera.bounds(MI2UTmp.r1).contains(tile.worldx(), tile.worldy()) && !Core.camera.bounds(MI2UTmp.r1).contains(nextTile.worldx(), nextTile.worldy())) continue;  //Skip paths outside screen
+                                if(nextTile == tile) break;
+                                Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
+                                if(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) > 4000f) break;
+                                Lines.dashLine(tile.worldx(), tile.worldy(), nextTile.worldx(), nextTile.worldy(), (int)(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) / 4f));
+                                tile = nextTile;
+                            }
+                        }catch(Exception ignore){
+                            boolean move = controlPath.getPathPosition(unit, MI2Utils.getValue(ai, "pathId"), ai.targetPos, MI2UTmp.v1);
+                            if(move){
+                                Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
+                                Lines.dashLine(unit.x, unit.y, MI2UTmp.v1.x, MI2UTmp.v1.y, (int)(Mathf.len(MI2UTmp.v1.x - unit.x, MI2UTmp.v1.y - unit.y) / 4f));
+                            }
                         }
                     }
 
