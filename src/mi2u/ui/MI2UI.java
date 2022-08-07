@@ -4,7 +4,7 @@ import arc.*;
 import arc.graphics.*;
 import arc.math.*;
 import arc.scene.*;
-import arc.scene.ui.TextField;
+import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.*;
@@ -14,7 +14,7 @@ import mi2u.io.*;
 import mi2u.io.MI2USettings.*;
 import mindustry.Vars;
 import mindustry.gen.*;
-import mindustry.ui.Styles;
+import mindustry.ui.*;
 
 import static mi2u.MI2UVars.*;
 
@@ -175,7 +175,15 @@ public class MI2UI extends Mindow2{
         });
 
         settings.add(new CollapseGroupEntry("InputExtension", ""){
-            CheckEntry check1 = new CheckEntry("inputReplace", "@settings.main.inputReplace", false, null);
+            CheckEntry check1 = new CheckEntry("inputReplace", "@settings.main.inputReplace", false, b -> {
+                if(b){
+                    if(Vars.mobile){
+                        MobileInputExt.mobileExt.replaceInput();
+                    }else{
+                        DesktopInputExt.desktopExt.replaceInput();
+                    }
+                }
+            });
             CheckEntry check2 = new CheckEntry("forceTapTile", "@settings.main.forceTapTile", false, null);
             CheckEntry check3 = new CheckEntry("edgePanning", "@settings.main.edgePanning", true, null);
             {
