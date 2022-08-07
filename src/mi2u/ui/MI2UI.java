@@ -199,6 +199,8 @@ public class MI2UI extends Mindow2{
 
         settings.add(new FieldEntry("maxSchematicSize", "@settings.main.maxSchematicSize", String.valueOf(32), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 16 && Strings.parseInt(s) <= 512, s -> Vars.maxSchematicSize = Mathf.clamp(Strings.parseInt(s), 16, 512)));
 
+        settings.add(new FieldEntry("blockSelectTableHeight", "@settings.main.blockSelectTableHeight", String.valueOf(194), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 1000, null));
+
         settings.add(new FieldEntry("rtsFormDoubleTap", "@settings.main.rtsFormDoubleTap", Vars.ghApi, TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) > 0, s -> RtsCommand.doubleTapInterval = Strings.parseInt(s)));
 
         settings.add(new CheckEntry("modifyBlockBars", "@settings.main.modifyBlockBars", false, null));

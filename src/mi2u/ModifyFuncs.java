@@ -5,16 +5,13 @@ import arc.func.*;
 import arc.graphics.Color;
 import arc.graphics.g2d.TextureRegion;
 import arc.math.*;
-import arc.math.geom.*;
 import arc.scene.Element;
 import arc.scene.style.TextureRegionDrawable;
-import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.io.*;
 import mi2u.map.filters.*;
 import mi2u.ui.*;
-import mindustry.content.*;
 import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.gen.*;
@@ -24,19 +21,13 @@ import mindustry.maps.*;
 import mindustry.maps.filters.*;
 import mindustry.type.*;
 import mindustry.ui.*;
-import mindustry.ui.dialogs.*;
+import mindustry.ui.dialogs.BaseDialog;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.turrets.*;
-import mindustry.world.blocks.heat.HeatConsumer;
-import mindustry.world.blocks.logic.*;
 import mindustry.world.blocks.production.HeatCrafter;
 import mindustry.world.consumers.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.zip.InflaterInputStream;
 
 import static mi2u.MI2UVars.textb;
 import static mindustry.Vars.*;
@@ -49,7 +40,6 @@ public class ModifyFuncs{
         Events.on(EventType.ContentInitEvent.class, e2 -> modifyVanillaBlockBars());
         addFilters();
         initBetterTopTable();
-        schelogic();
         settingsMenuDialog();
     }
 
@@ -147,7 +137,6 @@ public class ModifyFuncs{
         });
     }
 
-    //让原版面板只在方块规划显示(+尺寸缩放)，mod面板则在有hover时显示(+尺寸缩放)。还需要调换原版和mod版的布局，让方块规划紧贴方块选择区
     public static void betterTopTable(){
         if(!MI2USettings.getBool("modifyTopTable", false)) return;
 
@@ -172,127 +161,10 @@ public class ModifyFuncs{
             vanilla.updateVisibility();
             return HoverTopTable.hoverInfo.hasInfo() || vanilla.visible;
         });
-    }
-
-    public static void schelogic(){
-        SchematicsDialog.SchematicInfoDialog info = Reflect.get(SchematicsDialog.class, ui.schematics, "info");
-        info.shown(Time.runTask(10f, () -> {
-            Label l = info.find(e -> e instanceof Label ll && ll.getText().toString().contains("[[" + Core.bundle.get("schematic") + "] "));
-            if(l != null){
-                info.cont.row();
-                info.cont.add("@schematicDialog.nameCheck");
-                info.cont.row();
-                String schename = l.getText().toString().replace("[[" + Core.bundle.get("schematic") + "] ", "");
-                Schematic sche = schematics.all().find(s -> s.name().equals(schename));
-                if(sche != null && sche.width <= 128 && sche.height <= 128){
-                    info.cont.add("@schematicDialog.sizeCheck");
-                    info.cont.row();
-                    info.cont.button("@schematicsDialog.details", () -> {}).with(b -> {
-                        //float padding = 2f;
-                        b.getLabel().setWrap(false);
-                        b.clicked(() -> {
-                            b.setDisabled(true);
-                            SchematicsDialog.SchematicImage image = info.find(e -> e instanceof SchematicsDialog.SchematicImage);
-                            if(image == null){
-                                Log.infoTag("MI2U-Sche Logic", "Failed to get Sche Image, skip.");
-                                return;
-                            }
-                            Vec2 imagexy = MI2UTmp.v1;
-                            imagexy.set(0f, 0f);
-                            image.localToParentCoordinates(imagexy);
-                            sche.tiles.each(tile -> {
-                                int size = tile.block.size;
-                                float padding = 2f;
-                                float bufferScl = Math.min(image.getWidth() / ((sche.width + padding) * 32f * Scl.scl()), image.getHeight() / ((sche.height + padding) * 32f * Scl.scl()));
-                                Vec2 tablexy = new Vec2(tile.x, tile.y);
-                                //tablexy.add(padding/2f, padding/2f);
-                                tablexy.add(-sche.width/2f, -sche.height/2f);
-                                tablexy.scl(32f * Scl.scl());
-                                tablexy.scl(bufferScl);
-                                tablexy.add(imagexy.x, imagexy.y);
-                                tablexy.add(image.getWidth()/2f, image.getHeight()/2f);
-                                //Label tl = new Label(tile.block.name);
-                                //info.cont.addChild(tl);
-                                //tl.setPosition(tablexy.x, tablexy.y);
-                                //tl.setSize(size);
-                                if(tile.block instanceof LogicBlock){
-                                    //tile.config is a byte[] including compressed code and links
-                                    try(DataInputStream stream = new DataInputStream(new InflaterInputStream(new ByteArrayInputStream((byte[])tile.config)))){
-                                        stream.read();
-                                        int bytelen = stream.readInt();
-                                        if(bytelen > 1024 * 500) throw new IOException("Malformed logic data! Length: " + bytelen);
-                                        byte[] bytes = new byte[bytelen];
-                                        stream.readFully(bytes);
-                                        /*
-                                        links.clear();
-
-                                        int total = stream.readInt();
-
-                                        if(version == 0){
-                                            //old version just had links, ignore those
-
-                                            for(int i = 0; i < total; i++){
-                                                stream.readInt();
-                                            }
-                                        }else{
-                                            for(int i = 0; i < total; i++){
-                                                String name = stream.readUTF();
-                                                short x = stream.readShort(), y = stream.readShort();
-
-                                                if(relative){
-                                                    x += tileX();
-                                                    y += tileY();
-                                                }
-
-                                                Building build = world.build(x, y);
-
-                                                if(build != null){
-                                                    String bestName = getLinkName(build.block);
-                                                    if(!name.startsWith(bestName)){
-                                                        name = findLinkName(build.block);
-                                                    }
-                                                }
-
-                                                links.add(new LogicLink(x, y, name, false));
-                                            }
-                                        }
-                                        */
-                                        TextButton bl = new TextButton("" + Iconc.paste);
-                                        bl.setStyle(textb);
-                                        bl.clicked(() -> {
-                                            Core.app.setClipboardText(new String(bytes, charset));
-                                        });
-                                        info.cont.addChild(bl);
-                                        bl.setPosition(tablexy.x, tablexy.y);
-                                        bl.setSize(Scl.scl() * 36f * (size <= 1f ? 0.5f:1f));
-                                    }catch(Exception ignored){
-                                        //invalid logic doesn't matter here
-                                    }
-                                }
-                                if(tile.block instanceof MessageBlock){
-                                    TextButton bl = new TextButton("" + Iconc.paste);
-                                    bl.setStyle(textb);
-                                    bl.clicked(() -> {
-                                        Core.app.setClipboardText(tile.config.toString());
-                                    });
-                                    bl.addListener(new Tooltip(tooltip -> {
-                                        tooltip.background(Styles.black5);
-                                        tooltip.add(tile.config.toString());
-                                    }));
-                                    info.cont.addChild(bl);
-                                    bl.setPosition(tablexy.x, tablexy.y);
-                                    bl.setSize(Scl.scl() * 36f * (size <= 1f ? 0.5f:1f));
-                                }
-                            });
-                        });
-                    }).size(100f, 30f).with(c -> {
-                        c.getLabel().setAlignment(Align.left);
-                        c.getLabel().setWrap(false);
-                        c.getLabelCell().pad(2);
-                    });
-                }
-            }
-        }));
+        Table blockCatTable = MI2Utils.getValue(ui.hudfrag.blockfrag, "blockCatTable");
+        //TODO make height a setting
+        ((Table)blockCatTable.getCells().first().get()).getCells().first().maxHeight(Mathf.clamp(MI2USettings.getInt("blockSelectTableHeight", 194), 50, 1000));
+        blockCatTable.getCells().get(1).height(Mathf.clamp(MI2USettings.getInt("blockSelectTableHeight", 194) + 52, 50, 1000));
     }
 
     public static void settingsMenuDialog(){
@@ -307,6 +179,27 @@ public class ModifyFuncs{
                     t.row();
                 }
             });
+            st.row();
+            st.button("@mi2u.settings.cleanUp", textb, () -> {
+                var dialog = new BaseDialog("@mi2u.settings.cleanUp");
+                dialog.addCloseButton();
+                dialog.buttons.button("@clear", Icon.refresh, () -> ui.showConfirm("@mi2u.settings.removeAllConf", MI2USettings.map::clear));
+                dialog.cont.pane(t -> {
+                    MI2USettings.map.each((name, setting) -> {
+                        t.button("" + Iconc.cancel, textb, null).size(24f).with(b -> {
+                            b.clicked(() -> ui.showConfirm(Core.bundle.get("mi2u.settings.removeConf") + name, () -> {
+                                MI2USettings.map.remove(name);
+                                MI2USettings.modified = true;
+                                b.setDisabled(true);
+                            }));
+                        });
+                        t.labelWrap(name).width(200f);
+                        t.add(setting.get()).width(200f);
+                        t.row();
+                    });
+                }).growY();
+                dialog.show();
+            }).growX().height(64f);
         });
     }
 }
