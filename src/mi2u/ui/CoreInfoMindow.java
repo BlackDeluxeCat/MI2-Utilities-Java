@@ -23,6 +23,7 @@ import mindustry.game.Teams.*;
 import mindustry.gen.*;
 import mindustry.type.*;
 import mindustry.ui.*;
+import mindustry.world.blocks.ConstructBlock;
 import mindustry.world.blocks.storage.CoreBlock.*;
 
 import static mindustry.Vars.*;
@@ -303,7 +304,7 @@ public class CoreInfoMindow extends Mindow2{
             ItemSeq req = new ItemSeq();
             player.unit().plans().each(plan -> {
                 for(ItemStack stack : plan.block.requirements){
-                    req.add(stack.item, Mathf.floor(stack.amount * (plan.breaking ? state.rules.deconstructRefundMultiplier*state.rules.buildCostMultiplier:-1*state.rules.buildCostMultiplier)));
+                    req.add(stack.item, Mathf.floor(stack.amount * (plan.breaking ? (world.build(plan.x, plan.y) instanceof ConstructBlock.ConstructBuild cb && cb.team == player.team() ? cb.progress : 1f) * state.rules.deconstructRefundMultiplier*state.rules.buildCostMultiplier : (world.build(plan.x, plan.y) instanceof ConstructBlock.ConstructBuild cb && cb.team == player.team() ? cb.progress - 1f : -1f) * state.rules.buildCostMultiplier)));
                 }
             });
             for(Item item : content.items()){
@@ -352,7 +353,6 @@ public class CoreInfoMindow extends Mindow2{
         });
     }
 
-    /** can be overrided, should use super.initSettings(), called in rebuild() */
     @Override
     public void initSettings(){
         super.initSettings();
