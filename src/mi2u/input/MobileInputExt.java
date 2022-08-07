@@ -55,6 +55,7 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
             movement.set(player).sub(targetPos).limit(unit.speed());
             if(player.within(targetPos, 15f)) movement.setZero();
             unit.movePref(movement);
+            if(unit.type.omniMovement && MI2UTmp.v1.set(unit.x, unit.y).sub(move).len() < 4f) unit.vel.approachDelta(Vec2.ZERO, unit.speed() * unit.type.accel / 4f);
             //control move
             unit.movePref(move);
         }
