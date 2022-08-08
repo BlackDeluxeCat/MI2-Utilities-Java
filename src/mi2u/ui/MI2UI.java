@@ -19,6 +19,7 @@ import mindustry.ui.*;
 import static mi2u.MI2UVars.*;
 
 public class MI2UI extends Mindow2{
+    public static PopupTable popup = new PopupTable();
     public MI2UI(){
         super("@main.MI2U", "@main.help");
     }
@@ -62,14 +63,14 @@ public class MI2UI extends Mindow2{
                     else img.setRotation(0f);
                     img.setColor(!b.isChecked() ? Color.white : SpeedController.lowerThanMin() ? Color.scarlet : Color.lime);
                 });
-            }).growX();
-        });
+            }).grow();
+        }).growX();
 
         cont.row();
 
         cont.table(tt -> {
             tt.button("AI\n" + Iconc.settings, textb, () -> {
-                var popup = new PopupTable();
+                popup.clear();
                 popup.addCloseButton();
                 popup.addDragMove();
                 popup.setSize(300f, 200f);
@@ -90,7 +91,7 @@ public class MI2UI extends Mindow2{
                 popup.popup();
                 popup.update(popup::keepInScreen);
                 popup.setPositionInScreen(Core.graphics.getWidth()/2f, Core.graphics.getHeight()/2f);
-            }).growY().minSize(36f).with(funcSetTextb);
+            }).grow().minSize(36f).with(funcSetTextb);
             tt.table(ttt -> {
                 fullAI.modes.each(mode -> {
                     ttt.button(mode.btext, textbtoggle, () -> {
@@ -115,7 +116,8 @@ public class MI2UI extends Mindow2{
                 for(int i = 0; i < 10; i++){
                     int ii = i;
                     if(i == 5) tt.row();
-                    tt.button("" + Mathf.mod(ii + 1, 10), textb, () -> {
+
+                    var button = tt.button("" + Mathf.mod(ii + 1, 10), textb, () -> {
                         if(RtsCommand.creatingFormation){
                             RtsCommand.createFormation(Vars.control.input.selectedUnits, ii);
                         }else{
@@ -127,10 +129,16 @@ public class MI2UI extends Mindow2{
                         b.getLabel().setColor(RtsCommand.creatingFormation ? check ? Color.cyan : Color.acid : Color.white);
                     }).minSize(36f).with(c -> {
                         c.getLabel().setAlignment(Align.center);
-                    });
+                    }).get();
+
+                    var label = new Label(() -> "" + RtsCommand.countFormation(ii));
+                    label.setFontScale(0.65f);
+                    label.setFillParent(true);
+                    label.setAlignment(Align.bottomRight);
+                    button.addChild(label);
                 }
             }).growX();
-        }, () -> true).growX().get().setDuration(0.25f).setCollapsed(true, () -> !Vars.control.input.commandMode);
+        }, () -> true).growX().get().setDuration(0.25f).setCollapsed(true, () -> !Vars.control.input.commandMode).setCollapsed(!Vars.control.input.commandMode);
 
     }
 
@@ -143,7 +151,6 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("showMindowMap", "@settings.main.mindowMap", false, b -> mindowmap.addTo(b?Core.scene.root:null)));
         settings.add(new CheckEntry("showMapInfo", "@settings.main.mapInfo", false, b -> mapinfo.addTo(b?Core.scene.root:null)));
         settings.add(new CheckEntry("showLogicHelper", "@settings.main.logicHelper", true, b -> logicHelper.addTo(b?Vars.ui.logic:null)));
-        settings.add(new CheckEntry("showUIContainer", "@settings.main.container", false, b -> container.addTo(b?Core.scene.root:null)));
 
         settings.add(new CheckEntry("enPlayerCursor", "@settings.main.playerCursor", true, null));
         settings.add(new CheckEntry("enOverdriveZone", "@settings.main.overdriveZone", false, null));
@@ -222,5 +229,7 @@ public class MI2UI extends Mindow2{
                 };
             }
         });
+
+        settings.add(new CheckEntry("showUIContainer", "@settings.main.container", false, b -> container.addTo(b?Core.scene.root:null)));
     }
 }

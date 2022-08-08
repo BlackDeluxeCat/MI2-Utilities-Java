@@ -39,10 +39,14 @@ public class RtsCommand{
 
     /** @return whether it is a valid formation*/
     public static boolean checkFormation(int id){
+        return countFormation(id) > 0;
+    }
+
+    public static int countFormation(int id){
         updateFormation(id);
-        if(formations[id] == null) return false;
-        if(formations[id].isEmpty()) return false;
-        return true;
+        if(formations[id] == null) return 0;
+        if(formations[id].isEmpty()) return 0;
+        return formations[id].size;
     }
 
     public static void updateFormation(int id){
