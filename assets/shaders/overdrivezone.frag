@@ -19,11 +19,11 @@ void main(){
 
     vec4 maxed = max(max(max(texture2D(u_texture, T + vec2(0, wide) * v), texture2D(u_texture, T + vec2(0, -wide) * v)), texture2D(u_texture, T + vec2(wide, 0) * v)), texture2D(u_texture, T + vec2(-wide, 0) * v));
 
-	if(texture2D(u_texture, T).a < 0.02 && maxed.a > 0.49){
+	if(texture2D(u_texture, T).a < 0.02 && maxed.a > 0.05){
 		gl_FragColor = vec4(maxed.rgb, maxed.a * 100.0);
     }else{
         if(color.a > 0.03){
-            color.a = (0.05 + (mod(coords.y / 1.0 + coords.x / 1.8 - u_time / 12.0, 32.0) > 20.0 ? 0.2 * (step(mod((coords.x / 4.0 + coords.y / 16.0 - u_time / 6.0) / 4.0, 2.0), 1.0)) : 0.0));
+            color.a = (0.05 + (mod(coords.y / 2.0 + coords.x / 4.0 - u_time / 4.0, 32.0) > 25.0 && mod(coords.x / 3.0 + coords.y / 10.0 - u_time / 4.0, 24.0) > 18.0 ? 0.3 : 0.0));
         }
         gl_FragColor = color;
     }   

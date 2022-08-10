@@ -97,6 +97,7 @@ public class RendererExt{
                 if(enDistributionReveal) drawBlackboxBuilding(tile.build);
                 if(enOverdriveZone && tile.build instanceof OverdriveProjector.OverdriveBuild odb) drawOverDriver(odb);
                 if(enMenderZone && tile.build instanceof MendProjector.MendBuild mb) drawMender(mb);
+                Draw.reset();
             }
 
         }
@@ -468,9 +469,10 @@ public class RendererExt{
     public static void drawOverDriver(OverdriveProjector.OverdriveBuild odb){
         OverdriveProjector block = (OverdriveProjector)odb.block();
         Draw.color(block.baseColor, block.phaseColor, odb.phaseHeat);
+        Draw.mixcol(Color.black, 1f - odb.efficiency());
         Draw.z(91.1f);
-        Draw.alpha(Core.settings.getBool("animatedshields")?0.6f:0.2f);
-        Fill.circle(odb.x, odb.y, block.range + odb.phaseHeat * block.phaseRangeBoost);
+        Draw.alpha(Core.settings.getBool("animatedshields")?0.6f:0.1f);
+        Fill.poly(odb.x, odb.y, (int)(block.range + odb.phaseHeat * block.phaseRangeBoost) / 4, block.range + odb.phaseHeat * block.phaseRangeBoost);
 
         Lines.stroke(2f);
         Draw.alpha(1f);
@@ -484,7 +486,7 @@ public class RendererExt{
         Draw.z(91.2f);
         Draw.color(block.baseColor);
         Draw.alpha((Core.settings.getBool("animatedshields")?0.6f:0.2f) * (alpha > 0.05 ? alpha : 0f));
-        Fill.circle(mb.x, mb.y, block.range + mb.phaseHeat * block.phaseRangeBoost);
+        Fill.poly(mb.x, mb.y, (int)(block.range + mb.phaseHeat * block.phaseRangeBoost) / 4, block.range + mb.phaseHeat * block.phaseRangeBoost);
     }
 
     public static void drawJunciton(Junction.JunctionBuild jb){
