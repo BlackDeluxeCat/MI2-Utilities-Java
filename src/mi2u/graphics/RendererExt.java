@@ -97,6 +97,7 @@ public class RendererExt{
                 if(enDistributionReveal) drawBlackboxBuilding(tile.build);
                 if(enOverdriveZone && tile.build instanceof OverdriveProjector.OverdriveBuild odb) drawOverDriver(odb);
                 if(enMenderZone && tile.build instanceof MendProjector.MendBuild mb) drawMender(mb);
+                if(enMenderZone && tile.build instanceof RegenProjector.RegenProjectorBuild rb) drawRegen(rb);
                 Draw.reset();
             }
 
@@ -458,11 +459,19 @@ public class RendererExt{
                 renderer.effectBuffer.blit(MI2UShaders.odzone);
             });
         }
-        if(Core.settings.getBool("animatedshields") && MI2USettings.getBool("enMenderZone", false) && MI2UShaders.mdzone != null){
-            Draw.drawRange(91.2f, 0.02f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
-                renderer.effectBuffer.end();
-                renderer.effectBuffer.blit(MI2UShaders.mdzone);
-            });
+        if(Core.settings.getBool("animatedshields") && MI2USettings.getBool("enMenderZone", false)){
+            if(MI2UShaders.mdzone != null){
+                Draw.drawRange(91.2f, 0.02f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
+                    renderer.effectBuffer.end();
+                    renderer.effectBuffer.blit(MI2UShaders.mdzone);
+                });
+            }
+            if(MI2UShaders.rgzone != null){
+                Draw.drawRange(91.3f, 0.02f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
+                    renderer.effectBuffer.end();
+                    renderer.effectBuffer.blit(MI2UShaders.rgzone);
+                });
+            }
         }
     }
 
@@ -487,6 +496,18 @@ public class RendererExt{
         Draw.color(block.baseColor);
         Draw.alpha((Core.settings.getBool("animatedshields")?0.6f:0.2f) * (alpha > 0.05 ? alpha : 0f));
         Fill.poly(mb.x, mb.y, (int)(block.range + mb.phaseHeat * block.phaseRangeBoost) / 4, block.range + mb.phaseHeat * block.phaseRangeBoost);
+    }
+
+    public static void drawRegen(RegenProjector.RegenProjectorBuild rb){
+        RegenProjector block = (RegenProjector)rb.block;
+        Draw.z(91.3f);
+        Draw.color(block.baseColor);
+        Draw.alpha((Core.settings.getBool("animatedshields") ? 0.4f : 0.1f) * (rb.efficiency() <= 0f ? 0.6f : 1f));
+        Fill.rect(rb.x, rb.y, block.range * tilesize, block.range * tilesize);
+
+        Lines.stroke(2f);
+        Draw.alpha(rb.efficiency() <= 0f ? 0.5f : 1f);
+        Lines.rect(rb.x - block.range * tilesize / 2f, rb.y - block.range * tilesize / 2f, block.range * tilesize, block.range * tilesize);
     }
 
     public static void drawJunciton(Junction.JunctionBuild jb){
