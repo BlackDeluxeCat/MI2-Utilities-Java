@@ -250,8 +250,9 @@ public class Mindow2 extends Table{
         return true;
     }
 
+    //TODO snap chain causing StackOverflow
     public boolean shouldTopMost(){
-        return (topmost || (aboveSnap !=null && aboveSnap != this && aboveSnap instanceof Mindow2 m && m.shouldTopMost()));
+        return (topmost || (aboveSnap != null && aboveSnap != this && aboveSnap instanceof Mindow2 m && m.topmost));
     }
     
     public void showHelp(){
