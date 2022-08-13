@@ -37,10 +37,10 @@ public class MI2UI extends Mindow2{
 
         cont.table(tt -> {
             if(MI2USettings.getEntry("enDistributionReveal") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.zoom + Iconc.blockJunction)).minSize(24f);
-            if(MI2USettings.getEntry("disableWreck") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.alphaaaa)).minSize(24f);
-            if(MI2USettings.getEntry("disableUnit") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.unitGamma)).minSize(24f);
-            if(MI2USettings.getEntry("disableBullet") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.unitScatheMissile)).minSize(24f);
-            if(MI2USettings.getEntry("disableBuilding") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.blockDuo)).minSize(24f);
+            if(MI2USettings.getEntry("disableWreck") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.alphaaaa)).width(36f);
+            if(MI2USettings.getEntry("disableUnit") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.unitGamma)).width(36f);
+            if(MI2USettings.getEntry("disableBullet") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.unitScatheMissile)).width(36f);
+            if(MI2USettings.getEntry("disableBuilding") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.blockDuo)).width(36f);
         });
         cont.row();
 

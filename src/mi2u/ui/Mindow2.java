@@ -455,6 +455,8 @@ public class Mindow2 extends Table{
                             entry4.build(ttt);
                             ttt.row();
                             entry5.build(ttt);
+                            ttt.row();
+                            ttt.labelWrap("@settings.mindow.edgeSnap.tip").left().growX();
                         }).growX();
                         rightt.row();
 
