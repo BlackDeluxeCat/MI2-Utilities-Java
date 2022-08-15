@@ -19,7 +19,7 @@ public class TurretZoneDrawer{
     public static void applyShader(){
         teams.each(id -> {
             if(time.check(id, 10f)) return;
-            Draw.drawRange(getLayer(id), 0.002f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
+            Draw.drawRange(getLayer(id), 0.001f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
                 renderer.effectBuffer.end();
                 renderer.effectBuffer.blit(MI2UShaders.turretzone);
             });
@@ -28,7 +28,7 @@ public class TurretZoneDrawer{
 
     public static float getLayer(int id){
         teams.add(id);
-        time.get(id, 1f);
-        return Layer.plans + 1f + id * 0.01f;
+        time.reset(id, 1f);
+        return Layer.plans + 1f + id * 0.003f;
     }
 }

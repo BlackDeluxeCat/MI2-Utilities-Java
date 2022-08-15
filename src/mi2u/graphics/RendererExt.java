@@ -482,11 +482,10 @@ public class RendererExt{
                 }
             }
 
-            if(MI2USettings.getBool("enTurretRange", false) && MI2UShaders.turretzone != null){
+            if(MI2USettings.getBool("enTurretZone", false) && MI2UShaders.turretzone != null){
                 TurretZoneDrawer.applyShader();
             }
         }
-
     }
 
     public static void drawOverDriver(OverdriveProjector.OverdriveBuild odb){
