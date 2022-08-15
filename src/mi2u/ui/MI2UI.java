@@ -158,6 +158,7 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("enSpawnZone", "@settings.main.spawnZone", true, null));
         settings.add(new CheckEntry("enDistributionReveal", "@settings.main.distributionReveal", true, null));
         settings.add(new CheckEntry("enBlockHpBar", "@settings.main.blockHpBar", false, null));
+        settings.add(new CheckEntry("enTurretZone", "@settings.main.enTurretZone", false, null));
         settings.add(new CheckEntry("enUnitHpBar", "@settings.main.unitHpBar", false, null));
         settings.add(new CheckEntry("enUnitLogic", "@settings.main.unitLogic", false, null));
         settings.add(new CheckEntry("enUnitLogicTimer", "@settings.main.unitLogicTimer", false, null));

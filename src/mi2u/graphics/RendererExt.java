@@ -23,6 +23,7 @@ import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.*;
+import mindustry.world.blocks.defense.turrets.BaseTurret;
 import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.storage.*;
 import mindustry.world.blocks.units.*;
@@ -41,12 +42,13 @@ public class RendererExt{
     protected static Seq<Unit> hiddenUnit = new Seq<>();
     public static Field itemBridgeBuffer = MI2Utils.getField(BufferedItemBridge.BufferedItemBridgeBuild.class, "buffer"),
             itemBridgeBufferBuffer = MI2Utils.getField(ItemBuffer.class, "buffer"), itemBridgeBufferIndex = MI2Utils.getField(ItemBuffer.class, "index"),
-            unloaderCanLoad = MI2Utils.getField(Unloader.ContainerStat.class, "canLoad"), unloaderCanUnload = MI2Utils.getField(Unloader.ContainerStat.class, "canUnload"), unloaderBuilding = MI2Utils.getField(Unloader.ContainerStat.class, "building");
+            unloaderBuilding = MI2Utils.getField(Unloader.ContainerStat.class, "building");
 
     public static void initBase(){
         Events.on(EventType.WorldLoadEvent.class, e -> {
             players.clear();
             hiddenUnit.clear();
+            TurretZoneDrawer.clear();
         });
 
         Events.run(EventType.Trigger.draw, () -> {
@@ -89,12 +91,14 @@ public class RendererExt{
         if(tiles != null){
             if(MI2USettings.getBool("disableBuilding", false)) tiles.clear();
             boolean enOverdriveZone = MI2USettings.getBool("enOverdriveZone", false), enMenderZone = MI2USettings.getBool("enMenderZone", false),
-            enBlockHpBar = MI2USettings.getBool("enBlockHpBar", true), enDistributionReveal = MI2USettings.getBool("enDistributionReveal", false);
+            enBlockHpBar = MI2USettings.getBool("enBlockHpBar", true), enDistributionReveal = MI2USettings.getBool("enDistributionReveal", false),
+            enTurretZone = MI2USettings.getBool("enTurretZone", false);
 
             for(var tile : tiles){
                 if(tile.build == null) continue;
                 if(enBlockHpBar) drawBlockHpBar(tile.build);
                 if(enDistributionReveal) drawBlackboxBuilding(tile.build);
+                if(enTurretZone && tile.build instanceof BaseTurret.BaseTurretBuild btb) drawTurretZone(btb);
                 if(enOverdriveZone && tile.build instanceof OverdriveProjector.OverdriveBuild odb) drawOverDriver(odb);
                 if(enMenderZone && tile.build instanceof MendProjector.MendBuild mb) drawMender(mb);
                 if(enMenderZone && tile.build instanceof RegenProjector.RegenProjectorBuild rb) drawRegen(rb);
@@ -455,26 +459,34 @@ public class RendererExt{
     }
 
     public static void drawZoneShader(){
-        if(Core.settings.getBool("animatedshields") && MI2USettings.getBool("enOverdriveZone", false) && MI2UShaders.odzone != null){
-            Draw.drawRange(91.1f, 0.02f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
-                renderer.effectBuffer.end();
-                renderer.effectBuffer.blit(MI2UShaders.odzone);
-            });
-        }
-        if(Core.settings.getBool("animatedshields") && MI2USettings.getBool("enMenderZone", false)){
-            if(MI2UShaders.mdzone != null){
-                Draw.drawRange(91.2f, 0.02f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
+        if(Core.settings.getBool("animatedshields")){
+            if(MI2USettings.getBool("enOverdriveZone", false) && MI2UShaders.odzone != null){
+                Draw.drawRange(91.1f, 0.02f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
                     renderer.effectBuffer.end();
-                    renderer.effectBuffer.blit(MI2UShaders.mdzone);
+                    renderer.effectBuffer.blit(MI2UShaders.odzone);
                 });
             }
-            if(MI2UShaders.rgzone != null){
-                Draw.drawRange(91.3f, 0.02f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
-                    renderer.effectBuffer.end();
-                    renderer.effectBuffer.blit(MI2UShaders.rgzone);
-                });
+
+            if(MI2USettings.getBool("enMenderZone", false)){
+                if(MI2UShaders.mdzone != null){
+                    Draw.drawRange(91.2f, 0.02f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
+                        renderer.effectBuffer.end();
+                        renderer.effectBuffer.blit(MI2UShaders.mdzone);
+                    });
+                }
+                if(MI2UShaders.rgzone != null){
+                    Draw.drawRange(91.3f, 0.02f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
+                        renderer.effectBuffer.end();
+                        renderer.effectBuffer.blit(MI2UShaders.rgzone);
+                    });
+                }
+            }
+
+            if(MI2USettings.getBool("enTurretRange", false) && MI2UShaders.turretzone != null){
+                TurretZoneDrawer.applyShader();
             }
         }
+
     }
 
     public static void drawOverDriver(OverdriveProjector.OverdriveBuild odb){
@@ -510,6 +522,32 @@ public class RendererExt{
         Lines.stroke(2f);
         Draw.alpha(rb.efficiency() <= 0f ? 0.5f : 1f);
         Lines.rect(rb.x - block.range * tilesize / 2f, rb.y - block.range * tilesize / 2f, block.range * tilesize, block.range * tilesize);
+    }
+
+    public static void drawTurretZone(BaseTurret.BaseTurretBuild btb){
+        float z = Draw.z();
+        float range = btb.range();
+
+        Draw.color(btb.team.color);
+        Draw.z(TurretZoneDrawer.getLayer(btb.team.id));
+        if(Core.settings.getBool("animatedshields")){
+            Draw.alpha(0.05f);
+            Fill.poly(btb.x, btb.y, (int)(range) / 4, range);
+
+            Lines.stroke(2f);
+            Draw.alpha(1f);
+            Lines.circle(btb.x, btb.y, range);
+        }else{
+            Draw.alpha(0.05f);
+            Fill.poly(btb.x, btb.y, (int)(range) / 4, range);
+
+            Lines.stroke(2f);
+            Draw.alpha(0.5f);
+            Lines.circle(btb.x, btb.y, range);
+        }
+
+        Draw.z(z);
+        Draw.color();
     }
 
     public static void drawJunciton(Junction.JunctionBuild jb){
