@@ -30,6 +30,7 @@ import static mindustry.Vars.*;
 public class MinimapMindow extends Mindow2{
     public static Minimap2 m = new Minimap2(200f);
     public static WorldFinderTable finderTable = new WorldFinderTable();
+    public static PopupTable buttons;
     public MinimapMindow(){
         super("@minimap.MI2U");
     }
@@ -45,6 +46,12 @@ public class MinimapMindow extends Mindow2{
                 finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
             }
         });
+
+        buttons = new PopupTable();
+        buttons.button(Iconc.players + "", MI2UVars.textbtoggle, () -> m.drawLabel = !m.drawLabel).update(b -> b.setChecked(m.drawLabel)).size(48f);
+        buttons.button(Iconc.blockSpawn + "", MI2UVars.textbtoggle, () -> m.drawSpawn = !m.drawSpawn).update(b -> b.setChecked(m.drawSpawn)).size(48f);
+        buttons.button(Iconc.map + "", MI2UVars.textbtoggle, () -> m.drawFog = !m.drawFog).update(b -> b.setChecked(m.drawFog)).size(48f).get().getLabel().setColor(Color.slate);
+        buttons.update(() -> buttons.hideWithoutFocusOn(this, buttons));
     }
 
     @Override
@@ -59,14 +66,18 @@ public class MinimapMindow extends Mindow2{
                 tt.row();
                 tt.label(() -> Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1)).right().color(Color.scarlet);
             }).growX();
+
             t.table(tt -> {
-                tt.button(Iconc.players + "", MI2UVars.textbtoggle, () -> m.drawLabel = !m.drawLabel).update(b -> b.setChecked(m.drawLabel)).width(36f).growY();
-                tt.button(Iconc.blockSpawn + "", MI2UVars.textbtoggle, () -> m.drawSpawn = !m.drawSpawn).update(b -> b.setChecked(m.drawSpawn)).width(36f).growY();
                 tt.button(Iconc.zoom + "", MI2UVars.textb, () -> {
                     finderTable.popup();
                     finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
-                }).width(36f).growY();
+                }).width(32f).growY();
+                tt.button(Iconc.downOpen + "", MI2UVars.textb, () -> {
+                    buttons.popup(Align.right);
+                    buttons.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
+                }).width(32f).growY();
             }).fillX().growY();
+
         }).growX();
     }
 
@@ -96,7 +107,7 @@ public class MinimapMindow extends Mindow2{
     
     public static class Minimap2 extends Table{
         protected Element map;
-        public boolean drawLabel = true, drawSpawn = true;
+        public boolean drawLabel = true, drawSpawn = true, drawFog = true;
         private static final float baseSize = 16f;
         public float zoom = 4;
 
@@ -271,6 +282,37 @@ public class MinimapMindow extends Mindow2{
             }
 
             Draw.reset();
+
+            if(state.rules.fog && drawFog){
+                Draw.shader(Shaders.fog);
+                Texture staticTex = renderer.fog.getStaticTexture(), dynamicTex = renderer.fog.getDynamicTexture();
+
+                //crisp pixels
+                dynamicTex.setFilter(Texture.TextureFilter.nearest);
+                var region = getRegion();
+
+                if(withLabels){
+                    region.set(0f, 0f, 1f, 1f);
+                }
+
+                Tmp.tr1.set(dynamicTex);
+                Tmp.tr1.set(region.u, 1f - region.v, region.u2, 1f - region.v2);
+
+                Draw.color(state.rules.dynamicColor);
+                Draw.rect(Tmp.tr1, x + w/2f, y + h/2f, w, h);
+
+                if(state.rules.staticFog){
+                    staticTex.setFilter(Texture.TextureFilter.nearest);
+
+                    Tmp.tr1.texture = staticTex;
+                    //must be black to fit with borders
+                    Draw.color(0f, 0f, 0f, state.rules.staticColor.a);
+                    Draw.rect(Tmp.tr1, x + w/2f, y + h/2f, w, h);
+                }
+
+                Draw.color();
+                Draw.shader();
+            }
         }
 
         public void drawSpawns(float x, float y, float w, float h, float scaling){
@@ -281,7 +323,6 @@ public class MinimapMindow extends Mindow2{
             Lines.stroke(Scl.scl(1f));
 
             Draw.color(state.rules.waveTeam.color, Tmp.c2.set(state.rules.waveTeam.color).value(1.2f), Mathf.absin(Time.time, 16f, 1f));
-
 
             float curve = Mathf.curve(Time.time % 240f, 120f, 240f);
 
@@ -310,9 +351,9 @@ public class MinimapMindow extends Mindow2{
         /**
          * get texture, region in {@link MinimapRenderer}*/
         public @Nullable TextureRegion getRegion(){
-            var texture = getTextureRef();
+            var texture = renderer.minimap.getTexture();
             if(texture == null) return null;
-            var region = getRegionRef();
+            var region = renderer.minimap.getRegion();
             if(region == null) return null;
             //2 * sz = map width/height in tiles
             float sz = baseSize * zoom;
@@ -347,14 +388,5 @@ public class MinimapMindow extends Mindow2{
             font.getData().setScale(1f);
             Pools.free(l);
         }
-
-        public static Texture getTextureRef(){
-            return MI2Utils.getValue(renderer.minimap, "texture");
-        }
-
-        public static TextureRegion getRegionRef(){
-            return MI2Utils.getValue(renderer.minimap, "region");
-        }
-
     }
 }
