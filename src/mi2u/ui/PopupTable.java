@@ -26,16 +26,16 @@ public class PopupTable extends Table{
         float duration = 0.15f;
         if(Align.isTop(align)){
             actions(Actions.scaleTo(1f,0f), Actions.translateBy(0f, getPrefHeight()));
-            actions(Actions.parallel(Actions.scaleTo(1f, 1f, duration, Interp.fade), Actions.translateBy(0f , -getPrefHeight(), duration, Interp.fade)));
+            actions(Actions.parallel(Actions.scaleTo(1f, 1f, duration, Interp.fade), Actions.translateBy(0f , -getPrefHeight(), duration, Interp.fade), Actions.run(this::keepInScreen)));
         }else if(Align.isBottom(align)){
             actions(Actions.scaleTo(1f,0f));
-            actions(Actions.parallel(Actions.scaleTo(1f, 1f, duration, Interp.fade)));
+            actions(Actions.parallel(Actions.scaleTo(1f, 1f, duration, Interp.fade), Actions.run(this::keepInScreen)));
         }else if(Align.isLeft(align)){
             actions(Actions.scaleTo(0f,1f));
-            actions(Actions.parallel(Actions.scaleTo(1f, 1f, duration, Interp.fade)));
+            actions(Actions.parallel(Actions.scaleTo(1f, 1f, duration, Interp.fade), Actions.run(this::keepInScreen)));
         }else if(Align.isRight(align)){
             actions(Actions.scaleTo(0f,1f), Actions.translateBy(getPrefWidth(), 0f));
-            actions(Actions.parallel(Actions.scaleTo(1f, 1f, duration, Interp.fade), Actions.translateBy(-getPrefWidth() , 0f, duration, Interp.fade)));
+            actions(Actions.parallel(Actions.scaleTo(1f, 1f, duration, Interp.fade), Actions.translateBy(-getPrefWidth() , 0f, duration, Interp.fade), Actions.run(this::keepInScreen)));
         }
     }
 
