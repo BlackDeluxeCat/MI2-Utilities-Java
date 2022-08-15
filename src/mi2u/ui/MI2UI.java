@@ -162,6 +162,7 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("enUnitLogic", "@settings.main.unitLogic", false, null));
         settings.add(new CheckEntry("enUnitLogicTimer", "@settings.main.unitLogicTimer", false, null));
         settings.add(new CheckEntry("enUnitPath", "@settings.main.unitPath", false, null));
+        settings.add(new FieldEntry("enUnitPath.length", "@settings.main.enUnitPath.length", String.valueOf(40), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 10 && Strings.parseInt(s) <= 300, null));
 
         settings.add(new CheckEntry("disableWreck", "@settings.main.disableWreck", false, null));
         settings.add(new CheckEntry("disableUnit", "@settings.main.disableUnit", false, null));

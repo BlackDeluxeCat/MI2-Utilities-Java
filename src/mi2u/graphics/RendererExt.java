@@ -264,7 +264,8 @@ public class RendererExt{
                     Draw.reset();
                     Draw.z(Layer.power - 4f);
                     Tile tile = unit.tileOn();
-                    for(int tileIndex = 1; tileIndex <= 40; tileIndex++){
+                    int max = MI2USettings.getInt("enUnitPath.length", 40);
+                    for(int tileIndex = 1; tileIndex <= max; tileIndex++){
                         Tile nextTile = pathfinder.getTargetTile(tile, pathfinder.getField(unit.team, unit.pathType(), Pathfinder.fieldCore));
                         if(nextTile == null) break;
                         if(nextTile == tile) break;
@@ -450,6 +451,7 @@ public class RendererExt{
         if(b instanceof Unloader.UnloaderBuild ub) drawUnloader(ub);
         if(b instanceof Router.RouterBuild rb) drawRouter(rb);
         if(b instanceof DuctBridge.DuctBridgeBuild db) drawDuctBridge(db);
+        if(b instanceof DirectionalUnloader.DirectionalUnloaderBuild rb) drawDirectionalUnloader(rb);
     }
 
     public static void drawZoneShader(){
@@ -634,28 +636,13 @@ public class RendererExt{
         try{
             Unloader block = (Unloader)ub.block;
             Item drawItem = content.item(ub.rotations);
-            Building fromb = null, tob = null;
+            Unloader.ContainerStat fromCont = ub.dumpingFrom, toCont = ub.dumpingTo;
 
-            Building tmp;
-            boolean toFound = false, fromFound = false;
-            boolean canLoad, canUnload;
-            for(Unloader.ContainerStat c : ub.possibleBlocks){
-                canLoad = unloaderCanLoad.getBoolean(c);
-                canUnload = unloaderCanUnload.getBoolean(c);
-                tmp = MI2Utils.getValue(unloaderBuilding, c);
-                if(!toFound && canLoad){
-                    tob = tmp;
-                    toFound = true;
-                }
-                if(!fromFound && canUnload){
-                    fromb = tmp;
-                    fromFound = true;
-                }
-            }
+            Building fromb = MI2Utils.getValue(unloaderBuilding, fromCont), tob = MI2Utils.getValue(unloaderBuilding, toCont);
 
             Draw.color();
 
-            if(!(drawItem == null || fromb == null ||  tob == null)){
+            if(!(drawItem == null || fromb == null || tob == null)){
                 float x1 = 0f, x2 = 0f, y1 = 0f, y2 = 0f;
                 //0> 1^ 2< 3\/
                 switch(Mathf.mod(((int) Angles.angle(tob.x - ub.x, tob.y - ub.y) + 45) / 90, 4)){
@@ -729,6 +716,28 @@ public class RendererExt{
                 Draw.reset();
             }
         }catch(Exception e){if(!interval.get(30)) return; Log.err(e.toString());}
+    }
+
+    public static void drawDirectionalUnloader(DirectionalUnloader.DirectionalUnloaderBuild db){
+        Draw.color();
+        Building front = db.front(), back = db.back();
+        if(front == null || back == null || back.items == null || front.team != db.team || back.team != db.team || !back.canUnload() || !(((DirectionalUnloader)db.block).allowCoreUnload || !(back instanceof CoreBlock.CoreBuild))) return;
+        if(db.unloadItem != null){
+            Draw.alpha(db.unloadTimer / ((DirectionalUnloader)db.block).speed < 1f && back.items.has(db.unloadItem) && front.acceptItem(db, db.unloadItem) ? 0.8f : 0f);
+            Draw.rect(db.unloadItem.uiIcon, db.x, db.y, 4f, 4f);
+        }else{
+            var itemseq = content.items();
+            int itemc = itemseq.size;
+            for(int i = 0; i < itemc; i++){
+                Item item = itemseq.get((i + db.offset) % itemc);
+                if(back.items.has(item) && front.acceptItem(db, item)){
+                    Draw.alpha(0.8f);
+                    Draw.rect(item.uiIcon, db.x, db.y, 4f, 4f);
+                    break;
+                }
+            }
+        }
+        Draw.color();
     }
 
     public static void drawRouter(Router.RouterBuild rb){
