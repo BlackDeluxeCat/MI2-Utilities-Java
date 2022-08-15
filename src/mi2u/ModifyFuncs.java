@@ -138,31 +138,32 @@ public class ModifyFuncs{
     }
 
     public static void betterTopTable(){
-        if(!MI2USettings.getBool("modifyTopTable", false)) return;
+        if(MI2USettings.getBool("modifyTopTable", false)) {
+            Table topTable = Reflect.get(ui.hudfrag.blockfrag, "topTable");
+            if(topTable == null){
+                Log.infoTag("MI2U-Modify", "failed to replace info top-table");
+                return;
+            }
+            Element vanilla = topTable.getChildren().get(topTable.getChildren().size - 1);
+            topTable.clearChildren();
 
-        Table topTable = Reflect.get(ui.hudfrag.blockfrag, "topTable");
-        if(topTable == null){
-            Log.infoTag("MI2U-Modify", "failed to replace info top-table");
-            return;
+            topTable.add(HoverTopTable.hoverInfo).growX();
+            topTable.row();
+            topTable.add(vanilla).growX().visible(() -> control.input.block != null || MI2Utils.getValue(ui.hudfrag.blockfrag, "menuHoverBlock") != null);
+            topTable.row();
+            topTable.add(new Element()).height(0.5f).update(t -> {
+                var cell = topTable.getCell(vanilla);
+                if(cell != null) cell.height(vanilla.getPrefHeight() * (vanilla.visible ? 1f:0f) / Scl.scl() + 0.5f);   //affected by ui scale, I don't know why it's necessary here.
+                MI2Utils.setValue(ui.hudfrag.blockfrag, "hover", HoverTopTable.hoverInfo.unit);
+            });
+            topTable.visible(() -> {
+                vanilla.updateVisibility();
+                return HoverTopTable.hoverInfo.hasInfo() || vanilla.visible;
+            });
         }
-        Element vanilla = topTable.getChildren().get(topTable.getChildren().size - 1);
-        topTable.clearChildren();
 
-        topTable.add(HoverTopTable.hoverInfo).growX();
-        topTable.row();
-        topTable.add(vanilla).growX().visible(() -> control.input.block != null || MI2Utils.getValue(ui.hudfrag.blockfrag, "menuHoverBlock") != null);
-        topTable.row();
-        topTable.add(new Element()).height(0.5f).update(t -> {
-            var cell = topTable.getCell(vanilla);
-            if(cell != null) cell.height(vanilla.getPrefHeight() * (vanilla.visible ? 1f:0f) / Scl.scl() + 0.5f);   //affected by ui scale, I don't know why it's necessary here.
-            MI2Utils.setValue(ui.hudfrag.blockfrag, "hover", HoverTopTable.hoverInfo.unit);
-        });
-        topTable.visible(() -> {
-            vanilla.updateVisibility();
-            return HoverTopTable.hoverInfo.hasInfo() || vanilla.visible;
-        });
         Table blockCatTable = MI2Utils.getValue(ui.hudfrag.blockfrag, "blockCatTable");
-        //TODO make height a setting
+
         ((Table)blockCatTable.getCells().first().get()).getCells().first().maxHeight(Mathf.clamp(MI2USettings.getInt("blockSelectTableHeight", 194), 50, 1000));
         blockCatTable.getCells().get(1).height(Mathf.clamp(MI2USettings.getInt("blockSelectTableHeight", 194) + 52, 50, 1000));
     }
