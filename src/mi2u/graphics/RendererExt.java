@@ -38,11 +38,13 @@ import static mindustry.Vars.*;
  */
 public class RendererExt{
     protected static Interval interval = new Interval();
-    protected static ObjectMap<Unit, Vec2> players = new ObjectMap<Unit, Vec2>();
+    protected static ObjectMap<Unit, Vec2> players = new ObjectMap<>();
     protected static Seq<Unit> hiddenUnit = new Seq<>();
     public static Field itemBridgeBuffer = MI2Utils.getField(BufferedItemBridge.BufferedItemBridgeBuild.class, "buffer"),
             itemBridgeBufferBuffer = MI2Utils.getField(ItemBuffer.class, "buffer"), itemBridgeBufferIndex = MI2Utils.getField(ItemBuffer.class, "index"),
             unloaderBuilding = MI2Utils.getField(Unloader.ContainerStat.class, "building");
+
+    public static boolean enPlayerCursor, enUnitHpBar, enUnitRangeZone, enOverdriveZone, enMenderZone, enTurretZone, enBlockHpBar, enDistributionReveal, enSpawnZone, disableWreck, disableUnit, disableBuilding, disableBullet, shadow;
 
     public static void initBase(){
         Shadow.init();
@@ -66,41 +68,56 @@ public class RendererExt{
         Events.run(EventType.Trigger.update, () -> {
             fullAI.unit(player.unit());
             fullAI.updateUnit();
+            updateSettings();
         });
+    }
+
+    public static void updateSettings(){
+        enPlayerCursor = MI2USettings.getBool("enPlayerCursor", false);
+        enUnitHpBar = MI2USettings.getBool("enUnitHpBar");
+        enUnitRangeZone = MI2USettings.getBool("enUnitRangeZone", false);
+        enOverdriveZone = MI2USettings.getBool("enOverdriveZone", false);
+        enMenderZone = MI2USettings.getBool("enMenderZone", false);
+        enTurretZone = MI2USettings.getBool("enTurretZone", false);
+        enBlockHpBar = MI2USettings.getBool("enBlockHpBar", true);
+        enDistributionReveal = MI2USettings.getBool("enDistributionReveal", false);
+        enSpawnZone = MI2USettings.getBool("enSpawnZone", true);
+        disableWreck = MI2USettings.getBool("disableWreck", false);
+        disableUnit = MI2USettings.getBool("disableUnit", false);
+        disableBuilding = MI2USettings.getBool("disableBuilding", false);
+        disableBullet = MI2USettings.getBool("disableBullet", false);
+        shadow = MI2USettings.getBool("shadow", false);
     }
 
     public static void drawBase(){
         if(!state.isGame()) return;
-        if(!MI2USettings.getBool("disableUnit", false)){
+        if(!disableUnit){
             hiddenUnit.select(Healthc::isValid).each(u -> Groups.draw.add(u));
             hiddenUnit.clear();
         }
 
+        drawZoneShader();
+        if(shadow) Shadow.applyShader();
+
         Groups.draw.each(d -> {
-            if(d instanceof Decal && MI2USettings.getBool("disableWreck", false)) d.remove();
+            if(d instanceof Decal && disableWreck) d.remove();
             if(d instanceof Unit u){
-                if(MI2USettings.getBool("disableUnit", false)){
+                if(disableUnit){
                     Groups.draw.remove(u);
                     hiddenUnit.add(u);
                 }else{
                     drawUnit(u);
                 }
             }
-            if(d instanceof Bullet b && MI2USettings.getBool("disableBullet", false)) Groups.draw.remove(b);
+            if(d instanceof Bullet b && disableBullet) Groups.draw.remove(b);
         });
 
         Groups.draw.remove(Shadow.indexGetter);
         Groups.draw.add(Shadow.indexGetter);
 
-        drawZoneShader();
-        if(MI2USettings.getBool("shadow", false)) Shadow.applyShader();
-
         Seq<Tile> tiles = MI2Utils.getValue(renderer.blocks, "tileview");
         if(tiles != null){
-            if(MI2USettings.getBool("disableBuilding", false)) tiles.clear();
-            boolean enOverdriveZone = MI2USettings.getBool("enOverdriveZone", false), enMenderZone = MI2USettings.getBool("enMenderZone", false),
-            enBlockHpBar = MI2USettings.getBool("enBlockHpBar", true), enDistributionReveal = MI2USettings.getBool("enDistributionReveal", false),
-            enTurretZone = MI2USettings.getBool("enTurretZone", false);
+            if(disableBuilding) tiles.clear();
 
             for(var tile : tiles){
                 if(tile.build == null) continue;
@@ -113,18 +130,18 @@ public class RendererExt{
                 Draw.reset();
             }
 
-            if(MI2USettings.getBool("shadow", false)){
+            if(shadow){
                 Shadow.draw(tiles);
             }
         }
-        if(MI2USettings.getBool("enSpawnZone", true)) drawSpawnPoint();
+        if(enSpawnZone) drawSpawnPoint();
 
         Draw.reset();
     }
 
     public static void drawUnit(Unit unit){
         //Draw aim point
-        if(unit.isPlayer() && MI2USettings.getBool("enPlayerCursor", false) && Mathf.len(unit.aimX - unit.x, unit.aimY - unit.y) < 4800f){
+        if(unit.isPlayer() && enPlayerCursor && Mathf.len(unit.aimX - unit.x, unit.aimY - unit.y) < 4800f){
             if(players.get(unit) != null){
                 players.get(unit).lerp(unit.aimX, unit.aimY, 0.4f);
             }else{
@@ -197,7 +214,7 @@ public class RendererExt{
         if(Math.abs(unit.x - Core.camera.position.x) <= (Core.camera.width / 2) && Math.abs(unit.y - Core.camera.position.y) <= (Core.camera.height / 2)){
             //display healthbar by MI2
             Draw.z(Layer.shields + 6f);
-            if(MI2USettings.getBool("enUnitHpBar")){
+            if(enUnitHpBar){
                 drawUnitHpBar(unit);
             }
 
@@ -230,6 +247,19 @@ public class RendererExt{
 
                     Draw.reset();
                 }
+            }
+
+            if(enUnitRangeZone){
+                float z = Draw.z();
+                float range = unit.range();
+
+                Draw.color(unit.team.color);
+                Draw.z(TurretZoneDrawer.getLayer(unit.team.id));
+                Draw.alpha(0.05f);
+                Fill.poly(unit.x, unit.y, (int)(range) / 4, range);
+
+                Draw.z(z);
+                Draw.color();
             }
 
             //v7 rts pathfind render, making your device a barbecue.
@@ -310,18 +340,9 @@ public class RendererExt{
                 Lines.line(build.x - build.hitSize() * halfwidth, build.y + offy, build.x + build.hitSize() * halfwidth, build.y + offy);
             }
 
-            //Lines.stroke(4f);
-            //Draw.color(build.team.color, 0.5f);
-            //Lines.line(build.x - build.hitSize() * halfwidth, build.y + offy, build.x + build.hitSize() * halfwidth, build.y + offy);
-
             Draw.color((build.health > 0 ? Pal.health:Color.gray), 0.8f);
-            //Lines.stroke(2);
-            /*Lines.line(
-                    build.x - build.hitSize() * halfwidth, build.y + offy,
-                    build.x + build.hitSize() * ((build.health > 0 ? build.health : Mathf.maxZero(build.maxHealth + build.health)) / build.maxHealth * width - halfwidth), build.y + offy);
-            */
-            barLength = Mathf.clamp(build.health / build.maxHealth);
 
+            barLength = Mathf.clamp(build.health / build.maxHealth);
             x = build.x - (1f - barLength) * halfwidth * build.hitSize();
             y = build.y + offy;
             h = 2f;
@@ -471,14 +492,14 @@ public class RendererExt{
 
     public static void drawZoneShader(){
         if(Core.settings.getBool("animatedshields")){
-            if(MI2USettings.getBool("enOverdriveZone", false) && MI2UShaders.odzone != null){
+            if(enOverdriveZone && MI2UShaders.odzone != null){
                 Draw.drawRange(91.1f, 0.02f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
                     renderer.effectBuffer.end();
                     renderer.effectBuffer.blit(MI2UShaders.odzone);
                 });
             }
 
-            if(MI2USettings.getBool("enMenderZone", false)){
+            if(enMenderZone){
                 if(MI2UShaders.mdzone != null){
                     Draw.drawRange(91.2f, 0.02f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
                         renderer.effectBuffer.end();
@@ -493,7 +514,7 @@ public class RendererExt{
                 }
             }
 
-            if(MI2USettings.getBool("enTurretZone", false) && MI2UShaders.turretzone != null){
+            if(enTurretZone && MI2UShaders.turretzone != null){
                 TurretZoneDrawer.applyShader();
             }
         }
