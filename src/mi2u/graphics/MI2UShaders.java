@@ -124,7 +124,8 @@ public class MI2UShaders{
             setUniformf("u_texsize", Core.camera.width, Core.camera.height);
             setUniformf("u_invsize", 1f/Core.camera.width, 1f/Core.camera.height);
 
-            setUniformf("u_lightcount", (float)Shadow.size);
+            setUniformf("u_ambientLight", Vars.state.rules.ambientLight.a);
+            setUniformi("u_lightcount", Shadow.size);
             setUniform2fv("u_lights", data.items, 0, data.size);
         }
     }
