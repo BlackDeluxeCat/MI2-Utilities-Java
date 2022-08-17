@@ -4,21 +4,27 @@ import arc.Core;
 import arc.files.Fi;
 import arc.graphics.gl.Shader;
 import arc.scene.ui.layout.Scl;
+import arc.struct.FloatSeq;
+import arc.util.Log;
+import arc.util.Strings;
 import arc.util.Time;
 import mindustry.Vars;
-import mindustry.graphics.Shaders;
+
+import java.util.Arrays;
 
 public class MI2UShaders{
     public static OverDriverZoneShader odzone;
     public static MenderZoneShader mdzone;
     public static RegenZoneShader rgzone;
     public static TurretZoneShader turretzone;
+    public static ShadowShader shadow;
 
     public static void load(){
         odzone = new OverDriverZoneShader();
         mdzone = new MenderZoneShader();
         rgzone = new RegenZoneShader();
         turretzone = new TurretZoneShader();
+        shadow = new ShadowShader();
     }
 
     public static class MI2UShader extends Shader{
@@ -100,6 +106,26 @@ public class MI2UShaders{
                     Core.camera.position.y - Core.camera.height / 2);
             setUniformf("u_texsize", Core.camera.width, Core.camera.height);
             setUniformf("u_invsize", 1f/Core.camera.width, 1f/Core.camera.height);
+        }
+    }
+
+    public static class ShadowShader extends MI2UShader{
+        public FloatSeq data = new FloatSeq();
+        public ShadowShader(){
+            super("shadow.frag", "screenspace.vert");
+        }
+
+        @Override
+        public void apply(){
+            Shadow.lightsUniformData(data);
+            setUniformf("u_offset",
+                    Core.camera.position.x - Core.camera.width / 2,
+                    Core.camera.position.y - Core.camera.height / 2);
+            setUniformf("u_texsize", Core.camera.width, Core.camera.height);
+            setUniformf("u_invsize", 1f/Core.camera.width, 1f/Core.camera.height);
+
+            setUniformf("u_lightcount", (float)Shadow.size);
+            setUniform2fv("u_lights", data.items, 0, data.size);
         }
     }
 }

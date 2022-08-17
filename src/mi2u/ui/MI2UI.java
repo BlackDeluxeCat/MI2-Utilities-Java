@@ -233,5 +233,6 @@ public class MI2UI extends Mindow2{
         });
 
         settings.add(new CheckEntry("showUIContainer", "@settings.main.container", false, b -> container.addTo(b?Core.scene.root:null)));
+        settings.add(new CheckEntry("shadow", "@settings.main.shadow", false, null));
     }
 }

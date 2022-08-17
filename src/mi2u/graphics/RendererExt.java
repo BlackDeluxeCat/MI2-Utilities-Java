@@ -45,6 +45,8 @@ public class RendererExt{
             unloaderBuilding = MI2Utils.getField(Unloader.ContainerStat.class, "building");
 
     public static void initBase(){
+        Shadow.init();
+
         Events.on(EventType.WorldLoadEvent.class, e -> {
             players.clear();
             hiddenUnit.clear();
@@ -54,6 +56,7 @@ public class RendererExt{
         Events.run(EventType.Trigger.draw, () -> {
             players.each((u, v) -> {if(u == null||!u.isPlayer()||!u.isValid()) players.remove(u);});
             drawBase();
+            Shadow.indexGetter.add();
         });
 
         Events.run(EventType.Trigger.drawOver, () -> {
@@ -86,7 +89,12 @@ public class RendererExt{
             if(d instanceof Bullet b && MI2USettings.getBool("disableBullet", false)) Groups.draw.remove(b);
         });
 
+        Groups.draw.remove(Shadow.indexGetter);
+        Groups.draw.add(Shadow.indexGetter);
+
         drawZoneShader();
+        if(MI2USettings.getBool("shadow", false)) Shadow.applyShader();
+
         Seq<Tile> tiles = MI2Utils.getValue(renderer.blocks, "tileview");
         if(tiles != null){
             if(MI2USettings.getBool("disableBuilding", false)) tiles.clear();
@@ -105,6 +113,9 @@ public class RendererExt{
                 Draw.reset();
             }
 
+            if(MI2USettings.getBool("shadow", false)){
+                Shadow.draw(tiles);
+            }
         }
         if(MI2USettings.getBool("enSpawnZone", true)) drawSpawnPoint();
 

@@ -17,6 +17,7 @@ public class TurretZoneDrawer{
     }
 
     public static void applyShader(){
+        if(MI2UShaders.turretzone == null) return;
         teams.each(id -> {
             if(time.check(id, 10f)) return;
             Draw.drawRange(getLayer(id), 0.001f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
