@@ -88,13 +88,14 @@ public class Shadow{
         if(fCircleX == null) fCircleX = MI2Utils.getField(circle.getClass(), "x");
         if(fCircleY == null) fCircleY = MI2Utils.getField(circle.getClass(), "y");
         if(fCircleR == null) fCircleR = MI2Utils.getField(circle.getClass(), "radius");
-        //if(fCircleC == null) fCircleC = MI2Utils.getField(circle.getClass(), "color");
+        if(fCircleC == null) fCircleC = MI2Utils.getField(circle.getClass(), "color");
 
         tmpc[0] = fCircleX == null ? -1f : MI2Utils.getValue(fCircleX, circle);
         tmpc[1] = fCircleY == null ? -1f : MI2Utils.getValue(fCircleY, circle);
         var tile = world.tileWorld(tmpc[0], tmpc[1]);
         tmpc[2] = tile == null ? 0f : tile.build != null && Mathf.dst(tile.build.x, tile.build.y, tmpc[0], tmpc[1]) < 0.1f ? tile.block().size : 0f;   //whether the light comes from a building
         tmpc[3] = fCircleR == null ? -1f : MI2Utils.getValue(fCircleR, circle);
+        tmpc[3] *= fCircleC == null ? 1f : MI2UTmp.c1.abgr8888(MI2Utils.getValue(fCircleC, circle)).a;
         return tmpc;
     }
 

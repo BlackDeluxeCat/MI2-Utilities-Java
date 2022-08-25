@@ -1,6 +1,7 @@
-#define HIGHP
-#define PRECISION 1.0
-#define LIGHTH 5.0
+#define LOWP
+#define PRECISION 4.0
+#define EDGE_PRECISION 1.0
+#define LIGHTH 4.0
 #define MAX_LIGHTS 400
 uniform sampler2D u_texture;
 uniform vec2 u_texsize;
@@ -41,24 +42,28 @@ void main(){
         if(i == -1){
             //ambientLight
             light.xy = worldxy + 24.0;
-            light.w = 64.0;
+            light.w = 48.0;
         }else{
             light = unpack(u_lights[i]);
         }
 
 
         if(light.x < -10000.0) continue;
-        float radius = light.w;
-        float sourceSize = light.z;
+        float radius = light.w * 0.8 + 20.0;
 
         float dst = distance(worldxy, light.xy);
         if(dst < radius){
             bool isShadow = false;
-
-            for(float j = 0.0; j < min((dst - sourceSize), dst / LIGHTH); j += PRECISION){
+            float shadowLen = min((dst - light.z), dst / LIGHTH);
+            for(float j = 0.0; j < shadowLen; j += EDGE_PRECISION){
                 vec2 blockscreenxy = T + normalize(light.xy - worldxy) * j * u_invsize;
                 vec4 shadow = texture2D(u_texture, blockscreenxy);
                 if(shadow.a > 0.1){
+                    do{
+                        j -= PRECISION;
+                        blockscreenxy = T + normalize(light.xy - worldxy) * j * u_invsize;
+                        shadow = texture2D(u_texture, blockscreenxy);
+                    }while(shadow.a < 0.1 || j <= 0.0);
                     shadowness = max(shadowness, 1.0 - dst / radius);
                     isShadow = true;
                     break;
