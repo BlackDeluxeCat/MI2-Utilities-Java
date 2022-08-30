@@ -229,24 +229,6 @@ public class RendererExt{
                     Lines.dashCircle(logicai.moveX, logicai.moveY, logicai.moveRad);
                     Draw.reset();
                 }
-
-                //logicai timers
-                //if(Core.settings.getBool("unitLogicTimerBars")){
-                if(MI2USettings.getBool("enUnitLogicTimer")){
-                    Lines.stroke(2f);
-                    Draw.color(Pal.heal);
-                    Lines.line(unit.x - (unit.hitSize() / 2f), unit.y - (unit.hitSize() / 2f), unit.x - (unit.hitSize() / 2f), unit.y + unit.hitSize() * (logicai.controlTimer / LogicAI.logicControlTimeout - 0.5f));
-
-                    Lines.stroke(2f);
-                    Draw.color(Pal.items);
-                    Lines.line(unit.x - (unit.hitSize() / 2f) - 1f, unit.y - (unit.hitSize() / 2f), unit.x - (unit.hitSize() / 2f) - 1f, unit.y + unit.hitSize() * (logicai.itemTimer / LogicAI.transferDelay - 0.5f));
-
-                    Lines.stroke(2f);
-                    Draw.color(Pal.items);
-                    Lines.line(unit.x - (unit.hitSize() / 2f) - 1.5f, unit.y - (unit.hitSize() / 2f), unit.x - (unit.hitSize() / 2f) - 1.5f, unit.y + unit.hitSize() * (logicai.payTimer / LogicAI.transferDelay - 0.5f));
-
-                    Draw.reset();
-                }
             }
 
             if(enUnitRangeZone){
