@@ -51,6 +51,7 @@ public class MI2Utilities extends Mod{
                 RendererExt.initBase();
                 ModifyFuncs.modifyVanilla();
                 RtsCommand.init();
+                BuildingStatsPopup.init();
             });
 
             //popup too early will cause font rendering bug.

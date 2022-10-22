@@ -197,7 +197,7 @@ public class CoreInfoMindow extends Mindow2{
 
             ipt.row();
 
-            if(MI2USettings.getBool(mindowName + ".showCoreItems")){
+            if(MI2USettings.getBool(mindowName + ".showCoreItems", true)){
                 ipt.pane(iut -> {
                     int i = 0;
 
@@ -235,7 +235,7 @@ public class CoreInfoMindow extends Mindow2{
                 }).with(c -> c.setFadeScrollBars(true));
             }
 
-            if(MI2USettings.getBool(mindowName + ".showPowerGraphs")){
+            if(MI2USettings.getBool(mindowName + ".showPowerGraphs", true)){
                 ipt.row();
                 ipt.add(pg).fillX();
             }

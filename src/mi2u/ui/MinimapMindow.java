@@ -19,6 +19,7 @@ import mi2u.input.InputOverwrite;
 import mi2u.io.*;
 import mi2u.io.MI2USettings.*;
 import mindustry.core.*;
+import mindustry.game.EventType;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.input.*;
@@ -31,6 +32,8 @@ public class MinimapMindow extends Mindow2{
     public static Minimap2 m = new Minimap2(200f);
     public static WorldFinderTable finderTable = new WorldFinderTable();
     public static PopupTable buttons;
+
+    public boolean catching = false;
     public MinimapMindow(){
         super("@minimap.MI2U");
     }
@@ -45,6 +48,12 @@ public class MinimapMindow extends Mindow2{
                 finderTable.popup();
                 finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
             }
+        });
+
+        Events.on(EventType.TapEvent.class, e -> {
+            if(!catching) return;
+            catching = false;
+            BuildingStatsPopup.popNew(e.tile.build);
         });
 
         buttons = new PopupTable();
@@ -68,6 +77,9 @@ public class MinimapMindow extends Mindow2{
             }).growX();
 
             t.table(tt -> {
+                tt.button(Iconc.downOpen + "", MI2UVars.textbtoggle, () -> {
+                    catching = !catching;
+                }).width(32f).growY().checked(b -> catching);
                 tt.button(Iconc.zoom + "", MI2UVars.textb, () -> {
                     finderTable.popup();
                     finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
@@ -137,7 +149,7 @@ public class MinimapMindow extends Mindow2{
                     if(renderer.minimap.getTexture() != null){
                         Draw.alpha(parentAlpha);
                         drawEntities(x, y, width, height, 0.75f, drawLabel);
-                        drawSpawns(x, y, width, height, 0.75f);
+                        if(drawSpawn) drawSpawns(x, y, width, height, 0.75f);
                     }
     
                     clipEnd();

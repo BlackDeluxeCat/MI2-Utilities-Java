@@ -8,6 +8,7 @@ import arc.math.Interp;
 import arc.math.Mathf;
 import arc.scene.*;
 import arc.scene.actions.Actions;
+import arc.scene.actions.TemporalAction;
 import arc.scene.ui.TextField;
 import arc.scene.ui.layout.Table;
 import arc.struct.*;
@@ -21,7 +22,7 @@ import mindustry.logic.LogicDialog;
 import mindustry.ui.Styles;
 
 import static mi2u.MI2UVars.*;
-import static mindustry.Vars.ui;
+import static mindustry.Vars.*;
 
 public class LogicHelperMindow extends Mindow2{
     public Mode mode;
@@ -299,6 +300,7 @@ public class LogicHelperMindow extends Mindow2{
             if(index < 0) index = results.size - 1;
             Element e = results.get(index);
             e.localToAscendantCoordinates(ld.canvas.pane.getWidget(), MI2UTmp.v2);
+            //may not fit UI scaling config
             ld.canvas.pane.setScrollPercentY(1 - (MI2UTmp.v2.y-0.5f*ld.canvas.pane.getScrollHeight())/(ld.canvas.pane.getWidget().getPrefHeight()-ld.canvas.pane.getScrollHeight()));
             blinkElement(e);
             if(e instanceof TextField tf) {
@@ -311,6 +313,9 @@ public class LogicHelperMindow extends Mindow2{
 
     private void blinkElement(Element e){
         MI2UTmp.c2.set(e.color);
+        e.getActions().each(act -> {
+            if(act instanceof TemporalAction tm) tm.finish();
+        });
         e.actions(Actions.delay(0.5f), Actions.color(Color.acid, 0.1f), Actions.color(MI2UTmp.c2, 0.5f, Interp.fade), Actions.color(Color.acid, 0.1f), Actions.color(MI2UTmp.c2, 0.5f, Interp.fade));
     }
 
