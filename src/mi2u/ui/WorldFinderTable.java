@@ -127,7 +127,7 @@ public class WorldFinderTable extends PopupTable{
         if(seq == null) return;
 
         seq.each(pos -> {
-            if(MI2UTmp.v1.set(Point2.x(pos), Point2.y(pos)).scl(tilesize).sub(player.unit().x, player.unit().y).len() > range) return;
+            if(range == -1f || MI2UTmp.v1.set(Point2.x(pos), Point2.y(pos)).scl(tilesize).sub(player.unit().x, player.unit().y).len() > range) return;
             if(player.unit().plans().size > 1000) return;
             if(world.tile(pos).build != null && to == Blocks.air){
                 //break
