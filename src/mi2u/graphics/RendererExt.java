@@ -56,7 +56,7 @@ public class RendererExt{
         });
 
         Events.run(EventType.Trigger.draw, () -> {
-            players.each((u, v) -> {if(u == null||!u.isPlayer()||!u.isValid()) players.remove(u);});
+            players.each((u, v) -> {if(!u.isPlayer()||!u.isValid()) players.remove(u);});
             drawBase();
             Shadow.indexGetter.add();
         });
