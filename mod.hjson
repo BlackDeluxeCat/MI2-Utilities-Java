@@ -77,7 +77,7 @@ description: "# MI2-Utilities Java
 - MI2U选项存储在$Mindustry/mods/MI2U_Settings/目录下"
 
 #the mod version
-version: 0.13.0
+version: 0.13.1
 
 #the minimum game build required to run this mod
 minGameVersion: 139
