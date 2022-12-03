@@ -7,6 +7,7 @@ import arc.math.Mathf;
 import arc.math.geom.Position;
 import arc.struct.FloatSeq;
 import arc.struct.Seq;
+import arc.struct.Sort;
 import arc.util.Log;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
@@ -26,7 +27,7 @@ import static mindustry.Vars.*;
 public class Shadow{
     public static Field fCircles = MI2Utils.getField(LightRenderer.class, "circles"), fSize = MI2Utils.getField(LightRenderer.class, "circleIndex"), fCircleX, fCircleY, fCircleR, fCircleC;
     public static int size = 0;
-    public static float[] tmpc = new float[4];
+    public static Seq<float[]> floatlights = new Seq<>();
 
     public static float layer = Layer.block - 2f;
 
@@ -37,7 +38,21 @@ public class Shadow{
     }
 
     public static void getIndex(){
-        size = Math.min(MI2Utils.getValue(fSize, renderer.lights), 400);
+        size = MI2Utils.getValue(fSize, renderer.lights);
+    }
+
+    public static void deepReflectObject(float[] tmpc, Object circle){
+        if(fCircleX == null) fCircleX = MI2Utils.getField(circle.getClass(), "x");
+        if(fCircleY == null) fCircleY = MI2Utils.getField(circle.getClass(), "y");
+        if(fCircleR == null) fCircleR = MI2Utils.getField(circle.getClass(), "radius");
+        if(fCircleC == null) fCircleC = MI2Utils.getField(circle.getClass(), "color");
+
+        tmpc[0] = fCircleX == null ? -1f : MI2Utils.getValue(fCircleX, circle);
+        tmpc[1] = fCircleY == null ? -1f : MI2Utils.getValue(fCircleY, circle);
+        var tile = world.tileWorld(tmpc[0], tmpc[1]);
+        tmpc[2] = tile == null ? 0f : tile.build != null && Mathf.dst(tile.build.x, tile.build.y, tmpc[0], tmpc[1]) < 0.1f ? tile.block().size : 0f;   //whether the light comes from a building
+        tmpc[3] = fCircleR == null ? -1f : MI2Utils.getValue(fCircleR, circle);
+        tmpc[3] *= fCircleC == null ? 1f : MI2UTmp.c1.abgr8888(MI2Utils.getValue(fCircleC, circle)).a;
     }
 
     public static void draw(Seq<Tile> tiles){
@@ -46,8 +61,8 @@ public class Shadow{
             //draw white/shadow color depending on blend
             Draw.color((!tile.block().hasShadow || (state.rules.fog && tile.build != null && !tile.build.wasVisible)) ? Color.clear : Color.black);
             float bs = tile.block().size * tilesize;
-            //Draw.rect(tile.block().region, tile.build == null ? tile.worldx() : tile.build.x, tile.build == null ? tile.worldy() : tile.build.y, bs, bs);
-            Fill.rect(tile.build == null ? tile.worldx() : tile.build.x, tile.build == null ? tile.worldy() : tile.build.y, bs, bs);
+            Draw.rect(tile.block().fullIcon, tile.build == null ? tile.worldx() : tile.build.x, tile.build == null ? tile.worldy() : tile.build.y, bs, bs, tile.build == null ? 0f : tile.build.drawrot());
+            //Fill.rect(tile.build == null ? tile.worldx() : tile.build.x, tile.build == null ? tile.worldy() : tile.build.y, bs, bs);
         }
     }
 
@@ -67,8 +82,17 @@ public class Shadow{
         if(seq == null) return;
 
         for(int i = 0; i < size; i++){
-            if(i >= seq.size) break;
-            pack(deepReflectObject(seq.get(i)));
+            if(i >= floatlights.size){
+                floatlights.add(new float[4]);
+            }
+            deepReflectObject(floatlights.get(i), seq.get(i));
+        }
+
+        floatlights.sort(fs -> -fs[3]);
+
+        if(floatlights.isEmpty()) return;
+        for(int i = 0; i < Math.min(floatlights.size, 400); i++){
+            pack(floatlights.get(i));
             data.addAll(MI2UTmp.v3.x, MI2UTmp.v3.y);
         }
     }
@@ -82,21 +106,6 @@ public class Shadow{
                 + Mathf.floor(values[2]) * 50000f,
                 Mathf.floor((values[1] + 100f) * 5)
                 + Mathf.floor(values[3]) * 50000f);
-    }
-
-    public static float[] deepReflectObject(Object circle){
-        if(fCircleX == null) fCircleX = MI2Utils.getField(circle.getClass(), "x");
-        if(fCircleY == null) fCircleY = MI2Utils.getField(circle.getClass(), "y");
-        if(fCircleR == null) fCircleR = MI2Utils.getField(circle.getClass(), "radius");
-        if(fCircleC == null) fCircleC = MI2Utils.getField(circle.getClass(), "color");
-
-        tmpc[0] = fCircleX == null ? -1f : MI2Utils.getValue(fCircleX, circle);
-        tmpc[1] = fCircleY == null ? -1f : MI2Utils.getValue(fCircleY, circle);
-        var tile = world.tileWorld(tmpc[0], tmpc[1]);
-        tmpc[2] = tile == null ? 0f : tile.build != null && Mathf.dst(tile.build.x, tile.build.y, tmpc[0], tmpc[1]) < 0.1f ? tile.block().size : 0f;   //whether the light comes from a building
-        tmpc[3] = fCircleR == null ? -1f : MI2Utils.getValue(fCircleR, circle);
-        tmpc[3] *= fCircleC == null ? 1f : MI2UTmp.c1.abgr8888(MI2Utils.getValue(fCircleC, circle)).a;
-        return tmpc;
     }
 
     //hack way to get circles index

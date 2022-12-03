@@ -3,6 +3,7 @@ package mi2u.graphics;
 import arc.Core;
 import arc.files.Fi;
 import arc.graphics.gl.Shader;
+import arc.math.Mathf;
 import arc.scene.ui.layout.Scl;
 import arc.struct.FloatSeq;
 import arc.util.Log;
@@ -118,6 +119,7 @@ public class MI2UShaders{
         @Override
         public void apply(){
             Shadow.lightsUniformData(data);
+            setUniformf("u_EDGE_PRECISION", 1f / Mathf.pow(Vars.renderer.getDisplayScale(), 0.6f));
             setUniformf("u_offset",
                     Core.camera.position.x - Core.camera.width / 2,
                     Core.camera.position.y - Core.camera.height / 2);

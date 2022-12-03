@@ -158,3 +158,5 @@ android/libs/
 *.bat
 *.jar
 *.psd
+
+Game/*

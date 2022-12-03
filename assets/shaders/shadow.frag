@@ -1,8 +1,7 @@
 #define LOWP
-#define PRECISION 4.0
-#define EDGE_PRECISION 1.0
 #define LIGHTH 4.0
 #define MAX_LIGHTS 400
+uniform float u_EDGE_PRECISION;
 uniform sampler2D u_texture;
 uniform vec2 u_texsize;
 uniform vec2 u_invsize;
@@ -55,15 +54,10 @@ void main(){
         if(dst < radius){
             bool isShadow = false;
             float shadowLen = min((dst - light.z), dst / LIGHTH);
-            for(float j = 0.0; j < shadowLen; j += EDGE_PRECISION){
+            for(float j = 0.0; j < shadowLen; j += u_EDGE_PRECISION){
                 vec2 blockscreenxy = T + normalize(light.xy - worldxy) * j * u_invsize;
                 vec4 shadow = texture2D(u_texture, blockscreenxy);
                 if(shadow.a > 0.1){
-                    do{
-                        j -= PRECISION;
-                        blockscreenxy = T + normalize(light.xy - worldxy) * j * u_invsize;
-                        shadow = texture2D(u_texture, blockscreenxy);
-                    }while(shadow.a < 0.1 || j <= 0.0);
                     shadowness = max(shadowness, 1.0 - dst / radius);
                     isShadow = true;
                     break;
