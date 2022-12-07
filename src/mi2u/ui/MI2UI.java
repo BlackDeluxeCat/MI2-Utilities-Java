@@ -9,7 +9,6 @@ import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.*;
 import mi2u.game.*;
-import mi2u.graphics.Shadow;
 import mi2u.input.*;
 import mi2u.io.*;
 import mi2u.io.MI2USettings.*;
@@ -65,9 +64,6 @@ public class MI2UI extends Mindow2{
                     img.setColor(!b.isChecked() ? Color.white : SpeedController.lowerThanMin() ? Color.scarlet : Color.lime);
                 });
             }).grow();
-
-            tt.button("Depth",textbtoggle, () -> Shadow.depthTex = !Shadow.depthTex).minSize(24f).checked(b->Shadow.depthTex);
-            tt.button("shadow",textbtoggle, () -> Shadow.shadow = !Shadow.shadow).minSize(24f).checked(b->Shadow.shadow);
         }).growX();
 
         cont.row();
@@ -237,6 +233,5 @@ public class MI2UI extends Mindow2{
         });
 
         settings.add(new CheckEntry("showUIContainer", "@settings.main.container", false, b -> container.addTo(b?Core.scene.root:null)));
-        settings.add(new CheckEntry("shadow", "@settings.main.shadow", false, null));
     }
 }

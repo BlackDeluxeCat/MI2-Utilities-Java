@@ -2,11 +2,11 @@ package mi2u;
 
 import arc.*;
 import arc.func.*;
-import arc.graphics.Color;
-import arc.graphics.g2d.TextureRegion;
+import arc.graphics.*;
+import arc.graphics.g2d.*;
 import arc.math.*;
-import arc.scene.Element;
-import arc.scene.style.TextureRegionDrawable;
+import arc.scene.*;
+import arc.scene.style.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.io.*;
@@ -15,12 +15,9 @@ import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
-import mindustry.io.*;
-import mindustry.maps.*;
-import mindustry.maps.filters.*;
 import mindustry.type.*;
 import mindustry.ui.*;
-import mindustry.ui.dialogs.BaseDialog;
+import mindustry.ui.dialogs.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.turrets.*;
 import mindustry.world.blocks.power.BeamNode;
@@ -28,9 +25,7 @@ import mindustry.world.blocks.power.ImpactReactor;
 import mindustry.world.blocks.production.HeatCrafter;
 import mindustry.world.consumers.*;
 
-import java.util.Arrays;
-
-import static mi2u.MI2UVars.textb;
+import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
 
 /** modify vanilla game*/

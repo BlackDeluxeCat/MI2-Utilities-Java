@@ -47,8 +47,6 @@ public class RendererExt{
     public static boolean enPlayerCursor, enUnitHpBar, enUnitRangeZone, enOverdriveZone, enMenderZone, enTurretZone, enBlockHpBar, enDistributionReveal, enSpawnZone, disableWreck, disableUnit, disableBuilding, disableBullet, shadow;
 
     public static void initBase(){
-        Shadow.init();
-
         Events.on(EventType.WorldLoadEvent.class, e -> {
             players.clear();
             hiddenUnit.clear();
@@ -58,7 +56,6 @@ public class RendererExt{
         Events.run(EventType.Trigger.draw, () -> {
             players.each((u, v) -> {if(!u.isPlayer()||!u.isValid()) players.remove(u);});
             drawBase();
-            Shadow.indexGetter.add();
         });
 
         Events.run(EventType.Trigger.drawOver, () -> {
@@ -97,7 +94,6 @@ public class RendererExt{
         }
 
         drawZoneShader();
-        if(shadow) Shadow.applyShader();
 
         Groups.draw.each(d -> {
             if(d instanceof Decal && disableWreck) d.remove();
@@ -112,9 +108,6 @@ public class RendererExt{
             if(d instanceof Bullet b && disableBullet) Groups.draw.remove(b);
         });
 
-        Groups.draw.remove(Shadow.indexGetter);
-        Groups.draw.add(Shadow.indexGetter);
-
         Seq<Tile> tiles = MI2Utils.getValue(renderer.blocks, "tileview");
         if(tiles != null){
             if(disableBuilding) tiles.clear();
@@ -128,10 +121,6 @@ public class RendererExt{
                 if(enMenderZone && tile.build instanceof MendProjector.MendBuild mb) drawMender(mb);
                 if(enMenderZone && tile.build instanceof RegenProjector.RegenProjectorBuild rb) drawRegen(rb);
                 Draw.reset();
-            }
-
-            if(shadow){
-                Shadow.draw(tiles);
             }
         }
         if(enSpawnZone) drawSpawnPoint();
