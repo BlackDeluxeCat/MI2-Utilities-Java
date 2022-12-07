@@ -10,7 +10,6 @@ import arc.scene.style.TextureRegionDrawable;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.io.*;
-import mi2u.map.filters.*;
 import mi2u.ui.*;
 import mindustry.core.*;
 import mindustry.game.*;
@@ -40,31 +39,8 @@ public class ModifyFuncs{
     public static void modifyVanilla(){
         modifyVanillaBlockBars();
         Events.on(EventType.ContentInitEvent.class, e2 -> modifyVanillaBlockBars());
-        addFilters();
         initBetterTopTable();
         settingsMenuDialog();
-    }
-
-    public static void addFilters(){
-        if(!MI2USettings.getBool("modifyFilters")) return;
-        addFilter(TranslateTransFilter::new);
-        addFilter(ScalingTransFilter::new);
-        addFilter(RotateTransFilter::new);
-        addFilter(PolarTransFilter::new);
-        addFilter(AppliedRegionFilter::new);
-        addFilter(AdvancedNoiseFilter::new);
-        addFilter(AdvancedOreFilter::new);
-        addFilter(GridFilter::new);
-        addFilter(CopyPasteFilter::new);
-    }
-
-    public static void addFilter(Prov<GenerateFilter> filter){
-        var newArr = Arrays.copyOf(Maps.allFilterTypes, Maps.allFilterTypes.length + 1);
-        newArr[Maps.allFilterTypes.length] = filter;
-        Maps.allFilterTypes = newArr;
-        Log.info("Adding New Filters... Filters Size: " + newArr.length);
-        GenerateFilter ins = filter.get();
-        JsonIO.json.addClassTag(Strings.camelize(ins.getClass().getSimpleName().replace("Filter", "")), ins.getClass());
     }
 
     public static void modifyVanillaBlockBars(){
