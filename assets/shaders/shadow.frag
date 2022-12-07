@@ -30,7 +30,7 @@ vec4 unpack(vec2 value){
 void main(){
     vec2 T = v_texCoords.xy;
     vec2 worldxy = (T * u_texsize) + u_offset;
-    vec4 color = texture2D(u_texture, T);
+    vec4 shadow0 = texture2D(u_texture, T);
 
     float lightness = 0.0;
     float shadowness = 0.0;
@@ -54,11 +54,10 @@ void main(){
         if(dst < radius){
             bool isShadow = false;
             float shadowLen = min((dst - light.z), dst / LIGHTH);
-            vec4 shadow0 = texture2D(u_texture, T);
             for(float j = 0.0; j < shadowLen; j += u_EDGE_PRECISION){
                 vec2 blockscreenxy = T + normalize(light.xy - worldxy) * j * u_invsize;
                 vec4 shadow = texture2D(u_texture, blockscreenxy);
-                if(shadow.a - shadow0.a> j / shadowLen){
+                if(shadow.b - shadow0.b> j / shadowLen){
                     shadowness = max(shadowness, 1.0 - dst / radius);
                     isShadow = true;
                     break;
@@ -75,6 +74,6 @@ void main(){
         }
     }
 
-    vec4 result = vec4(0.0, 0.0, 0.0, max(color.b, clamp(shadowness * (1.0 - lightness) * sqrt(u_ambientLight * 0.75 + 0.25), 0.0, 0.9)));
+    vec4 result = vec4(0.0, 0.0, 0.0, clamp(shadowness * (1.0 - lightness) * sqrt(u_ambientLight * 0.75 + 0.25), 0.0, 0.9));
     gl_FragColor = result;
 }

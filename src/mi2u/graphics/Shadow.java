@@ -34,6 +34,8 @@ import static arc.Core.camera;
 import static mindustry.Vars.*;
 
 public class Shadow{
+    public static boolean depthTex = true, shadow = true;
+
     public static Field fCircles = MI2Utils.getField(LightRenderer.class, "circles"), fSize = MI2Utils.getField(LightRenderer.class, "circleIndex"), fCircleX, fCircleY, fCircleR, fCircleC;
     public static int size = 0;
     public static Seq<float[]> floatlights = new Seq<>();
@@ -90,8 +92,8 @@ public class Shadow{
                             float ald = MI2UTmp.c2.set(img.get(x,y)).a, art = MI2UTmp.c2.set(img.get(y, x)).a;
                             float gray = Vrt < Vld ? 0.2f : Vrt - Vld < 0.01f ? 0.6f : 1f;
                             //反向视差贴图，Vrt < Vld右上明度高于左下，低位，色浅
-                            img.set(x, y, ald < 0.1f ? Color.black : MI2UTmp.c1.set(Color.black).a(gray));
-                            img.set(y, x, art < 0.1f ? Color.black : MI2UTmp.c1.set(Color.black).a(gray));
+                            img.set(x, y, ald < 0.1f ? Color.black : MI2UTmp.c1.set(0f,0f, gray, 1f));
+                            img.set(y, x, art < 0.1f ? Color.black : MI2UTmp.c1.set(0f,0f, gray, 1f));
                         }
                     }
                     for(int x = 0; x < img.width; x++){
@@ -128,21 +130,30 @@ public class Shadow{
         tmpc[3] *= fCircleC == null ? 1f : MI2UTmp.c1.abgr8888(MI2Utils.getValue(fCircleC, circle)).a;
     }
 
+    public static float getLayer(){
+        return depthTex?layer:layer-4f;
+    }
+
     public static void draw(Seq<Tile> tiles){
-        Draw.z(layer);
         for(Tile tile : tiles){
             //draw white/shadow color depending on blend
-            Draw.color((!tile.block().hasShadow || (state.rules.fog && tile.build != null && !tile.build.wasVisible)) ? Color.clear : Color.white);
             float bs = tile.block().size * tilesize;
-            Draw.rect(normRegions[tile.block().id], tile.build == null ? tile.worldx() : tile.build.x, tile.build == null ? tile.worldy() : tile.build.y, bs, bs, tile.build == null ? 0f : tile.build.drawrot());
-            //Fill.rect(tile.build == null ? tile.worldx() : tile.build.x, tile.build == null ? tile.worldy() : tile.build.y, bs, bs);
+            Draw.z(getLayer());
+            if(!depthTex){
+                Draw.color();
+                Draw.mixcol(Color.white, 1f);
+                Draw.rect(tile.block().fullIcon, tile.build == null ? tile.worldx() : tile.build.x, tile.build == null ? tile.worldy() : tile.build.y, bs, bs, tile.build == null ? 0f : tile.build.drawrot());
+            }else{
+                Draw.color((!tile.block().hasShadow || (state.rules.fog && tile.build != null && !tile.build.wasVisible)) ? Color.clear : Color.white);
+                Draw.rect(normRegions[tile.block().id], tile.build == null ? tile.worldx() : tile.build.x, tile.build == null ? tile.worldy() : tile.build.y, bs, bs, tile.build == null ? 0f : tile.build.drawrot());
+            }
         }
     }
 
     public static void applyShader(){
-        if(MI2UShaders.shadow == null) return;
+        if(!Shadow.shadow || MI2UShaders.shadow == null) return;
         //the layer of block shadow;
-        Draw.drawRange(layer, 0.1f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
+        Draw.drawRange(getLayer(), 0.1f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
             renderer.effectBuffer.end();
             renderer.effectBuffer.blit(MI2UShaders.shadow);
         });
