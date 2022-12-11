@@ -1,19 +1,19 @@
 package mi2u;
 
 import arc.*;
-import arc.scene.ui.Label;
+import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import arc.util.serialization.*;
 import mi2u.graphics.*;
-import mi2u.input.RtsCommand;
+import mi2u.input.*;
 import mi2u.io.*;
 import mi2u.ui.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.mod.*;
 
-import java.util.regex.Pattern;
+import java.util.regex.*;
 
 import static mindustry.Vars.*;
 import static mi2u.MI2UVars.*;
@@ -31,6 +31,7 @@ public class MI2Utilities extends Mod{
 
             Mindow2.initMindowStyles();
             MI2USettings.init();
+            InputUtils.init();
 
             maxSchematicSize = MI2USettings.getInt("maxSchematicSize", 32);
             Time.runTask(40f, () -> {

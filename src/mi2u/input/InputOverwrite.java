@@ -1,9 +1,7 @@
 package mi2u.input;
 
-import arc.func.*;
 import arc.math.Mathf;
 import arc.math.geom.*;
-import arc.struct.*;
 import mi2u.*;
 import mindustry.gen.*;
 

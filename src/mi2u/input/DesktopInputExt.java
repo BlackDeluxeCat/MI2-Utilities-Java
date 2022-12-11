@@ -1,19 +1,17 @@
 package mi2u.input;
 
 import arc.*;
-import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
-import arc.struct.ObjectMap;
+import arc.scene.ui.layout.*;
+import arc.struct.*;
 import arc.util.*;
 import mi2u.*;
-import mi2u.io.MI2USettings;
-import mindustry.core.*;
+import mi2u.io.*;
 import mindustry.gen.*;
 import mindustry.input.*;
 
 import static mindustry.Vars.*;
-import static mindustry.input.PlaceMode.*;
 
 /**
  * An extented desktop input handler.
@@ -30,12 +28,12 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
     public Vec2 panXY = new Vec2();
     public boolean ctrlShoot = false, shoot = false; Vec2 shootXY = new Vec2();
     public boolean ctrlMove = false; Vec2 move = new Vec2();
-    protected Building forceTapped;
 
     @Override
     public void update(){
         super.update();
         desktopFormation();
+        postPMFrag();
 
         Unit unit = player.unit();
         if(ctrlBoost) player.boosting = boost;
@@ -89,9 +87,9 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
         if(MI2USettings.getBool("forceTapTile", false) && Core.input.keyTap(Binding.select) && !Core.scene.hasMouse()){
             if(player.dead()){
                 var build = world.buildWorld(Core.input.mouseWorldX(), Core.input.mouseWorldY());
-                forceTap(build, true);
+                InputUtils.forceTap(build, true);
             }else{
-                forceTap(prevSelected == null ? null : prevSelected.build, false);
+                InputUtils.forceTap(prevSelected == null ? null : prevSelected.build, false);
             }
         }
     }
@@ -137,38 +135,6 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
         control.setInput(this);
     }
 
-    public void forceTap(@Nullable Building build, boolean includeSelfTeam){
-        if(build == null) return;
-        if(!includeSelfTeam && build.interactable(player.team())) return;//handled by vanilla
-        if(build == forceTapped){
-            inv.hide();
-            config.hideConfig();
-            return;
-        }
-        forceTapped = build;
-
-        if(build.block.configurable){
-            if((!config.isShown() && build.shouldShowConfigure(player)) //if the config fragment is hidden, show
-                    //alternatively, the current selected block can 'agree' to switch config tiles
-                    || (config.isShown() && config.getSelected().onConfigureBuildTapped(build))){
-                config.showConfig(build);
-            }
-            //otherwise...
-        }else if(!config.hasConfigMouse()){ //make sure a configuration fragment isn't on the cursor
-            //then, if it's shown and the current block 'agrees' to hide, hide it.
-            if(config.isShown() && config.getSelected().onConfigureBuildTapped(build)){
-                config.hideConfig();
-            }
-        }
-
-        //consume tap event if necessary
-        if(build.block.synthetic() && (build.block.allowConfigInventory)){
-            if(build.block.hasItems && build.items.total() > 0){
-                inv.showFor(build);
-            }
-        }
-    }
-
     public void desktopFormation(){
         if(commandMode){
             if(Core.input.keyDown(Binding.control)) RtsCommand.creatingFormation = true;
@@ -201,6 +167,21 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
                 if(Core.input.keyTap(Binding.block_select_09)) RtsCommand.callFormation(8);
                 if(Core.input.keyTap(Binding.block_select_10)) RtsCommand.callFormation(9);
             }
+        }
+    }
+
+    /**
+     * Post Placement fragment to your mouse.
+     */
+    public void postPMFrag(){
+        Table fullT = MI2Utils.getValue(ui.hudfrag.blockfrag, "toggler");
+        if(fullT == null) return;
+        if(Core.input.keyDown(Binding.control) && Core.input.keyTap(Binding.pick)){
+            fullT.margin(0f, 0f,
+                    (Core.input.mouseY() + 15f) / Scl.scl(),
+                    Mathf.maxZero(Core.graphics.getWidth() - Core.input.mouseX() - fullT.getChildren().first().getWidth() - 15f) / Scl.scl());
+        }else if(Core.input.keyTap(Binding.control)){
+            fullT.margin(0f);
         }
     }
 }
