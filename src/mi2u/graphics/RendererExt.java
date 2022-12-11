@@ -226,8 +226,21 @@ public class RendererExt{
 
                 Draw.color(unit.team.color);
                 Draw.z(TurretZoneDrawer.getLayer(unit.team.id));
-                Draw.alpha(0.05f);
-                Fill.poly(unit.x, unit.y, (int)(range) / 4, range);
+                if(Core.settings.getBool("animatedshields")){
+                    Draw.alpha(0.05f);
+                    Fill.poly(unit.x, unit.y, (int)(range) / 4, range);
+
+                    Lines.stroke(2f);
+                    Draw.alpha(1f);
+                    Lines.circle(unit.x, unit.y, range);
+                }else{
+                    Draw.alpha(0.05f);
+                    Fill.poly(unit.x, unit.y, (int)(range) / 4, range);
+
+                    Lines.stroke(2f);
+                    Draw.alpha(0.5f);
+                    Lines.circle(unit.x, unit.y, range);
+                }
 
                 Draw.z(z);
                 Draw.color();
