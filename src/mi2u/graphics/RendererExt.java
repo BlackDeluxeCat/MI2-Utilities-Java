@@ -523,7 +523,7 @@ public class RendererExt{
         float alpha = Mathf.pow(1f - (mb.charge / block.reload), 5);
         Draw.z(91.2f);
         Draw.color(block.baseColor);
-        Draw.alpha((Core.settings.getBool("animatedshields")?0.6f:0.2f) * (alpha > 0.05 ? alpha : 0f));
+        Draw.alpha((Core.settings.getBool("animatedshields")?0.6f:0.2f) * Math.max(alpha, 0.2f));
         Fill.poly(mb.x, mb.y, (int)(block.range + mb.phaseHeat * block.phaseRangeBoost) / 4, block.range + mb.phaseHeat * block.phaseRangeBoost);
     }
 
