@@ -20,9 +20,7 @@ public class InputUtils{
     }
     public static void forceTap(@Nullable Building build, boolean includeSelfTeam){
         if(build == null) return;
-        Log.info(build.interactable(player.team()) + ", " + (tapAccess.containsKey(build.block) ? tapAccess.get(build.block).get(build) : "false0"));
         if(!includeSelfTeam && (build.interactable(player.team()) && (!tapAccess.containsKey(build.block) || tapAccess.get(build.block).get(build)))) return;//handled by vanilla
-        Log.info("in");
         var inv = control.input.inv;
         var config = control.input.config;
 
