@@ -55,6 +55,8 @@ public class HoverTopTable extends Table {
             lastBuild = build;
             buildt.clear();
             if(build != null){
+                buildt.add(build.team.localized()).left().color(build.team.color);
+                buildt.row();
                 build.display(buildt);
             }
         });
