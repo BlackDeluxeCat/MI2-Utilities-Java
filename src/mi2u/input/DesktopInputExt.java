@@ -135,6 +135,18 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
         control.setInput(this);
     }
 
+    public static Binding[] numKey = {
+            Binding.block_select_01,
+            Binding.block_select_02,
+            Binding.block_select_03,
+            Binding.block_select_04,
+            Binding.block_select_05,
+            Binding.block_select_06,
+            Binding.block_select_07,
+            Binding.block_select_08,
+            Binding.block_select_09,
+            Binding.block_select_10};
+
     public void desktopFormation(){
         if(commandMode){
             if(Core.input.keyDown(Binding.control)) RtsCommand.creatingFormation = true;
@@ -145,27 +157,15 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
             ObjectMap selectBlocks = MI2Utils.getValue(ui.hudfrag.blockfrag, "selectedBlocks");
             selectBlocks.each((cat, block) -> selectBlocks.put(cat, null));
             if(RtsCommand.creatingFormation){
-                if(Core.input.keyTap(Binding.block_select_01)) RtsCommand.createFormation(selectedUnits, 0);
-                if(Core.input.keyTap(Binding.block_select_02)) RtsCommand.createFormation(selectedUnits, 1);
-                if(Core.input.keyTap(Binding.block_select_03)) RtsCommand.createFormation(selectedUnits, 2);
-                if(Core.input.keyTap(Binding.block_select_04)) RtsCommand.createFormation(selectedUnits, 3);
-                if(Core.input.keyTap(Binding.block_select_05)) RtsCommand.createFormation(selectedUnits, 4);
-                if(Core.input.keyTap(Binding.block_select_06)) RtsCommand.createFormation(selectedUnits, 5);
-                if(Core.input.keyTap(Binding.block_select_07)) RtsCommand.createFormation(selectedUnits, 6);
-                if(Core.input.keyTap(Binding.block_select_08)) RtsCommand.createFormation(selectedUnits, 7);
-                if(Core.input.keyTap(Binding.block_select_09)) RtsCommand.createFormation(selectedUnits, 8);
-                if(Core.input.keyTap(Binding.block_select_10)) RtsCommand.createFormation(selectedUnits, 9);
-            }else{
-                if(Core.input.keyTap(Binding.block_select_01)) RtsCommand.callFormation(0);
-                if(Core.input.keyTap(Binding.block_select_02)) RtsCommand.callFormation(1);
-                if(Core.input.keyTap(Binding.block_select_03)) RtsCommand.callFormation(2);
-                if(Core.input.keyTap(Binding.block_select_04)) RtsCommand.callFormation(3);
-                if(Core.input.keyTap(Binding.block_select_05)) RtsCommand.callFormation(4);
-                if(Core.input.keyTap(Binding.block_select_06)) RtsCommand.callFormation(5);
-                if(Core.input.keyTap(Binding.block_select_07)) RtsCommand.callFormation(6);
-                if(Core.input.keyTap(Binding.block_select_08)) RtsCommand.callFormation(7);
-                if(Core.input.keyTap(Binding.block_select_09)) RtsCommand.callFormation(8);
-                if(Core.input.keyTap(Binding.block_select_10)) RtsCommand.callFormation(9);
+                for(int ki = 0; ki < numKey.length; ki++){
+                    if(Core.input.keyTap(numKey[ki])){
+                        if(RtsCommand.creatingFormation){
+                            RtsCommand.createFormation(selectedUnits, ki);
+                        }else{
+                            RtsCommand.callFormation(ki);
+                        }
+                    }
+                }
             }
         }
     }
