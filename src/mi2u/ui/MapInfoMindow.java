@@ -135,7 +135,6 @@ public class MapInfoMindow extends Mindow2{
                 addBoolString(() -> state.rules.reactorExplosions, "" + Iconc.blockThoriumReactor, tt);
                 addBoolString(() -> state.rules.schematicsAllowed, "" + Iconc.paste, tt);
                 addBoolString(() -> state.rules.coreIncinerates, "" + Iconc.blockIncinerator, tt);
-                addBoolString(() -> state.rules.unitAmmo, "" + Iconc.unitCorvus + Iconc.statusElectrified, tt);
                 addBoolString(() -> state.rules.coreCapture, "" + Iconc.blockCoreFoundation, tt);
                 addBoolString(() -> state.rules.polygonCoreProtection, "" + Iconc.grid, tt);
                 tt.button("@mapinfo.buttons.allAttrs", textb, () -> mapAttsDialog.show()).growX().minSize(32f).with(funcSetTextb);
@@ -172,6 +171,9 @@ public class MapInfoMindow extends Mindow2{
                 t3.button("@mapinfo.buttons.forceRunWave", textb, () -> {
                     logic.runWave();
                 }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).height(titleButtonSize);
+                t3.button("" + Iconc.refresh, textbtoggle, () -> {
+                    if(state.rules.infiniteResources) state.rules.waveTimer = !state.rules.waveTimer;
+                }).update(b -> b.setChecked(state.rules.waveTimer)).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).height(titleButtonSize);
             });
 
             tt.row();
