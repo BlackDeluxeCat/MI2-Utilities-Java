@@ -19,12 +19,14 @@ import mindustry.entities.units.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
+import mindustry.logic.*;
 import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.*;
-import mindustry.world.blocks.defense.turrets.BaseTurret;
+import mindustry.world.blocks.defense.turrets.*;
 import mindustry.world.blocks.distribution.*;
+import mindustry.world.blocks.logic.*;
 import mindustry.world.blocks.storage.*;
 import mindustry.world.blocks.units.*;
 
@@ -42,9 +44,12 @@ public class RendererExt{
     protected static Seq<Unit> hiddenUnit = new Seq<>();
     public static Field itemBridgeBuffer = MI2Utils.getField(BufferedItemBridge.BufferedItemBridgeBuild.class, "buffer"),
             itemBridgeBufferBuffer = MI2Utils.getField(ItemBuffer.class, "buffer"), itemBridgeBufferIndex = MI2Utils.getField(ItemBuffer.class, "index"),
-            unloaderBuilding = MI2Utils.getField(Unloader.ContainerStat.class, "building");
+            unloaderBuilding = MI2Utils.getField(Unloader.ContainerStat.class, "building"),
+            lexecTimer = MI2Utils.getField(LExecutor.class, "unitTimeouts");
 
+    public static boolean animatedshields;
     public static boolean enPlayerCursor, enUnitHpBar, enUnitRangeZone, enOverdriveZone, enMenderZone, enTurretZone, enBlockHpBar, enDistributionReveal, enSpawnZone, disableWreck, disableUnit, disableBuilding, disableBullet, shadow;
+    public static float flashZoneAlpha;
 
     public static void initBase(){
         Events.on(EventType.WorldLoadEvent.class, e -> {
@@ -70,6 +75,9 @@ public class RendererExt{
     }
 
     public static void updateSettings(){
+        animatedshields = Core.settings.getBool("animatedshields");
+
+        flashZoneAlpha = MI2USettings.getInt("flashZoneAlpha", 50) / 100f;
         enPlayerCursor = MI2USettings.getBool("enPlayerCursor", false);
         enUnitHpBar = MI2USettings.getBool("enUnitHpBar");
         enUnitRangeZone = MI2USettings.getBool("enUnitRangeZone", false);
@@ -208,15 +216,23 @@ public class RendererExt{
             }
 
             //display logicAI info by MI2
-            if(unit.controller() instanceof LogicAI logicai){
+            if(unit.controller() instanceof LogicAI logicai && logicai.controller.isValid()){
                 Draw.reset();
-                //if(Core.settings.getBool("unitLogicMoveLine") && Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) <= 1200f){
-                if(MI2USettings.getBool("enUnitLogic") && Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) <= 1200f){
-                    Lines.stroke(1f);
-                    Draw.color(0.2f, 0.2f, 1f, 0.9f);
-                    Lines.dashLine(unit.x, unit.y, logicai.moveX, logicai.moveY, (int)(Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) / 8));
-                    Lines.dashCircle(logicai.moveX, logicai.moveY, logicai.moveRad);
-                    Draw.reset();
+                if(MI2USettings.getBool("enUnitLogic")){
+                    if(logicai.controller instanceof LogicBlock.LogicBuild lb && lb.executor != null){
+                        Draw.color(0.2f, 1f, 0.6f, 0.3f);
+                        Fill.arc(unit.x, unit.y, 6f, 1f - Mathf.clamp(logicai.controlTimer / LogicAI.logicControlTimeout), 90f, 20);
+                        IntFloatMap utimer = MI2Utils.getValue(lexecTimer, lb.executor);
+                        Draw.color(0.2f, 1f, 0.2f, 0.6f);
+                        Fill.arc(unit.x, unit.y, 4f, 1f - Mathf.clamp((Time.time - utimer.get(unit.id)) / LogicAI.transferDelay), 90f, 16);
+                    }
+                    if(Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) <= 3200f){
+                        Lines.stroke(1f);
+                        Draw.color(0.2f, 0.2f, 1f, 0.8f);
+                        Lines.dashLine(unit.x, unit.y, logicai.moveX, logicai.moveY, (int) (Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) / 8));
+                        Lines.dashCircle(logicai.moveX, logicai.moveY, logicai.moveRad);
+                        Draw.reset();
+                    }
                 }
             }
 
@@ -226,7 +242,7 @@ public class RendererExt{
 
                 Draw.color(unit.team.color);
                 Draw.z(TurretZoneDrawer.getLayer(unit.team.id));
-                if(Core.settings.getBool("animatedshields")){
+                if(animatedshields){
                     Draw.alpha(0.05f);
                     Fill.poly(unit.x, unit.y, (int)(range) / 4, range);
 
@@ -475,7 +491,7 @@ public class RendererExt{
     }
 
     public static void drawZoneShader(){
-        if(Core.settings.getBool("animatedshields")){
+        if(animatedshields){
             if(enOverdriveZone && MI2UShaders.odzone != null){
                 Draw.drawRange(91.1f, 0.02f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
                     renderer.effectBuffer.end();
@@ -509,7 +525,7 @@ public class RendererExt{
         Draw.color(block.baseColor, block.phaseColor, odb.phaseHeat);
         Draw.mixcol(Color.black, 1f - odb.efficiency());
         Draw.z(91.1f);
-        Draw.alpha(Core.settings.getBool("animatedshields")?0.6f:0.1f);
+        Draw.alpha(animatedshields?0.6f:0.1f);
         Fill.poly(odb.x, odb.y, (int)(block.range + odb.phaseHeat * block.phaseRangeBoost) / 4, block.range + odb.phaseHeat * block.phaseRangeBoost);
 
         Lines.stroke(2f);
@@ -523,7 +539,7 @@ public class RendererExt{
         float alpha = Mathf.pow(1f - (mb.charge / block.reload), 5);
         Draw.z(91.2f);
         Draw.color(block.baseColor);
-        Draw.alpha((Core.settings.getBool("animatedshields")?0.6f:0.2f) * Math.max(alpha, 0.2f));
+        Draw.alpha((animatedshields?0.6f:0.2f) * alpha * flashZoneAlpha + 0.12f);
         Fill.poly(mb.x, mb.y, (int)(block.range + mb.phaseHeat * block.phaseRangeBoost) / 4, block.range + mb.phaseHeat * block.phaseRangeBoost);
     }
 
@@ -531,7 +547,7 @@ public class RendererExt{
         RegenProjector block = (RegenProjector)rb.block;
         Draw.z(91.3f);
         Draw.color(block.baseColor);
-        Draw.alpha((Core.settings.getBool("animatedshields") ? 0.4f : 0.1f) * (rb.efficiency() <= 0f ? 0.6f : 1f));
+        Draw.alpha((animatedshields ? 0.4f : 0.1f) * (rb.efficiency() <= 0f ? 0.6f : 1f));
         Fill.rect(rb.x, rb.y, block.range * tilesize, block.range * tilesize);
 
         Lines.stroke(2f);
@@ -545,7 +561,7 @@ public class RendererExt{
 
         Draw.color(btb.team.color);
         Draw.z(TurretZoneDrawer.getLayer(btb.team.id));
-        if(Core.settings.getBool("animatedshields")){
+        if(animatedshields){
             Draw.alpha(0.05f);
             Fill.poly(btb.x, btb.y, (int)(range) / 4, range);
 
@@ -690,6 +706,7 @@ public class RendererExt{
             Unloader block = (Unloader)ub.block;
             Item drawItem = content.item(ub.rotations);
             Unloader.ContainerStat fromCont = ub.dumpingFrom, toCont = ub.dumpingTo;
+            if(!ub.possibleBlocks.contains(ub.dumpingFrom) || !ub.possibleBlocks.contains(ub.dumpingTo)) return;
 
             Building fromb = MI2Utils.getValue(unloaderBuilding, fromCont), tob = MI2Utils.getValue(unloaderBuilding, toCont);
 

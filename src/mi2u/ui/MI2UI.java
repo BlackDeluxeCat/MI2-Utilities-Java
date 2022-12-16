@@ -155,6 +155,7 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("enPlayerCursor", "@settings.main.playerCursor", true, null));
         settings.add(new CheckEntry("enOverdriveZone", "@settings.main.overdriveZone", false, null));
         settings.add(new CheckEntry("enMenderZone", "@settings.main.menderZone", false, null));
+        settings.add(new FieldEntry("flashZoneAlpha", "@settings.main.flashZoneAlpha", String.valueOf(50), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 0 && Strings.parseInt(s) <= 150, null));
         settings.add(new CheckEntry("enSpawnZone", "@settings.main.spawnZone", true, null));
         settings.add(new CheckEntry("enDistributionReveal", "@settings.main.distributionReveal", true, null));
         settings.add(new CheckEntry("enBlockHpBar", "@settings.main.blockHpBar", false, null));
@@ -214,7 +215,6 @@ public class MI2UI extends Mindow2{
 
         settings.add(new CheckEntry("modifyBlockBars", "@settings.main.modifyBlockBars", false, null));
         settings.add(new CheckEntry("modifyTopTable", "@settings.main.modifyTopTable", false, null));
-        settings.add(new CheckEntry("modifyFilters", "@settings.main.modifyMapFilters", true, null));
 
         settings.add(new CollapseGroupEntry("UpdateCheck", ""){
             CheckEntry check1 = new CheckEntry("enableUpdate", "@settings.main.enableUpdate", true, b -> {
