@@ -29,10 +29,10 @@ void main(){
     if(length(mined.rgb) < 0.0001 && length(color.rgb) > 0.01){
         gl_FragColor = vec4(normalize(color.rgb), mod(coords.y / 2.0 + coords.x / 4.0 - u_time / 4.0, 32.0) / 24.0);
     }else{
-        if(color.a >= 0.1 && color.a < 0.9){
-            color.a = 0.1;
+        if(color.a >= 0.2 && color.a < 0.9){
+            color.a = 0.2;
         }else if(color.a >= 0.9){
-            color.a = 0.13;
+            color.a = 0.3;
         }
         gl_FragColor = color;
     }
