@@ -25,13 +25,14 @@ import static mindustry.Vars.*;
 
 public class PowerGraphTable extends Table{
     public Team team;
-    public float barsWidth = 400f;
+    public float barsWidth;
     public PopupTable detailTable = new PopupTable();
+    private Seq<MI2Bar> bars = new Seq<>();
+    static Image[] blocksI = new Image[content.blocks().size];
 
     private Interval interval = new Interval();
     //P.G. set for ui generation, to keep P.G. order（让多电网的次序不会每次都变化）
-    private Seq<PowerGraph> saved = new Seq<PowerGraph>();
-    private Seq<MI2Bar> bars = new Seq<MI2Bar>();
+    private Seq<PowerGraph> saved = new Seq<>();
     private float totalCap = 0f;
 
     public PowerGraphTable(float w){
@@ -49,8 +50,8 @@ public class PowerGraphTable extends Table{
         if(!state.isGame()) return;
         if(team == null) return;
         if(state.teams.get(team).buildings == null) return;
-        ObjectSet<PowerGraph> graphs = new ObjectSet<PowerGraph>();
-        Seq<Building> builds = new Seq<Building>(state.teams.get(team).buildings);
+        ObjectSet<PowerGraph> graphs = new ObjectSet<>();
+        Seq<Building> builds = new Seq<>(state.teams.get(team).buildings);
         totalCap = 0f;
         Prov<String> powertext;
 
@@ -161,5 +162,9 @@ public class PowerGraphTable extends Table{
             detailTable.setPositionInScreen(Core.input.mouseX() - 20f, Core.input.mouseY() - detailTable.getPrefHeight() - 20f);
         });
         detailTable.toFront();
+    }
+
+    public static Image getBlockImage(Block block){
+        return blocksI[block.id] != null ? blocksI[block.id] : (blocksI[block.id] = new Image(block.uiIcon));
     }
 }
