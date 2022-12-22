@@ -27,7 +27,6 @@ public class EmojiMindow extends Mindow2{
     public Table listt, tablet;
     public boolean listMode = false;
     private int tmpindex = 0;
-    private ObjectMap<String, String> map;
 
     public EmojiMindow() {
         super("@emoji.MI2U", "@emoji.help");
@@ -38,39 +37,41 @@ public class EmojiMindow extends Mindow2{
         super.init();
         mindowName = "Emojis";
 
-        map = new ObjectMap<String, String>();
+        var map = new ObjectMap<String, String>();
         listt = new Table();
         tablet = new Table();
+        tablet.background(Styles.black6);
 
         try{
             map.clear();
             Field[] fs = Iconc.class.getFields();
+
+            tmpindex = 0;
             for(Field f : fs){
                 if(f.getType() == char.class){
                     map.put(f.getName(), Reflect.get(Iconc.class, f) + "");
+                    var emoji = map.get(f.getName());
+                    tablet.button(emoji, textb, () -> {
+                        Core.app.setClipboardText(emoji);
+                    }).with(funcSetTextb).get().getLabel().setFontScale(1.5f);
+                    if(++tmpindex > 8){
+                        tablet.row();
+                        tmpindex = 0;
+                    }
                 }
             }
 
-            var seq = map.keys().toSeq().sort();
-
-            tmpindex = 0;
-            seq.each(name -> {
+            var keyseq = map.keys().toSeq();
+            keyseq.sort();
+            keyseq.each(name -> {
                 listt.button(name, textbStyle, () -> {
                     Core.app.setClipboardText(name);
                 }).growX().with(funcSetTextb);
                 var emoji = map.get(name);
-                listt.button(emoji, textbStyle, () -> {
+                listt.button(emoji, textb, () -> {
                     Core.app.setClipboardText(emoji);
-                }).growX().with(funcSetTextb);
+                }).with(funcSetTextb).get().getLabel().setFontScale(1.5f);
                 listt.row();
-
-                tablet.button(emoji, textbStyle, () -> {
-                    Core.app.setClipboardText(emoji);
-                }).growX().with(funcSetTextb);
-                if(++tmpindex > 8){
-                    tablet.row();
-                    tmpindex = 0;
-                }
             });
         }catch(Exception ignore){Log.err(ignore);}
     }
