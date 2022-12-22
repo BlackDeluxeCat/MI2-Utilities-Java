@@ -42,7 +42,7 @@ public class FloatDataRecorder{
     }
 
     public float get(int before){
-        if(before >= values.length) return values[head + 1];
+        if(before >= size) return size == 0 ? values[head] : values[Mathf.mod(head + 1, size)];
         if(before < 0) return values[head];
         return values[head - before + (head - before < 0 ? values.length : 0)];
     }
