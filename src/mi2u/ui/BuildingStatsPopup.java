@@ -8,6 +8,7 @@ import arc.math.geom.Vec2;
 import arc.scene.Action;
 import arc.scene.Element;
 import arc.scene.actions.Actions;
+import arc.scene.event.Touchable;
 import arc.scene.ui.Image;
 import arc.scene.ui.Label;
 import arc.scene.ui.layout.Table;
@@ -57,6 +58,7 @@ public class BuildingStatsPopup<B extends Building> extends PopupTable{
 
     public BuildingStatsPopup(B build){
         super();
+        this.touchable = Touchable.enabled;
         init(build);
         setupPopup();
         addDragMove();
@@ -90,8 +92,9 @@ public class BuildingStatsPopup<B extends Building> extends PopupTable{
             imageBlock = t.image(build.block.uiIcon).size(24f).get();
             imageBlock.clicked(() -> {
                 if(control.input instanceof InputOverwrite io) io.pan(true, MI2UTmp.v1.set(build));
+                imageBlock.actions(Actions.color(Color.acid), Actions.color(Color.white, 0.2f));
             });
-            labelPos = t.label(() -> Strings.autoFixed(build.x / tilesize, 1) + ", "+ Strings.autoFixed(build.y / tilesize, 1)).get();
+            labelPos = t.label(() -> Iconc.left + Strings.autoFixed(build.x / tilesize, 1) + ", "+ Strings.autoFixed(build.y / tilesize, 1)).get();
         }).growX().left().get();
         if(timer != null && timerUI){
             row();
