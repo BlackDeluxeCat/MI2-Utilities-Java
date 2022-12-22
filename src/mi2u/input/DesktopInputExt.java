@@ -7,10 +7,13 @@ import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import mi2u.*;
+import mi2u.graphics.*;
 import mi2u.io.*;
 import mindustry.gen.*;
 import mindustry.input.*;
+import mindustry.world.blocks.*;
 
+import static arc.Core.*;
 import static mindustry.Vars.*;
 
 /**
@@ -34,6 +37,7 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
         super.update();
         desktopFormation();
         postPMFrag();
+        tryCtrlBuildUnderUnit();
 
         Unit unit = player.unit();
         if(ctrlBoost) player.boosting = boost;
@@ -59,7 +63,6 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
         if(!panTimer.check(0, 30f)){
             panning = true;
             Core.camera.position.lerpDelta(panXY, 0.3f);
-
         }else if(state.isGame() && MI2USettings.getBool("edgePanning", true)){
             float camSpeed = (!Core.input.keyDown(Binding.boost) ? this.panSpeed : this.panBoostSpeed) * Time.delta;
             float margin = Mathf.clamp(Math.min(Core.graphics.getWidth() * 0.5f, Core.graphics.getHeight() * 0.5f), 5f, 30f);
@@ -146,6 +149,17 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
             Binding.block_select_08,
             Binding.block_select_09,
             Binding.block_select_10};
+
+    public void tryCtrlBuildUnderUnit(){
+        if(!scene.hasMouse() && !locked() && state.rules.possessionAllowed){
+            if(Core.input.keyDown(Binding.control) && Core.input.keyTap(Binding.select)){
+                var build = world.buildWorld(Core.input.mouseWorld().x, Core.input.mouseWorld().y);
+                if(RendererExt.disableUnit && selectedUnit() != null && build instanceof ControlBlock cont && cont.canControl() && build.team == player.team() && cont.unit() != player.unit() && cont.unit().isAI()){
+                    Call.unitControl(player, cont.unit());
+                }
+            }
+        }
+    }
 
     public void desktopFormation(){
         if(commandMode){
