@@ -41,7 +41,8 @@ public class CoreInfoMindow extends Mindow2{
     protected ObjectSet<Item> usedItems;
     protected FloatDataRecorder[] itemRecoders;
     protected FloatDataRecorder charting = null;
-    
+    public int itemTimerInt = 1;
+
     public CoreInfoMindow(){
         super("@coreInfo.MI2U", "@coreInfo.help");
         itemRecoders = new FloatDataRecorder[content.items().size];
@@ -193,6 +194,17 @@ public class CoreInfoMindow extends Mindow2{
                     b.setText(Core.bundle.get("coreInfo.selectButton.team") + team.localized() + (select == null ? Core.bundle.get("coreInfo.selectButton.playerteam"):""));
                     b.getLabel().setColor(team == null ? Color.white:team.color);
                 });
+                utt.button(itemTimerInt + "s", textb, null).size(48f).with(b -> {
+                    b.clicked(() -> {
+                        switch(itemTimerInt){
+                            case 1 -> itemTimerInt = 10;
+                            case 10 -> itemTimerInt = 30;
+                            case 30 -> itemTimerInt = 60;
+                            default -> itemTimerInt = 1;
+                        }
+                        b.setText(itemTimerInt + "s");
+                    });
+                });
             }).grow();
 
             ipt.row();
@@ -204,32 +216,31 @@ public class CoreInfoMindow extends Mindow2{
                     for(Item item : content.items()){
                         if(!usedItems.contains(item)) continue;
 
+                        var ir = itemRecoders[item.id];
+                        Runnable click = () -> {
+                            charting = ir;
+                            if(!chartTable.shown) chartTable.setPositionInScreen(this.x - chartTable.getPrefWidth(), this.y);
+                            chartTable.popup();
+                        };
+
                         iut.stack(
                             new Image(item.uiIcon),
-                            new Table(t -> t.label(() -> core == null ? "" : (itemRecoders[item.id].get(0) - itemRecoders[item.id].get(1) >= 0 ? "[green]+" : "[red]") + (int)(itemRecoders[item.id].get(0) - itemRecoders[item.id].get(1))).get().setFontScale(0.65f)).right().bottom()
-                        ).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel)).get().clicked(() -> {
-                            charting = itemRecoders[item.id];
-                            chartTable.popup();
-                            chartTable.setPositionInScreen(this.x - chartTable.getPrefWidth(), this.y);
-                        });
+                            new Table(t -> t.label(() -> core == null ? "" : (ir.get(0) - ir.get(itemTimerInt) >= 0 ? "[green]+" : "[scarlet]-") + Strings.autoFixed(Math.abs(ir.get(0) - ir.get(itemTimerInt))/(float)Math.min(itemTimerInt, ir.size()) , 1)).get().setFontScale(0.65f)).right().bottom()
+                        ).size(iconSmall).padLeft(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel)).get().clicked(click);
 
                         iut.label(() -> core == null ? "0" :
                                 UI.formatAmount(core.items.get(item)))
-                                .padRight(3).minWidth(52f).left().get().clicked(() -> {
-                            charting = itemRecoders[item.id];
-                            chartTable.popup();
-                            chartTable.setPositionInScreen(this.x - chartTable.getPrefWidth(), this.y);
-                        });;
+                                .padRight(3).minWidth(52f).left().get().clicked(click);
 
-                        if (++i % 4 == 0) {
+                        if(++i % 4 == 0){
                             iut.row();
                         }
                     }
                 }).minWidth(300f).maxHeight(MI2USettings.getInt(mindowName + ".itemsMaxHeight", 150)).update(p -> {
                     Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-                    if(e != null && e.isDescendantOf(p)) {
+                    if(e != null && e.isDescendantOf(p)){
                         p.requestScroll();
-                    }else if(p.hasScroll()) {
+                    }else if(p.hasScroll()){
                         Core.scene.setScrollFocus(null);
                     }
                 }).with(c -> c.setFadeScrollBars(true));
