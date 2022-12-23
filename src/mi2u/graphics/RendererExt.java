@@ -334,9 +334,10 @@ public class RendererExt{
         float barLength, x, y, h, w;
 
         if(build.health < build.maxHealth){
-            if(build.hitTime > 0f){
-                Lines.stroke(4f + Mathf.lerp(0f, 2f, Mathf.clamp(build.hitTime)));
-                Draw.color(Color.white, Mathf.lerp(0.1f, 1f, Mathf.clamp(build.hitTime)));
+            float hitTime = build instanceof Wall.WallBuild wb && ((Wall)wb.block).flashHit? wb.hit:build.hitTime;
+            if(hitTime > 0f){
+                Lines.stroke(2f + Mathf.lerp(0f, 2f, Mathf.clamp(hitTime)));
+                Draw.color(Color.white, Mathf.lerp(0.1f, 1f, Mathf.clamp(hitTime)));
                 Lines.line(build.x - build.hitSize() * halfwidth, build.y + offy, build.x + build.hitSize() * halfwidth, build.y + offy);
             }
 
