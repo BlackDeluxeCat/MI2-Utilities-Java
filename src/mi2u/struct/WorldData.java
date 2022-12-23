@@ -1,5 +1,6 @@
 package mi2u.struct;
 
+import arc.math.Mathf;
 import arc.struct.*;
 import arc.util.*;
 import mi2u.io.MI2USettings;
@@ -79,6 +80,10 @@ public class WorldData{
         @Nullable public Team team;
 
         public int findNext(){
+            return findNext(1);
+        }
+
+        public int findNext(int step){
             if(!MI2USettings.getBool("worldDataUpdate") && getSeq(findTarget, team) == null) scanWorld();
             if(getSeq(findTarget, team) == null){
                 findIndex = 0;
@@ -86,8 +91,7 @@ public class WorldData{
             }
             int size = getSeq(findTarget, team).size;
             if(size == 0) return -1;
-            if(findIndex >= size) findIndex = 0;
-            lastPos = getSeq(findTarget, team).get(findIndex++);
+            lastPos = getSeq(findTarget, team).get(findIndex = Mathf.mod(findIndex + step, size));
             return lastPos;
         }
     }

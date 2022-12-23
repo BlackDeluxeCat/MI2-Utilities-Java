@@ -79,13 +79,25 @@ public class WorldFinderTable extends PopupTable{
         row();
         //finder button
         table(t -> {
-            t.button("", textb, () -> {
+            t.button(Iconc.zoom + "+1", textb, () -> {
                 finder.team = team;
                 finder.findTarget = find;
                 int pos = finder.findNext();
                 if(pos != -1 && control.input instanceof InputOverwrite ipo) ipo.pan(true, MI2UTmp.v1.set(Point2.x(pos), Point2.y(pos)).scl(tilesize));
-            }).height(size).update(b -> b.setText(Iconc.zoom + "" + (finder.findIndex) + "/" + WorldData.countBlock(find, team))).with(funcSetTextb).growX();
-            t.label(() -> finder.lastPos == -1 ? "" : Point2.unpack(finder.lastPos).toString());
+            }).height(size).with(funcSetTextb);
+            t.button("+20", textb, () -> {
+                finder.team = team;
+                finder.findTarget = find;
+                int pos = finder.findNext(20);
+                if(pos != -1 && control.input instanceof InputOverwrite ipo) ipo.pan(true, MI2UTmp.v1.set(Point2.x(pos), Point2.y(pos)).scl(tilesize));
+            }).height(size).with(funcSetTextb);
+            t.button("+2%", textb, () -> {
+                finder.team = team;
+                finder.findTarget = find;
+                int pos = finder.findNext(Mathf.floor(WorldData.countBlock(find, team) * 0.01f));
+                if(pos != -1 && control.input instanceof InputOverwrite ipo) ipo.pan(true, MI2UTmp.v1.set(Point2.x(pos), Point2.y(pos)).scl(tilesize));
+            }).height(size).with(funcSetTextb);
+            t.label(() -> finder.findIndex + "/" + WorldData.countBlock(find, team) + (finder.lastPos == -1 ? "" : Point2.unpack(finder.lastPos).toString()));
         }).grow().padBottom(8f);
 
         //replace buttons
