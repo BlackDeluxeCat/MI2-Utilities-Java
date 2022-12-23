@@ -28,6 +28,7 @@ import mindustry.world.blocks.storage.CoreBlock.*;
 
 import static mindustry.Vars.*;
 import static mi2u.MI2UVars.*;
+import static mindustry.Vars.player;
 
 public class CoreInfoMindow extends Mindow2{
     protected Interval interval = new Interval(2);
@@ -97,7 +98,7 @@ public class CoreInfoMindow extends Mindow2{
                 rebuild();
             }
 
-            if(player.unit() != null && player.unit().plans().size <= 0){
+            if(player.unit() != null && player.unit().plans().isEmpty() && control.input.selectPlans.isEmpty()){
                 buildPlanTable.hide();
                 buildPlanTable.clearChildren();
             }else{
@@ -312,21 +313,28 @@ public class CoreInfoMindow extends Mindow2{
         buildPlanTable.update(() -> {
             buildPlanTable.setPositionInScreen(this.x, this.y - buildPlanTable.getPrefHeight());
             if(player.unit() == null || player.team().core() == null || player.unit().plans().size > 1000) return;   //Too many plans cause lag
-            ItemSeq req = new ItemSeq();
+            ItemSeq req = new ItemSeq(), req2 = new ItemSeq();
             player.unit().plans().each(plan -> {
                 for(ItemStack stack : plan.block.requirements){
                     req.add(stack.item, Mathf.floor(stack.amount * (plan.breaking ? (world.build(plan.x, plan.y) instanceof ConstructBlock.ConstructBuild cb && cb.team == player.team() ? cb.progress : 1f) * state.rules.deconstructRefundMultiplier*state.rules.buildCostMultiplier : (world.build(plan.x, plan.y) instanceof ConstructBlock.ConstructBuild cb && cb.team == player.team() ? cb.progress - 1f : -1f) * state.rules.buildCostMultiplier)));
                 }
             });
+
+            control.input.selectPlans.each(plan -> {
+                for(ItemStack stack : plan.block.requirements){
+                    req2.add(stack.item, Mathf.floor(stack.amount * (plan.breaking ? (world.build(plan.x, plan.y) instanceof ConstructBlock.ConstructBuild cb && cb.team == player.team() ? cb.progress : 1f) * state.rules.deconstructRefundMultiplier*state.rules.buildCostMultiplier : (world.build(plan.x, plan.y) instanceof ConstructBlock.ConstructBuild cb && cb.team == player.team() ? cb.progress - 1f : -1f) * state.rules.buildCostMultiplier)));
+                }
+            });
+
             for(Item item : content.items()){
                 if(buildPlanTable.getChildren().find(e -> e.name != null && e.name.equals(item.name)) instanceof Label l){
-                    l.setText((req.get(item)>0?"+":"") + req.get(item));
-                    l.setColor(player.team().core().items.get(item) < -req.get(item) ? Color.red:Color.forest);
+                    l.setText((req.get(item)>0?"+":"") + req.get(item) + (req2.get(item)>0?"+":"") + (req2.get(item)==0?"":req2.get(item)));
+                    l.setColor(player.team().core().items.get(item) < -(req.get(item) + req2.get(item)) ? Color.red:Color.forest);
                 }else{
-                    if(req.get(item) == 0) continue;
+                    if(req.get(item) == 0 && req2.get(item) == 0) continue;
                     if(buildPlanTable.getCells().size % 8 == 0) buildPlanTable.row();
                     buildPlanTable.image(item.uiIcon).size(16f);
-                    buildPlanTable.add("" + req.get(item)).name(item.name);
+                    buildPlanTable.add("").name(item.name).left();
                 }
             }
         });
