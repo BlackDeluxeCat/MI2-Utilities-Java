@@ -216,7 +216,7 @@ public class RendererExt{
             }
 
             //display logicAI info by MI2
-            if(unit.controller() instanceof LogicAI logicai && logicai.controller.isValid()){
+            if(unit.controller() instanceof LogicAI logicai){
                 Draw.reset();
                 if(MI2USettings.getBool("enUnitLogic")){
                     if(logicai.controller instanceof LogicBlock.LogicBuild lb && lb.executor != null){

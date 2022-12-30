@@ -28,5 +28,4 @@ public class MI2UVars{
     public static LogicHelperMindow logicHelper = new LogicHelperMindow();
     public static CustomContainerMindow container = new CustomContainerMindow();
     public static MinimapMindow mindowmap = new MinimapMindow();
-    public static MapInfoMindow mapinfo = new MapInfoMindow();
 }

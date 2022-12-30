@@ -42,7 +42,7 @@ public class Mindow2 extends Table{
     public static Drawable titleBarbgNormal, titleBarbgSnapped, white, gray2;
 
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
-    public boolean topmost = false, minimized = false, closable = true;
+    public boolean topmost = false, minimized = false;
     public String titleText, helpInfo = "", mindowName;
     protected Table titleBar = new Table();
     protected Table cont = new Table();
@@ -91,11 +91,6 @@ public class Mindow2 extends Table{
         rebuild();
     }
 
-    /** called when click close-button, can be overrided */
-    public void close(){
-        remove();
-    }
-
     public void setupTitle(){
         titleBar.clear();
         var title = new Label(titleText);
@@ -124,23 +119,9 @@ public class Mindow2 extends Table{
         });
 
         if(!minimized){
-            titleBar.add(title).pad(0, 1, 0, 1).growX();
-
-            titleBar.button("" + Iconc.info, textb, this::showHelp).size(titleButtonSize);
+            titleBar.add(title).pad(0, 1, 0, 1);
 
             titleBar.button("" + Iconc.settings, textb, this::showSettings).size(titleButtonSize);
-
-            titleBar.button("" + Iconc.lock, textbtoggle, () -> {
-                topmost = !topmost;
-                if(topmost){
-                    currTopmost = this;
-                }else{
-                    if(currTopmost == this) currTopmost = null;
-                }
-            }).size(titleButtonSize).update(b -> {
-                topmost = currTopmost == this;
-                b.setChecked(topmost);
-            });
 
             titleBar.button("-", textbtoggle, () -> {
                 minimized = !minimized;
@@ -166,8 +147,6 @@ public class Mindow2 extends Table{
                 b.setChecked(minimized);
             }).with(funcSetTextb);
         }
-
-        titleBar.button("X", textb, this::close).size(titleButtonSize).update(b -> b.setDisabled(!closable));
 
         addListener(new InputListener(){
             @Override
@@ -201,7 +180,16 @@ public class Mindow2 extends Table{
             pack();
         });
 
-        collapser(titleBar, true, () -> cont.getPrefHeight() < 20f || !cont.visible || !MI2USettings.getBool(mindowName + ".autoHideTitle", false) || minimized || ((hasMouse() || !interval.check(0, 180)))).growX().with(c -> c.setDuration(0.1f));
+        var coll = new Collapser(titleBar, false);
+        coll.setCollapsed(true, () -> !(cont.getPrefHeight() < 20f || !cont.visible || !MI2USettings.getBool(mindowName + ".autoHideTitle", false) || minimized || (hasMouse() || !interval.check(0, 180))));
+        coll.setDuration(0.1f);
+        coll.update(() -> {
+            float w = coll.getPrefWidth(), h = coll.getPrefHeight();
+            coll.setSize(w, h);
+            coll.setPosition(0f,getHeight() - h);
+            coll.toFront();
+        });
+        addChild(coll);
     }
 
     protected void edgeSnap(int align, Vec2 vec){
@@ -278,6 +266,8 @@ public class Mindow2 extends Table{
                 addCloseButton();
                 this.cont.pane(t -> {
                     t.add(mindowName != null && !mindowName.equals("") ? Core.bundle.format("mindow2.settings.curMindowName") + mindowName: "@mindow2.settings.noMindowNameWarning").fontScale(1.2f).get().setAlignment(Align.center);
+                    t.row();
+                    t.button("Help", Icon.info, () -> showHelp()).width(200f).get().setStyle(textb);
                     t.row();
                     settings.each(st -> {
                         t.table(st::build).width(Math.min(600, Core.graphics.getWidth())).left();
@@ -363,7 +353,14 @@ public class Mindow2 extends Table{
 
     public class MindowUIGroupEntry extends SettingGroupEntry{
         SingleEntry entry1 = new SingleEntry(mindowName + ".minimized", "");
-        SingleEntry entry2 = new SingleEntry(mindowName + ".topmost", "");
+        CheckEntry entry2 = new CheckEntry(mindowName + ".topmost", "", false, b -> {
+            topmost = b;
+            if(topmost){
+                currTopmost = Mindow2.this;
+            }else{
+                if(currTopmost == Mindow2.this) currTopmost = null;
+            }
+        });
         SingleEntry entry3 = new SingleEntry(mindowName + ".curx", "");
         SingleEntry entry4 = new SingleEntry(mindowName + ".cury", "");
         SingleEntry entry5 = new SingleEntry(mindowName + ".edgesnap", ""){
@@ -448,7 +445,7 @@ public class Mindow2 extends Table{
                         rightt.table(ttt -> {
                             entry1.build(ttt);
                             ttt.row();
-                            entry2.build(ttt);
+                            ttt.add(entry2.newTextButton(name + ".topMost")).growX();
                             ttt.row();
                             entry3.build(ttt);
                             ttt.row();

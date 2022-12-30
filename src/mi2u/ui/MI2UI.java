@@ -12,28 +12,61 @@ import mi2u.game.*;
 import mi2u.input.*;
 import mi2u.io.*;
 import mi2u.io.MI2USettings.*;
-import mindustry.Vars;
+import mindustry.*;
+import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.ui.*;
 
 import static mi2u.MI2UVars.*;
+import static mindustry.Vars.*;
 
 public class MI2UI extends Mindow2{
     public static PopupTable popup = new PopupTable();
+    public MapInfoTable mapinfo =  new MapInfoTable();
+
+    private long runTime = 0, lastRunTime = 0, realRunTime = 0, lastRealRun = 0;
+
     public MI2UI(){
         super("@main.MI2U", "@main.help");
+
+        Events.run(EventType.Trigger.update, () -> {
+            if(state.isGame()){
+                if(!state.isPaused()){
+                    realRunTime += Time.timeSinceMillis(lastRealRun) * Time.delta;
+                }
+                runTime += Time.timeSinceMillis(lastRunTime);
+                lastRealRun = Time.millis();
+                lastRunTime = Time.millis();
+            }
+        });
+
+        Events.on(EventType.WorldLoadEvent.class, e -> {
+            realRunTime = runTime = 0;
+            lastRealRun = lastRunTime = Time.millis();
+        });
     }
 
     @Override
     public void init(){
         super.init();
-        closable = false;
         mindowName = "MI2UI";
     }
 
     @Override
     public void setupCont(Table cont){
         cont.clear();
+        cont.table(t -> {
+            t.table(timet -> {
+                timet.label(() -> Iconc.save + Strings.formatMillis(control.saves.getTotalPlaytime())).minWidth(40f).padRight(8f).get().setFontScale(0.8f);
+                timet.row();
+                timet.label(() -> Iconc.play + Strings.formatMillis(runTime)).minWidth(40f).padRight(8f).get().setFontScale(0.8f);
+                timet.row();
+                timet.label(() -> Iconc.pause + Strings.formatMillis(realRunTime)).minWidth(40f).get().setFontScale(0.8f);
+            });
+            t.add(mapinfo).growX();
+        }).growX();
+
+        cont.row();
 
         cont.table(tt -> {
             if(MI2USettings.getEntry("enDistributionReveal") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.zoom + Iconc.blockJunction)).minSize(24f);
@@ -42,6 +75,7 @@ public class MI2UI extends Mindow2{
             if(MI2USettings.getEntry("disableBullet") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.unitScatheMissile)).width(36f);
             if(MI2USettings.getEntry("disableBuilding") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.blockDuo)).width(36f);
         });
+
         cont.row();
 
         cont.table(tt -> {
@@ -149,7 +183,6 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("showEmojis", "@settings.main.emoji", false, b -> emojis.addTo(b?Core.scene.root:null)));
         settings.add(new CheckEntry("showCoreInfo", "@settings.main.coreInfo", false, b -> coreInfo.addTo(b?Core.scene.root:null)));
         settings.add(new CheckEntry("showMindowMap", "@settings.main.mindowMap", false, b -> mindowmap.addTo(b?Core.scene.root:null)));
-        settings.add(new CheckEntry("showMapInfo", "@settings.main.mapInfo", false, b -> mapinfo.addTo(b?Core.scene.root:null)));
         settings.add(new CheckEntry("showLogicHelper", "@settings.main.logicHelper", true, b -> logicHelper.addTo(b?Vars.ui.logic:null)));
 
         settings.add(new CheckEntry("enPlayerCursor", "@settings.main.playerCursor", true, null));

@@ -193,6 +193,8 @@ public class MinimapMindow extends Mindow2{
                     if(mobile){
                         float max = Math.min(world.width(), world.height()) / 16f / 2f;
                         setZoom(1f + y / height * (max - 1f));
+                    }else{
+                        this.clicked(null, x, y);
                     }
                 }
     

@@ -3,131 +3,282 @@ package mi2u.ui;
 import arc.*;
 import arc.func.*;
 import arc.graphics.*;
+
 import arc.scene.*;
-import arc.scene.event.Touchable;
+import arc.scene.event.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
+import arc.struct.*;
 import arc.util.*;
+import mi2u.*;
+import mi2u.struct.*;
 import mindustry.content.*;
+import mindustry.core.*;
 import mindustry.game.*;
-import mindustry.game.EventType.*;
-import mindustry.game.Teams.*;
 import mindustry.gen.*;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
-import mindustry.world.Block;
+import mindustry.world.*;
 
-import static mindustry.Vars.*;
 import static mi2u.MI2UVars.*;
+import static mi2u.MI2UVars.titleButtonSize;
+import static mi2u.struct.UnitsData.*;
+import static mindustry.Vars.*;
 
-public class MapInfoMindow extends Mindow2{
-
-    public boolean showMapAtts = true, showWaves = true, showWaveBars = true;
-    private boolean syncCurWave = true;
-    public int curWave = 0; //state.wave is display number, spawner number should sub 1
-    public WaveBarTable wavebars = new WaveBarTable();
-    public Table mapAttsTable;
-    public PopupTable attsListPopup;
+public class MapInfoTable extends Table{
+    protected Seq<MI2Bar> hpBars = new Seq<>();
+    protected PopupTable detailt = new PopupTable(), wavesPopup = new PopupTable(), attrsListPopup = new PopupTable();;
     public BaseDialog mapAttsDialog;
-    private Interval timer = new Interval();
-    private long runTime = 0, lastRunTime = 0, realRunTime = 0, lastRealRun = 0;
+    Table barsTable;
 
-    public MapInfoMindow() {
-        super("@mapInfo.MI2U", "@mapInfo.help");
-        Events.on(WorldLoadEvent.class, e -> {
-            realRunTime = runTime = 0;
-            lastRealRun = lastRunTime = Time.millis();
-            rebuild();
-            setCurWave(state.wave);
+    private Interval timer = new Interval(2);   //0-data update; 1-wave table rebuild
+    private boolean syncCurWave = true;
+    private int curWave = 1;
+    public MapInfoTable(){
+        super();
+        Events.on(EventType.WorldLoadEvent.class, e -> {
+            clearData();
+            WorldData.updateSpanwer();
+            Time.run(Math.min(state.rules.waveSpacing, 60f), UnitsData::catchWave);
         });
 
-        Events.run(Trigger.update, () -> {
-            if(state.isGame()){
-                if(!state.isPaused()){
-                    realRunTime += Time.timeSinceMillis(lastRealRun);
-                }
-                runTime += Time.timeSinceMillis(lastRunTime);
-                lastRealRun = Time.millis();
-                lastRunTime = Time.millis();
-            }
+        Events.on(EventType.CoreChangeEvent.class, e -> WorldData.updateSpanwer());
+
+        Events.on(EventType.WaveEvent.class, e -> Time.run(Math.min(state.rules.waveSpacing, 60f), () -> {
+            WorldData.updateSpanwer();
+            catchWave();
+        }));
+
+        update(() -> {
+            if(!timer.get(0, 19f)) return;
+            updateData();
+            if(barsTable != null && barsTable.hasParent()) setupBars(barsTable);
         });
-    }
 
-    @Override
-    public void init(){
-        super.init();
-        mindowName = "MapInfo";
+        //ui on MI2U
+        button("@mapinfo.buttons.allAttrs", textb , () -> mapAttsDialog.show()).with(funcSetTextb).growX();
+        row();
+        button("波次", textb, () -> {
+            wavesPopup.popup(Align.top);
+            wavesPopup.snapTo(this);
+            wavesPopup.keepInScreen();
+        }).with(funcSetTextb).growX();
 
+        //map attributes
         mapAttsDialog = new BaseDialog("@mapinfo.buttons.allAttrs");
         mapAttsDialog.shown(this::setupDetailAttsInfo);
-        setupDetailAttsInfo();
         mapAttsDialog.addCloseButton();
 
-        mapAttsTable = new Table();
-        mapAttsTable.setBackground(Styles.black5);
-        setupMapAtts(mapAttsTable);
+        //wave tools
+        wavesPopup.addCloseButton();
+        wavesPopup.addDragMove();
+        wavesPopup.background(Styles.black3);
+        wavesPopup.table(t -> {
+            t.table(t3 -> {
+                t3.label(() -> "Wave: " + curWave).get().setFontScale(0.7f);
+                t3.button("" + Iconc.redo, textb, () -> {
+                    curWave = Math.max(curWave, 1);
+                    state.wave = curWave;
+                }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).size(titleButtonSize);
+                t3.button("@mapinfo.buttons.forceRunWave", textb, () -> {
+                    logic.runWave();
+                }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).height(titleButtonSize);
+                t3.button("" + Iconc.refresh, textbtoggle, () -> {
+                    if(state.rules.infiniteResources) state.rules.waveTimer = !state.rules.waveTimer;
+                }).update(b -> b.setChecked(state.rules.waveTimer)).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).height(titleButtonSize);
+            });
+        }).row();
 
-        attsListPopup = new PopupTable();
-    }
-
-    @Override
-    public void setupCont(Table cont){
-        cont.clear();
-        //if(!state.isGame()) return;
-        cont.visible(() -> state.isGame());
-        cont.background(Styles.black5);
-        cont.table(tt -> {
-            tt.defaults().growX().height(36f);
-            tt.button("" + Iconc.map, textbtoggle, () -> {
-                showMapAtts = !showMapAtts;
-                rebuild();
-            }).update(b -> {
-                b.setChecked(showMapAtts);
-            }).with(funcSetTextb);
-
-            tt.button("" + Iconc.teamCrux, textbtoggle, () -> {
-                showWaves = !showWaves;
-                rebuild();
-            }).update(b -> {
-                b.setChecked(showWaves);
-            }).with(funcSetTextb);
-
-            tt.button("" + Iconc.chartBar, textbtoggle, () -> {
-                showWaveBars = !showWaveBars;
-                rebuild();
-            }).update(b -> {
-                b.setChecked(showWaveBars);
-            }).with(funcSetTextb);
-        }).fillX();
-        cont.row();
-        if(showMapAtts){
-            cont.add(mapAttsTable);
-            cont.row();
-        }
-        if(showWaves){
-            cont.table(this::setupWaves);
-            cont.row();
-        }
-        if(showWaveBars){
-            cont.pane(wavebars).growX().minWidth(100f).maxHeight(200f).update(p -> {
+        wavesPopup.table(t -> {
+            t.pane(p -> {
+                p.update(() -> {
+                    if(!timer.get(1, 60f)) return;
+                    p.clear();
+                    int i = 0;
+                    for(SpawnGroup group : state.rules.spawns){
+                        int wavenum = state.wave - 1;
+                        if(group.getSpawned(wavenum) < 1) continue;
+                        p.table(g -> {
+                            g.table(gt -> {
+                                gt.image(group.type.uiIcon).size(18f);
+                                gt.add("x" + group.getSpawned(wavenum)).get().setFontScale(0.7f);
+                            });
+                            g.row();
+                            g.add("" + group.getShield(wavenum)).get().setFontScale(0.7f);
+                            g.row();
+                            g.table(eip -> {
+                                if(group.effect != null && group.effect != StatusEffects.none) eip.image(group.effect.uiIcon).size(12f);
+                                if(group.items != null) eip.image(group.items.item.uiIcon).size(12f);
+                                if(group.payloads!=null && !group.payloads.isEmpty()) eip.add("" + Iconc.units).get().setFontScale(0.7f);
+                            });
+                        }).pad(2f);
+                        if(++i >= 5){
+                            i = 0;
+                            p.row();
+                        }
+                    }
+                });
+            }).fillX().maxHeight(200f).update(p -> {
                 Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
                 if(e != null && e.isDescendantOf(p)){
                     p.requestScroll();
                 }else if(p.hasScroll()){
                     Core.scene.setScrollFocus(null);
                 }
-            }).with(c -> c.setFadeScrollBars(true));
+            });
+        }).row();
+
+        wavesPopup.table(t3 -> {
+            t3.button("<<", textb, () -> {
+                syncCurWave = false;
+                curWave = Math.max(curWave - 10, 0);
+            }).with(funcSetTextb).size(titleButtonSize);
+            t3.button("<", textb, () -> {
+                syncCurWave = false;
+                curWave = Math.max(curWave - 1, 0);
+            }).with(funcSetTextb).size(titleButtonSize);
+            t3.button("O", textbtoggle, () -> {
+                syncCurWave = !syncCurWave;
+            }).with(funcSetTextb).size(titleButtonSize).update(b -> {
+                b.setChecked(syncCurWave);
+                if(syncCurWave) curWave = Math.max(state.wave - 1, 0);
+            });
+            t3.button(">", textb, () -> {
+                syncCurWave = false;
+                curWave = Math.max(curWave + 1, 0);
+            }).with(funcSetTextb).size(titleButtonSize);
+            t3.button(">>", textb, () -> {
+                syncCurWave = false;
+                curWave = Math.max(curWave + 1, 0);
+            }).with(funcSetTextb).size(titleButtonSize);
+            TextField tf = new TextField();
+            tf.changed(() -> {
+                if(Strings.canParseInt(tf.getText()) && Strings.parseInt(tf.getText()) > 0){
+                    syncCurWave = false;
+                    curWave = Math.max(Strings.parseInt(tf.getText()) - 1, 0);
+                }
+            });
+            t3.add(tf).width(80f).height(28f);
+        }).row();
+
+        wavesPopup.pane(t -> barsTable = t).maxHeight(400f).update(p -> {
+            Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
+            if(e != null && e.isDescendantOf(p)){
+                p.requestScroll();
+            }else if(p.hasScroll()){
+                Core.scene.setScrollFocus(null);
+            }
+        });;
+
+    }
+
+    //single wave details
+    public void setupBars(Table t){
+        t.clear();
+        for(int i = 0; i < allwaves.size; i++){
+            if(i >= hpBars.size) hpBars.add(new MI2Bar());
+            WaveData d = allwaves.get(i);
+            t.add(hpBars.get(i)).growX().height(18f).minWidth(200f).with(bar -> {
+                bar.clearListeners();
+                bar.set(() -> "Wave " + d.wave + ": " + "(" + d.units.size + ") " + UI.formatAmount((long)d.sumHp()) + "/" + UI.formatAmount((long)(d.totalHp + d.totalShield)),
+                        () -> {
+                            if(curWave <= d.wave && d.sumHp() <= 0f) return 1f;
+                            return d.sumHp() / (d.totalHp + d.totalShield);
+                        },
+                        (curWave > d.wave || d.sumHp() > 0) ? Color.scarlet : Color.darkGray);
+                bar.blink(Color.white).outline(MI2UTmp.c2.set(0.3f, 0.3f, 0.6f, 0.3f), 1f).setFontScale(0.8f);
+                bar.tapped(() -> {
+                    if(detailt.shown) detailt.hide();
+                    detailt.clear();
+                    detailt.background(Styles.black8);
+                    detailt.addCloseButton();
+                    detailt.addDragMove();
+                    buildDetails(detailt, d);
+                    detailt.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
+                    detailt.popup();
+                });
+            });
+            t.row();
         }
     }
-    
+
+    //single wave details
+    public void buildDetails(Table t, WaveData data){
+        t.add("Wave " + data.wave).growX().minSize(80f, 36f);
+        t.row();
+        t.pane(p -> {
+            p.table(groupt -> {
+                int i = 0;
+                for(SpawnGroup group : state.rules.spawns){
+                    if(group.getSpawned(data.wave - 1) < 1) continue;
+                    groupt.table(g -> {
+                        g.table(eip -> {
+                            if(group.effect != null && group.effect != StatusEffects.none) eip.image(group.effect.uiIcon).size(12f);
+                            if(group.items != null) eip.image(group.items.item.uiIcon).size(12f);
+                            if(group.payloads != null && !group.payloads.isEmpty()) eip.add("" + Iconc.units).get().setFontScale(0.7f);
+                            if(group.spawn != -1) eip.add("" + Iconc.blockSpawn).get().setFontScale(0.7f);
+                            eip.image(group.type.uiIcon).size(18f);
+                            eip.add("x" + group.getSpawned(data.wave - 1)).get().setFontScale(0.7f);
+                        });
+                        g.row();
+                        g.add("" + group.getShield(data.wave - 1)).get().setFontScale(0.7f);
+                    }).pad(2f);
+                    if(++i >= 5){
+                        i = 0;
+                        groupt.row();
+                    }
+                }
+            });
+
+            p.row();
+
+            p.table(t2 -> {
+                for(int id = 0; id < data.totalsByType.length; id++){
+                    if(data.totalsByType[id] <= 1f) continue;
+                    var type = content.unit(id);
+                    t2.image(type.uiIcon).size(18f);
+                    t2.add(new MI2Bar()).with(bar -> {
+                        bar.set(() -> {
+                                    Seq<UnitData> units = data.unitsByType[type.id];
+                                    if(units == null) return UI.formatAmount((long)data.totalsByType[type.id]);
+                                    float hp = data.unitsByType[type.id].sumf(udata -> udata.unit.health + udata.unit.shield);
+                                    return units.size + "|" + UI.formatAmount((long)hp) + "/" + UI.formatAmount((long)data.totalsByType[type.id]);
+                                },
+                                () -> {
+                                    Seq<UnitData> units = data.unitsByType[type.id];
+                                    if (units == null) return 1f;
+                                    float hp = data.unitsByType[type.id].sumf(udata -> udata.unit.health + udata.unit.shield);
+                                    return hp / data.totalsByType[type.id];
+                                }, Color.scarlet);
+                        bar.setFontScale(0.8f).blink(Color.white);
+                    }).height(10f).minWidth(100f).growX();
+                    t2.row();
+                }
+            }).growX();
+        }).maxHeight(300f).update(p -> {
+            Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
+            if(e != null && e.isDescendantOf(p)){
+                p.requestScroll();
+            }else if(p.hasScroll()){
+                Core.scene.setScrollFocus(null);
+            }
+        });
+    }
+
+    public void addBoolString(Boolp p, String icon, Table t){
+        t.add(icon).update(l -> l.color.set(p.get() ? Color.white : Color.darkGray)).pad(1f);
+    }
+
+    public void addFloatAttr(Prov<CharSequence> p, String name, Table t){
+        t.table(tt -> {
+            tt.add(name).get().setFontScale(0.8f);
+            tt.row();
+            tt.label(p).get().setFontScale(0.8f);
+        }).pad(2);
+    }
+
     public void setupMapAtts(Table t){
         t.clear();
-        t.table(timet -> {
-            timet.label(() -> Iconc.save + Strings.formatMillis(control.saves.getTotalPlaytime())).minWidth(40f).padRight(8f).get().setFontScale(0.8f);
-            timet.label(() -> Iconc.play + Strings.formatMillis(runTime)).minWidth(40f).padRight(8f).get().setFontScale(0.8f);
-            timet.label(() -> Iconc.pause + Strings.formatMillis(realRunTime)).minWidth(40f).get().setFontScale(0.8f);
-        });
-        t.row();
         t.table(rules1 -> {
             rules1.table(tt -> {
                 addBoolString(() -> state.rules.fire, "" + Iconc.statusBurning, tt);
@@ -156,120 +307,6 @@ public class MapInfoMindow extends Mindow2{
                 addFloatAttr(() -> Strings.fixed(state.rules.solarMultiplier, 2), "@mapInfo.solarMulti", tt);
             });
         });
-    }
-
-    public void setupWaves(Table t){
-        t.clear();
-        t.table(tt -> {
-            tt.table(t3 -> {
-                t3.label(() -> "Wave: " + curWave).get().setFontScale(0.7f);
-                t3.button("" + Iconc.redo, textb, () -> {
-                    curWave = Math.max(curWave, 1);
-                    state.wave = curWave;
-                    wavebars.curWave = curWave;
-                }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).size(titleButtonSize);
-                t3.button("@mapinfo.buttons.forceRunWave", textb, () -> {
-                    logic.runWave();
-                }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).height(titleButtonSize);
-                t3.button("" + Iconc.refresh, textbtoggle, () -> {
-                    if(state.rules.infiniteResources) state.rules.waveTimer = !state.rules.waveTimer;
-                }).update(b -> b.setChecked(state.rules.waveTimer)).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).height(titleButtonSize);
-            });
-
-            tt.row();
-
-            tt.table(t3 -> {
-                t3.button("<<", textb, () -> {
-                    syncCurWave = false;
-                    setCurWave(curWave - 10);
-                }).with(funcSetTextb).size(titleButtonSize);
-                t3.button("<", textb, () -> {
-                    syncCurWave = false;
-                    setCurWave(curWave - 1);
-                }).with(funcSetTextb).size(titleButtonSize);
-                t3.button("O", textbtoggle, () -> {
-                    syncCurWave = !syncCurWave;
-                }).with(funcSetTextb).size(titleButtonSize).update(b -> {
-                    b.setChecked(syncCurWave);
-                    if(syncCurWave) setCurWave(state.wave);
-                });
-                t3.button(">", textb, () -> {
-                    syncCurWave = false;
-                    setCurWave(curWave + 1);
-                }).with(funcSetTextb).size(titleButtonSize);
-                t3.button(">>", textb, () -> {
-                    syncCurWave = false;
-                    setCurWave(curWave + 10);
-                }).with(funcSetTextb).size(titleButtonSize);
-                TextField tf = new TextField();
-                tf.changed(() -> {
-                    if(Strings.canParseInt(tf.getText()) && Strings.parseInt(tf.getText()) > 0){
-                        syncCurWave = false;
-                        setCurWave(Strings.parseInt(tf.getText()));
-                    }
-                });
-                t3.add(tf).width(80f).height(28f);
-            });
-        });
-        t.row();
-
-        t.pane(p -> {
-            p.update(() -> {
-                if(!timer.get(60f)) return;
-                p.clear();
-                int i = 0;
-                for(SpawnGroup group : state.rules.spawns){
-                    if(group.getSpawned(curWave - 1) < 1) continue;
-                    p.table(g -> {
-                        g.table(gt -> {
-                            gt.image(group.type.uiIcon).size(18f);
-                            gt.add("x" + group.getSpawned(curWave - 1)).get().setFontScale(0.7f);
-                        });
-                        g.row();
-                        g.add("" + group.getShield(curWave - 1)).get().setFontScale(0.7f);
-                        g.row();
-                        g.table(eip -> {
-                            if(group.effect != null && group.effect != StatusEffects.none) eip.image(group.effect.uiIcon).size(12f);
-                            if(group.items != null) eip.image(group.items.item.uiIcon).size(12f);
-                            if(group.payloads!=null && !group.payloads.isEmpty()) eip.add("" + Iconc.units).get().setFontScale(0.7f);
-                        });
-                    }).pad(2f);
-                    if(++i >= 5){
-                        i = 0;
-                        p.row();
-                    }
-                }
-            });
-        }).fillX().maxHeight(200f).update(p -> {
-            Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-            if(e != null && e.isDescendantOf(p)){
-                p.requestScroll();
-            }else if(p.hasScroll()){
-                Core.scene.setScrollFocus(null);
-            }
-        });
-    }
-
-    public void setCurWave(int wave){
-        curWave = Math.max(wave, 1);
-        boolean updateBars = wavebars.previewedWave != curWave;
-        wavebars.previewedWave = curWave;
-        if(updateBars){
-            wavebars.updateData();
-            wavebars.setupBars();
-        }
-    }
-
-    public void addBoolString(Boolp p, String icon, Table t){
-        t.add(icon).update(l -> l.color.set(p.get() ? Color.white : Color.darkGray)).pad(1f);
-    }
-
-    public void addFloatAttr(Prov<CharSequence> p, String name, Table t){
-        t.table(tt -> {
-            tt.add(name).get().setFontScale(0.8f);
-            tt.row();
-            tt.label(p).get().setFontScale(0.8f);
-        }).pad(2);
     }
 
     public void setupDetailAttsInfo(){
@@ -424,7 +461,7 @@ public class MapInfoMindow extends Mindow2{
                 teamt.add("@mapInfo.cheat").padLeft(5).padRight(5);
                 teamt.add("@mapInfo.rtsAI").padLeft(5).padRight(5);
 
-                for(TeamData teamData : state.teams.getActive()){
+                for(Teams.TeamData teamData : state.teams.getActive()){
                     teamt.row();
                     var teamRule = state.rules.teams.get(teamData.team);
                     teamt.add("[#" + teamData.team.color + "]" + teamData.team.localized());
@@ -445,16 +482,16 @@ public class MapInfoMindow extends Mindow2{
     }
 
     public <T> void showIterable(String title, Iterable<T> array, Boolf<T> boolf, Cons2<T, Table> cons){
-        attsListPopup.clear();
-        attsListPopup.setBackground(Styles.black3);
-        attsListPopup.touchable = Touchable.enabled;
-        attsListPopup.addDragMove();
-        attsListPopup.addCloseButton();
-        attsListPopup.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
-        attsListPopup.update(() -> attsListPopup.keepInScreen());
-        attsListPopup.add(title).padRight(10f);
-        attsListPopup.row();
-        attsListPopup.pane(cont -> {
+        attrsListPopup.clear();
+        attrsListPopup.setBackground(Styles.black3);
+        attrsListPopup.touchable = Touchable.enabled;
+        attrsListPopup.addDragMove();
+        attrsListPopup.addCloseButton();
+        attrsListPopup.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
+        attrsListPopup.update(() -> attrsListPopup.keepInScreen());
+        attrsListPopup.add(title).padRight(10f);
+        attrsListPopup.row();
+        attrsListPopup.pane(cont -> {
             int index = 0;
             for(T item : array){
                 if(boolf != null && !boolf.get(item)) continue;
@@ -473,7 +510,7 @@ public class MapInfoMindow extends Mindow2{
             }
         }).with(c -> c.setFadeScrollBars(true));
 
-        attsListPopup.popup();
-        attsListPopup.toFront();
+        attrsListPopup.popup();
+        attrsListPopup.toFront();
     }
 }
