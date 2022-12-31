@@ -2,7 +2,7 @@ package mi2u.struct;
 
 import arc.struct.*;
 import arc.util.*;
-import mindustry.entities.*;
+import mi2u.ui.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 
@@ -20,11 +20,6 @@ public class UnitsData{
     }
 
     public static void updateData(){
-        if(!state.isGame()){
-            clearData();
-            return;
-        }
-
         //clear dead units
         allunits.remove(unit -> {
             boolean remove = unit.unit == null || !unit.unit.isValid();
@@ -40,27 +35,22 @@ public class UnitsData{
 
         //wave data cleanup
         allwaves.each(WaveData::removeDead);
-        allwaves.removeAll(waved -> {
-            boolean preview = false;
-            for(int i = 0;i < 200; i++){
-                preview = waved.wave == state.wave + i;
-                if(preview) break;
-            }
-            return !preview && waved.units.isEmpty();
-        });
 
-        for(int i = 0;i < 200; i++){
-            int ii = i;
-            if(!allwaves.contains(waveData -> waveData.wave == state.wave + ii)) allwaves.add(new WaveData(state.wave + ii));
+        allwaves.removeAll(waved -> waved.units.isEmpty() && Math.abs(state.wave - waved.wave) > 4 && waved.wave - MapInfoTable.curWave <= 50);
+        int cs = 0;
+        while(cs < 50){
+            int css = cs;
+            if(!allwaves.contains(waveData -> waveData.wave == MapInfoTable.curWave + css)) allwaves.add(new WaveData(MapInfoTable.curWave + css));
+            cs++;
         }
 
         allwaves.sort(waveData -> waveData.wave);
     }
 
     public static void catchWave(){
-        int wa = state.wave - 1;//state.wave is updated before WaveEvent, thus the spawned unit should be signed to wave-1
+        int wa = Math.max(state.wave - 1 - 1, 0);//state.wave is updated before WaveEvent, thus the spawned unit should be signed to wave-1
         if(!allwaves.contains(waveData -> waveData.wave == wa)) allwaves.add(new WaveData(wa));
-        Seq<UnitData> toAdd = allunits.select(unitData -> unitData.wave == -1 && unitData.unit.team == state.rules.waveTeam && unitData.getSurviveTime() < 240f);
+        Seq<UnitData> toAdd = allunits.select(unitData -> unitData.wave == -1 && unitData.unit.team.id == state.rules.waveTeam.id && unitData.getSurviveTime() < 240f);
         toAdd.each(unitData -> unitData.wave = wa);
         allwaves.select(waveData -> waveData.wave == wa).first().addAll(toAdd);
     }
@@ -70,24 +60,23 @@ public class UnitsData{
         public float totalHp = 1f, totalShield = 1f;
         public float[] totalsByType = new float[content.units().size];
         public Seq<UnitData> units = new Seq<>();
-        public Seq<UnitData>[] unitsByType;
+        public Seq<UnitData>[] unitsByType = new Seq[content.units().size];
         Interval time = new Interval();
         float sumHp;
         public WaveData(int wave){
             this.wave = wave;
-            init();
+            updateSpawnInfo();
         }
 
-        public void init(){
-            unitsByType = new Seq[content.units().size];
+        public void updateSpawnInfo(){
             totalHp = totalShield = 0f;
 
             for(SpawnGroup group : state.rules.spawns){
-                int spawns = group.type.flying ? WorldData.countFlyingSpawner(group.spawn) : WorldData.countGroundSpawner(group.spawn);
-
-                totalHp += group.type.health * group.getSpawned(wave - 1) * spawns;
-                totalShield += group.getShield(wave - 1) * group.getSpawned(wave - 1) * spawns;
-                totalsByType[group.type.id] += (group.type.health + group.getShield(wave - 1)) * group.getSpawned(wave - 1) * spawns;
+                int countSpawns = group.type.flying ? WorldData.countFlyingSpawner(group.spawn) : WorldData.countGroundSpawner(group.spawn);
+                int countUnits = group.getSpawned(wave) * countSpawns;
+                totalHp += group.type.health * countUnits;
+                totalShield += group.getShield(wave ) * countUnits;
+                totalsByType[group.type.id] += (group.type.health + group.getShield(wave)) * countUnits;
             }
         }
 

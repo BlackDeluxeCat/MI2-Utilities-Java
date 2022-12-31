@@ -6,6 +6,7 @@ import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.scene.*;
 import arc.scene.ui.layout.*;
+import arc.util.*;
 import arc.util.pooling.*;
 import mindustry.ui.*;
 
@@ -26,6 +27,7 @@ public class MI2Bar extends Element{
 
     public MI2Bar(Prov<String> name, Prov<Color> color, Floatp fraction){
         this.fraction = fraction;
+        this.blinkColor.set(color.get());
         try{
             lastValue = value = Mathf.clamp(fraction.get());
         }catch(Exception e){ //getting the fraction may involve referring to invalid data
@@ -34,7 +36,6 @@ public class MI2Bar extends Element{
         update(() -> {
             try{
                 this.name = name.get();
-                this.blinkColor.set(color.get());
                 setColor(color.get());
             }catch(Exception e){ //getting the fraction may involve referring to invalid data
                 this.name = "";
@@ -61,9 +62,9 @@ public class MI2Bar extends Element{
     public void set(Prov<String> name, Floatp fraction, Prov<Color> color){
         this.fraction = fraction;
         this.lastValue = fraction.get();
+        this.blinkColor.set(color.get());
         update(() -> {
             this.name = name.get();
-            this.blinkColor.set(color.get());
             setColor(color.get());
         });
     }
@@ -103,10 +104,8 @@ public class MI2Bar extends Element{
             computed = 0f;
         }
 
-        if(lastValue > computed){
-            blink = 1f;
-            lastValue = computed;
-        }
+        if(lastValue > computed) blink = 1f;
+        lastValue = computed;
 
         if(Float.isNaN(lastValue)) lastValue = 0;
         if(Float.isInfinite(lastValue)) lastValue = 1f;

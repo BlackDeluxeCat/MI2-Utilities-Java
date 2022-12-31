@@ -274,7 +274,7 @@ public class WorldFinderTable extends PopupTable{
                 int j = 1;
                 for(int i = 0; i < 256; i++){
                     var team0 = Team.all[i];
-                    if(WorldData.activeTeams[i]){
+                    if(team0.data().buildings.size > 0){
                         selectTable.button(team0.localized(), textb, () -> {
                             team = team0;
                         }).minSize(titleButtonSize * 2f).disabled(b -> team == team0).with(b -> {

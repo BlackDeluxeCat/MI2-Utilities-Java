@@ -12,8 +12,6 @@ import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.world.*;
 
-import java.util.Arrays;
-
 import static mindustry.Vars.*;
 
 public class WorldData{
@@ -23,7 +21,6 @@ public class WorldData{
      * */
     public static ObjectMap<Block, IntSeq[]> tiles = new ObjectMap<>();
     private static ObjectSet<Building> scanned = new ObjectSet<>();
-    public static boolean[] activeTeams = new boolean[256];
 
     public static Seq<Integer> spawnPoints = new Seq<>();
     public static Seq<Integer> groundSpawns = new Seq<>();
@@ -33,7 +30,6 @@ public class WorldData{
 
     public static void clear(){
         scanned.clear();
-        Arrays.fill(activeTeams, false);
         tiles.each((b, array) -> {
             for(var intSeq : array){
                 if(intSeq != null) intSeq.clear();
@@ -68,7 +64,6 @@ public class WorldData{
                 }
                 putBlock(tile.block(), tile.pos(), 256);
                 if(tile.build != null){
-                    activeTeams[tile.build.team.id] = true;
                     putBlock(tile.block(), tile.pos(), tile.build.team.id);
                 }
             }

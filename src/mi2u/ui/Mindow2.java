@@ -58,7 +58,7 @@ public class Mindow2 extends Table{
             loadUISettings();
         });
 
-        Events.on(ResizeEvent.class, e -> loadUISettings());
+        Events.on(ResizeEvent.class, e -> Time.run(60f, this::loadUISettings));
 
         titleText = title;
         registerName();
@@ -181,7 +181,7 @@ public class Mindow2 extends Table{
         });
 
         var coll = new Collapser(titleBar, false);
-        coll.setCollapsed(true, () -> !(cont.getPrefHeight() < 20f || !cont.visible || !MI2USettings.getBool(mindowName + ".autoHideTitle", false) || minimized || (hasMouse() || !interval.check(0, 180))));
+        coll.setCollapsed(true, () -> !(cont.getPrefHeight() < 20f || !cont.visible || minimized || (hasMouse() || !interval.check(0, 180))));
         coll.setDuration(0.1f);
         coll.update(() -> {
             float w = coll.getPrefWidth(), h = coll.getPrefHeight();
@@ -498,18 +498,6 @@ public class Mindow2 extends Table{
                                 }};
                             });
                             b.getLabelCell().pad(5f,2f,5f,2f);
-
-                            t3.row();
-
-                            var b2 = t3.button("@settings.mindow.autoHideTitle", textbtoggle, null).growX().get();
-                            b2.setChecked(MI2USettings.getBool(mindowName + ".autoHideTitle", false));
-                            b2.clicked(() -> {
-                                var bool = MI2USettings.getBool(mindowName + ".autoHideTitle", false);
-                                bool = !bool;
-                                MI2USettings.putBool(mindowName + ".autoHideTitle", bool);
-                                b2.setChecked(bool);
-                            });
-                            b2.getLabelCell().pad(5f,2f,5f,2f);
                         }).growX();
                     }).minWidth(220f).pad(4f);
                 });

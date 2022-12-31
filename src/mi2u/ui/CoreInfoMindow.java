@@ -78,13 +78,6 @@ public class CoreInfoMindow extends Mindow2{
             }
         });
 
-        Core.scene.addListener(new InputListener(){
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
-                return super.touchDown(event, x, y, pointer, button);
-            }
-        });
-
         update(() -> {
             if(select == null || !select.active()){
                 team = player.team();
