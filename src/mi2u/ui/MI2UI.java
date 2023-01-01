@@ -57,11 +57,11 @@ public class MI2UI extends Mindow2{
         cont.clear();
         cont.table(t -> {
             t.table(timet -> {
-                timet.label(() -> Iconc.save + Strings.formatMillis(control.saves.getTotalPlaytime())).minWidth(40f).padRight(8f).get().setFontScale(0.8f);
+                timet.label(() -> Iconc.save + Strings.formatMillis(control.saves.getTotalPlaytime())).minWidth(40f).padRight(8f);
                 timet.row();
-                timet.label(() -> Iconc.play + Strings.formatMillis(runTime)).minWidth(40f).padRight(8f).get().setFontScale(0.8f);
+                timet.label(() -> Iconc.play + Strings.formatMillis(runTime)).minWidth(40f).padRight(8f).get();
                 timet.row();
-                timet.label(() -> Iconc.pause + Strings.formatMillis(realRunTime)).minWidth(40f).get().setFontScale(0.8f);
+                timet.label(() -> Iconc.pause + Strings.formatMillis(realRunTime)).minWidth(40f).get();
             });
             t.add(mapinfo).growX();
         }).growX();

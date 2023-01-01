@@ -5,6 +5,7 @@ import arc.graphics.*;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Fill;
 import arc.input.*;
+import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.*;
 import arc.scene.event.*;
@@ -14,7 +15,7 @@ import arc.scene.ui.Label.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
-import mi2u.MI2UTmp;
+import mi2u.*;
 import mi2u.game.MI2UEvents;
 import mi2u.io.*;
 import mi2u.io.MI2USettings.*;
@@ -47,7 +48,7 @@ public class Mindow2 extends Table{
     protected Table titleBar = new Table();
     protected Table cont = new Table();
     protected Seq<SettingEntry> settings = new Seq<>();
-    protected Interval interval = new Interval();
+    protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(1);
     @Nullable public Element aboveSnap; public int edgesnap = Align.center;
 
     public Mindow2(String title){
@@ -78,8 +79,8 @@ public class Mindow2 extends Table{
         row();
         if(!minimized){
             cont.setBackground(Styles.black3);
-            add(cont);
             setupCont(cont);
+            add(cont);
         }
     }
 
@@ -148,14 +149,6 @@ public class Mindow2 extends Table{
             }).with(funcSetTextb);
         }
 
-        addListener(new InputListener(){
-            @Override
-            public void exit(InputEvent event, float x, float y, int pointer, Element toActor){
-                if(toActor != null && toActor.isDescendantOf(Mindow2.this)) return;
-                interval.get(0, 1);
-            }
-        });
-
         interval.get(0, 1);
         titleBar.update(() -> {
             cont.touchable = Touchable.enabled;
@@ -181,18 +174,31 @@ public class Mindow2 extends Table{
         });
 
         var coll = new Collapser(titleBar, false);
-        coll.setCollapsed(true, () -> !(cont.getPrefHeight() < 20f || !cont.visible || minimized || (hasMouse() || !interval.check(0, 180))));
+        coll.setCollapsed(true, () -> !(cont.getPrefHeight() < 20f || minimized || !interval.check(0, 3000)));
         coll.setDuration(0.1f);
         coll.update(() -> {
-            float w = coll.getPrefWidth(), h = coll.getPrefHeight();
+            float w = titleBar.getPrefWidth(), h = titleBar.getPrefHeight();
             coll.setSize(w, h);
             coll.setPosition(0f,getHeight() - h);
             coll.toFront();
+            if(hasMouse()) interval.get(0, 1);
         });
+
         addChild(coll);
     }
 
+    @Override
+    public float getPrefHeight(){
+        return Math.max(super.getPrefHeight(), titleBar.getPrefHeight());
+    }
+
+    @Override
+    public float getPrefWidth(){
+        return Math.max(super.getPrefWidth(), titleBar.getPrefWidth());
+    }
+
     protected void edgeSnap(int align, Vec2 vec){
+        if(parent == null) return;
         switch(align){
             case Align.topLeft://lefttop
                 vec.x = 0;
@@ -203,15 +209,15 @@ public class Mindow2 extends Table{
                 vec.y = (parent.getHeight() - getPrefHeight());
                 break;
             case Align.topRight://righttop
-                vec.x = (parent.getWidth() - getWidth());
+                vec.x = (parent.getWidth() - getPrefWidth());
                 vec.y = (parent.getHeight() - getPrefHeight());
                 break;
             case Align.right://right
-                vec.x = (parent.getWidth() - getWidth());
+                vec.x = (parent.getWidth() - getPrefWidth());
                 //vec.y = (parent.getHeight() -getRealHeight())/2f;
                 break;
             case Align.bottomRight://rightbottom
-                vec.x = (parent.getWidth() - getWidth());
+                vec.x = (parent.getWidth() - getPrefWidth());
                 vec.y = 0;
                 break;
             case Align.bottom://bottom

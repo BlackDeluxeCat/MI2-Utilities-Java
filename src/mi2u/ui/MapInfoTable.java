@@ -71,16 +71,16 @@ public class MapInfoTable extends Table{
         });
 
         //ui on MI2U
-        button("@mapinfo.buttons.allAttrs", textb , () -> mapAttsDialog.show()).with(funcSetTextb).growX();
+        button("@mapInfo.buttons.allAttrs", textb , () -> mapAttsDialog.show()).with(funcSetTextb).growX();
         row();
-        button("波次", textb, () -> {
+        button("@mapInfo.buttons.allWaves", textb, () -> {
             wavesPopup.popup(Align.top);
             wavesPopup.snapTo(this);
             wavesPopup.keepInScreen();
         }).with(funcSetTextb).growX();
 
         //map attributes
-        mapAttsDialog = new BaseDialog("@mapinfo.buttons.allAttrs");
+        mapAttsDialog = new BaseDialog("@mapInfo.buttons.allAttrs");
         mapAttsDialog.shown(this::setupDetailAttsInfo);
         mapAttsDialog.addCloseButton();
 
@@ -91,11 +91,11 @@ public class MapInfoTable extends Table{
         wavesPopup.table(t -> {
             t.table(t3 -> {
                 t3.label(() -> "Wave: " + (curWave + 1)).get().setFontScale(1f);
-                t3.button("" + Iconc.redo, textb, () -> {
+                t3.button("@mapInfo.buttons.setWave", textb, () -> {
                     curWave = Math.max(curWave, 0);
                     state.wave = curWave + 1;
                 }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).size(titleButtonSize);
-                t3.button("@mapinfo.buttons.forceRunWave", textb, () -> {
+                t3.button("@mapInfo.buttons.forceRunWave", textb, () -> {
                     logic.runWave();
                 }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).height(titleButtonSize);
                 t3.button("" + Iconc.refresh, textbtoggle, () -> {
@@ -139,7 +139,7 @@ public class MapInfoTable extends Table{
 
         wavesPopup.table(t4 -> {
             t4.defaults().fillY();
-            t4.button("Preview", textbtoggle, () -> showWaveDetail = !showWaveDetail).checked(showWaveDetail).with(funcSetTextb);
+            t4.button("@mapInfo.buttons.preview", textbtoggle, () -> showWaveDetail = !showWaveDetail).checked(showWaveDetail).with(funcSetTextb);
             t4.button(Iconc.blockSpawn + Core.bundle.get("waves.spawn.all"), textb, null).growX().with(b -> {
                 b.clicked(() -> {
                     var p = spawnerSelect;
@@ -169,7 +169,7 @@ public class MapInfoTable extends Table{
                     }
 
                     if(spawner.getSpawns().isEmpty()){
-                        p.button("@waves.spawn.none", Styles.flatTogglet, () -> p.hide());
+                        p.hide();
                     }else{
                         p.button("@waves.spawn.all", Styles.flatTogglet, () -> {
                             curSpawn = -1;
@@ -178,6 +178,7 @@ public class MapInfoTable extends Table{
                         }).size(110f, 45f).checked(-1 == curSpawn);
                     }
                 });
+                b.setDisabled(() -> spawner.getSpawns().isEmpty());
             });
         }).height(24f).growX().row();
 

@@ -67,20 +67,20 @@ public class LogicHelperMindow extends Mindow2{
     public void setupCont(Table cont) {
         cont.clear();
         cont.table(tt -> {
-            tt.defaults().growX().height(36f);
+            tt.defaults().growX().minSize(48f);
             tt.button("" + Iconc.list, textbtoggle, () -> {
                 mode = Mode.vars;
-                rebuild();
+                setupCont(cont);
             }).update(b -> b.setChecked(mode == Mode.vars)).with(funcSetTextb);
 
             tt.button("" + Iconc.zoom, textbtoggle, () -> {
                 mode = Mode.search;
-                rebuild();
+                setupCont(cont);
             }).update(b -> b.setChecked(mode == Mode.search)).with(funcSetTextb);
 
             tt.button("" + Iconc.paste, textbtoggle, () -> {
                 mode = Mode.cutPaste;
-                rebuild();
+                setupCont(cont);
             }).update(b -> b.setChecked(mode == Mode.cutPaste)).with(funcSetTextb);
         }).fillX();
         cont.row();
@@ -188,7 +188,10 @@ public class LogicHelperMindow extends Mindow2{
     public void setupSearchMode(Table cont){
         cont.clear();
         cont.table(tt -> {
-            tt.field("", Styles.nodeField, s -> keyWord = s).fillX();
+            tt.field("", Styles.nodeField, s -> {
+                keyWord = s;
+                doSearch();
+            }).fillX();
 
             tt.button("Cc", textbtoggle, () -> {
                 caseMatch = !caseMatch;
@@ -201,11 +204,6 @@ public class LogicHelperMindow extends Mindow2{
                 doSearch();
                 locateElement(null);
             }).update(b -> b.setChecked(wholeWordsMatch)).with(funcSetTextb).size(36f);
-
-            tt.button("" + Iconc.zoom, textb, () -> {
-                doSearch();
-                locateElement(null);
-            }).with(funcSetTextb).size(36f);
         }).fillX();
         cont.row();
 
@@ -299,7 +297,7 @@ public class LogicHelperMindow extends Mindow2{
             if(index >= results.size) index = 0;
             if(index < 0) index = results.size - 1;
             Element e = results.get(index);
-            e.localToAscendantCoordinates(ld.canvas.pane.getWidget(), MI2UTmp.v2);
+            e.localToAscendantCoordinates(ld.canvas.pane.getWidget(), MI2UTmp.v2.setZero());
             //may not fit UI scaling config
             ld.canvas.pane.setScrollPercentY(1 - (MI2UTmp.v2.y-0.5f*ld.canvas.pane.getScrollHeight())/(ld.canvas.pane.getWidget().getPrefHeight()-ld.canvas.pane.getScrollHeight()));
             blinkElement(e);
@@ -316,7 +314,7 @@ public class LogicHelperMindow extends Mindow2{
         e.getActions().each(act -> {
             if(act instanceof TemporalAction tm) tm.finish();
         });
-        e.actions(Actions.delay(0.5f), Actions.color(Color.acid, 0.1f), Actions.color(MI2UTmp.c2, 0.5f, Interp.fade), Actions.color(Color.acid, 0.1f), Actions.color(MI2UTmp.c2, 0.5f, Interp.fade));
+        e.actions(Actions.delay(1f), Actions.color(Color.acid, 0.2f), Actions.color(MI2UTmp.c2, 0.5f, Interp.fade), Actions.color(Color.acid, 0.2f), Actions.color(MI2UTmp.c2, 0.5f, Interp.fade));
     }
 
     public void setupVarsMode(Table cont){
