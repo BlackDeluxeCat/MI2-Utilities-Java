@@ -333,12 +333,14 @@ public class RendererExt{
         float offy = -build.hitSize() * 0.4f;
         float barLength, x, y, h, w;
 
-        if(build.health < build.maxHealth && build instanceof Wall.WallBuild wb){
-            float hitTime = ((Wall)wb.block).flashHit? wb.hit:0f;
-            if(hitTime > 0f){
-                Lines.stroke(2f + Mathf.lerp(0f, 2f, Mathf.clamp(hitTime)));
-                Draw.color(Color.white, Mathf.lerp(0.1f, 1f, Mathf.clamp(hitTime)));
-                Lines.line(build.x - build.hitSize() * halfwidth, build.y + offy, build.x + build.hitSize() * halfwidth, build.y + offy);
+        if(build.health < build.maxHealth){
+            if(build instanceof Wall.WallBuild wb){
+                float hitTime = ((Wall)wb.block).flashHit? wb.hit:0f;
+                if(hitTime > 0f){
+                    Lines.stroke(2f + Mathf.lerp(0f, 2f, Mathf.clamp(hitTime)));
+                    Draw.color(Color.white, Mathf.lerp(0.1f, 1f, Mathf.clamp(hitTime)));
+                    Lines.line(build.x - build.hitSize() * halfwidth, build.y + offy, build.x + build.hitSize() * halfwidth, build.y + offy);
+                }
             }
 
             Draw.color((build.health > 0 ? Pal.health:Color.gray), 0.8f);
