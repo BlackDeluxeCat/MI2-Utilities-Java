@@ -33,7 +33,7 @@ public class MapInfoTable extends Table{
     Table barsTable;
 
     private static int lastWave = -1, lastSpawn = -1;
-    private long lastUpd;
+    private MI2Utils.IntervalMillis millTimer = new MI2Utils.IntervalMillis();
     private boolean syncCurWave = true, showWaveDetail = false;
     public static int curWave = 0, curSpawn = -1;   //TODO no static
     public MapInfoTable(){
@@ -41,7 +41,6 @@ public class MapInfoTable extends Table{
         Events.on(EventType.WorldLoadEvent.class, e -> {
             clearData();
             WorldData.updateSpanwer();
-            Time.run(Math.min(state.rules.waveSpacing, 60f), UnitsData::catchWave);
             //reset hpbar pools
             hpBars.each(c -> {
                 c.wave = -1;
@@ -49,11 +48,12 @@ public class MapInfoTable extends Table{
             });
             hpBars.clear();
             tmp.clear();
+            Time.run(Math.min(state.rules.waveSpacing, 30f), UnitsData::catchWave);
         });
 
         Events.on(EventType.CoreChangeEvent.class, e -> WorldData.updateSpanwer());
 
-        Events.on(EventType.WaveEvent.class, e -> Time.run(Math.min(state.rules.waveSpacing, 60f), () -> {
+        Events.on(EventType.WaveEvent.class, e -> Time.run(Math.min(state.rules.waveSpacing, 30f), () -> {
             WorldData.updateSpanwer();
             catchWave();
         }));
@@ -63,8 +63,7 @@ public class MapInfoTable extends Table{
                 clearData();
                 return;
             }
-            if(Time.timeSinceMillis(lastUpd) < 500f) return;
-            lastUpd = Time.millis();
+            if(!millTimer.get(500)) return;
             updateData();
             //waves update
             if(barsTable != null && barsTable.hasParent()) buildBars(barsTable);
@@ -89,12 +88,13 @@ public class MapInfoTable extends Table{
         wavesPopup.addDragMove();
         wavesPopup.background(Styles.black3);
         wavesPopup.table(t -> {
+            t.label(() -> "Wave: " + (curWave + 1));
+            t.row();
             t.table(t3 -> {
-                t3.label(() -> "Wave: " + (curWave + 1)).get().setFontScale(1f);
                 t3.button("@mapInfo.buttons.setWave", textb, () -> {
                     curWave = Math.max(curWave, 0);
                     state.wave = curWave + 1;
-                }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).size(titleButtonSize);
+                }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).minSize(titleButtonSize);
                 t3.button("@mapInfo.buttons.forceRunWave", textb, () -> {
                     logic.runWave();
                 }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).height(titleButtonSize);
@@ -201,7 +201,7 @@ public class MapInfoTable extends Table{
             }
         }).row();
 
-        wavesPopup.pane(t -> barsTable = t).maxHeight(400f).update(p -> {
+        wavesPopup.pane(t -> barsTable = t).fillX().maxHeight(300f).update(p -> {
             Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
             if(e != null && e.isDescendantOf(p)){
                 p.requestScroll();

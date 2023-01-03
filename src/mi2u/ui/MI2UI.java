@@ -32,7 +32,7 @@ public class MI2UI extends Mindow2{
         Events.run(EventType.Trigger.update, () -> {
             if(state.isGame()){
                 if(!state.isPaused()){
-                    realRunTime += Time.timeSinceMillis(lastRealRun) * Time.delta;
+                    realRunTime += Time.timeSinceMillis(lastRealRun) / Time.delta;
                 }
                 runTime += Time.timeSinceMillis(lastRunTime);
                 lastRealRun = Time.millis();

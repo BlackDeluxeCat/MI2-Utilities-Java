@@ -36,7 +36,7 @@ public class UnitsData{
         //wave data cleanup
         allwaves.each(WaveData::removeDead);
 
-        allwaves.removeAll(waved -> waved.units.isEmpty() && Math.abs(state.wave - waved.wave) > 4 && waved.wave - MapInfoTable.curWave <= 50);
+        allwaves.removeAll(waved -> waved.units.isEmpty() && Math.abs(state.wave - 1 - waved.wave) > 3 && (waved.wave - MapInfoTable.curWave < 0 || waved.wave - MapInfoTable.curWave > 50));
         int cs = 0;
         while(cs < 50){
             int css = cs;
@@ -96,7 +96,7 @@ public class UnitsData{
         }
 
         public void removeDead(){
-            units.removeAll(unit -> unit.unit == null || !unit.unit.isValid() || unit.unit.dead() || unit.unit.health <= 0f);
+            units.removeAll(unit -> unit.unit == null || !unit.unit.isValid());
             for(var seq : unitsByType){
                 if(seq != null) seq.removeAll(unit -> unit.unit == null || !unit.unit.isValid() || unit.unit.dead() || unit.unit.health <= 0f); //this remove method may cause lagging
             }

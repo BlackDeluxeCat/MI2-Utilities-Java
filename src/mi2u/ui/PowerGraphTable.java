@@ -10,13 +10,12 @@ import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
-import mi2u.MI2UTmp;
-import mi2u.input.InputOverwrite;
+import mi2u.*;
+import mi2u.input.*;
 import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
-import mindustry.input.*;
 import mindustry.ui.*;
 import mindustry.world.blocks.power.*;
 
@@ -31,7 +30,7 @@ public class PowerGraphTable extends Table{
     private Seq<MI2Bar> bars = new Seq<>();
     static Element[][] blocksI = new Element[content.blocks().size][6];
 
-    private Interval interval = new Interval();
+    private static MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(2);
     //P.G. set for ui generation, to keep P.G. order（让多电网的次序不会每次都变化）
     private Seq<PGInfo> saved = new Seq<>();
     private float totalCap = 0f;
@@ -41,7 +40,7 @@ public class PowerGraphTable extends Table{
         barsWidth = w;
         update(() -> {
             saved.each(PGInfo::update);
-            if(interval.get(0, 60)){
+            if(interval.get(0, 800)){
                 rebuild();
             }
         });
@@ -56,7 +55,6 @@ public class PowerGraphTable extends Table{
         ObjectSet<PowerGraph> graphs = new ObjectSet<>();
         Seq<Building> builds = new Seq<>(state.teams.get(team).buildings);
         totalCap = 0f;
-        Prov<String> powertext;
 
         for(Building build : builds){
             if(build.block.hasPower){
@@ -97,21 +95,22 @@ public class PowerGraphTable extends Table{
         detailTable.clearChildren();
         buildInfo(detailTable, info);
 
-        detailTable.popup();
         detailTable.update(() -> {
             detailTable.hideWithoutFocusOn(bar);
             detailTable.setPositionInScreen(Core.input.mouseX() - 20f, Core.input.mouseY() - detailTable.getPrefHeight() - 20f);
         });
+        detailTable.popup();
         detailTable.toFront();
     }
 
     public static void buildInfo(Table table, PGInfo info){
         table.table(t -> {
             t.update(() -> {
+                if(!interval.get(1, 200)) return;
                 t.clearChildren();
                 t.defaults().left().top().pad(1f);
                 t.table(tt -> {
-                    tt.defaults().left().width(100f);
+                    tt.defaults().left().width(150f);
                     tt.label(() -> Iconc.blockSolarPanel + "+" + Strings.fixed(info.totalgen, 1)).colspan(2).padBottom(5f).color(Color.green);
                     for(int m = 0; m < info.blocks.length; m++){
                         int i = m;
@@ -119,37 +118,37 @@ public class PowerGraphTable extends Table{
                             tt.row();
                             tt.add(getBlockImage(i, 0, () -> new Image(content.block(i).uiIcon))).size(16f).pad(2f);
                             var l = getBlockImage(i, 3, () -> new Label(""));
-                            ((Label)l).setText(() -> l.name = "+" + Strings.autoFixed(info.bgen[i], 1));
+                            ((Label)l).setText(() -> "x" + info.blocks[i] + " [gray]+" + Strings.autoFixed(info.bgen[i], 1));
                             tt.add(l);
                         }
                     }
                 });
 
                 t.table(tt -> {
-                    tt.defaults().left().width(100f);
+                    tt.defaults().left().width(150f);
                     tt.label(() -> Iconc.blockSiliconSmelter + "-" + Strings.fixed(info.totalcons, 1)).colspan(2).padBottom(5f).color(Color.scarlet);
                     for(int m = 0; m < info.blocks.length; m++){
                         int i = m;
                         if(!Mathf.zero(info.bcons[i], 0.001f)){
                             tt.row();
                             tt.add(getBlockImage(i, 1, () -> new Image(content.block(i).uiIcon))).size(16f).pad(2f);
-                            var l = getBlockImage(i, 3, () -> new Label(""));
-                            ((Label)l).setText(() -> l.name = "-" + Strings.autoFixed(info.bcons[i], 1));
+                            var l = getBlockImage(i, 4, () -> new Label(""));
+                            ((Label)l).setText(() -> "x" + info.blocks[i] + " [gray]-" + Strings.autoFixed(info.bcons[i], 1));
                             tt.add(l);
                         }
                     }
                 });
 
                 t.table(tt -> {
-                    tt.defaults().left().width(100f);
-                    tt.label(() -> Iconc.blockBattery + Strings.fixed(info.pg.getBatteryStored(), 1) + "/" + Strings.fixed(info.totalcap, 1)).colspan(2).padBottom(5f).color(Pal.accent);
+                    tt.defaults().left().width(150f);
+                    tt.label(() -> Iconc.blockBattery + "(" + Strings.fixed(100*info.pg.getBatteryStored()/info.totalcap, 1) + "%)" + (int)info.pg.getBatteryStored()).colspan(2).padBottom(5f).color(Pal.accent);
                     for(int m = 0; m < info.blocks.length; m++){
                         int i = m;
                         if(!Mathf.zero(info.bstore[i], 0.001f)){
                             tt.row();
                             tt.add(getBlockImage(i, 2, () -> new Image(content.block(i).uiIcon))).size(16f).pad(2f);
                             var l = getBlockImage(i, 5, () -> new Label(""));
-                            ((Label)l).setText(() -> l.name = Strings.autoFixed(info.bstore[i], 1));
+                            ((Label)l).setText(() -> "x" + info.blocks[i] + "  [gray]" + Strings.autoFixed(info.bstore[i], 1));
                             tt.add(l);
                         }
                     }
