@@ -9,7 +9,7 @@ import mi2u.MI2UTmp;
 public class FloatDataRecorder{
     private float[] values;
     public Floatp getter = null;
-    private int head = 0;
+    private int head = -1;
     private int size = 0;
     public boolean disable = false;
     public Boolf<FloatDataRecorder> disableF = null;
@@ -50,10 +50,10 @@ public class FloatDataRecorder{
     public void add(float value){
         if(++head >= values.length) head = 0;
         values[head] = value;
-        size = Math.min(++size, cap());
+        size = Math.min(++size, values.length);
     }
 
-    //starts from latest record.
+    //starts from the latest record.
     public void each(Cons<Float> cons){
         for(int i = size - 1; i >= 0; i--){
             cons.get(get(i));
@@ -120,8 +120,7 @@ public class FloatDataRecorder{
         return titleGetter != null ? titleGetter.get():"";
     }
 
-    public void defaultDraw(float x, float y, float width, float height, boolean lineChart){
-        float min = min(), max = max();
+    public void defaultDraw(float x, float y, float width, float height, boolean lineChart, float min, float max){
         if(lineChart){
             //折线图
             Lines.beginLine();
@@ -135,5 +134,9 @@ public class FloatDataRecorder{
                 Fill.rect(MI2UTmp.r1.setCentered(x + (size - i) * width/(float)size, y + height*Mathf.clamp((get(i)-min+1f)/(max-min+1f))/2f,  width/(float)size, height*Mathf.clamp((get(i)-min+1f)/(max-min+1f))));
             }
         }
+    }
+
+    public void defaultDraw(float x, float y, float width, float height, boolean lineChart){
+        defaultDraw(x, y, width, height, lineChart, min(), max());
     }
 }

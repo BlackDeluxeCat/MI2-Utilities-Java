@@ -120,6 +120,7 @@ public class CoreInfoMindow extends Mindow2{
                         super.draw();
                         Draw.reset();
                         if(charting != null){
+                            Lines.stroke(2f);
                             charting.defaultDraw(x, y, width, height, true);
                             Draw.color();
 
