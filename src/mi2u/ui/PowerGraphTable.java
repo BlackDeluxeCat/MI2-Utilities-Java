@@ -35,7 +35,7 @@ public class PowerGraphTable extends Table{
 
     private static Interval interval = new Interval(2);
     //P.G. set for ui generation, to keep P.G. order（让多电网的次序不会每次都变化）
-    private Seq<PGInfo> saved = new Seq<>();
+    private final Seq<PGInfo> saved = new Seq<>();
     private float totalCap = 0f;
 
     public PowerGraphTable(float w){
@@ -57,30 +57,33 @@ public class PowerGraphTable extends Table{
         if(state.teams.get(team).buildings == null) return;
         totalCap = 0f;
 
-        ObjectSet<PowerGraph> graphs = new ObjectSet<>();
+        OrderedSet<PowerGraph> graphs = new OrderedSet<>();
         state.teams.get(team).buildings.each(b -> {
             if(b.block.hasPower) graphs.add(b.power.graph);
         });
-        Seq<PowerGraph> pgs = graphs.toSeq();
 
         //find and select presented graphs,
-        //also select remained graphs and renew. So recorder data is probably get kept.
+        //also select and renew remained graphs. So recorder data is probably get kept.
         //remove others.
-        saved.removeAll(pi -> !pgs.contains(pgn -> {
-            if(pgn == pi.pg || (!pgn.batteries.isEmpty() && pi.pg.batteries.contains(pgn.batteries.find(Building::isValid)))){
-                pi.renew(pgn);
-                return true;
-            }
-            return false;
-        }));
-
-        for(var p : pgs){
-            if(!saved.contains(pp -> pp.pg == p)) saved.add(new PGInfo(p));
-        }
-
-        saved.each(c -> {
-            totalCap += c.totalcap;
+        saved.removeAll(pi -> {
+            final PowerGraph[] used = new PowerGraph[1];
+            boolean remove = !graphs.orderedItems().contains(pgn -> {
+                if(pgn == pi.pg || (!pgn.batteries.isEmpty() && pi.pg.batteries.contains(pgn.batteries.find(Building::isValid)))){
+                    pi.renew(pgn);
+                    used[0] = pgn;
+                    return true;
+                }
+                return false;
+            });
+            if(used[0] != null) graphs.remove(used[0]);
+            return remove;
         });
+
+        graphs.orderedItems().each(p -> {
+            if(!saved.contains(pp -> pp.pg == p)) saved.add(new PGInfo(p));
+        });
+
+        saved.each(c -> totalCap += c.totalcap);
         
         int index = 0;
         for(var info : saved){
@@ -164,6 +167,7 @@ public class PowerGraphTable extends Table{
         table.row();
 
         table.table(t -> {
+            interval.reset(1, 50f);
             t.update(() -> {
                 if(!interval.get(1, 15f)) return;
                 t.clearChildren();
