@@ -57,9 +57,14 @@ public class MinimapMindow extends Mindow2{
         });
 
         buttons = new PopupTable();
-        buttons.button(Iconc.players + "", MI2UVars.textbtoggle, () -> m.drawLabel = !m.drawLabel).update(b -> b.setChecked(m.drawLabel)).size(48f);
-        buttons.button(Iconc.blockSpawn + "", MI2UVars.textbtoggle, () -> m.drawSpawn = !m.drawSpawn).update(b -> b.setChecked(m.drawSpawn)).size(48f);
-        buttons.button(Iconc.map + "", MI2UVars.textbtoggle, () -> m.drawFog = !m.drawFog).update(b -> b.setChecked(m.drawFog)).size(48f).get().getLabel().setColor(Color.slate);
+
+        buttons.defaults().height(32f).pad(2f).fillX();
+        buttons.button(Iconc.players + Core.bundle.get("minimap.buttons.label"), MI2UVars.textbtoggle, () -> m.drawLabel = !m.drawLabel).update(b -> b.setChecked(m.drawLabel)).with(MI2UVars.funcSetTextb);
+        buttons.row();
+        buttons.button(Iconc.blockSpawn + Core.bundle.get("minimap.buttons.spawn"), MI2UVars.textbtoggle, () -> m.drawSpawn = !m.drawSpawn).update(b -> b.setChecked(m.drawSpawn)).with(MI2UVars.funcSetTextb);
+        buttons.row();
+        buttons.button(Iconc.map + Core.bundle.get("minimap.buttons.fog"), MI2UVars.textbtoggle, () -> m.drawFog = !m.drawFog).with(MI2UVars.funcSetTextb).update(b -> b.setChecked(m.drawFog)).get().getLabel().setColor(Color.slate);
+
         buttons.update(() -> buttons.hideWithoutFocusOn(this, buttons));
     }
 
@@ -67,17 +72,19 @@ public class MinimapMindow extends Mindow2{
     public void setupCont(Table cont){
         cont.clear();
         m.setMapSize(MI2USettings.getInt(mindowName + ".size", 200));
-        cont.add(m).right();
+        cont.add(m);
         cont.row();
         cont.table(t -> {
+            t.add().growX();//let coords being right align
             t.table(tt -> {
-                tt.label(() -> Strings.fixed(World.conv(player.x), 1) + ", "+ Strings.fixed(World.conv(player.y), 1)).right();
+                tt.defaults().width(1f);
+                tt.label(() -> Strings.fixed(World.conv(player.x), 1) + ", "+ Strings.fixed(World.conv(player.y), 1)).get().setAlignment(Align.right);
                 tt.row();
-                tt.label(() -> Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1)).right().color(Color.scarlet);
-            }).growX();
+                tt.label(() -> Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1)).color(Color.coral).get().setAlignment(Align.right);
+            }).right();
 
             t.table(tt -> {
-                tt.button(Iconc.downOpen + "", MI2UVars.textbtoggle, () -> {
+                tt.button(Iconc.logic + "", MI2UVars.textbtoggle, () -> {
                     catching = !catching;
                 }).width(32f).growY().checked(b -> catching);
                 tt.button(Iconc.zoom + "", MI2UVars.textb, () -> {
