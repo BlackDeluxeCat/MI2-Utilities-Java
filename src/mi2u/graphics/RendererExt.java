@@ -747,7 +747,7 @@ public class RendererExt{
 
                 Draw.z(Layer.block + 1f);
 
-                Draw.color(Pal.placing);
+                Draw.color(Pal.placing, ub.unloadTimer < block.speed ? 1f : 0.25f);
                 Lines.stroke(1.5f);
                 Lines.line(x1, y1, x2, y2);
 
@@ -778,7 +778,7 @@ public class RendererExt{
                     }
                 }
 
-                Draw.color(Pal.remove);
+                Draw.color(Pal.remove, ub.unloadTimer < block.speed ? 1f : 0.25f);
                 Lines.stroke(1.5f);
                 Lines.line(x1, y1, x2, y2);
 
