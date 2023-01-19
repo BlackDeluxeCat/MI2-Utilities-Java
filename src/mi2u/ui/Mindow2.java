@@ -48,7 +48,7 @@ public class Mindow2 extends Table{
     protected Table titleBar = new Table();
     protected Table cont = new Table();
     protected Seq<SettingEntry> settings = new Seq<>();
-    protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(1);
+    protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(2);
     @Nullable public Element aboveSnap; public int edgesnap = Align.center;
 
     public Mindow2(String title){
@@ -119,6 +119,17 @@ public class Mindow2 extends Table{
             }
         });
 
+        addListener(new InputListener(){
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Element fromActor){
+                super.enter(event, x, y, pointer, fromActor);
+                //Log.info(pointer + "" + fromActor);
+                if(pointer != 0 && (fromActor == null || !fromActor.isDescendantOf(Mindow2.this))){
+                    interval.get(1, 1);
+                }
+            }
+        });
+
         if(!minimized){
             titleBar.add(title).pad(0, 1, 0, 1);
 
@@ -174,7 +185,7 @@ public class Mindow2 extends Table{
         });
 
         var coll = new Collapser(titleBar, false);
-        coll.setCollapsed(true, () -> !(cont.getPrefHeight() < 20f || minimized || !interval.check(0, 3000)));
+        coll.setCollapsed(true, () -> !(cont.getPrefHeight() < 20f || minimized || (!interval.check(0, 3000) && interval.check(1, 2000))));
         coll.setDuration(0.1f);
         coll.update(() -> {
             float w = titleBar.getPrefWidth(), h = titleBar.getPrefHeight();
