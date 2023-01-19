@@ -59,18 +59,13 @@ public class RendererExt{
         });
 
         Events.run(EventType.Trigger.draw, () -> {
+            updateSettings();
             players.each((u, v) -> {if(!u.isPlayer()||!u.isValid()) players.remove(u);});
             drawBase();
         });
 
         Events.run(EventType.Trigger.drawOver, () -> {
             if(MI2USettings.getBool("forceTapTile", false)) forceDrawSelect();
-        });
-
-        Events.run(EventType.Trigger.update, () -> {
-            fullAI.unit(player.unit());
-            fullAI.updateUnit();
-            updateSettings();
         });
     }
 
@@ -97,24 +92,43 @@ public class RendererExt{
     public static void drawBase(){
         if(!state.isGame()) return;
         if(!disableUnit){
-            hiddenUnit.select(Healthc::isValid).each(u -> Groups.draw.add(u));
+            //Caution!! EntityGroup.add without index update leads to bug!!!
+            hiddenUnit.select(Healthc::isValid).each(u -> u.setIndex__draw(Groups.draw.addIndex(u)));
             hiddenUnit.clear();
         }
 
         drawZoneShader();
 
-        Groups.draw.each(d -> {
-            if(d instanceof Decal && disableWreck) d.remove();
+        Seq<Drawc> remove = new Seq<>();
+        IntSeq removei = new IntSeq();
+        for(int i = 0; i < Groups.draw.size(); i++){
+            var d = Groups.draw.index(i);
+            if(disableWreck && d instanceof Decal){
+                remove.add(d);
+                removei.add(i);
+                ((Decal)d).setIndex__draw(-1);
+            }
             if(d instanceof Unit u){
                 if(disableUnit){
-                    Groups.draw.remove(u);
+                    remove.add(d);
+                    removei.add(i);
+                    u.setIndex__draw(-1);
                     hiddenUnit.add(u);
                 }else{
                     drawUnit(u);
                 }
             }
-            if(d instanceof Bullet b && disableBullet) Groups.draw.remove(b);
-        });
+            if(disableBullet && d instanceof Bullet){
+                remove.add(d);
+                removei.add(i);
+                ((Bullet)d).setIndex__draw(-1);
+            }
+        }
+        if(!remove.isEmpty()){
+            for(int i = remove.size - 1; i >= 0; i--){
+                Groups.draw.removeIndex(remove.get(i), removei.get(i));
+            }
+        }
 
         Seq<Tile> tiles = MI2Utils.getValue(renderer.blocks, "tileview");
         if(tiles != null){

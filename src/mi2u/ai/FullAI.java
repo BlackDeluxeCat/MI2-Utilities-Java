@@ -14,6 +14,7 @@ import mi2u.ui.*;
 import mindustry.content.*;
 import mindustry.entities.*;
 import mindustry.entities.units.*;
+import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.input.*;
 import mindustry.type.*;
@@ -36,6 +37,11 @@ public class FullAI extends AIController{
         modes.add(new AutoBuildMode());
         modes.add(new SelfRepairMode());
         modes.add(new AutoTargetMode());
+
+        Events.run(EventType.Trigger.update, () -> {
+            fullAI.unit(player.unit());
+            fullAI.updateUnit();
+        });
     }
 
     @Override
