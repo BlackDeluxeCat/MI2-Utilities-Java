@@ -245,7 +245,7 @@ public class MapInfoTable extends Table{
         t.table(tt -> {
             int i = 0;
             for(SpawnGroup group : state.rules.spawns){
-                if(spawn != -1 && spawn != group.spawn) continue;
+                if(spawn != -1 && group.spawn != -1 && spawn != group.spawn) continue;
                 if(group.getSpawned(curWave) < 1) continue;
                 tt.table(g -> {
                     g.table(gt -> {
