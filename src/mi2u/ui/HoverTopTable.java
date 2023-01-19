@@ -3,6 +3,7 @@ package mi2u.ui;
 import arc.*;
 import arc.graphics.*;
 import arc.math.geom.*;
+import arc.scene.event.*;
 import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
@@ -10,7 +11,7 @@ import arc.util.*;
 import mi2u.MI2Utils;
 import mindustry.ai.types.*;
 import mindustry.content.*;
-import mindustry.core.UI;
+import mindustry.core.*;
 import mindustry.entities.*;
 import mindustry.entities.abilities.*;
 import mindustry.gen.*;
@@ -21,10 +22,10 @@ import mindustry.world.blocks.environment.*;
 
 import static mindustry.Vars.*;
 
-public class HoverTopTable extends Table {
+public class HoverTopTable extends PopupTable{
     public static HoverTopTable hoverInfo = new HoverTopTable();
 
-    public Displayable lastUnit, lastBuild; Tile tile, lastTile;
+    public Displayable lastUnit, lastBuild; Tile tile;
     public Building build;
     public Unit unit;
     public Table unitt, buildt, tilet;
@@ -49,13 +50,15 @@ public class HoverTopTable extends Table {
             }
         });
 
-        //I don't know why item flow doesn't appear.
         buildt.update(() -> {
             if(build == lastBuild) return;
             lastBuild = build;
             buildt.clear();
             if(build != null){
-                buildt.add(build.team.localized()).left().color(build.team.color);
+                buildt.table(t -> {
+                    t.add(build.team.localized()).left().color(build.team.color);
+                    t.add("(" + World.conv(build.x) + "," + World.conv(build.y) + ")").left();
+                });
                 buildt.row();
                 build.display(buildt);
             }
@@ -75,7 +78,7 @@ public class HoverTopTable extends Table {
                             this.setDrawable(tile != null ? icon.set(tile.floor().uiIcon) : null);
                         });
                     }
-                }).size(8 * 4);
+                }).maxSize(8 * 4);
                 tt.label(() -> tile != null ? tile.floor().localizedName : "").left().padLeft(5);
             });
 
@@ -90,7 +93,7 @@ public class HoverTopTable extends Table {
                             this.setDrawable((tile != null && tile.overlay() != null && tile.overlay() != Blocks.air) ? icon.set(tile.overlay().uiIcon) : null);
                         });
                     }
-                }).size(8 * 4);
+                }).maxSize(8 * 4);
                 tt.label(() -> tile != null && tile.overlay() != null && tile.overlay() != Blocks.air ? tile.overlay().localizedName : "").left().padLeft(5);
             });
 
@@ -105,7 +108,7 @@ public class HoverTopTable extends Table {
                             this.setDrawable((tile != null && tile.block() instanceof Prop || tile.block() instanceof TreeBlock) ? icon.set(tile.block().uiIcon) : null);
                         });
                     }
-                }).size(8 * 4);
+                }).maxSize(8 * 4);
                 tt.label(() -> (tile != null && tile.block() instanceof Prop || tile.block() instanceof TreeBlock) ? tile.block().localizedName : "").left().padLeft(5);
             });
 
@@ -129,24 +132,33 @@ public class HoverTopTable extends Table {
         clear();
         table().growX().update(t -> {
             t.clear();
+            t.background(Styles.black3);
+            if(state.isMenu()){
+                build = null;
+                unit = null;
+                tile = null;
+            }
             t.defaults().growX().padBottom(4f);
-
+            boolean empty = true;
             if(build != null){
-                t.add(buildt);
+                t.add(buildt).minWidth(200f);
                 t.row();
+                empty = false;
             }
 
             if(unit != null){
-                t.add(unitt);
+                t.add(unitt).minWidth(200f);
                 t.row();
+                empty = false;
             }
 
             if(tile != null){
                 t.add(tilet);
                 t.row();
+                empty = false;
             }
 
-            addColorBar(t);
+            if(!empty) addColorBar(t);
             t.row();
         });
     }

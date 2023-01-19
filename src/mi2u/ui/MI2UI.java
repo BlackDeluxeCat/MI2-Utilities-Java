@@ -247,7 +247,15 @@ public class MI2UI extends Mindow2{
         settings.add(new FieldEntry("rtsFormDoubleTap", "@settings.main.rtsFormDoubleTap", Vars.ghApi, TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) > 0, s -> RtsCommand.doubleTapInterval = Strings.parseInt(s)));
 
         settings.add(new CheckEntry("modifyBlockBars", "@settings.main.modifyBlockBars", false, null));
-        settings.add(new CheckEntry("modifyTopTable", "@settings.main.modifyTopTable", false, null));
+        settings.add(new CollapseGroupEntry("HoverTableExtension", ""){
+            CheckEntry check1 = new CheckEntry("modifyTopTable", "@settings.main.modifyTopTable", false, null);
+            CheckEntry check2 = new CheckEntry("topTableFollowMouse", "@settings.main.topTableFollowMouse", false, null);
+            {
+                collapsep = () -> !check1.value;
+                headBuilder = t -> check1.build(t);
+                builder = t -> check2.build(t);
+            }
+        });
 
         settings.add(new CollapseGroupEntry("UpdateCheck", ""){
             CheckEntry check1 = new CheckEntry("enableUpdate", "@settings.main.enableUpdate", true, b -> {
