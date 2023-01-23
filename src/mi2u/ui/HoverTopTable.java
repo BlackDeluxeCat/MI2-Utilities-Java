@@ -2,6 +2,7 @@ package mi2u.ui;
 
 import arc.*;
 import arc.graphics.*;
+import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.event.*;
 import arc.scene.style.*;
@@ -9,11 +10,14 @@ import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.MI2Utils;
+import mi2u.struct.*;
 import mindustry.ai.types.*;
 import mindustry.content.*;
 import mindustry.core.*;
 import mindustry.entities.*;
 import mindustry.entities.abilities.*;
+import mindustry.entities.bullet.*;
+import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.ui.*;
@@ -25,15 +29,45 @@ import static mindustry.Vars.*;
 public class HoverTopTable extends PopupTable{
     public static HoverTopTable hoverInfo = new HoverTopTable();
 
+    private final EventType.UnitDamageEvent singleDamageEvent = MI2Utils.getValue(BulletType.class, "bulletDamageEvent");
+    private final EventType.UnitDamageEvent splashDamageEvent = MI2Utils.getValue(Damage.class, "bulletDamageEvent");
+
     public Displayable lastUnit, lastBuild; Tile tile;
     public Building build;
     public Unit unit;
     public Table unitt, buildt, tilet;
     Table floort, oret, blockt;
 
+    FloatDataRecorder buildDps = new FloatDataRecorder(16), unitDps = new FloatDataRecorder(16);
+    float uDstk, bDstk;
+    Interval dpstimer = new Interval(4);
+
     public HoverTopTable(){
         initChild();
         build();
+
+        //伤害事件不带伤害值，手算
+        Events.on(EventType.UnitDamageEvent.class, e -> {
+            if(!this.hasParent()) return;
+            Bullet b = e.bullet;
+
+            float rawDamage = e == splashDamageEvent ? Mathf.lerp(1f - (b.type.scaledSplashDamage ? Math.max(0, e.unit.dst(b) - e.unit.type.hitSize/2) : e.unit.dst(b)) / b.type.splashDamageRadius, 1f, 0.4f) * b.type.splashDamage : b.damage;
+            float damage = b.type.pierceArmor ? rawDamage : Damage.applyArmor(rawDamage, e.unit.armor);
+            if(unit != null && b.owner == unit) uDstk += damage * b.type.damageMultiplier(b) / e.unit.healthMultiplier;
+            if(build != null && b.owner == build) bDstk += damage * b.type.damageMultiplier(b) / e.unit.healthMultiplier;
+        });
+
+        //对建筑的直伤和溅射共用一个事件，两种伤害不能直接区分。溅射内爆不发事件，其他溅射采用射线爆炸。因此任何带溅射的伤害计算均不可靠。
+        Events.on(EventType.BuildDamageEvent.class, e -> {
+            if(!this.hasParent()) return;
+            Bullet b = e.source;
+            //只计算直伤类子弹。
+            if(b.type.splashDamageRadius >= 0f) return;
+
+            float damage = b.type.buildingDamageMultiplier * (b.type.pierceArmor ? b.damage : Damage.applyArmor(b.damage, e.build.block.armor));
+            if(unit != null && b.owner == unit) uDstk += damage * e.source.type.damageMultiplier(b) / state.rules.blockHealth(e.build.team);
+            if(build != null && b.owner == build) bDstk += damage * e.source.type.damageMultiplier(b) / state.rules.blockHealth(e.build.team);
+        });
     }
 
     public void initChild(){
@@ -42,18 +76,36 @@ public class HoverTopTable extends PopupTable{
         tilet = new Table();
 
         unitt.update(() -> {
-            if(unit == lastUnit) return;
+            if(unit == lastUnit){
+                if(dpstimer.get(0, 30f)){//record per 0.5s
+                    if(dpstimer.check(2, 60f)) unitDps.add(uDstk);
+                    uDstk = 0;
+                }
+                return;
+            }
             lastUnit = unit;
             unitt.clear();
+            unitDps.reset();
+            dpstimer.get(2,1f);
             if(unit != null){
                 display(unitt, unit);
+                unitt.row();
+                unitt.label(() -> "DPS: " + Strings.fixed(unitDps.avg() * 2, 2) + ", MAX: " + Strings.fixed(unitDps.max(f -> 2*f), 2)).left().get().setFontScale(0.75f);
             }
         });
 
         buildt.update(() -> {
-            if(build == lastBuild) return;
+            if(build == lastBuild){
+                if(dpstimer.get(1, 30f)){
+                    if(dpstimer.check(3, 60f)) buildDps.add(bDstk);
+                    bDstk = 0;
+                }
+                return;
+            }
             lastBuild = build;
             buildt.clear();
+            buildDps.reset();
+            dpstimer.get(3,1f);
             if(build != null){
                 buildt.table(t -> {
                     t.add(build.team.localized()).left().color(build.team.color);
@@ -61,6 +113,8 @@ public class HoverTopTable extends PopupTable{
                 });
                 buildt.row();
                 build.display(buildt);
+                buildt.row();
+                buildt.label(() -> "DPS: " + Strings.fixed(buildDps.avg() * 2, 2) + ", MAX: " + Strings.fixed(buildDps.max(f -> 2*f), 2)).left().get().setFontScale(0.75f);
             }
         });
 
@@ -133,11 +187,8 @@ public class HoverTopTable extends PopupTable{
         table().growX().update(t -> {
             t.clear();
             t.background(Styles.black3);
-            if(state.isMenu()){
-                build = null;
-                unit = null;
-                tile = null;
-            }
+            if(state.isMenu()) cleanHover();
+
             t.defaults().growX().padBottom(4f);
             boolean empty = true;
             if(build != null){
@@ -232,8 +283,11 @@ public class HoverTopTable extends PopupTable{
     public void hovered(){
         Vec2 v = this.stageToLocalCoordinates(Core.input.mouse());
 
-        //if the mouse intersects the table or the UI has the mouse, no hovering can occur
-        if(Core.scene.hasMouse() || this.hit(v.x, v.y, false) != null) return;
+        //if the mouse intersects the table or the *touchable* UI has the mouse, no hovering can occur
+        if(Core.scene.hasMouse() || this.hit(v.x, v.y, true) != null){
+            cleanHover();
+            return;
+        }
 
         //check for a unit
         unit = Units.closestOverlap(null, Core.input.mouseWorldX(), Core.input.mouseWorldY(), 5f, u -> true);
@@ -254,6 +308,12 @@ public class HoverTopTable extends PopupTable{
             MI2Utils.setValue(ui.hudfrag.blockfrag, "nextFlowBuild", build);
             tile = null;
         }
+    }
+
+    public void cleanHover(){
+        build = null;
+        unit = null;
+        tile = null;
     }
 
     public boolean hasInfo(){

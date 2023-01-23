@@ -21,9 +21,8 @@ import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.turrets.*;
-import mindustry.world.blocks.power.BeamNode;
-import mindustry.world.blocks.power.ImpactReactor;
-import mindustry.world.blocks.production.HeatCrafter;
+import mindustry.world.blocks.power.*;
+import mindustry.world.blocks.production.*;
 import mindustry.world.consumers.*;
 
 import static mi2u.MI2UVars.*;
@@ -127,13 +126,16 @@ public class ModifyFuncs{
             //HoverTopTable是完全和方块info共用table的，所以无法将原版info拆出来做浮窗。
             if(!MI2USettings.getBool("topTableFollowMouse", false)){
                 topTable.add(HoverTopTable.hoverInfo).growX();
+                HoverTopTable.hoverInfo.touchable = Touchable.enabled;
             }else{
                 var h = HoverTopTable.hoverInfo;
+                h.touchable = Touchable.disabled;
                 h.hide();
                 h.popup();
                 h.update(() -> {
                     h.toFront();
                     h.setPositionInScreen(Core.input.mouseX() + 30f, Core.input.mouseY() + 30f);
+                    if(state.isMenu()) h.hide();
                 });
             }
             topTable.row();
