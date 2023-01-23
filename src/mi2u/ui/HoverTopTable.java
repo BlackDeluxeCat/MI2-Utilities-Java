@@ -77,7 +77,7 @@ public class HoverTopTable extends PopupTable{
 
         unitt.update(() -> {
             if(unit == lastUnit){
-                if(dpstimer.get(0, 30f)){//record per 0.5s
+                if(dpstimer.get(0, 60f)){//record per 0.5s
                     if(dpstimer.check(2, 60f)) unitDps.add(uDstk);
                     uDstk = 0;
                 }
@@ -90,13 +90,13 @@ public class HoverTopTable extends PopupTable{
             if(unit != null){
                 display(unitt, unit);
                 unitt.row();
-                unitt.label(() -> "DPS: " + Strings.fixed(unitDps.avg() * 2, 2) + ", MAX: " + Strings.fixed(unitDps.max(f -> 2*f), 2)).left().get().setFontScale(0.75f);
+                unitt.label(() -> "DPS: " + Strings.fixed(unitDps.avg(), 2) + ", Max: " + Strings.fixed(unitDps.max(), 2)).left().get().setFontScale(0.75f);
             }
         });
 
         buildt.update(() -> {
             if(build == lastBuild){
-                if(dpstimer.get(1, 30f)){
+                if(dpstimer.get(1, 60f)){
                     if(dpstimer.check(3, 60f)) buildDps.add(bDstk);
                     bDstk = 0;
                 }
@@ -114,7 +114,7 @@ public class HoverTopTable extends PopupTable{
                 buildt.row();
                 build.display(buildt);
                 buildt.row();
-                buildt.label(() -> "DPS: " + Strings.fixed(buildDps.avg() * 2, 2) + ", MAX: " + Strings.fixed(buildDps.max(f -> 2*f), 2)).left().get().setFontScale(0.75f);
+                buildt.label(() -> "DPS: " + Strings.fixed(buildDps.avg(), 2) + ", Max: " + Strings.fixed(buildDps.max(), 2)).left().get().setFontScale(0.75f);
             }
         });
 

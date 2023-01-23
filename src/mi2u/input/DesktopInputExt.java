@@ -27,7 +27,7 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
 
     public boolean ctrlBoost = false, boost = false;
     /** A timer for panning. Check returning true means moving camera.*/
-    public Interval panTimer = new Interval();
+    public MI2Utils.IntervalMillis panTimer = new MI2Utils.IntervalMillis();
     public Vec2 panXY = new Vec2();
     public boolean ctrlShoot = false, shoot = false; Vec2 shootXY = new Vec2();
     public boolean ctrlMove = false; Vec2 move = new Vec2();
@@ -60,7 +60,7 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
             }
         }
         //panning state is stored on desktop. ctrlPan should be set to true to use overwritten states. Set ctrlPan to false after panning is ok.
-        if(!panTimer.check(0, 30f)){
+        if(!panTimer.check(0, 400)){
             panning = true;
             Core.camera.position.lerpDelta(panXY, 0.3f);
         }else if(state.isGame() && MI2USettings.getBool("edgePanning", true)){
@@ -106,7 +106,7 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
     /** set ctrl to false to cancel control*/
     @Override
     public void pan(Boolean ctrl, Vec2 panXY){
-        if(ctrl) panTimer.reset(0,0f);  //set a timer for extended smooth panning
+        if(ctrl) panTimer.reset(0,0);  //set a timer for extended smooth panning
         panning = ctrl;
         this.panXY.set(panXY);
     }
