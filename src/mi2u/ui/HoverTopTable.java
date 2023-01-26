@@ -216,6 +216,7 @@ public class HoverTopTable extends PopupTable{
 
     /** base on Anuke's*/
     public void display(Table table, Unit unit){
+        //unit.type.display(unit, table);   TODO this will not fit some mod ui
         table.table(t -> {
             t.left();
             t.add(new Image(unit.type.uiIcon)).size(iconMed).scaling(Scaling.fit);
