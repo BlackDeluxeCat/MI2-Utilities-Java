@@ -307,18 +307,48 @@ public class CoreInfoMindow extends Mindow2{
         buildPlanTable.update(() -> {
             buildPlanTable.setPositionInScreen(this.x, this.y - buildPlanTable.getPrefHeight());
             if(player.unit() == null || player.team().core() == null || player.unit().plans().size > 1000) return;   //Too many plans cause lag
+
             ItemSeq req = new ItemSeq(), req2 = new ItemSeq();
+            final float[] time = {0f, 0f};
             player.unit().plans().each(plan -> {
-                for(ItemStack stack : plan.block.requirements){
-                    req.add(stack.item, Mathf.floor(stack.amount * (plan.breaking ? (world.build(plan.x, plan.y) instanceof ConstructBlock.ConstructBuild cb && cb.team == player.team() ? cb.progress : 1f) * state.rules.deconstructRefundMultiplier*state.rules.buildCostMultiplier : (world.build(plan.x, plan.y) instanceof ConstructBlock.ConstructBuild cb && cb.team == player.team() ? cb.progress - 1f : -1f) * state.rules.buildCostMultiplier)));
+                boolean cbhas = false;
+                float cbprog = 0f;
+                float cbb = 0f;
+                if(world.build(plan.x, plan.y) instanceof ConstructBlock.ConstructBuild cb){
+                    cbhas = true;
+                    cbprog = cb.team == player.team() ? cb.progress : 0f;
+                    cbb = cb.buildCost;
                 }
+
+                for(ItemStack stack : plan.block.requirements){
+                    req.add(stack.item, Mathf.floor(stack.amount * (plan.breaking ? (cbhas ? cbprog : 1f) * state.rules.deconstructRefundMultiplier*state.rules.buildCostMultiplier : (cbhas ? cbprog - 1f : -1f) * state.rules.buildCostMultiplier)));
+                }
+
+                time[0] += (cbhas?cbb:plan.block.buildCost) * state.rules.buildCostMultiplier * (cbhas ? (plan.breaking ? cbprog : 1f - cbprog) : 1f) / 60f / (player.unit().type.buildSpeed * player.unit().buildSpeedMultiplier * state.rules.buildSpeed(player.team()));
             });
 
             control.input.selectPlans.each(plan -> {
-                for(ItemStack stack : plan.block.requirements){
-                    req2.add(stack.item, Mathf.floor(stack.amount * (plan.breaking ? (world.build(plan.x, plan.y) instanceof ConstructBlock.ConstructBuild cb && cb.team == player.team() ? cb.progress : 1f) * state.rules.deconstructRefundMultiplier*state.rules.buildCostMultiplier : (world.build(plan.x, plan.y) instanceof ConstructBlock.ConstructBuild cb && cb.team == player.team() ? cb.progress - 1f : -1f) * state.rules.buildCostMultiplier)));
+                boolean cbhas = false;
+                float cbprog = 0f;
+                float cbb = 0f;
+                if(world.build(plan.x, plan.y) instanceof ConstructBlock.ConstructBuild cb){
+                    cbhas = true;
+                    cbprog = cb.team == player.team() ? cb.progress : 0f;
+                    cbb = cb.buildCost;
                 }
+
+                for(ItemStack stack : plan.block.requirements){
+                    req2.add(stack.item, Mathf.floor(stack.amount * (plan.breaking ? (cbhas ? cbprog : 1f) * state.rules.deconstructRefundMultiplier*state.rules.buildCostMultiplier : (cbhas ? cbprog - 1f : -1f) * state.rules.buildCostMultiplier)));
+                }
+
+                time[1] += (cbhas?cbb:plan.block.buildCost) * state.rules.buildCostMultiplier * (cbhas ? (plan.breaking ? cbprog : 1f - cbprog) : 1f) / 60f / (player.unit().type.buildSpeed * player.unit().buildSpeedMultiplier * state.rules.buildSpeed(player.team()));
             });
+
+            if(buildPlanTable.getChildren().find(e -> e.name != null && e.name.equals("bpt-time")) instanceof Label l){
+                l.setText(Strings.fixed(time[0], 1) + (time[1]>0f?"s+"+Strings.fixed(time[1], 1)+"s":"s"));
+            }else{
+                buildPlanTable.add("").name("bpt-time").colspan(3).row();
+            }
 
             for(Item item : content.items()){
                 if(buildPlanTable.getChildren().find(e -> e.name != null && e.name.equals(item.name)) instanceof Label l){
