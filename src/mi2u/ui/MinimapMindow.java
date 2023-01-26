@@ -1,6 +1,7 @@
 package mi2u.ui;
 
 import arc.*;
+import arc.func.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.input.*;
@@ -42,6 +43,7 @@ public class MinimapMindow extends Mindow2{
     public void init() {
         super.init();
         mindowName = "MindowMap";
+        titleAlign = Align.bottomLeft;
         update(() -> {
             if(control.input instanceof InputOverwrite && control.input.block != null && Core.input.keyDown(KeyCode.controlLeft) && Core.input.keyDown(KeyCode.f)){
                 finderTable.find = control.input.block;
@@ -71,32 +73,45 @@ public class MinimapMindow extends Mindow2{
     @Override
     public void setupCont(Table cont){
         cont.clear();
-        m.setMapSize(MI2USettings.getInt(mindowName + ".size", 200));
+        int size = MI2USettings.getInt(mindowName + ".size", 140);
+        m.setMapSize(size);
         cont.add(m);
         cont.row();
         cont.table(t -> {
             t.add().growX();//let coords being right align
-            t.table(tt -> {
-                tt.defaults().width(1f);
-                tt.label(() -> Strings.fixed(World.conv(player.x), 1) + ", "+ Strings.fixed(World.conv(player.y), 1)).get().setAlignment(Align.right);
-                tt.row();
-                tt.label(() -> Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1)).color(Color.coral).get().setAlignment(Align.right);
-            }).right();
+            Cons<Table> l = tl -> {
+                tl.table(tt -> {
+                    tt.defaults().width(1f);
+                    tt.label(() -> Strings.fixed(World.conv(player.x), 1) + ", "+ Strings.fixed(World.conv(player.y), 1)).get().setAlignment(Align.right);
+                    tt.row();
+                    tt.label(() -> Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1)).color(Color.coral).get().setAlignment(Align.right);
+                }).right();
+            };
+            Cons<Table> b = tb -> {
+                tb.table(tt -> {
+                    tt.button(Iconc.logic + "", MI2UVars.textbtoggle, () -> {
+                        catching = !catching;
+                    }).width(32f).growY().checked(bt -> catching);
+                    tt.button(Iconc.zoom + "", MI2UVars.textb, () -> {
+                        finderTable.popup();
+                        finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
+                    }).width(32f).growY();
+                    tt.button(Iconc.downOpen + "", MI2UVars.textb, () -> {
+                        buttons.popup(Align.right);
+                        buttons.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
+                    }).width(32f).growY();
+                }).fillX().growY().minHeight(32f);
+            };
 
-            t.table(tt -> {
-                tt.button(Iconc.logic + "", MI2UVars.textbtoggle, () -> {
-                    catching = !catching;
-                }).width(32f).growY().checked(b -> catching);
-                tt.button(Iconc.zoom + "", MI2UVars.textb, () -> {
-                    finderTable.popup();
-                    finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
-                }).width(32f).growY();
-                tt.button(Iconc.downOpen + "", MI2UVars.textb, () -> {
-                    buttons.popup(Align.right);
-                    buttons.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
-                }).width(32f).growY();
-            }).fillX().growY();
-
+            if(size < 32 * 3 + titleBar.getPrefWidth()){
+                b.get(t);
+                t.row();
+                t.add().growX();
+                l.get(t);
+            }else{
+                l.get(t);
+                b.get(t);
+            }
         }).growX();
     }
 
@@ -199,7 +214,7 @@ public class MinimapMindow extends Mindow2{
     
                     if(mobile){
                         float max = Math.min(world.width(), world.height()) / 16f / 2f;
-                        setZoom(1f + y / height * (max - 1f));
+                        setZoom(1f + (y * 0.8f + 0.2f ) / height * (max - 1f));
                     }else{
                         this.clicked(null, x, y);
                     }
@@ -269,7 +284,7 @@ public class MinimapMindow extends Mindow2{
             Rect rect = MI2UTmp.r1.set((dx - sz) * tilesize, (dy - sz) * tilesize, sz * 2 * tilesize, sz * 2 * tilesize);
 
             //draw a linerect of view area
-            Lines.stroke(1f, new Color(1f, 1f, 1f, 0.5f));
+            Lines.stroke(1f, MI2UTmp.c1.set(Color.white).a(0.5f));
             float cx = (Core.camera.position.x - rect.x) / rect.width * w;
             float cy = (Core.camera.position.y - rect.y) / rect.width * h;
             Lines.rect(x + cx - Core.graphics.getWidth() / rect.width * w / renderer.getScale() / 2f,
@@ -285,7 +300,7 @@ public class MinimapMindow extends Mindow2{
                 float scale = Scl.scl(1f) / 2f * scaling * 32f;
                 var region = unit.icon();
                 //color difference between block and unit in setting
-                Draw.mixcol(new Color(unit.team().color.r * 0.9f, unit.team().color.g * 0.9f, unit.team().color.b * 0.9f, 1f), 1f);
+                Draw.mixcol(MI2UTmp.c1.set(unit.team().color.r * 0.9f, unit.team().color.g * 0.9f, unit.team().color.b * 0.9f, 1f), 1f);
                 Draw.rect(region, x + rx, y + ry, scale, scale * (float)region.height / region.width, unit.rotation() - 90);
                 Draw.reset();
             });

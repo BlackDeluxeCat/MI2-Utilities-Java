@@ -46,9 +46,10 @@ public class Mindow2 extends Table{
     public boolean topmost = false, minimized = false;
     public String titleText, helpInfo = "", mindowName;
     protected Table titleBar = new Table();
+    protected int titleAlign = Align.topLeft;
     protected Table cont = new Table();
     protected Seq<SettingEntry> settings = new Seq<>();
-    protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(2);
+    protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(1);
     @Nullable public Element aboveSnap; public int edgesnap = Align.center;
 
     public Mindow2(String title){
@@ -119,17 +120,6 @@ public class Mindow2 extends Table{
             }
         });
 
-        addListener(new InputListener(){
-            @Override
-            public void enter(InputEvent event, float x, float y, int pointer, Element fromActor){
-                super.enter(event, x, y, pointer, fromActor);
-                //Log.info(pointer + "" + fromActor);
-                if(pointer != 0 && (fromActor == null || !fromActor.isDescendantOf(Mindow2.this))){
-                    interval.get(1, 1);
-                }
-            }
-        });
-
         if(!minimized){
             titleBar.add(title).pad(0, 1, 0, 1);
 
@@ -185,14 +175,16 @@ public class Mindow2 extends Table{
         });
 
         var coll = new Collapser(titleBar, false);
-        coll.setCollapsed(true, () -> !(cont.getPrefHeight() < 20f || minimized || (!interval.check(0, 3000) && interval.check(1, 2000))));
+        coll.setCollapsed(true, () -> !(cont.getPrefHeight() < 20f || minimized || (!interval.check(0, 3000))));
         coll.setDuration(0.1f);
         coll.update(() -> {
             float w = titleBar.getPrefWidth(), h = titleBar.getPrefHeight();
             coll.setSize(w, h);
-            coll.setPosition(0f,getHeight() - h);
             coll.toFront();
             if(hasMouse()) interval.get(0, 1);
+
+            if(titleAlign == Align.topLeft) coll.setPosition(0f,getHeight() - h);
+            else if(titleAlign == Align.topRight) coll.setPosition(0f,0f);
         });
 
         addChild(coll);
@@ -211,38 +203,30 @@ public class Mindow2 extends Table{
     protected void edgeSnap(int align, Vec2 vec){
         if(parent == null) return;
         switch(align){
-            case Align.topLeft://lefttop
+            case Align.topLeft -> {//lefttop
                 vec.x = 0;
                 vec.y = parent.getHeight() - getPrefHeight();
-                break;
-            case Align.top://top
-                //vec.x = (parent.getWidth() - getWidth())/2f;
-                vec.y = (parent.getHeight() - getPrefHeight());
-                break;
-            case Align.topRight://righttop
+            }
+            case Align.top ->//top
+                    vec.y = (parent.getHeight() - getPrefHeight());
+            case Align.topRight -> {//righttop
                 vec.x = (parent.getWidth() - getPrefWidth());
                 vec.y = (parent.getHeight() - getPrefHeight());
-                break;
-            case Align.right://right
+            }
+            case Align.right ->//right
                 vec.x = (parent.getWidth() - getPrefWidth());
-                //vec.y = (parent.getHeight() -getRealHeight())/2f;
-                break;
-            case Align.bottomRight://rightbottom
+            case Align.bottomRight -> {//rightbottom
                 vec.x = (parent.getWidth() - getPrefWidth());
                 vec.y = 0;
-                break;
-            case Align.bottom://bottom
-                //vec.x = (parent.getWidth() - getWidth())/2f;
+            }
+            case Align.bottom ->//bottom
                 vec.y = 0;
-                break;
-            case Align.bottomLeft://leftbottom
+            case Align.bottomLeft -> {//leftbottom
                 vec.x = 0;
                 vec.y = 0;
-                break;
-            case Align.left://left
+            }
+            case Align.left ->//left
                 vec.x = 0;
-                //vec.y = (parent.getHeight() -getRealHeight())/2f;
-                break;
         }
     }
 
