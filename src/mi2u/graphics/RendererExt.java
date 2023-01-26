@@ -424,6 +424,8 @@ public class RendererExt{
             drawText((uf.unit() == null ? "":uf.unit().emoji()) + (Strings.autoFixed(barLength * 100f, 1) + "% | " + Strings.autoFixed(uf.plan().time * (1 - uf.progress) / (60f * state.rules.unitBuildSpeed(uf.team) * uf.timeScale()), 1)), uf.x, uf.y + offy, Pal.accent, uf.block.size > 3 ? 1.0f : 0.8f, Align.center);
             offy += 2f;
         }
+
+        Draw.color();
     }
 
     public static void drawUnitHpBar(Unit unit){
