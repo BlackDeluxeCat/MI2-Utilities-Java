@@ -45,7 +45,7 @@ public class RendererExt{
     public static Field itemBridgeBuffer = MI2Utils.getField(BufferedItemBridge.BufferedItemBridgeBuild.class, "buffer"),
             itemBridgeBufferBuffer = MI2Utils.getField(ItemBuffer.class, "buffer"), itemBridgeBufferIndex = MI2Utils.getField(ItemBuffer.class, "index"),
             unloaderBuilding = MI2Utils.getField(Unloader.ContainerStat.class, "building"),
-            lexecTimer = MI2Utils.getField(LExecutor.class, "unitTimeouts");//logdrawindex = MI2Utils.getField(Unit.class, "index__draw");
+            lexecTimer = MI2Utils.getField(LExecutor.class, "unitTimeouts");
 
     public static boolean animatedshields;
     public static boolean enPlayerCursor, enUnitHpBar, enUnitRangeZone, enOverdriveZone, enMenderZone, enTurretZone, enBlockHpBar, enDistributionReveal, enSpawnZone, disableWreck, disableUnit, disableBuilding, disableBullet, shadow;
@@ -60,7 +60,7 @@ public class RendererExt{
 
         Events.run(EventType.Trigger.draw, () -> {
             updateSettings();
-            players.each((u, v) -> {if(!u.isPlayer()||!u.isValid()) players.remove(u);});
+            players.each((u, v) -> {if(u == null) return; if(!u.isPlayer()||!u.isValid()) players.remove(u);});
             drawBase();
         });
 
@@ -89,53 +89,38 @@ public class RendererExt{
         shadow = MI2USettings.getBool("shadow", false);
     }
 
-    //private static MI2Utils.IntervalMillis debug = new MI2Utils.IntervalMillis();
+    public static Field drawIndexUnit = MI2Utils.getField(Unit.class, "index__draw"), drawIndexDecal = MI2Utils.getField(Decal.class, "index__draw"), drawIndexBullet = MI2Utils.getField(Bullet.class, "index__draw");
     public static void drawBase(){
         if(!state.isGame()) return;
         if(!disableUnit){
             //Caution!! EntityGroup.add without index update leads to bug!!!
             hiddenUnit.select(Healthc::isValid).each(u -> u.setIndex__draw(Groups.draw.addIndex(u)));
-            //if(!hiddenUnit.isEmpty()) Log.info(hiddenUnit.mapInt(u -> u.isAdded() ? 1:0));
+            if(!hiddenUnit.isEmpty()) Log.info(hiddenUnit.mapInt(u -> u.isAdded() ? 1:0));
             hiddenUnit.clear();
         }
 
         drawZoneShader();
 
-        //boolean debugg = debug.get(1000);
-        Seq<Drawc> remove = new Seq<>();
-        IntSeq removei = new IntSeq();
-        for(int i = 0; i < Groups.draw.size(); i++){
-            var d = Groups.draw.index(i);
-            //if(debugg) Log.info(i + "," + MI2Utils.getValue(d, "index__draw") + d.getClass().getSimpleName());
-            if(disableWreck && d instanceof Decal){
-                remove.add(d);
-                removei.add(i);
-                ((Decal)d).setIndex__draw(-1);
+        Groups.draw.each(d -> {
+            //No-bug way. TODO find out the reason of Bullet wrong removeIndex.
+            if(disableWreck && d instanceof Decal dd){
+                Groups.draw.removeIndex(dd, MI2Utils.getValue(drawIndexDecal, dd));
+                dd.setIndex__draw(-1);
             }
             if(d instanceof Unit u){
-                //if(debugg) Log.info("Unit id field" + MI2Utils.getValue(logdrawindex, u));
                 if(disableUnit){
-                    remove.add(d);
-                    removei.add(i);
+                    Groups.draw.removeIndex(u, MI2Utils.getValue(drawIndexUnit, u));
                     u.setIndex__draw(-1);
                     hiddenUnit.add(u);
                 }else{
                     drawUnit(u);
                 }
             }
-            if(disableBullet && d instanceof Bullet){
-                remove.add(d);
-                removei.add(i);
+            if(disableBullet && d instanceof Bullet b){
+                Groups.draw.removeIndex(b, MI2Utils.getValue(drawIndexBullet, b));
                 ((Bullet)d).setIndex__draw(-1);
             }
-        }
-        if(!remove.isEmpty()){
-            //Log.info(removei);
-            for(int i = remove.size - 1; i >= 0; i--){
-                if(net.client()) Groups.draw.remove(remove.get(i)); //No-bug way. TODO find out the reason of wrong index removed after hidden unit restored.
-                else Groups.draw.removeIndex(remove.get(i), removei.get(i));    //local only fast
-            }
-        }
+        });
 
         Seq<Tile> tiles = MI2Utils.getValue(renderer.blocks, "tileview");
         if(tiles != null){
