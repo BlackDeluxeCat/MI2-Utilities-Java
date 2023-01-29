@@ -127,8 +127,7 @@ public class HoverTopTable extends PopupTable{
                     TextureRegionDrawable icon = new TextureRegionDrawable();
                     {
                         update(() -> {
-                            if(tile == null || tile.floor() == last) return;
-                            last = tile.floor();
+                            if(tile != null && tile.floor() != last) last = tile.floor();
                             this.setDrawable(tile != null ? icon.set(tile.floor().uiIcon) : null);
                         });
                     }
@@ -142,8 +141,7 @@ public class HoverTopTable extends PopupTable{
                     TextureRegionDrawable icon = new TextureRegionDrawable();
                     {
                         update(() -> {
-                            if(tile == null || tile.overlay() == last) return;
-                            last = tile.overlay();
+                            if(tile != null && tile.overlay() != last) last = tile.overlay();
                             this.setDrawable((tile != null && tile.overlay() != null && tile.overlay() != Blocks.air) ? icon.set(tile.overlay().uiIcon) : null);
                         });
                     }
@@ -157,13 +155,12 @@ public class HoverTopTable extends PopupTable{
                     TextureRegionDrawable icon = new TextureRegionDrawable();
                     {
                         update(() -> {
-                            if(tile == null || tile.block() == last) return;
-                            last = tile.block();
-                            this.setDrawable((tile != null && tile.block() instanceof Prop || tile.block() instanceof TreeBlock) ? icon.set(tile.block().uiIcon) : null);
+                            if(tile != null && tile.block() != last) last = tile.block();
+                            this.setDrawable((tile != null && (tile.block() instanceof Prop || tile.block() instanceof TreeBlock)) ? icon.set(tile.block().uiIcon) : null);
                         });
                     }
                 }).maxSize(8 * 4);
-                tt.label(() -> (tile != null && tile.block() instanceof Prop || tile.block() instanceof TreeBlock) ? tile.block().localizedName : "").left().padLeft(5);
+                tt.label(() -> (tile != null && (tile.block() instanceof Prop || tile.block() instanceof TreeBlock)) ? tile.block().localizedName : "").left().padLeft(5);
             });
 
         }).left().update(t -> {
@@ -184,34 +181,22 @@ public class HoverTopTable extends PopupTable{
 
     public void build(){
         clear();
-        table().growX().update(t -> {
+        table(t -> {
             t.clear();
             t.background(Styles.black3);
-            if(state.isMenu()) cleanHover();
 
             t.defaults().growX().padBottom(4f);
-            boolean empty = true;
-            if(build != null){
-                t.add(buildt).minWidth(200f);
-                t.row();
-                empty = false;
-            }
 
-            if(unit != null){
-                t.add(unitt).minWidth(200f);
-                t.row();
-                empty = false;
-            }
-
-            if(tile != null){
-                t.add(tilet);
-                t.row();
-                empty = false;
-            }
-
-            if(!empty) addColorBar(t);
+            t.add(buildt).minWidth(200f);
             t.row();
-        });
+
+            t.add(unitt).minWidth(200f);
+            t.row();
+
+            t.add(tilet);
+        }).update(t -> {
+            if(state.isMenu()) cleanHover();
+        }).growX();
     }
 
     /** base on Anuke's*/
