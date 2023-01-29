@@ -3,16 +3,14 @@ package mi2u.ui;
 import arc.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
-import arc.input.*;
 import arc.math.*;
 import arc.scene.*;
-import arc.scene.event.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.pooling.*;
-import mi2u.MI2UTmp;
+import mi2u.*;
 import mi2u.input.*;
 import mi2u.io.*;
 import mi2u.io.MI2USettings.*;
@@ -23,12 +21,11 @@ import mindustry.game.Teams.*;
 import mindustry.gen.*;
 import mindustry.type.*;
 import mindustry.ui.*;
-import mindustry.world.blocks.ConstructBlock;
+import mindustry.world.blocks.*;
 import mindustry.world.blocks.storage.CoreBlock.*;
 
-import static mindustry.Vars.*;
 import static mi2u.MI2UVars.*;
-import static mindustry.Vars.player;
+import static mindustry.Vars.*;
 
 public class CoreInfoMindow extends Mindow2{
     protected Interval interval = new Interval(2);
@@ -356,7 +353,7 @@ public class CoreInfoMindow extends Mindow2{
                     l.setColor(player.team().core().items.get(item) < -(req.get(item) + req2.get(item)) ? Color.red:Color.forest);
                 }else{
                     if(req.get(item) == 0 && req2.get(item) == 0) continue;
-                    if(buildPlanTable.getCells().size % 8 == 0) buildPlanTable.row();
+                    if((buildPlanTable.getCells().size - 1) % 8 == 0) buildPlanTable.row();
                     buildPlanTable.image(item.uiIcon).size(16f);
                     buildPlanTable.add("").name(item.name).left();
                 }
