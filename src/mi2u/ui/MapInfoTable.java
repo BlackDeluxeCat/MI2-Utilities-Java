@@ -35,7 +35,7 @@ public class MapInfoTable extends Table{
     private static int lastWave = -1, lastSpawn = -1;
     private MI2Utils.IntervalMillis millTimer = new MI2Utils.IntervalMillis();
     private boolean syncCurWave = true, showWaveDetail = false;
-    public static int curWave = 0, curSpawn = -1;   //TODO no static
+    public static int curWave = 0, curSpawn = -1;
     public MapInfoTable(){
         super();
         Events.on(EventType.WorldLoadEvent.class, e -> {
@@ -486,7 +486,6 @@ public class MapInfoTable extends Table{
                     teamt.add("" + teamRule.infiniteAmmo).color(teamData.team.color);
                     teamt.add("" + teamRule.infiniteResources).color(teamData.team.color);
                     teamt.add("" + teamRule.cheat).color(teamData.team.color);
-                    //TODO rts ai fit
                     teamt.add("" + (teamRule.rtsAi ? teamRule.rtsMinWeight + "[" + teamRule.rtsMinSquad + "~" + teamRule.rtsMaxSquad + "]" + (teamRule.aiCoreSpawn ? Core.bundle.format("mapInfo.aiCoreSpawn") : "") : "")).color(teamData.team.color);
                 }
             });
