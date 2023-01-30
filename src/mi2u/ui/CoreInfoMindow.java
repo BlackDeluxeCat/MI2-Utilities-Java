@@ -36,6 +36,7 @@ public class CoreInfoMindow extends Mindow2{
     protected PopupTable teamSelect = new PopupTable(), buildPlanTable = new PopupTable(), chartTable;
     protected int[] unitIndex = new int[content.units().size];
 
+    protected ObjectSet<UnitType> usedUnits;
     protected ObjectSet<Item> usedItems;
     protected FloatDataRecorder[] itemRecoders;
     protected FloatDataRecorder charting = null;
@@ -65,6 +66,7 @@ public class CoreInfoMindow extends Mindow2{
 
         Events.on(EventType.ResetEvent.class, e -> {
             usedItems.clear();
+            usedUnits.clear();
         });
 
         Events.run(EventType.Trigger.update, () -> {
@@ -84,7 +86,7 @@ public class CoreInfoMindow extends Mindow2{
             core = team.core();
             pg.team = team;
 
-            if(state.isGame() && content.items().count(item -> core != null && core.items.get(item) > 0 && usedItems.add(item)) > 0){
+            if(state.isGame() && ((content.items().count(item -> core != null && core.items.get(item) > 0 && usedItems.add(item)) > 0) || (content.units().count(type -> team.data().countType(type) > 0 && usedUnits.add(type)) > 0))){
                 rebuild();
             }
 
@@ -105,6 +107,7 @@ public class CoreInfoMindow extends Mindow2{
         super.init();
         mindowName = "CoreInfo";
         usedItems = new ObjectSet<>();
+        usedUnits = new ObjectSet<>();
 
         chartTable = new PopupTable(){
             {
@@ -248,9 +251,10 @@ public class CoreInfoMindow extends Mindow2{
 
         if(MI2USettings.getBool(mindowName + ".showUnits")){
             cont.pane(uut -> {
-                int i = 0;
+                int i = 0, column = Mathf.clamp(usedUnits.size / (MI2USettings.getInt(mindowName + ".unitsMaxHeight", 200) / 24 - 2), 2, 5);
                 for(UnitType type : content.units()){
-                    if(type.isHidden()) continue;
+                    //if(type.isHidden()) continue;
+                    if(!usedUnits.contains(type)) continue;
                     uut.stack(new Image(type.uiIcon){{this.setColor(1f,1f,1f,0.8f);}},
                         new Table(t -> t.label(() -> team.data().countType(type) > 0 ? UI.formatAmount(team.data().countType(type)) : "").get().setFontScale(0.65f)).right().bottom()
                         ).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(type.localizedName).style(Styles.outlineLabel)).get().clicked(() -> {
@@ -262,11 +266,12 @@ public class CoreInfoMindow extends Mindow2{
                                 inp.pan(true, MI2UTmp.v1.set(team.data().unitCache(type).get(unitIndex[type.id]).x(), team.data().unitCache(type).get(unitIndex[type.id]).y()));
                             }
                         });
-        
-                    if(++i % 5 == 0){
+
+                    if(++i % column == 0){
                         uut.row();
                     }
                 }
+                uut.row();
                 uut.stack(new Image(Icon.unitsSmall){{this.setColor(1,0.6f,0,0.5f);}},
                 new Label(""){{
                     this.setFillParent(true);
@@ -274,7 +279,7 @@ public class CoreInfoMindow extends Mindow2{
                     this.setFontScale(0.65f);
                     this.update(() -> {
                         //this.setFontScale(team.data().unitCount <= 1000 ? 0.65f : 0.5f);
-                        this.setText(core != null && team.data().unitCount > 0 ? 
+                        this.setText(core != null && team.data().unitCount > 0 ?
                             (team.data().unitCount>1000 ? (team.data().unitCount/1000) + "\n":"") +
                             Mathf.mod(team.data().unitCount, 1000) + "" : "");
                     });
