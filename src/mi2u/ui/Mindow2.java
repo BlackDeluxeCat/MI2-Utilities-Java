@@ -111,7 +111,7 @@ public class Mindow2 extends Table{
                 if(!topmost){
                     var ints = mindow2s.mapInt(Element::getZIndex);
                     ints.sort();
-                    Mindow2.this.setZIndex(ints.first());
+                    Mindow2.this.setZIndex(Math.max(0, ints.first()));
                 }
                 Vec2 v = localToStageCoordinates(MI2UTmp.v1.set(x, y));
                 Vec2 v2 = title.localToStageCoordinates(MI2UTmp.v2.set(x, y));
@@ -248,7 +248,7 @@ public class Mindow2 extends Table{
                 this.cont.pane(t -> {
                     t.add(mindowName != null && !mindowName.equals("") ? Core.bundle.format("mindow2.settings.curMindowName") + mindowName: "@mindow2.settings.noMindowNameWarning").fontScale(1.2f).get().setAlignment(Align.center);
                     t.row();
-                    t.button("Help", Icon.info, () -> showHelp()).width(200f).get().setStyle(textb);
+                    t.button("@mindow2.settings.help", Icon.info, () -> showHelp()).width(200f).get().setStyle(textb);
                     t.row();
                     settings.each(st -> {
                         t.table(st::build).width(Math.min(600, Core.graphics.getWidth())).left();
@@ -436,24 +436,9 @@ public class Mindow2 extends Table{
                             ttt.row();
                             ttt.labelWrap("@settings.mindow.edgeSnap.tip").left().growX();
                         }).growX();
-                        rightt.row();
-
-                        rightt.table(ttt -> {
-                            ttt.button("@mindow2.settings.reloadUI", textb, Mindow2.this::loadUISettings).with(c -> {
-                                c.getLabel().setColor(1, 1, 0, 1);
-                                funcSetTextb.get(c);
-                            }).growX();
-
-                            ttt.button("@mindow2.settings.cacheUI", textb, Mindow2.this::saveUISettings).with(c -> {
-                                c.getLabel().setColor(0, 0, 1, 1);
-                                funcSetTextb.get(c);
-                            }).growX();
-                        }).tooltip(tooltip -> {
-                            tooltip.setBackground(Styles.black9);
-                            tooltip.labelWrap("@mindow2.settingHelp").width(200f);
-                        });
 
                         rightt.row();
+
                         rightt.table(t3 -> {
                             var b = t3.button("@settings.mindow.abovesnapTarget", textb, null).growX().get();
                             b.clicked(() -> {
@@ -482,6 +467,23 @@ public class Mindow2 extends Table{
                             });
                             b.getLabelCell().pad(5f,2f,5f,2f);
                         }).growX();
+
+                        rightt.row();
+
+                        rightt.table(ttt -> {
+                            ttt.button("@mindow2.settings.reloadUI", textb, Mindow2.this::loadUISettings).with(c -> {
+                                c.getLabel().setColor(1, 1, 0, 1);
+                                funcSetTextb.get(c);
+                            }).growX();
+
+                            ttt.button("@mindow2.settings.cacheUI", textb, Mindow2.this::saveUISettings).with(c -> {
+                                c.getLabel().setColor(0, 0, 1, 1);
+                                funcSetTextb.get(c);
+                            }).growX();
+                        }).tooltip(tooltip -> {
+                            tooltip.setBackground(Styles.black9);
+                            tooltip.labelWrap("@mindow2.settingHelp").width(200f);
+                        });
                     }).minWidth(220f).pad(4f);
                 });
             };
