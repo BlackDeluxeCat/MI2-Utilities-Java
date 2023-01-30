@@ -205,8 +205,8 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("disableBuilding", "@settings.main.disableBuilding", false, null));
 
         settings.add(new CollapseGroupEntry("SpeedController", ""){
-            ChooseEntry choose1 = new ChooseEntry("speedctrl.basefps", "@settings.main.speedctrl.basefps", new String[]{"10", "20", "30", "60", "120", "144"}, null);
-            ChooseEntry choose3 = new ChooseEntry("speedctrl.cutoff", "@settings.main.speedctrl.cutoff", new String[]{"50", "100", "200", "300"}, s -> String.valueOf(Strings.parseInt(s)/100f));
+            ChooseEntry choose1 = new ChooseEntry("speedctrl.basefps", "@settings.main.speedctrl.basefps", new String[]{"10", "20", "30", "60", "120", "144"}, null, null);
+            ChooseEntry choose3 = new ChooseEntry("speedctrl.cutoff", "@settings.main.speedctrl.cutoff", new String[]{"50", "100", "200", "300"}, s -> String.valueOf(Strings.parseInt(s)/100f), null);
             {
                 setDefaultHeader("@settings.main.speedctrl");
                 builder = t -> {

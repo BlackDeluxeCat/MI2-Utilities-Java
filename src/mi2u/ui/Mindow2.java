@@ -108,15 +108,29 @@ public class Mindow2 extends Table{
 
             @Override
             public void touchDragged(InputEvent event, float x, float y, int pointer){
+                if(!topmost){
+                    var ints = mindow2s.mapInt(Element::getZIndex);
+                    ints.sort();
+                    Mindow2.this.setZIndex(ints.first());
+                }
                 Vec2 v = localToStageCoordinates(MI2UTmp.v1.set(x, y));
-                Element hit = Core.scene.hit(v.x + title.x + title.parent.x, v.y + title.y + title.parent.y, false);
+                Vec2 v2 = title.localToStageCoordinates(MI2UTmp.v2.set(x, y));
+                Element hit = Core.scene.hit(v2.x, v2.y, false);
                 if(hit != null && hit.name != null && hit.name.equals("Mindow2Title") && !hit.isDescendantOf(Mindow2.this)){
-                    aboveSnap = hit.parent.parent;
+                    try{
+                        aboveSnap = hit.parent.parent.parent;
+                    }catch(Exception e){}
                     return;
                 }
                 aboveSnap = null;
                 curx = v.x - fromx;
                 cury = v.y - fromy;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, KeyCode button){
+                super.touchUp(event, x, y, pointer, button);
+                Mindow2.this.toFront();
             }
         });
 
@@ -127,27 +141,15 @@ public class Mindow2 extends Table{
 
             titleBar.button("-", textbtoggle, () -> {
                 minimized = !minimized;
-                if(minimized){
-                    cury += cont.getHeight();
-                }else{
-                    cury -= cont.getHeight();
-                }
+                cury += (minimized ? 1f : -1f) * cont.getHeight();
                 minimize();
-            }).size(titleButtonSize).update(b -> {
-                b.setChecked(minimized);
-            });
+            }).size(titleButtonSize).update(b -> b.setChecked(minimized));
         }else{
             titleBar.button(titleText != null ? titleText : "-", textbtoggle, () -> {
                 minimized = !minimized;
-                if(minimized){
-                    cury += cont.getHeight();
-                }else{
-                    cury -= cont.getHeight();
-                }
+                cury += (minimized ? 1f : -1f) * cont.getHeight();
                 minimize();
-            }).height(titleButtonSize).update(b -> {
-                b.setChecked(minimized);
-            }).with(funcSetTextb);
+            }).height(titleButtonSize).update(b -> b.setChecked(minimized)).with(funcSetTextb);
         }
 
         interval.get(0, 1);
@@ -160,7 +162,7 @@ public class Mindow2 extends Table{
             if(this == currTopmost || shouldTopMost()) setZIndex(1000);
 
             if(aboveSnap != null){
-                setPosition(aboveSnap.x, aboveSnap.y, Align.topLeft);
+                setPosition(aboveSnap.x, aboveSnap.y, Align.isRight(edgesnap) ? Align.topRight : Align.topLeft);
             }else if(edgesnap != Align.center && hasParent()){
                 Vec2 vec = MI2UTmp.v1;
                 vec.set(curx, cury);
@@ -202,32 +204,10 @@ public class Mindow2 extends Table{
 
     protected void edgeSnap(int align, Vec2 vec){
         if(parent == null) return;
-        switch(align){
-            case Align.topLeft -> {//lefttop
-                vec.x = 0;
-                vec.y = parent.getHeight() - getPrefHeight();
-            }
-            case Align.top ->//top
-                    vec.y = (parent.getHeight() - getPrefHeight());
-            case Align.topRight -> {//righttop
-                vec.x = (parent.getWidth() - getPrefWidth());
-                vec.y = (parent.getHeight() - getPrefHeight());
-            }
-            case Align.right ->//right
-                vec.x = (parent.getWidth() - getPrefWidth());
-            case Align.bottomRight -> {//rightbottom
-                vec.x = (parent.getWidth() - getPrefWidth());
-                vec.y = 0;
-            }
-            case Align.bottom ->//bottom
-                vec.y = 0;
-            case Align.bottomLeft -> {//leftbottom
-                vec.x = 0;
-                vec.y = 0;
-            }
-            case Align.left ->//left
-                vec.x = 0;
-        }
+        if(Align.isTop(align)) vec.y = parent.getHeight() - getPrefHeight();
+        if(Align.isBottom(align)) vec.y = 0;
+        if(Align.isRight(align)) vec.x = parent.getWidth() - getPrefWidth();
+        if(Align.isLeft(align)) vec.x = 0;
     }
 
     public boolean addTo(Group newParent){
@@ -484,12 +464,14 @@ public class Mindow2 extends Table{
                                         if(m == Mindow2.this || m.parent != Mindow2.this.parent) continue;
                                         this.button(Core.bundle.get(new StringBuilder(m.titleText).substring(1)) + "(" + m.mindowName + ")", textbtoggle, () -> {
                                             MI2USettings.putStr(mindowName + ".abovesnapTarget", m.mindowName);
+                                            aboveSnap = m;
                                             this.hide();
                                         }).with(funcSetTextb).get().setChecked(aboveSnap == m);
                                         this.row();
                                     }
                                     this.button(Iconc.cancel + "null", textbtoggle, () -> {
                                         MI2USettings.putStr(mindowName + ".abovesnapTarget", "null");
+                                        aboveSnap = null;
                                         this.hide();
                                     }).with(funcSetTextb).get().getLabel().setColor(Color.royal);
                                     this.snapTo(b);

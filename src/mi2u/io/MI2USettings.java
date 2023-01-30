@@ -39,7 +39,7 @@ public class MI2USettings{
         dir = root.child("MI2USettings.mi2u");
         load();
         Events.run(Trigger.update, () -> {
-            if(modified && timer.get(60f) && !Vars.state.isGame()){
+            if(modified && !Vars.state.isGame() && timer.get(60f)){
                 save();
                 modified = false;
             }
@@ -335,10 +335,12 @@ public class MI2USettings{
         public String[] items;
         /** process item to display on TextButton */
         public Func<String, String> buttonTextFunc;
-        public ChooseEntry(String name, String help, String[] items, Func<String, String> buttonTextFunc){
+        public Cons<String> changed;
+        public ChooseEntry(String name, String help, String[] items, Func<String, String> buttonTextFunc, Cons<String> changed){
             super(name, help);
             this.items = items;
             this.buttonTextFunc = buttonTextFunc;
+            this.changed = changed;
         }
 
         @Override
@@ -350,7 +352,10 @@ public class MI2USettings{
                             it.defaults().growX().uniform();
                             int i = 0;
                             for(var item : items){
-                                it.button(buttonTextFunc != null ? buttonTextFunc.get(item) : item, textbtoggle, () -> setting.put(item)).with(funcSetTextb).update(b -> b.setChecked(setting.get().equals(item)));
+                                it.button(buttonTextFunc != null ? buttonTextFunc.get(item) : item, textbtoggle, () -> {
+                                    setting.put(item);
+                                    if(changed != null) changed.get(item);
+                                }).with(funcSetTextb).update(b -> b.setChecked(setting.get().equals(item)));
                                 if(Mathf.mod(++i, 4) == 0){
                                     it.row();
                                     i = 0;
@@ -375,7 +380,7 @@ public class MI2USettings{
 
     /** SettingGroup主要用于自定义交互界面。创建实例时自动注册到静态类变量groups中，可以通过静态类方法按名字获取指定选项组。
      * 应提供选项组交互界面的生成方法，选项的修改与保存通过界面的自定义操作完成。
-     * //创建时必须生成相应的MI2USetting对象（如果没有）。
+     * //创建时必须新建所需的MI2USetting字段。
      * Mindow2选项组建议在创建Mindow时即创建，其他选项组在选项影响的相关功能创建时创建，以方便保存副本和设置getter setter
      * 需要在创建地方以外的地方调用选项组，建议用getGroup方法并作检验
      */
