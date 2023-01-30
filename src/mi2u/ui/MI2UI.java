@@ -85,20 +85,29 @@ public class MI2UI extends Mindow2{
 
             tt.button("@main.buttons.rebuild", textb, MI2UFuncs::unitRebuildBlocks).minSize(36f).with(funcSetTextb);
 
-            //TODO the update rate is based on button.update(), and affected by lagging
+            //The update rate is based on button.update(), and affected by lagging
             tt.button("Speeding", textbtoggle, SpeedController::switchUpdate).update(b -> {
                 b.setChecked(SpeedController.update);
                 b.setText(Core.bundle.get("main.buttons.speeding") + "x" + Strings.autoFixed(SpeedController.scl, 2));
                 SpeedController.update();
+                b.getLabel().setFontScale(1f);
+                b.getLabel().layout();
+                b.getLabel().setFontScale(Math.min((b.getWidth()- 8f - 16f - 8f) / b.getLabel().getGlyphLayout().width, 1f));
             }).with(funcSetTextb).with(b -> {
                 b.margin(4f);
-                b.image(Icon.settingsSmall).size(16f).update(img -> {
-                    if(SpeedController.update) img.rotateBy(-1f);
-                    else img.setRotation(0f);
-                    img.setColor(!b.isChecked() ? Color.white : SpeedController.lowerThanMin() ? Color.scarlet : Color.lime);
-                });
-            }).grow();
-        }).growX();
+                b.table(bii -> {
+                    bii.image(Icon.settingsSmall).size(16f).update(img -> {
+                        if(SpeedController.update) img.rotateBy(-1f);
+                        else img.setRotation(0f);
+                        img.setColor(!b.isChecked() ? Color.white : SpeedController.lowerThanMin() ? Color.scarlet : Color.lime);
+                    }).left();
+                    bii.add().growX();
+                }).growX();
+                b.getLabelCell().expand(false, false).fill(false).width(0.5f);
+                b.getLabel().setAlignment(Align.right);
+                b.getCells().swap(0,1);
+            }).growX();
+        }).fillX();
 
         cont.row();
 
@@ -132,9 +141,9 @@ public class MI2UI extends Mindow2{
                         mode.enable = !mode.enable;
                     }).checked(b -> mode.enable).minSize(36f).with(c -> {
                         c.getLabel().setAlignment(Align.center);
-                    });
+                    }).grow();
                 });
-            });
+            }).grow();
         }).growX();
 
         cont.row();
