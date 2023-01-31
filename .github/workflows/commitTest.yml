@@ -31,15 +31,19 @@ jobs:
       id: create_release
       uses: actions/create-release@v1
       if: startsWith(github.ref, 'refs/tags/')
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ steps.get_version.outputs.VERSION }}
         release_name: ${{ steps.get_version.outputs.VERSION }}
-        draft: false
+        draft: true
         prerelease: false
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       if: startsWith(github.ref, 'refs/tags/')
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: build/libs/${{ github.event.repository.name }}.jar
