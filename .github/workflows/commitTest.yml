@@ -1,9 +1,6 @@
 name: Commit Testing and Tag Publishing
 
-on:
-  push:
-    tags:
-      - '*'
+on: [push]
 
 jobs:
   buildJar:
