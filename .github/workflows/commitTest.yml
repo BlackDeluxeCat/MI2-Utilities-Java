@@ -1,6 +1,9 @@
-name: Commit Testing
+name: Commit Testing and Tag Publishing
 
-on: [push]
+on:
+  push:
+    tags:
+      - '*'
 
 jobs:
   buildJar:
@@ -22,6 +25,29 @@ jobs:
       with:
         name: ${{ github.event.repository.name }}
         path: build/libs/${{ github.event.repository.name }}.jar
+
+    - name: Get version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        tag_name: ${{ steps.get_version.outputs.VERSION }}
+        release_name: ${{ steps.get_version.outputs.VERSION }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: build/libs/${{ github.event.repository.name }}.jar
+        asset_name: format('{0}[{1}-141].jar', ${{ github.event.repository.name }}, ${{ steps.get_version.outputs.VERSION }})
+
   buildWindows:
     runs-on: windows-latest
 
