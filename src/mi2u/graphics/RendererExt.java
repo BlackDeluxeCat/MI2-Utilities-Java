@@ -32,7 +32,6 @@ import mindustry.world.blocks.units.*;
 
 import java.lang.reflect.*;
 
-import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
 
 /**
@@ -42,14 +41,16 @@ public class RendererExt{
     protected static Interval interval = new Interval();
     protected static ObjectMap<Unit, Vec2> players = new ObjectMap<>();
     protected static Seq<Unit> hiddenUnit = new Seq<>();
+
     public static Field itemBridgeBuffer = MI2Utils.getField(BufferedItemBridge.BufferedItemBridgeBuild.class, "buffer"),
             itemBridgeBufferBuffer = MI2Utils.getField(ItemBuffer.class, "buffer"), itemBridgeBufferIndex = MI2Utils.getField(ItemBuffer.class, "index"),
             unloaderBuilding = MI2Utils.getField(Unloader.ContainerStat.class, "building"),
             lexecTimer = MI2Utils.getField(LExecutor.class, "unitTimeouts");
 
     public static boolean animatedshields;
-    public static boolean enPlayerCursor, enUnitHpBar, enUnitRangeZone, enOverdriveZone, enMenderZone, enTurretZone, enBlockHpBar, enDistributionReveal, enSpawnZone, disableWreck, disableUnit, disableBuilding, disableBullet, shadow;
+    public static boolean enPlayerCursor, enUnitHpBar, enUnitRangeZone, enOverdriveZone, enMenderZone, enTurretZone, enBlockHpBar, enDistributionReveal, enSpawnZone, disableWreck, disableUnit, disableBuilding, disableBullet, enUnitLogic, enUnitPath;
     public static float flashZoneAlpha;
+    public static int unitPathLength;
 
     public static void initBase(){
         Events.on(EventType.WorldLoadEvent.class, e -> {
@@ -70,6 +71,8 @@ public class RendererExt{
     }
 
     public static void updateSettings(){
+        updCamera();
+
         animatedshields = Core.settings.getBool("animatedshields");
 
         flashZoneAlpha = MI2USettings.getInt("flashZoneAlpha", 50) / 100f;
@@ -86,7 +89,10 @@ public class RendererExt{
         disableUnit = MI2USettings.getBool("disableUnit", false);
         disableBuilding = MI2USettings.getBool("disableBuilding", false);
         disableBullet = MI2USettings.getBool("disableBullet", false);
-        shadow = MI2USettings.getBool("shadow", false);
+        enUnitLogic = MI2USettings.getBool("enUnitLogic", false);
+        enUnitPath = MI2USettings.getBool("enUnitPath", false);
+
+        unitPathLength = MI2USettings.getInt("enUnitPath.length", 40);
     }
 
     public static Field drawIndexUnit = MI2Utils.getField(Unit.class, "index__draw"), drawIndexDecal = MI2Utils.getField(Decal.class, "index__draw"), drawIndexBullet = MI2Utils.getField(Bullet.class, "index__draw");
@@ -95,7 +101,7 @@ public class RendererExt{
         if(!disableUnit){
             //Caution!! EntityGroup.add without index update leads to bug!!!
             hiddenUnit.select(Healthc::isValid).each(u -> u.setIndex__draw(Groups.draw.addIndex(u)));
-            if(!hiddenUnit.isEmpty()) Log.info(hiddenUnit.mapInt(u -> u.isAdded() ? 1:0));
+            //if(!hiddenUnit.isEmpty()) Log.info(hiddenUnit.mapInt(u -> u.isAdded() ? 1:0));
             hiddenUnit.clear();
         }
 
@@ -150,32 +156,34 @@ public class RendererExt{
             }else{
                 players.put(unit, new Vec2(unit.aimX, unit.aimY));
             }
-            Vec2 v = MI2UTmp.v2.set(players.get(unit));
+
+            Vec2 v = MI2UTmp.v3.set(players.get(unit));
             Rect tmpRect = MI2UTmp.r1.setCentered(Core.camera.position.x, Core.camera.position.y, Core.camera.width, Core.camera.height);
-            if(tmpRect.contains(v.x, v.y) || tmpRect.contains(unit.x, unit.y)){
-                Draw.reset();
-                Draw.z(Layer.flyingUnit + 2f);
-                if(unit.isShooting()){
-                    Draw.color(1f, 0.2f, 0.2f, 0.8f);
-                }else{
-                    Draw.color(1f, 1f, 1f, 0.4f);
-                }
-                if(unit.mounts().length == 0){
-                    Lines.dashLine(v.x, v.y, unit.x, unit.y, 40);
-                }else{
-                    for(WeaponMount m : unit.mounts()){
-                        if(Mathf.len(m.aimX - unit.x - m.weapon.x, m.aimY - unit.y - m.weapon.y) < 1800f){
-                            if(m.weapon.controllable){
-                                Lines.dashLine(v.x, v.y, unit.x + Mathf.cos((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), unit.y + Mathf.sin((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), 40);
-                            }else{
-                                Lines.dashLine(m.aimX, m.aimY, unit.x + Mathf.cos((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), unit.y + Mathf.sin((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), 40);
-                            }
+
+            Draw.reset();
+            Draw.z(Layer.flyingUnit + 2f);
+            if(unit.isShooting()){
+                Draw.color(1f, 0.2f, 0.2f, 0.8f);
+            }else{
+                Draw.color(1f, 1f, 1f, 0.4f);
+            }
+            if(unit.mounts().length == 0){
+                Vec2 v1 = MI2UTmp.v1.set(unit);
+                Vec2 v2 = MI2UTmp.v2.set(v);
+                if(limitCam(v1, v2)) Lines.dashLine(v1.x, v1.y, v2.x, v2.y, 40);;
+            }else{
+                for(WeaponMount m : unit.mounts()){
+                    if(Mathf.len(m.aimX - unit.x - m.weapon.x, m.aimY - unit.y - m.weapon.y) < 1800f){
+                        if(m.weapon.controllable){
+                            Lines.dashLine(v.x, v.y, unit.x + Mathf.cos((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), unit.y + Mathf.sin((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), 40);
+                        }else{
+                            Lines.dashLine(m.aimX, m.aimY, unit.x + Mathf.cos((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), unit.y + Mathf.sin((Mathf.angle(m.weapon.x, m.weapon.y) + unit.rotation() - 90f) / 180f * Mathf.pi) * Mathf.len(m.weapon.x, m.weapon.y), 40);
                         }
                     }
                 }
-                Draw.z(Layer.playerName);
-                Drawf.target(v.x, v.y, 4f, 0.6f, Pal.remove);
             }
+            Draw.z(Layer.playerName);
+            Drawf.target(v.x, v.y, 4f, 0.6f, Pal.remove);
 
             if(tmpRect.contains(v.x, v.y) && !tmpRect.contains(unit.x, unit.y)){
                 Draw.z(Layer.playerName);
@@ -224,7 +232,7 @@ public class RendererExt{
             //display logicAI info by MI2
             if(unit.controller() instanceof LogicAI logicai){
                 Draw.reset();
-                if(MI2USettings.getBool("enUnitLogic")){
+                if(enUnitLogic){
                     if(logicai.controller instanceof LogicBlock.LogicBuild lb && lb.executor != null){
                         Draw.color(0.2f, 1f, 0.6f, 0.3f);
                         Fill.arc(unit.x, unit.y, 6f, 1f - Mathf.clamp(logicai.controlTimer / LogicAI.logicControlTimeout), 90f, 20);
@@ -271,7 +279,7 @@ public class RendererExt{
             //v7 rts pathfind render, making your device a barbecue.
             //Pathfind Renderer
             //TODO line length limitation to prevent lagging
-            if(MI2USettings.getBool("enUnitPath")){
+            if(enUnitPath){
                 if(unit.isCommandable() && unit.controller() instanceof CommandAI ai && ai.targetPos != null){
                     Draw.reset();
                     Draw.z(Layer.power - 4f);
@@ -315,8 +323,7 @@ public class RendererExt{
                     Draw.reset();
                     Draw.z(Layer.power - 4f);
                     Tile tile = unit.tileOn();
-                    int max = MI2USettings.getInt("enUnitPath.length", 40);
-                    for(int tileIndex = 1; tileIndex <= max; tileIndex++){
+                    for(int tileIndex = 1; tileIndex <= unitPathLength; tileIndex++){
                         Tile nextTile = pathfinder.getTargetTile(tile, pathfinder.getField(unit.team, unit.pathType(), Pathfinder.fieldCore));
                         if(nextTile == null) break;
                         if(nextTile == tile) break;
@@ -949,6 +956,61 @@ public class RendererExt{
                     build.drawDisabled();
                 }
             }
+        }
+    }
+
+    private static final Vec2 tmp = new Vec2(), vline = new Vec2(), vp1pj = new Vec2(), pj = new Vec2(), rp1 = new Vec2(), rp2 = new Vec2();
+    private static final Rect rSC = new Rect();//update on each draw
+    private static final Vec2[] vCWorld = new Vec2[]{new Vec2(), new Vec2(), new Vec2(), new Vec2()};
+    private static final FloatSeq verxSC = new FloatSeq(), verySC = new FloatSeq();
+    public static void updCamera(){
+        Core.camera.bounds(rSC);
+        vCWorld[0].set(rSC.x, rSC.y);
+        vCWorld[1].set(rSC.x, rSC.y + rSC.height);
+        vCWorld[2].set(rSC.x + rSC.width, rSC.y);
+        vCWorld[3].set(rSC.x + rSC.width, rSC.y + rSC.height);
+    }
+
+    public static boolean inCam(Vec2 worldpos){
+        return rSC.contains(tmp.set(worldpos));
+    }
+
+    //limit a segment to screen world area.
+    public static boolean limitCam(Vec2 p1, Vec2 p2){
+        verxSC.clear();
+        verySC.clear();
+        if(inCam(p1) && inCam(p2)) return true;
+
+        vline.set(p2).sub(p1);
+
+        for(var vertex : vCWorld){
+            float linelen = vline.len();
+            pj.set(vline).setLength(Math.abs(vp1pj.set(vertex).sub(p1).dot(vline)) / linelen).add(p1);//垂足坐标pj
+            Log.info("pj: " + pj.toString());
+            if(!inCam(pj)) continue;
+            //求线段与矩形交点坐标
+            float jlen = rp1.set(vertex).sub(pj).len();
+            rp1.set(vertex).y += (vertex.y < pj.y ? 1f : -1f) * jlen / Math.abs(vline.x) * linelen;
+            rp2.set(vertex).x += (vertex.x < pj.x ? 1f : -1f) * jlen / Math.abs(vline.y) * linelen;
+            Log.info(rp1.toString() + rp2.toString());
+            if(inCam(rp1)){
+                verxSC.add(rp1.x);
+                verySC.add(rp1.y);
+            }
+            if(inCam(rp2)){
+                verxSC.add(rp2.x);
+                verySC.add(rp2.y);
+            }
+        }
+
+        Log.info(verxSC.toString() + verySC.toString());
+
+        if(verxSC.size == 2){
+            p1.set(verxSC.get(0), verySC.get(0));
+            p2.set(verxSC.get(1), verySC.get(1));
+            return true;
+        }else{
+            return false;
         }
     }
 }
