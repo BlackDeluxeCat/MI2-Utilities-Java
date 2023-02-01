@@ -212,20 +212,21 @@ public class CoreInfoMindow extends Mindow2{
                         if(!usedItems.contains(item)) continue;
 
                         var ir = itemRecoders[item.id];
-                        Runnable click = () -> {
+
+                        var l = new Label(() -> core == null ? "" : (ir.get(0) - ir.get(itemTimerInt) >= 0 ? "[green]+" : "[coral]-") + Strings.autoFixed(Math.abs(ir.get(0) - ir.get(itemTimerInt))/(float)Math.min(itemTimerInt, ir.size()) , 1));
+                        l.setAlignment(Align.bottomRight);
+                        l.setFontScale(0.7f);
+                        l.setFillParent(true);
+                        l.setColor(1f,1f,1f,0.7f);
+
+                        iut.stack(new Table(t -> {
+                                t.image(item.uiIcon).size(iconSmall);
+                                t.label(() -> core == null ? "0" : UI.formatAmount(core.items.get(item))).padRight(3).minWidth(52f).left();
+                        }), l).padLeft(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel)).get().clicked(() -> {
                             charting = ir;
                             if(!chartTable.shown) chartTable.setPositionInScreen(this.x - chartTable.getPrefWidth(), this.y);
                             chartTable.popup();
-                        };
-
-                        iut.stack(
-                            new Image(item.uiIcon),
-                            new Table(t -> t.label(() -> core == null ? "" : (ir.get(0) - ir.get(itemTimerInt) >= 0 ? "[green]+" : "[scarlet]-") + Strings.autoFixed(Math.abs(ir.get(0) - ir.get(itemTimerInt))/(float)Math.min(itemTimerInt, ir.size()) , 1)).get().setFontScale(0.65f)).right().bottom()
-                        ).size(iconSmall).padLeft(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel)).get().clicked(click);
-
-                        iut.label(() -> core == null ? "0" :
-                                UI.formatAmount(core.items.get(item)))
-                                .padRight(3).minWidth(52f).left().get().clicked(click);
+                        });
 
                         if(++i % 4 == 0){
                             iut.row();
@@ -256,7 +257,7 @@ public class CoreInfoMindow extends Mindow2{
                     //if(type.isHidden()) continue;
                     if(!usedUnits.contains(type)) continue;
                     uut.stack(new Image(type.uiIcon){{this.setColor(1f,1f,1f,0.8f);}},
-                        new Table(t -> t.label(() -> team.data().countType(type) > 0 ? UI.formatAmount(team.data().countType(type)) : "").get().setFontScale(0.65f)).right().bottom()
+                        new Table(t -> t.label(() -> team.data().countType(type) > 0 ? UI.formatAmount(team.data().countType(type)) : "").get().setFontScale(0.7f)).right().bottom()
                         ).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(type.localizedName).style(Styles.outlineLabel)).get().clicked(() -> {
                             //click to glance unit
                             if(control.input instanceof InputOverwrite inp){
@@ -276,7 +277,7 @@ public class CoreInfoMindow extends Mindow2{
                 new Label(""){{
                     this.setFillParent(true);
                     this.setAlignment(Align.bottomRight);
-                    this.setFontScale(0.65f);
+                    this.setFontScale(0.7f);
                     this.update(() -> {
                         //this.setFontScale(team.data().unitCount <= 1000 ? 0.65f : 0.5f);
                         this.setText(core != null && team.data().unitCount > 0 ?
@@ -286,7 +287,7 @@ public class CoreInfoMindow extends Mindow2{
                 }}
                 ).size(iconSmall).padRight(3);
                 uut.stack(new Label("" + Iconc.blockCoreNucleus){{this.setColor(1,0.6f,0,0.5f);}},
-                new Table(t -> t.label(() -> core != null && team.data().cores.size > 0 ? UI.formatAmount(team.data().cores.size) : "").get().setFontScale(0.65f)).right().bottom()
+                new Table(t -> t.label(() -> core != null && team.data().cores.size > 0 ? UI.formatAmount(team.data().cores.size) : "").get().setFontScale(0.7f)).right().bottom()
                 ).size(iconSmall).padRight(3).get().clicked(() -> {
                     if(control.input instanceof InputOverwrite inp && team.cores() != null && !team.cores().isEmpty()){
                         Building b = team.cores().random();
