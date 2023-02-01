@@ -36,7 +36,7 @@ jobs:
       with:
         tag_name: ${{ steps.get_version.outputs.VERSION }}
         release_name: ${{ steps.get_version.outputs.VERSION }}
-        draft: true
+        draft: false
         prerelease: false
 
     - name: Upload Release Asset
