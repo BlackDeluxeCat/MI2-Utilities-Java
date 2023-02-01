@@ -5,10 +5,10 @@ displayName: "MI2-Utilities Java"
 name: "MI2-Utilities-Java"
 
 #the mod version
-version: 1.1.7
+version: 1.1.8
 
 #the minimum game build required to run this mod
-minGameVersion: 141.1
+minGameVersion: 141.3
 
 #this is a java mod
 java: true
