@@ -181,6 +181,7 @@ public class HoverTopTable extends PopupTable{
 
     public void build(){
         clear();
+        addInGameVisible();
         table(t -> {
             t.clear();
             t.background(Styles.black3);

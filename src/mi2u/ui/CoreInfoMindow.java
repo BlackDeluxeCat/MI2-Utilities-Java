@@ -114,6 +114,7 @@ public class CoreInfoMindow extends Mindow2{
                 this.setBackground(Styles.black8);
                 this.addCloseButton();
                 this.addDragMove();
+                this.addInGameVisible();
                 var ch = new Element(){
                     @Override
                     public void draw(){

@@ -116,6 +116,7 @@ public class MI2UI extends Mindow2{
                 popup.clear();
                 popup.addCloseButton();
                 popup.addDragMove();
+                popup.addInGameVisible();
                 popup.setSize(300f, 200f);
                 popup.margin(4f).setBackground(Styles.black8);
                 popup.pane(p -> {

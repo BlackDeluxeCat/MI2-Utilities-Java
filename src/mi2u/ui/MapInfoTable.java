@@ -84,6 +84,7 @@ public class MapInfoTable extends Table{
         mapAttsDialog.addCloseButton();
 
         //wave tools
+        wavesPopup.addInGameVisible();
         wavesPopup.addCloseButton();
         wavesPopup.addDragMove();
         wavesPopup.background(Styles.black3);
@@ -499,6 +500,7 @@ public class MapInfoTable extends Table{
         attrsListPopup.touchable = Touchable.enabled;
         attrsListPopup.addDragMove();
         attrsListPopup.addCloseButton();
+        attrsListPopup.addInGameVisible();
         attrsListPopup.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
         attrsListPopup.update(() -> attrsListPopup.keepInScreen());
         attrsListPopup.add(title).padRight(10f);
@@ -567,6 +569,7 @@ public class MapInfoTable extends Table{
                 detailt.background(Styles.black8);
                 detailt.addCloseButton();
                 detailt.addDragMove();
+                detailt.addInGameVisible();
                 detailt.add("Wave " + (d.wave + 1)).growX().minSize(80f, 36f);
                 detailt.row();
                 buildPreview(detailt, d.wave, -1);

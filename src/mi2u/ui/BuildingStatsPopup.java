@@ -58,6 +58,7 @@ public class BuildingStatsPopup<B extends Building> extends PopupTable{
 
     public BuildingStatsPopup(B build){
         super();
+        this.addInGameVisible();
         this.touchable = Touchable.enabled;
         init(build);
         setupPopup();

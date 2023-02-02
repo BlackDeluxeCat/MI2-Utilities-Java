@@ -42,6 +42,7 @@ public class WorldFinderTable extends PopupTable{
         float size = 36f;
         addCloseButton();
         addDragMove();
+        addInGameVisible();
         update(() -> {
             this.keepInScreen();
             if(MI2USettings.getBool("worldDataUpdate") && worldDataTimer.get(Mathf.clamp(MI2USettings.getInt("worldDataUpdate.interval", 10), 3, 60))){
@@ -161,7 +162,7 @@ public class WorldFinderTable extends PopupTable{
         selectTable.background(Styles.black6);
         selectTable.update(() -> {
             selectTable.setPositionInScreen(this.x, this.y - selectTable.getPrefHeight());
-            if(!this.shown) selectTable.hide();
+            if(!this.shown && !this.visible) selectTable.hide();
         });
 
         switch(showSubTableID){

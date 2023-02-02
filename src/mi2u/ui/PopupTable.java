@@ -11,6 +11,7 @@ import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.*;
+import mindustry.*;
 import mindustry.gen.*;
 
 public class PopupTable extends Table{
@@ -107,5 +108,9 @@ public class PopupTable extends Table{
             b.toFront();
         });
         addChild(b);
+    }
+
+    public void addInGameVisible(){
+        visible(() -> Vars.state.isMenu() || Vars.ui.hudfrag.shown);
     }
 }
