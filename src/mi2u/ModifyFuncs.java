@@ -1,9 +1,11 @@
 package mi2u;
 
 import arc.*;
+import arc.files.*;
 import arc.func.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
+import arc.graphics.gl.*;
 import arc.math.*;
 import arc.scene.*;
 import arc.scene.event.*;
@@ -12,6 +14,7 @@ import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.io.*;
 import mi2u.ui.*;
+import mindustry.*;
 import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.gen.*;
@@ -25,17 +28,102 @@ import mindustry.world.blocks.power.*;
 import mindustry.world.blocks.production.*;
 import mindustry.world.consumers.*;
 
+import static arc.Core.graphics;
 import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
 
 /** modify vanilla game*/
 public class ModifyFuncs{
-
     public static void modifyVanilla(){
         modifyVanillaBlockBars();
         Events.on(EventType.ContentInitEvent.class, e2 -> modifyVanillaBlockBars());
         initBetterTopTable();
         settingsMenuDialog();
+        modifyIndependentRenderFrame();
+    }
+
+    public static void modifyIndependentRenderFrame(){
+        synchronized(Core.app.getListeners()){
+            Core.app.getListeners().find(al -> {
+                if(al instanceof ClientLauncher cl){
+                    Log.info(cl.toString());
+                    var field = MI2Utils.getField(ApplicationCore.class, "modules");
+                    ApplicationListener[] listeners = MI2Utils.getValue(field, cl);
+                    for(int i = 0; i < listeners.length; i++){
+                        if(listeners[i] == renderer){
+                            listeners[i] = RendererPacked.renderp;
+                            Log.info("Render Frame Kit Setup Successfully.");
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            });
+        }
+        Core.app.post(() -> {
+            ((Table)Core.scene.find("fps/ping")).label(() -> "RFPS: " + Strings.fixed(RendererPacked.renderp.renderfps(), 1)).left().style(Styles.outlineLabel).name("rfps").row();
+        });
+        Events.run(EventType.Trigger.draw, () -> {
+            RendererPacked.tmp++;
+        });
+    }
+
+    public static class RendererPacked implements ApplicationListener{
+        public static RendererPacked renderp = new RendererPacked();
+        public static float rfps, tmp;
+        public static MI2Utils.IntervalMillis im = new MI2Utils.IntervalMillis();
+        public float progress, precent, fpf;
+
+        @Override
+        public void resize(int width, int height){
+            renderer.resize(width, height);
+        }
+
+        @Override
+        public void update(){
+            precent = Core.graphics.getFramesPerSecond() / 60f;
+            fpf = Mathf.clamp(precent, 0.3f, 0.5f);
+            progress = Mathf.clamp(progress);
+            progress += fpf;
+            if(progress >= 1f){
+                renderer.update();
+                progress--;
+            }
+        }
+
+        public float renderfps(){
+            if(im.get(1000)){
+                rfps = tmp;
+                tmp = 0f;
+            }
+            return rfps;
+            //return fpf * 60f * precent;
+        }
+
+        @Override
+        public void pause(){
+            renderer.pause();
+        }
+
+        @Override
+        public void resume(){
+            renderer.resume();
+        }
+
+        @Override
+        public void dispose(){
+            renderer.dispose();
+        }
+
+        @Override
+        public void exit(){
+            renderer.exit();
+        }
+
+        @Override
+        public void fileDropped(Fi file){
+            renderer.fileDropped(file);
+        }
     }
 
     public static void modifyVanillaBlockBars(){
