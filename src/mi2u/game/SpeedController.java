@@ -12,7 +12,7 @@ public class SpeedController{
 
     public static void auto(){
         //Log.info(Time.globalTime - lastAuto);
-        if(Time.globalTime - lastAuto < 20f) return;
+        if(Time.globalTime - lastAuto < 5f) return;
         lastAuto = Time.globalTime;
         rawScl = Core.graphics.getFramesPerSecond() / reference;
         if(Math.abs(rawScl - 1f) < 0.05f) rawScl = 1f;
