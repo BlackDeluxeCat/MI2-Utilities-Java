@@ -11,6 +11,7 @@ import arc.util.*;
 import arc.util.pooling.*;
 import mi2u.*;
 import mi2u.io.*;
+import mi2u.ui.*;
 import mindustry.ai.*;
 import mindustry.ai.types.*;
 import mindustry.content.*;
@@ -32,7 +33,6 @@ import mindustry.world.blocks.units.*;
 
 import java.lang.reflect.*;
 
-import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
 
 /**
@@ -52,6 +52,7 @@ public class RendererExt{
     public static float flashZoneAlpha;
 
     public static void initBase(){
+        BuildingInventory.init();
         Events.on(EventType.WorldLoadEvent.class, e -> {
             players.clear();
             hiddenUnit.clear();
@@ -123,13 +124,18 @@ public class RendererExt{
         });
 
         Seq<Tile> tiles = MI2Utils.getValue(renderer.blocks, "tileview");
+        BuildingInventory.ids.clear();
         if(tiles != null){
             if(disableBuilding) tiles.clear();
 
             for(var tile : tiles){
                 if(tile.build == null) continue;
                 if(enBlockHpBar) drawBlockHpBar(tile.build);
-                if(enDistributionReveal) drawBlackboxBuilding(tile.build);
+                if(enDistributionReveal){
+                    BuildingInventory.ids.add(tile.build.id);
+                    boolean transport = drawBlackboxBuilding(tile.build);
+                    if(!transport) drawItemStack(tile.build);
+                }
                 if(enTurretZone && tile.build instanceof BaseTurret.BaseTurretBuild btb) drawTurretZone(btb);
                 if(enOverdriveZone && tile.build instanceof OverdriveProjector.OverdriveBuild odb) drawOverDriver(odb);
                 if(enMenderZone && tile.build instanceof MendProjector.MendBuild mb) drawMender(mb);
@@ -332,6 +338,77 @@ public class RendererExt{
         }
     }
 
+    public static void drawUnitHpBar(Unit unit){
+        float width = 1.2f, halfwidth = width / 2f;
+
+        if(unit.hitTime > 0f){
+            Lines.stroke(4f + Mathf.lerp(0f, 2f, Mathf.clamp(unit.hitTime)));
+            Draw.color(Color.white, Mathf.lerp(0.1f, 1f, Mathf.clamp(unit.hitTime)));
+            Lines.line(unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f), unit.x + unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f));
+        }
+
+        Lines.stroke(4f);
+        Draw.color(unit.team.color, 0.5f);
+        Lines.line(unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f), unit.x + unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f));
+
+        Draw.color((unit.health > 0 ? Pal.health:Color.gray), 0.8f);
+        Lines.stroke(2);
+        Lines.line(
+                unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f),
+                unit.x + unit.hitSize * ((unit.health > 0 ? unit.health : Mathf.maxZero(unit.maxHealth + unit.health)) / unit.maxHealth * width - halfwidth), unit.y + (unit.hitSize / 2f));
+
+        if(unit.shield > 0){
+            for(int didgt = 1; didgt <= Mathf.digits((int)(unit.shield / unit.maxHealth)) + 1; didgt++){
+                Draw.color(Pal.shield, 0.8f);
+                float barLength = Mathf.mod(unit.shield / unit.maxHealth, Mathf.pow(10f, (float)didgt - 1f)) / Mathf.pow(10f, (float)didgt - 1f);
+                if(didgt > 1){
+                    float y = unit.y + unit.hitSize / 2f + didgt * 2f;
+                    float h = 2f;
+                    int counts = Mathf.floor(barLength * 10f);
+                    for(float i = 1; i <= counts; i++){
+                        Fill.rect(unit.x - 0.55f * unit.hitSize + (i - 1f) * 0.12f * unit.hitSize, y, 0.1f * unit.hitSize, h);
+                    }
+                }else{
+                    float x = unit.x - (1f - barLength) * halfwidth * unit.hitSize;
+                    float y = unit.y + unit.hitSize / 2f + didgt * 2f;
+                    float h = 2f;
+                    float w = width * barLength * unit.hitSize;
+                    Fill.rect(x, y, w, h);
+                }
+            }
+        }
+
+        Draw.reset();
+
+        float index = 0f;
+        int columns = Mathf.floor(unit.hitSize * width / 4f);
+        for(StatusEffect eff : content.statusEffects()){
+            if(eff == StatusEffects.none) continue;
+            if(unit.hasEffect(eff)){
+                Draw.alpha(unit.getDuration(eff) < 180f ? 0.3f + 0.7f * Math.abs(Mathf.sin(Time.time / 20f)) : 1f);
+                Draw.rect(eff.uiIcon,
+                        unit.x - unit.hitSize * halfwidth + 2f + 4f * Mathf.mod(index, columns),
+                        unit.y + (unit.hitSize / 2f) + 3f + 5f * Mathf.floor(index / columns),
+                        eff.uiIcon.width / (float)eff.uiIcon.height * 5f, 5f);
+                index++;
+            }
+        }
+
+        if(unit instanceof PayloadUnit pu && pu.payloads != null){
+            Draw.alpha(0.9f);
+            //the smaller pui is, the further payload is in drop list. And those further ones can be slightly covered.
+            float fullIconCells = width * unit.hitSize / pu.payloads.size < 6f ? Mathf.floor(unit.hitSize * width * 0.5f / 6f) : 100f;
+            for(int pui = 0; pui < pu.payloads.size; pui++){
+                var p = pu.payloads.get(pu.payloads.size - 1 - pui);
+                if(p == null) continue;
+                Draw.rect(p.icon(),
+                        unit.x + (1f + (pui > fullIconCells ? unit.hitSize * -halfwidth + fullIconCells * 6f + (pui - fullIconCells) * (unit.hitSize * width - fullIconCells * 6f) / (pu.payloads.size - fullIconCells) : unit.hitSize * -halfwidth + pui * 6f)),
+                        unit.y + (unit.hitSize / 2f) - 4f,
+                        6f, 6f);
+            }
+        }
+    }
+
     //TODO set a Runnable list.
     public static void drawBlockHpBar(Building build){
         Draw.z(Layer.shields + 3f);
@@ -420,85 +497,20 @@ public class RendererExt{
         Draw.color();
     }
 
-    public static void drawUnitHpBar(Unit unit){
-        float width = 1.2f, halfwidth = width / 2f;
-
-        if(unit.hitTime > 0f){
-            Lines.stroke(4f + Mathf.lerp(0f, 2f, Mathf.clamp(unit.hitTime)));
-            Draw.color(Color.white, Mathf.lerp(0.1f, 1f, Mathf.clamp(unit.hitTime)));
-            Lines.line(unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f), unit.x + unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f));
-        }
-
-        Lines.stroke(4f);
-        Draw.color(unit.team.color, 0.5f);
-        Lines.line(unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f), unit.x + unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f));
-
-        Draw.color((unit.health > 0 ? Pal.health:Color.gray), 0.8f);
-        Lines.stroke(2);
-        Lines.line(
-                unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f),
-                unit.x + unit.hitSize * ((unit.health > 0 ? unit.health : Mathf.maxZero(unit.maxHealth + unit.health)) / unit.maxHealth * width - halfwidth), unit.y + (unit.hitSize / 2f));
-
-        if(unit.shield > 0){
-            for(int didgt = 1; didgt <= Mathf.digits((int)(unit.shield / unit.maxHealth)) + 1; didgt++){
-                Draw.color(Pal.shield, 0.8f);
-                float barLength = Mathf.mod(unit.shield / unit.maxHealth, Mathf.pow(10f, (float)didgt - 1f)) / Mathf.pow(10f, (float)didgt - 1f);
-                if(didgt > 1){
-                    float y = unit.y + unit.hitSize / 2f + didgt * 2f;
-                    float h = 2f;
-                    int counts = Mathf.floor(barLength * 10f);
-                    for(float i = 1; i <= counts; i++){
-                        Fill.rect(unit.x - 0.55f * unit.hitSize + (i - 1f) * 0.12f * unit.hitSize, y, 0.1f * unit.hitSize, h);
-                    }
-                }else{
-                    float x = unit.x - (1f - barLength) * halfwidth * unit.hitSize;
-                    float y = unit.y + unit.hitSize / 2f + didgt * 2f;
-                    float h = 2f;
-                    float w = width * barLength * unit.hitSize;
-                    Fill.rect(x, y, w, h);
-                }
-            }
-        }
-
-        Draw.reset();
-
-        float index = 0f;
-        int columns = Mathf.floor(unit.hitSize * width / 4f);
-        for(StatusEffect eff : content.statusEffects()){
-            if(eff == StatusEffects.none) continue;
-            if(unit.hasEffect(eff)){
-                Draw.alpha(unit.getDuration(eff) < 180f ? 0.3f + 0.7f * Math.abs(Mathf.sin(Time.time / 20f)) : 1f);
-                Draw.rect(eff.uiIcon,
-                        unit.x - unit.hitSize * halfwidth + 2f + 4f * Mathf.mod(index, columns),
-                        unit.y + (unit.hitSize / 2f) + 3f + 5f * Mathf.floor(index / columns),
-                        eff.uiIcon.width / (float)eff.uiIcon.height * 5f, 5f);
-                index++;
-            }
-        }
-
-        if(unit instanceof PayloadUnit pu && pu.payloads != null){
-            Draw.alpha(0.9f);
-            //the smaller pui is, the further payload is in drop list. And those further ones can be slightly covered.
-            float fullIconCells = width * unit.hitSize / pu.payloads.size < 6f ? Mathf.floor(unit.hitSize * width * 0.5f / 6f) : 100f;
-            for(int pui = 0; pui < pu.payloads.size; pui++){
-                var p = pu.payloads.get(pu.payloads.size - 1 - pui);
-                if(p == null) continue;
-                Draw.rect(p.icon(),
-                        unit.x + (1f + (pui > fullIconCells ? unit.hitSize * -halfwidth + fullIconCells * 6f + (pui - fullIconCells) * (unit.hitSize * width - fullIconCells * 6f) / (pu.payloads.size - fullIconCells) : unit.hitSize * -halfwidth + pui * 6f)),
-                        unit.y + (unit.hitSize / 2f) - 4f,
-                        6f, 6f);
-            }
-        }
+    public static void drawItemStack(Building b){
+        BuildingInventory.get(b);
     }
 
-    public static void drawBlackboxBuilding(Building b){
+    public static boolean drawBlackboxBuilding(Building b){
         if(b instanceof Junction.JunctionBuild jb) drawJunciton(jb);
-        if(b instanceof ItemBridge.ItemBridgeBuild ib) drawItemBridge(ib);
-        if(b instanceof BufferedItemBridge.BufferedItemBridgeBuild bb) drawBufferedItemBridge(bb);
-        if(b instanceof Unloader.UnloaderBuild ub) drawUnloader(ub);
-        if(b instanceof Router.RouterBuild rb) drawRouter(rb);
-        if(b instanceof DuctBridge.DuctBridgeBuild db) drawDuctBridge(db);
-        if(b instanceof DirectionalUnloader.DirectionalUnloaderBuild rb) drawDirectionalUnloader(rb);
+        else if(b instanceof BufferedItemBridge.BufferedItemBridgeBuild bb) drawBufferedItemBridge(bb);
+        else if(b instanceof ItemBridge.ItemBridgeBuild ib) drawItemBridge(ib);
+        else if(b instanceof Unloader.UnloaderBuild ub) drawUnloader(ub);
+        else if(b instanceof Router.RouterBuild rb) drawRouter(rb);
+        else if(b instanceof DuctBridge.DuctBridgeBuild db) drawDuctBridge(db);
+        else if(b instanceof DirectionalUnloader.DirectionalUnloaderBuild rb) drawDirectionalUnloader(rb);
+        else return false;
+        return true;
     }
 
     public static void drawZoneShader(){
@@ -633,7 +645,7 @@ public class RendererExt{
         }catch(Exception e){if(!interval.get(30)) return; Log.err(e.toString());}
     }
 
-    public static void drawItemBridge(ItemBridge.ItemBridgeBuild ib){
+    public static void drawDuctBridge(DuctBridge.DuctBridgeBuild ib){
         Draw.reset();
         Draw.z(Layer.power);
         //draw each item this bridge have
@@ -651,7 +663,7 @@ public class RendererExt{
         }
     }
 
-    public static void drawDuctBridge(DuctBridge.DuctBridgeBuild ib){
+    public static void drawItemBridge(ItemBridge.ItemBridgeBuild ib){
         Draw.reset();
         Draw.z(Layer.power);
         //draw each item this bridge have
@@ -709,6 +721,8 @@ public class RendererExt{
             }
             loti++;
         }
+
+        drawItemBridge(bb);
     }
 
     public static void drawUnloader(Unloader.UnloaderBuild ub){
