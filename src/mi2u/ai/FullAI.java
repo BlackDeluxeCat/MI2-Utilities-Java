@@ -365,7 +365,7 @@ public class FullAI extends AIController{
 
                 if(unit.within(core, itemTransferRange / 1.5f)){
                     if(timer.get(8, 120f)){
-                        if(unit.stack.amount > 0 && unit.stack.item != null && unit.stack.item != targetItem){
+                        if(unit.stack.item != null && unit.stack.item != targetItem && unit.stack.amount > 0){
                             control.input.droppingItem = true;
                             control.input.tryDropItems(core, unit.aimX, unit.aimY);
                         }else{
@@ -373,7 +373,7 @@ public class FullAI extends AIController{
                         }
                     }
                 }
-                if(onetimePick && unit.stack.item == targetItem) targetItem = null;
+                if(onetimePick && unit.stack.item == targetItem && unit.stack.amount > 0) targetItem = null;
 
             }else if(mobile){
                 if(!enable){
