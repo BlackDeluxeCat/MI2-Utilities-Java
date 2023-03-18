@@ -181,7 +181,7 @@ public class FullAI extends AIController{
                         p.row();
                     }
                 }
-            }).maxHeight(300f);
+            }).maxHeight(300f).with(p -> p.setFadeScrollBars(false));
         }
     }
 
@@ -390,7 +390,7 @@ public class FullAI extends AIController{
         @Override
         public void buildConfig(Table table) {
             super.buildConfig(table);
-            table.table(p -> {
+            table.pane(p -> {
                 int i = 0;
                 for(var item : content.items()){
                     p.button(b -> {
@@ -410,7 +410,7 @@ public class FullAI extends AIController{
                         p.row();
                     }
                 }
-            }).maxHeight(300f);
+            }).maxHeight(300f).with(p -> p.setFadeScrollBars(false));
             table.row();
             table.button("@ai.config.oneTime", textbtoggle, () -> onetimePick = !onetimePick).growX().update(b -> b.setChecked(onetimePick)).with(funcSetTextb);
         }
