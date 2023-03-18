@@ -160,11 +160,11 @@ public class FullAI extends AIController{
         @Override
         public void buildConfig(Table table) {
             super.buildConfig(table);
-            table.table(t -> {
+            table.pane(p -> {
                 int i = 0;
                 for(var item : content.items()){
                     if(!content.blocks().contains(b -> b.itemDrop == item)) continue;
-                    t.button(b -> {
+                    p.button(b -> {
                         b.image(item.uiIcon).size(16f);
                         b.add(item.localizedName);
                         b.margin(4f);
@@ -178,10 +178,10 @@ public class FullAI extends AIController{
                     i++;
                     if(i >= 3){
                         i = 0;
-                        t.row();
+                        p.row();
                     }
                 }
-            });
+            }).maxHeight(300f);
         }
     }
 
@@ -390,10 +390,10 @@ public class FullAI extends AIController{
         @Override
         public void buildConfig(Table table) {
             super.buildConfig(table);
-            table.table(t -> {
+            table.table(p -> {
                 int i = 0;
                 for(var item : content.items()){
-                    t.button(b -> {
+                    p.button(b -> {
                         b.image(item.uiIcon).size(24f).update(img -> {
                             img.setColor(b.isDisabled() ? Color.gray : Color.white);
                         });
@@ -407,10 +407,10 @@ public class FullAI extends AIController{
                     i++;
                     if(i >= 5){
                         i = 0;
-                        t.row();
+                        p.row();
                     }
                 }
-            });
+            }).maxHeight(300f);
             table.row();
             table.button("@ai.config.oneTime", textbtoggle, () -> onetimePick = !onetimePick).growX().update(b -> b.setChecked(onetimePick)).with(funcSetTextb);
         }
