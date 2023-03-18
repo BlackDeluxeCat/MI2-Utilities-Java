@@ -86,8 +86,8 @@ public class BuildingInventory extends Element{
 
         for(var item : content.items()){
             int amt = build.items.get(item);
-            if(itemused.check(item.id, 5000) && amt <= 0) continue;
-            itemused.get(item.id, 1);
+            if(amt > 0) itemused.get(item.id, 1);
+            if(itemused.check(item.id, 1000)) continue;
 
             float dx = Mathf.mod(i, size) * iconsize;
             float dy = rowdy * Mathf.floor(i / (float)size) * iconsize;
