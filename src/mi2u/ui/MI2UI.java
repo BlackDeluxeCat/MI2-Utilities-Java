@@ -215,7 +215,7 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("disableBuilding", "@settings.main.disableBuilding", false, null));
 
         settings.add(new CollapseGroupEntry("SpeedController", ""){
-            ChooseEntry choose1 = new ChooseEntry("speedctrl.basefps", "@settings.main.speedctrl.basefps", new String[]{"10", "20", "30", "60", "120", "144"}, null, null);
+            ChooseEntry choose1 = new ChooseEntry("speedctrl.basefps", "@settings.main.speedctrl.basefps", new String[]{"10", "20", "30", "60", "120", "240"}, null, null);
             ChooseEntry choose3 = new ChooseEntry("speedctrl.cutoff", "@settings.main.speedctrl.cutoff", new String[]{"50", "100", "200", "300"}, s -> String.valueOf(Strings.parseInt(s)/100f), null);
             {
                 setDefaultHeader("@settings.main.speedctrl");
@@ -267,21 +267,9 @@ public class MI2UI extends Mindow2{
             }
         });
 
-        settings.add(new CollapseGroupEntry("UpdateCheck", ""){
-            CheckEntry check1 = new CheckEntry("enableUpdate", "@settings.main.enableUpdate", true, b -> {
-                if(b) MI2Utilities.checkUpdate();
-            });
-            FieldEntry field2 = new FieldEntry("ghApi", "@settings.main.ghApi", Vars.ghApi, null, null, null);
-
-            {
-                setDefaultHeader("@settings.main.updateCheck");
-                builder = t -> {
-                    check1.build(t);
-                    t.row();
-                    field2.build(t);
-                };
-            }
-        });
+        settings.add(new CheckEntry("enableUpdate", "@settings.main.enableUpdate", true, b -> {
+            if(b) MI2Utilities.checkUpdate();
+        }));
 
         settings.add(new CheckEntry("showUIContainer", "@settings.main.container", false, b -> container.addTo(b?Core.scene.root:null)));
     }

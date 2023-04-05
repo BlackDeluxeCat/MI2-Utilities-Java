@@ -20,7 +20,7 @@ import static mi2u.MI2UVars.*;
 
 
 public class MI2Utilities extends Mod{
-    public static final String gitURL = "https://github.com/BlackDeluxeCat/MI2-Utilities-Java";
+    public static final String gitURL = "github.com/BlackDeluxeCat/MI2-Utilities-Java";
     public static final String gitRepo = "BlackDeluxeCat/MI2-Utilities-Java";
     public static Mods.LoadedMod MOD;
 
@@ -95,35 +95,17 @@ public class MI2Utilities extends Mod{
                 cont.button(gitRepo + "\n" + Iconc.paste + Iconc.github, textb, () -> {
                     Core.app.setClipboardText(gitURL);
                 }).growX().height(50f);
+
                 cont.row();
-                cont.button("", textb, () -> {
-                    ui.loadfrag.show("@downloading");
-                    ui.loadfrag.setProgress(() -> Reflect.get(ui.mods, "modImportProgress"));
-                    Http.get(MI2USettings.getStr("ghApi", ghApi) + "/repos/" + gitRepo + "/releases/latest", res -> {
-                        var json = Jval.read(res.getResultAsString());
-                        var assets = json.get("assets").asArray();
 
-                        //prioritize dexed jar, as that's what Sonnicon's mod template outputs
-                        var dexedAsset = assets.find(j -> j.getString("name").startsWith("dexed") && j.getString("name").endsWith(".jar"));
-                        var asset = dexedAsset == null ? assets.find(j -> j.getString("name").endsWith(".jar")) : dexedAsset;
-
-                        if(asset != null){
-                            //grab actual file
-                            var url = asset.getString("browser_download_url");
-
-                            Http.get(url, result -> {
-                                Reflect.invoke(ui.mods, "handleMod", new Object[]{gitRepo, result}, String.class, Http.HttpResponse.class);
-                            }, e -> Reflect.invoke(ui.mods, "modError", new Object[]{e}, Throwable.class));
-                        }else{
-                            throw new ArcRuntimeException("No JAR file found in releases. Make sure you have a valid jar file in the mod's latest Github Release.");
-                        }
-                    }, e -> Reflect.invoke(ui.mods, "modError", new Object[]{e}, Throwable.class));
-                }).growX().height(50f).update(b -> {
+                cont.button("", textb, () -> ui.mods.githubImportMod(gitRepo, true)).growX().height(50f).update(b -> {
                     b.getLabelCell().update(l -> {
                         l.setText(Core.bundle.get("update.download") + ": " + MOD.meta.version + " -> " + version);
                     }).get().setColor(1f, 1f, 0.3f, 1f);
                 });
+
                 cont.row();
+
                 cont.button("", textb, () -> this.addTo(null)).growX().height(50f).update(b -> {
                     b.setText(Core.bundle.get("update.close") + " (" + Strings.fixed((delay - in.getTime(0))/60 , 1)+ "s)");
                 });
@@ -133,7 +115,7 @@ public class MI2Utilities extends Mod{
                     introl = t.add(intro).align(Align.left).growX().get();  //drawing update discription possibly cause font color bug.
                 }).width(400f).maxHeight(500f);
 
-                Http.get(MI2USettings.getStr("ghApi", ghApi) + "/repos/" + gitRepo + "/releases/latest", res -> {
+                Http.get(gitURL + "/releases/latest", res -> {
                     var json = Jval.read(res.getResultAsString());
                     version = json.getString("name");
                     intro = json.getString("body");
