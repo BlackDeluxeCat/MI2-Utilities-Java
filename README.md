@@ -1,3 +1,10 @@
+TODO List
+> Updater 修复bug
+
+> 物流揭示的配置项\代码优化
+
+> 替换式单位stats,浮动stats等实现优化(提高mod兼容性)
+
 # MI2-Utilities Java
 
 - [English](README.md) | [中文](README_zh.md)
