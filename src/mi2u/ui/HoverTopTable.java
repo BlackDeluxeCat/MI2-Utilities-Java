@@ -90,7 +90,10 @@ public class HoverTopTable extends PopupTable{
             if(unit != null){
                 display(unitt, unit);
                 unitt.row();
-                unitt.label(() -> "DPS: " + Strings.fixed(unitDps.avg(), 2) + ", Max: " + Strings.fixed(unitDps.max(), 2)).left().get().setFontScale(0.75f);
+                unitt.add("").left().update(l -> {
+                    l.setText("DPS: " + Strings.fixed(unitDps.avg(), 2) + ", Max: " + Strings.fixed(unitDps.max(), 2));
+                    l.setFontScale(Mathf.zero(unitDps.avg(), 0.01f) ? 0.01f : 0.75f);
+                });
             }
         });
 
@@ -114,7 +117,10 @@ public class HoverTopTable extends PopupTable{
                 buildt.row();
                 build.display(buildt);
                 buildt.row();
-                buildt.label(() -> "DPS: " + Strings.fixed(buildDps.avg(), 2) + ", Max: " + Strings.fixed(buildDps.max(), 2)).left().get().setFontScale(0.75f);
+                buildt.add("").left().update(l -> {
+                    l.setText("DPS: " + Strings.fixed(buildDps.avg(), 2) + ", Max: " + Strings.fixed(buildDps.max(), 2));
+                    l.setFontScale(Mathf.zero(buildDps.avg(), 0.01f) ? 0.01f : 0.75f);
+                });
             }
         });
 

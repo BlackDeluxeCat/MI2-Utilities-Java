@@ -93,6 +93,7 @@ public class FloatDataRecorder{
     }
 
     public float avg(){
+        if(size == 0) return 0f;
         float result = 0f;
         for(int i = size - 1; i >= 1; i--){
             result += get(i);
