@@ -33,7 +33,7 @@ public class BuildingInventory extends Element{
         });
         group.setFillParent(true);
         group.touchable = Touchable.disabled;
-        Vars.ui.hudGroup.addChildBefore(Core.scene.find("overlaymarker"), group);
+        ui.hudGroup.addChildAt(ui.hudGroup.getChildren().indexOf(Core.scene.find("overlaymarker")) - 1, group);
     }
 
     public static void get(Building b){
