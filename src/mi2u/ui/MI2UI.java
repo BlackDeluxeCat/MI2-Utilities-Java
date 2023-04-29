@@ -31,6 +31,7 @@ public class MI2UI extends Mindow2{
 
         Events.run(EventType.Trigger.update, () -> {
             if(state.isGame()){
+                RtsCommand.desktopFormation();//Independent of inputoverwrite, may bug
                 if(!state.isPaused()){
                     realRunTime += Time.timeSinceMillis(lastRealRun);
                 }

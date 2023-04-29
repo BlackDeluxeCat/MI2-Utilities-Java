@@ -3,10 +3,11 @@ package mi2u.input;
 import arc.*;
 import arc.struct.*;
 import arc.util.Time;
-import mi2u.MI2UTmp;
+import mi2u.*;
 import mi2u.io.MI2USettings;
 import mindustry.game.EventType;
 import mindustry.gen.*;
+import mindustry.input.*;
 
 import static mindustry.Vars.*;
 
@@ -57,8 +58,13 @@ public class RtsCommand{
 
     public static void callFormation(int id){
         if(!checkFormation(id)) return;
-        if(lastCallId == id && Time.timeSinceMillis(lastCallTime) < doubleTapInterval && control.input instanceof InputOverwrite iow){
-            iow.pan(true, MI2UTmp.v1.set(formations[id].random()));
+        if(lastCallId == id && Time.timeSinceMillis(lastCallTime) < doubleTapInterval){
+            if(control.input instanceof InputOverwrite iow){
+                iow.pan(true, MI2UTmp.v1.set(formations[id].random()));
+            }else{
+                Core.camera.position.set(MI2UTmp.v1.set(formations[id].random()));
+            }
+
         }else{
             control.input.selectedUnits.clear();
             control.input.selectedUnits.add(formations[id]);
@@ -67,4 +73,24 @@ public class RtsCommand{
         lastCallTime = Time.millis();
     }
 
+    public static void desktopFormation(){
+        if(control.input.commandMode){
+            if(Core.input.keyDown(Binding.control)) creatingFormation = true;
+            if(Core.input.keyRelease(Binding.control)) creatingFormation = false;
+            //force block selection short-cut to switch category
+            MI2Utils.setValue(ui.hudfrag.blockfrag, "blockSelectEnd", true);
+            //cancel any stored block selections
+            ObjectMap selectBlocks = MI2Utils.getValue(ui.hudfrag.blockfrag, "selectedBlocks");
+            selectBlocks.each((cat, block) -> selectBlocks.put(cat, null));
+            for(int ki = 0; ki < DesktopInputExt.numKey.length; ki++){
+                if(Core.input.keyTap(DesktopInputExt.numKey[ki])){
+                    if(creatingFormation){
+                        createFormation(control.input.selectedUnits, ki);
+                    }else{
+                        callFormation(ki);
+                    }
+                }
+            }
+        }
+    }
 }

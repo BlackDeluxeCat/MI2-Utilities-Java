@@ -4,7 +4,6 @@ import arc.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.ui.layout.*;
-import arc.struct.*;
 import arc.util.*;
 import mi2u.*;
 import mi2u.graphics.*;
@@ -35,7 +34,6 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
     @Override
     public void update(){
         super.update();
-        desktopFormation();
         postPMFrag();
         tryCtrlBuildUnderUnit();
 
@@ -156,29 +154,6 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
                 var build = world.buildWorld(Core.input.mouseWorld().x, Core.input.mouseWorld().y);
                 if(RendererExt.disableUnit && selectedUnit() != null && build instanceof ControlBlock cont && cont.canControl() && build.team == player.team() && cont.unit() != player.unit() && cont.unit().isAI()){
                     Call.unitControl(player, cont.unit());
-                }
-            }
-        }
-    }
-
-    public void desktopFormation(){
-        if(commandMode){
-            if(Core.input.keyDown(Binding.control)) RtsCommand.creatingFormation = true;
-            if(Core.input.keyRelease(Binding.control)) RtsCommand.creatingFormation = false;
-            //force block selection short-cut to switch category
-            MI2Utils.setValue(ui.hudfrag.blockfrag, "blockSelectEnd", true);
-            //cancel any stored block selections
-            ObjectMap selectBlocks = MI2Utils.getValue(ui.hudfrag.blockfrag, "selectedBlocks");
-            selectBlocks.each((cat, block) -> selectBlocks.put(cat, null));
-            if(RtsCommand.creatingFormation){
-                for(int ki = 0; ki < numKey.length; ki++){
-                    if(Core.input.keyTap(numKey[ki])){
-                        if(RtsCommand.creatingFormation){
-                            RtsCommand.createFormation(selectedUnits, ki);
-                        }else{
-                            RtsCommand.callFormation(ki);
-                        }
-                    }
                 }
             }
         }
