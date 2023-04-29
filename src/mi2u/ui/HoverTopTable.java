@@ -115,7 +115,10 @@ public class HoverTopTable extends PopupTable{
                     t.add("(" + World.conv(build.x) + "," + World.conv(build.y) + ")").left();
                 });
                 buildt.row();
+                var team = build.team;
+                build.team = player.team();
                 build.display(buildt);
+                build.team = team;
                 buildt.row();
                 buildt.add("").left().update(l -> {
                     l.setText("DPS: " + Strings.fixed(buildDps.avg(), 2) + ", Max: " + Strings.fixed(buildDps.max(), 2));
@@ -208,7 +211,7 @@ public class HoverTopTable extends PopupTable{
 
     /** base on Anuke's*/
     public void display(Table table, Unit unit){
-        //unit.type.display(unit, table);   TODO this will not fit some mod ui
+        //unit.type.display(unit, table);   //TODO this will not fit some mod ui
         table.table(t -> {
             t.left();
             t.add(new Image(unit.type.uiIcon)).size(iconMed).scaling(Scaling.fit);
