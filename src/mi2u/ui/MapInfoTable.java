@@ -89,7 +89,7 @@ public class MapInfoTable extends Table{
         wavesPopup.addDragMove();
         wavesPopup.background(Styles.black3);
         wavesPopup.table(t -> {
-            t.label(() -> "Wave: " + (curWave + 1));
+            t.label(() -> "Wave: " + (curWave + 1)).growX();
             t.row();
             t.table(t3 -> {
                 t3.button("@mapInfo.buttons.setWave", textb, () -> {
@@ -103,7 +103,7 @@ public class MapInfoTable extends Table{
                     if(state.rules.infiniteResources) state.rules.waveTimer = !state.rules.waveTimer;
                 }).update(b -> b.setChecked(state.rules.waveTimer)).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).height(titleButtonSize);
             });
-        }).row();
+        }).growX().row();
 
         wavesPopup.table(t3 -> {
             t3.button("<<", textb, () -> {

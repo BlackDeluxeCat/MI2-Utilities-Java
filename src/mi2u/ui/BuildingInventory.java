@@ -15,6 +15,7 @@ import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.ui.*;
+import mindustry.world.blocks.storage.*;
 
 import static arc.Core.graphics;
 import static mindustry.Vars.*;
@@ -37,7 +38,7 @@ public class BuildingInventory extends Element{
     }
 
     public static void get(Building b){
-        if(state.isGame() && b.block.itemCapacity >= 10 && b.items != null){
+        if(state.isGame() && b.block.itemCapacity >= 10 && b.items != null && !(b instanceof StorageBlock.StorageBuild sb && sb.linkedCore != null)){
             if(used.add(b.id)) new BuildingInventory(b);
         }
     }

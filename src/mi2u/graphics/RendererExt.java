@@ -42,6 +42,7 @@ public class RendererExt{
     protected static Interval interval = new Interval();
     protected static ObjectMap<Unit, Vec2> players = new ObjectMap<>();
     protected static Seq<Unit> hiddenUnit = new Seq<>();
+
     public static Field itemBridgeBuffer = MI2Utils.getField(BufferedItemBridge.BufferedItemBridgeBuild.class, "buffer"),
             itemBridgeBufferBuffer = MI2Utils.getField(ItemBuffer.class, "buffer"), itemBridgeBufferIndex = MI2Utils.getField(ItemBuffer.class, "index"),
             unloaderBuilding = MI2Utils.getField(Unloader.ContainerStat.class, "building"),
@@ -100,7 +101,6 @@ public class RendererExt{
         if(!disableUnit){
             //Caution!! EntityGroup.add without index update leads to bug!!!
             hiddenUnit.select(Healthc::isValid).each(u -> u.setIndex__draw(Groups.draw.addIndex(u)));
-            if(!hiddenUnit.isEmpty()) Log.info(hiddenUnit.mapInt(u -> u.isAdded() ? 1:0));
             hiddenUnit.clear();
         }
 
@@ -421,8 +421,8 @@ public class RendererExt{
         float barLength, x, y, h, w;
 
         if(build.health < build.maxHealth){
-            if(build instanceof Wall.WallBuild wb){
-                float hitTime = ((Wall)wb.block).flashHit? wb.hit:0f;
+            if(build instanceof Wall.WallBuild wb && ((Wall)wb.block).flashHit){
+                float hitTime = wb.hit;
                 if(hitTime > 0f){
                     Lines.stroke(2f + Mathf.lerp(0f, 2f, Mathf.clamp(hitTime)));
                     Draw.color(Color.white, Mathf.lerp(0.1f, 1f, Mathf.clamp(hitTime)));
@@ -613,6 +613,7 @@ public class RendererExt{
             int cap = ((Junction)jb.block).capacity;
             float speed = ((Junction)jb.block).speed;
 
+            //too much usage of new array.
             Item[][] items = new Item[4][jb.buffer.buffers[0].length];
             for(int i = 0; i < 4; i++){
                 for(int ii = 0; ii < jb.buffer.buffers[i].length; ii++){
@@ -626,27 +627,24 @@ public class RendererExt{
                 }
             }
 
-            float begx, begy, endx, endy;
+            float begx, begy;
             for(int i = 0; i < 4; i++){
-                endx = jb.x + Geometry.d4(i).x * tilesize / 2f + Geometry.d4(Math.floorMod(i + 1, 4)).x * tilesize / 4f;
-                endy = jb.y + Geometry.d4(i).y * tilesize / 2f + Geometry.d4(Math.floorMod(i + 1, 4)).y * tilesize / 4f;
-                begx = jb.x - Geometry.d4(i).x * tilesize / 4f + Geometry.d4(Math.floorMod(i + 1, 4)).x * tilesize / 4f;
-                begy = jb.y - Geometry.d4(i).y * tilesize / 4f + Geometry.d4(Math.floorMod(i + 1, 4)).y * tilesize / 4f;
                 if(jb.buffer.indexes[i] > 0){
-                    float loti = 0f;
+                    begx = jb.x - Geometry.d4(i).x * tilesize / 4f + Geometry.d4((i + 1) % 4).x * tilesize / 4f;
+                    begy = jb.y - Geometry.d4(i).y * tilesize / 4f + Geometry.d4((i + 1) % 4).y * tilesize / 4f;
+
                     for(int idi = 0; idi < jb.buffer.indexes[i]; idi++){
                         if(items[i][idi] != null){
                             Draw.alpha(0.9f);
                             Draw.rect(items[i][idi].fullIcon,
-                            begx + ((endx - begx) / (float)cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale() / speed) * cap, cap - loti)),
-                            begy + ((endy - begy) / (float)cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale() / speed) * cap, cap - loti)),
+                            begx + (Geometry.d4(i).x * tilesize * 0.75f / cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale() / speed) * cap, cap - idi)),
+                            begy + (Geometry.d4(i).y * tilesize * 0.75f / cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale() / speed) * cap, cap - idi)),
                             4f, 4f);
                         }
-                        loti++;
                     }
                 }
             }
-        }catch(Exception e){if(!interval.get(30)) return; Log.err(e.toString());}
+        }catch(Exception e){if(!interval.get(30)) return; Log.errTag("MI2U-RendererExt", e.toString());}
     }
 
     public static void drawDuctBridge(DuctBridge.DuctBridgeBuild ib){
@@ -693,25 +691,16 @@ public class RendererExt{
         if(bufferbuffer == null) return;
         int index = MI2Utils.getValue(itemBridgeBufferIndex, buffer);
 
-        Tile other = world.tile(bb.link);
-        float begx, begy, endx, endy;
-        if(!((ItemBridge)bb.block()).linkValid(bb.tile, other)){
-            begx = bb.x - tilesize / 2f;
-            begy = bb.y - tilesize / 2f;
-            endx = bb.x + tilesize / 2f;
-            endy = bb.y - tilesize / 2f;
+        var vline = MI2UTmp.v1;
+        var voffset = MI2UTmp.v2;
+        if(((ItemBridge)bb.block).linkValid(bb.tile, world.tile(bb.link))){
+            vline.set(world.tile(bb.link)).sub(bb);
+            voffset.set(bb);
         }else{
-            int i = bb.tile.absoluteRelativeTo(other.x, other.y);
-            float ex = other.worldx() - bb.x - Geometry.d4(i).x * tilesize / 2f,
-            ey = other.worldy() - bb.y - Geometry.d4(i).y * tilesize / 2f;
-
-            begx = bb.x + Geometry.d4(i).x * tilesize / 2f;
-            begy = bb.y + Geometry.d4(i).y * tilesize / 2f;
-            endx = bb.x + ex;
-            endy = bb.y + ey;
+            vline.set(tilesize, 0f);
+            voffset.set(bb).sub(tilesize / 2f, tilesize / 2f);
         }
 
-        float loti = 0f;
         int cap = ((BufferedItemBridge)bb.block).bufferCapacity;
         float speed = ((BufferedItemBridge)bb.block).speed;
         Draw.alpha(0.9f);
@@ -720,10 +709,9 @@ public class RendererExt{
             var item = content.item(Pack.leftShort(Pack.rightInt(bufferbuffer[idi])));
             if(item != null){
                 Draw.rect(item.fullIcon,
-                begx + ((endx - begx) / (float)bufferbuffer.length * Math.min(((Time.time - time) * bb.timeScale() / speed) * cap, cap - loti)),
-                begy + ((endy - begy) / (float)bufferbuffer.length * Math.min(((Time.time - time) * bb.timeScale() / speed) * cap, cap - loti)), 4f, 4f);
+                voffset.x + (vline.x / bufferbuffer.length * Math.min(((Time.time - time) * bb.timeScale() / speed) * cap, cap - idi)),
+                voffset.y + (vline.y / bufferbuffer.length * Math.min(((Time.time - time) * bb.timeScale() / speed) * cap, cap - idi)), 4f, 4f);
             }
-            loti++;
         }
 
         drawItemBridge(bb);
@@ -741,72 +729,36 @@ public class RendererExt{
 
             Draw.color();
 
-            if(!(drawItem == null || fromb == null || tob == null)){
-                float x1 = 0f, x2 = 0f, y1 = 0f, y2 = 0f;
-                //0> 1^ 2< 3\/
-                switch(Mathf.mod(((int) Angles.angle(tob.x - ub.x, tob.y - ub.y) + 45) / 90, 4)){
-                    case 0 -> {
-                        x1 = ub.x + World.unconv(block.size) / 2f;
-                        x2 = ub.x + World.unconv(block.size) / 2f;
-                        y1 = Math.min(ub.y + World.unconv(block.size) / 2f, tob.y + World.unconv(tob.block.size) / 2f);
-                        y2 = Math.max(ub.y - World.unconv(block.size) / 2f, tob.y - World.unconv(tob.block.size) / 2f);
-                    }
-                    case 1 -> {
-                        y1 = ub.y + World.unconv(block.size) / 2f;
-                        y2 = ub.y + World.unconv(block.size) / 2f;
-                        x1 = Math.min(ub.x + World.unconv(block.size) / 2f, tob.x + World.unconv(tob.block.size) / 2f);
-                        x2 = Math.max(ub.x - World.unconv(block.size) / 2f, tob.x - World.unconv(tob.block.size) / 2f);
-                    }
-                    case 2 -> {
-                        x1 = ub.x - World.unconv(block.size) / 2f;
-                        x2 = ub.x - World.unconv(block.size) / 2f;
-                        y1 = Math.min(ub.y + World.unconv(block.size) / 2f, tob.y + World.unconv(tob.block.size) / 2f);
-                        y2 = Math.max(ub.y - World.unconv(block.size) / 2f, tob.y - World.unconv(tob.block.size) / 2f);
-                    }
-                    case 3 -> {
-                        y1 = ub.y - World.unconv(block.size) / 2f;
-                        y2 = ub.y - World.unconv(block.size) / 2f;
-                        x1 = Math.min(ub.x + World.unconv(block.size) / 2f, tob.x + World.unconv(tob.block.size) / 2f);
-                        x2 = Math.max(ub.x - World.unconv(block.size) / 2f, tob.x - World.unconv(tob.block.size) / 2f);
-                    }
-                }
 
+            if(!(drawItem == null || fromb == null || tob == null)){
                 Draw.z(Layer.block + 1f);
+
+                Vec2 off = MI2UTmp.v1, end = MI2UTmp.v2;
+                //line length: sum of block sizes sub xy distance
+                end.set(ub).sub(fromb);
+                end.x = (ub.block.size + fromb.block.size) * tilesize / 2f - Math.abs(end.x);
+                end.y = (ub.block.size + fromb.block.size) * tilesize / 2f - Math.abs(end.y);
+                //line offset: coords greater block xy - block size
+                off.x = ub.x > fromb.x ? ub.x - ub.block.size * tilesize / 2f : fromb.x - fromb.block.size * tilesize / 2f;
+                off.y = ub.y > fromb.y ? ub.y - ub.block.size * tilesize / 2f : fromb.y - fromb.block.size * tilesize / 2f;
+                end.add(off);
 
                 Draw.color(Pal.placing, ub.unloadTimer < block.speed ? 1f : 0.25f);
                 Lines.stroke(1.5f);
-                Lines.line(x1, y1, x2, y2);
+                Lines.line(off.x, off.y, end.x, end.y);
 
-                switch(Mathf.mod(((int)Angles.angle(fromb.x - ub.x, fromb.y - ub.y) + 45) / 90, 4)){
-                    case 0 -> {
-                        x1 = ub.x + World.unconv(block.size) / 2f;
-                        x2 = ub.x + World.unconv(block.size) / 2f;
-                        y1 = Math.min(ub.y + World.unconv(block.size) / 2f, fromb.y + World.unconv(fromb.block.size) / 2f);
-                        y2 = Math.max(ub.y - World.unconv(block.size) / 2f, fromb.y - World.unconv(fromb.block.size) / 2f);
-                    }
-                    case 1 -> {
-                        y1 = ub.y + World.unconv(block.size) / 2f;
-                        y2 = ub.y + World.unconv(block.size) / 2f;
-                        x1 = Math.min(ub.x + World.unconv(block.size) / 2f, fromb.x + World.unconv(fromb.block.size) / 2f);
-                        x2 = Math.max(ub.x - World.unconv(block.size) / 2f, fromb.x - World.unconv(fromb.block.size) / 2f);
-                    }
-                    case 2 -> {
-                        x1 = ub.x - World.unconv(block.size) / 2f;
-                        x2 = ub.x - World.unconv(block.size) / 2f;
-                        y1 = Math.min(ub.y + World.unconv(block.size) / 2f, fromb.y + World.unconv(fromb.block.size) / 2f);
-                        y2 = Math.max(ub.y - World.unconv(block.size) / 2f, fromb.y - World.unconv(fromb.block.size) / 2f);
-                    }
-                    case 3 -> {
-                        y1 = ub.y - World.unconv(block.size) / 2f;
-                        y2 = ub.y - World.unconv(block.size) / 2f;
-                        x1 = Math.min(ub.x + World.unconv(block.size) / 2f, fromb.x + World.unconv(fromb.block.size) / 2f);
-                        x2 = Math.max(ub.x - World.unconv(block.size) / 2f, fromb.x - World.unconv(fromb.block.size) / 2f);
-                    }
-                }
+                //line length: sum of block sizes sub xy distance
+                end.set(ub).sub(tob);
+                end.x = (ub.block.size + tob.block.size) * tilesize / 2f - Math.abs(end.x);
+                end.y = (ub.block.size + tob.block.size) * tilesize / 2f - Math.abs(end.y);
+                //line offset: coords greater block xy - block size
+                off.x = ub.x > tob.x ? ub.x - ub.block.size * tilesize / 2f : tob.x - tob.block.size * tilesize / 2f;
+                off.y = ub.y > tob.y ? ub.y - ub.block.size * tilesize / 2f : tob.y - tob.block.size * tilesize / 2f;
+                end.add(off);
 
                 Draw.color(Pal.remove, ub.unloadTimer < block.speed ? 1f : 0.25f);
                 Lines.stroke(1.5f);
-                Lines.line(x1, y1, x2, y2);
+                Lines.line(off.x, off.y, end.x, end.y);
 
                 if(ub.sortItem == null){
                     Draw.color();
@@ -814,7 +766,7 @@ public class RendererExt{
                 }
                 Draw.reset();
             }
-        }catch(Exception e){if(!interval.get(30)) return; Log.err(e.toString());}
+        }catch(Exception e){if(!interval.get(30)) return; Log.errTag("MI2U-RendererExt", e.toString());}
     }
 
     public static void drawDirectionalUnloader(DirectionalUnloader.DirectionalUnloaderBuild db){
@@ -826,9 +778,8 @@ public class RendererExt{
             Draw.rect(db.unloadItem.uiIcon, db.x, db.y, 4f, 4f);
         }else{
             var itemseq = content.items();
-            int itemc = itemseq.size;
-            for(int i = 0; i < itemc; i++){
-                Item item = itemseq.get((i + db.offset) % itemc);
+            for(int i = 0; i < itemseq.size; i++){
+                Item item = itemseq.get((i + db.offset) % itemseq.size);
                 if(back.items.has(item) && front.acceptItem(db, item)){
                     Draw.alpha(0.8f);
                     Draw.rect(item.uiIcon, db.x, db.y, 4f, 4f);
@@ -848,70 +799,39 @@ public class RendererExt{
         Draw.z(Layer.block + 1f);
         float x1 = 0f, x2 = 0f, y1 = 0f, y2 = 0f;
         if(tob != null){
-            //0> 1^ 2< 3\/
-            switch(Mathf.mod(((int)Angles.angle(tob.x - rb.x, tob.y - rb.y) + 45) / 90, 4)){
-                case 0 -> {
-                    x1 = rb.x + World.unconv(block.size) / 2f;
-                    x2 = rb.x + World.unconv(block.size) / 2f;
-                    y1 = Math.min(rb.y + World.unconv(block.size) / 2f, tob.y + World.unconv(tob.block.size) / 2f);
-                    y2 = Math.max(rb.y - World.unconv(block.size) / 2f, tob.y - World.unconv(tob.block.size) / 2f);
-                }
-                case 1 -> {
-                    y1 = rb.y + World.unconv(block.size) / 2f;
-                    y2 = rb.y + World.unconv(block.size) / 2f;
-                    x1 = Math.min(rb.x + World.unconv(block.size) / 2f, tob.x + World.unconv(tob.block.size) / 2f);
-                    x2 = Math.max(rb.x - World.unconv(block.size) / 2f, tob.x - World.unconv(tob.block.size) / 2f);
-                }
-                case 2 -> {
-                    x1 = rb.x - World.unconv(block.size) / 2f;
-                    x2 = rb.x - World.unconv(block.size) / 2f;
-                    y1 = Math.min(rb.y + World.unconv(block.size) / 2f, tob.y + World.unconv(tob.block.size) / 2f);
-                    y2 = Math.max(rb.y - World.unconv(block.size) / 2f, tob.y - World.unconv(tob.block.size) / 2f);
-                }
-                case 3 -> {
-                    y1 = rb.y - World.unconv(block.size) / 2f;
-                    y2 = rb.y - World.unconv(block.size) / 2f;
-                    x1 = Math.min(rb.x + World.unconv(block.size) / 2f, tob.x + World.unconv(tob.block.size) / 2f);
-                    x2 = Math.max(rb.x - World.unconv(block.size) / 2f, tob.x - World.unconv(tob.block.size) / 2f);
-                }
-            }
+            Vec2 off = MI2UTmp.v1, end = MI2UTmp.v2;
+            //line length: sum of block sizes sub xy distance
+            end.set(rb).sub(tob);
+            end.x = (rb.block.size + tob.block.size) * tilesize / 2f - Math.abs(end.x);
+            end.y = (rb.block.size + tob.block.size) * tilesize / 2f - Math.abs(end.y);
+            //line offset: coords greater block xy - block size
+            off.x = rb.x > tob.x ? rb.x - rb.block.size * tilesize / 2f : tob.x - tob.block.size * tilesize / 2f;
+            off.y = rb.y > tob.y ? rb.y - rb.block.size * tilesize / 2f : tob.y - tob.block.size * tilesize / 2f;
+            end.add(off);
+
             Draw.color(Pal.placing, 1 - rb.time);
             Lines.stroke(1.5f);
-            Lines.line(x1, y1, x2, y2);
+            Lines.line(off.x, off.y, end.x, end.y);
         }
 
         if(fromb != null){
-            float rmargin = World.unconv(block.size) / 2f - 2f;
-            float fmargin = World.unconv(fromb.block.size) / 2f + 2f;
-            switch(Mathf.mod(((int)Angles.angle(fromb.x - rb.x, fromb.y - rb.y) + 45) / 90, 4)){
-                case 0 -> {
-                    x1 = rb.x + rmargin;
-                    x2 = rb.x + rmargin;
-                    y1 = Math.min(rb.y + rmargin, fromb.y + fmargin);
-                    y2 = Math.max(rb.y - rmargin, fromb.y - fmargin);
-                }
-                case 1 -> {
-                    y1 = rb.y + rmargin;
-                    y2 = rb.y + rmargin;
-                    x1 = Math.min(rb.x + rmargin, fromb.x + fmargin);
-                    x2 = Math.max(rb.x - rmargin, fromb.x - fmargin);
-                }
-                case 2 -> {
-                    x1 = rb.x - rmargin;
-                    x2 = rb.x - rmargin;
-                    y1 = Math.min(rb.y + rmargin, fromb.y + fmargin);
-                    y2 = Math.max(rb.y - rmargin, fromb.y - fmargin);
-                }
-                case 3 -> {
-                    y1 = rb.y - rmargin;
-                    y2 = rb.y - rmargin;
-                    x1 = Math.min(rb.x + rmargin, fromb.x + fmargin);
-                    x2 = Math.max(rb.x - rmargin, fromb.x - fmargin);
-                }
-            }
+            Vec2 off = MI2UTmp.v1, end = MI2UTmp.v2;
+            //line length: sum of block sizes sub xy distance
+            end.set(rb).sub(fromb);
+            end.x = (rb.block.size + fromb.block.size) * tilesize / 2f - Math.abs(end.x);
+            end.y = (rb.block.size + fromb.block.size) * tilesize / 2f - Math.abs(end.y);
+            //line offset: coords greater block xy - block size
+            off.x = rb.x > fromb.x ? rb.x - rb.block.size * tilesize / 2f : fromb.x - fromb.block.size * tilesize / 2f;
+            off.y = rb.y > fromb.y ? rb.y - rb.block.size * tilesize / 2f : fromb.y - fromb.block.size * tilesize / 2f;
+
+            //margin
+            var p = Geometry.d4(Mathf.mod(((int)Angles.angle(fromb.x - rb.x, fromb.y - rb.y) + 45) / 90, 4));
+            off.add(p.x * -2f, p.y * -2f).add(p.y == 0f ? 0f : 2f, p.x == 0f ? 0f : 2f);
+            end.add(off).sub(p.y == 0f ? 0f : 4f, p.x == 0f ? 0f : 4f);
+
             Draw.color(Pal.remove, 1 - rb.time);
             Lines.stroke(1.5f);
-            Lines.line(x1, y1, x2, y2);
+            Lines.line(off.x, off.y, end.x, end.y);
         }
 
         if(rb.lastItem != null){
