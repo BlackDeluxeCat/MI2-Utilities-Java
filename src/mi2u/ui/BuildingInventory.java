@@ -54,10 +54,14 @@ public class BuildingInventory extends Element{
         setSize(build.block.size * tilesize * scl);
         Core.camera.project(MI2UTmp.v3.set(build.x, build.y));
         setPosition(MI2UTmp.v3.x - width / 2f, MI2UTmp.v3.y - height / 2f);
-        if(state.isMenu() || build == null || !build.isValid() || !ids.contains(build.id)){
+        if(!vaild()){
             remove();
             used.remove(build.id);
         }
+    }
+
+    public boolean vaild(){
+        return RendererExt.drevealInventory && state.isGame() && build != null && build.isValid() && ids.contains(build.id);
     }
 
     @Override
@@ -70,7 +74,7 @@ public class BuildingInventory extends Element{
         float count = content.items().count(ii -> build.items.has(ii));
         float rows = Mathf.ceil(count / (float)size);
         float rowdy = Math.min(size / rows + 0.1f, 1);
-        float scl = graphics.getWidth() / Core.camera.width;
+        float scl = graphics.getWidth() / Core.camera.width * (size > 1 ? 1f : 0.7f);
         float iconsize = tilesize * scl;
 
         Draw.alpha(1f);

@@ -48,7 +48,7 @@ public class RendererExt{
             lexecTimer = MI2Utils.getField(LExecutor.class, "unitTimeouts");
 
     public static boolean animatedshields;
-    public static boolean enPlayerCursor, enUnitHpBar, enUnitRangeZone, enOverdriveZone, enMenderZone, enTurretZone, enBlockHpBar, enDistributionReveal, enSpawnZone, disableWreck, disableUnit, disableBuilding, disableBullet, shadow;
+    public static boolean enPlayerCursor, enUnitHpBar, enUnitRangeZone, enOverdriveZone, enMenderZone, enTurretZone, enBlockHpBar, enDistributionReveal, drevealBridge, drevealJunction, drevealUnloader, drevealInventory, enSpawnZone, disableWreck, disableUnit, disableBuilding, disableBullet, shadow;
     public static float flashZoneAlpha;
 
     public static void initBase(){
@@ -82,6 +82,10 @@ public class RendererExt{
         enTurretZone = MI2USettings.getBool("enTurretZone", false);
         enBlockHpBar = MI2USettings.getBool("enBlockHpBar", true);
         enDistributionReveal = MI2USettings.getBool("enDistributionReveal", false);
+        drevealBridge = MI2USettings.getBool("drevealBridge", true);
+        drevealJunction = MI2USettings.getBool("drevealJunction", true);
+        drevealUnloader = MI2USettings.getBool("drevealUnloader", true);
+        drevealInventory = MI2USettings.getBool("drevealInventory", true);
         enSpawnZone = MI2USettings.getBool("enSpawnZone", true);
         disableWreck = MI2USettings.getBool("disableWreck", false);
         disableUnit = MI2USettings.getBool("disableUnit", false);
@@ -134,7 +138,7 @@ public class RendererExt{
                 if(enDistributionReveal){
                     BuildingInventory.ids.add(tile.build.id);
                     boolean transport = drawBlackboxBuilding(tile.build);
-                    if(!transport) drawItemStack(tile.build);
+                    if(drevealInventory && !transport) drawItemStack(tile.build);
                 }
                 if(enTurretZone && tile.build instanceof BaseTurret.BaseTurretBuild btb) drawTurretZone(btb);
                 if(enOverdriveZone && tile.build instanceof OverdriveProjector.OverdriveBuild odb) drawOverDriver(odb);
@@ -502,13 +506,13 @@ public class RendererExt{
     }
 
     public static boolean drawBlackboxBuilding(Building b){
-        if(b instanceof Junction.JunctionBuild jb) drawJunciton(jb);
-        else if(b instanceof BufferedItemBridge.BufferedItemBridgeBuild bb) drawBufferedItemBridge(bb);
-        else if(b instanceof ItemBridge.ItemBridgeBuild ib) drawItemBridge(ib);
-        else if(b instanceof Unloader.UnloaderBuild ub) drawUnloader(ub);
-        else if(b instanceof Router.RouterBuild rb) drawRouter(rb);
-        else if(b instanceof DuctBridge.DuctBridgeBuild db) drawDuctBridge(db);
-        else if(b instanceof DirectionalUnloader.DirectionalUnloaderBuild rb) drawDirectionalUnloader(rb);
+        if(drevealJunction && b instanceof Junction.JunctionBuild jb) drawJunciton(jb);
+        else if(drevealBridge && b instanceof BufferedItemBridge.BufferedItemBridgeBuild bb) drawBufferedItemBridge(bb);
+        else if(drevealBridge && b instanceof ItemBridge.ItemBridgeBuild ib) drawItemBridge(ib);
+        else if(drevealUnloader && b instanceof Unloader.UnloaderBuild ub) drawUnloader(ub);
+        else if(drevealJunction && b instanceof Router.RouterBuild rb) drawRouter(rb);
+        else if(drevealBridge && b instanceof DuctBridge.DuctBridgeBuild db) drawDuctBridge(db);
+        else if(drevealUnloader && b instanceof DirectionalUnloader.DirectionalUnloaderBuild rb) drawDirectionalUnloader(rb);
         else return false;
         return true;
     }

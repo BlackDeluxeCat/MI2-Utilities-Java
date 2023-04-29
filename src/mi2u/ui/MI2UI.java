@@ -202,6 +202,28 @@ public class MI2UI extends Mindow2{
         settings.add(new FieldEntry("flashZoneAlpha", "@settings.main.flashZoneAlpha", String.valueOf(50), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 0 && Strings.parseInt(s) <= 150, null));
         settings.add(new CheckEntry("enSpawnZone", "@settings.main.spawnZone", true, null));
         settings.add(new CheckEntry("enDistributionReveal", "@settings.main.distributionReveal", true, null));
+
+        settings.add(new CollapseGroupEntry("DistributionReveal", ""){
+            CheckEntry check1 = new CheckEntry("enDistributionReveal", "@settings.main.distributionReveal", true, null);
+            CheckEntry check2 = new CheckEntry("drevealBridge", "@settings.main.dreveal.bridge", true, null);
+            CheckEntry check3 = new CheckEntry("drevealJunction", "@settings.main.dreveal.junction", true, null);
+            CheckEntry check4 = new CheckEntry("drevealUnloader", "@settings.main.dreveal.unloader", true, null);
+            CheckEntry check5 = new CheckEntry("drevealInventory", "@settings.main.dreveal.inventory", true, null);
+            {
+                collapsep = () -> !check1.value;
+                headBuilder = t -> check1.build(t);
+                builder = t -> {
+                    check2.build(t);
+                    t.row();
+                    check3.build(t);
+                    t.row();
+                    check4.build(t);
+                    t.row();
+                    check5.build(t);
+                };
+            }
+        });
+
         settings.add(new CheckEntry("enBlockHpBar", "@settings.main.blockHpBar", false, null));
         settings.add(new CheckEntry("enTurretZone", "@settings.main.enTurretZone", false, null));
         settings.add(new CheckEntry("enUnitHpBar", "@settings.main.unitHpBar", false, null));
@@ -216,12 +238,12 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("disableBuilding", "@settings.main.disableBuilding", false, null));
 
         settings.add(new CollapseGroupEntry("SpeedController", ""){
-            ChooseEntry choose1 = new ChooseEntry("speedctrl.basefps", "@settings.main.speedctrl.basefps", new String[]{"10", "20", "30", "60", "120", "240"}, null, null);
-            ChooseEntry choose3 = new ChooseEntry("speedctrl.cutoff", "@settings.main.speedctrl.cutoff", new String[]{"50", "100", "200", "300"}, s -> String.valueOf(Strings.parseInt(s)/100f), null);
+            FieldEntry field1 = new FieldEntry("speedctrl.basefps", "@settings.main.speedctrl.basefps", String.valueOf(60), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 10 && Strings.parseInt(s) <= 600, null);
+            ChooseEntry choose3 = new ChooseEntry("speedctrl.cutoff", "@settings.main.speedctrl.cutoff", new String[]{"25","50", "100", "200", "300"}, s -> String.valueOf(Strings.parseInt(s)/100f), null);
             {
                 setDefaultHeader("@settings.main.speedctrl");
                 builder = t -> {
-                    choose1.build(t);
+                    field1.build(t);
                     t.row();
                     choose3.build(t);
                 };
