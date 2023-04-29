@@ -267,7 +267,6 @@ public class LogicHelperMindow extends Mindow2{
         }
     }
 
-    //TODO write a efficient method
     private String findMatch(String key, String value){
         if(wholeWordsMatch && value.equals(key)){
             return key;

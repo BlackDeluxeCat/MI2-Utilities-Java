@@ -211,7 +211,7 @@ public class HoverTopTable extends PopupTable{
 
     /** base on Anuke's*/
     public void display(Table table, Unit unit){
-        unit.type.display(unit, table);   //TODO this will not fit some mod ui
+        unit.type.display(unit, table);   //this will not fit some mod ui
 
         Table uiType = table.find(e -> e instanceof Table t && t.getChildren().size == 2 && t.getChildren().get(1) instanceof Label l && l.textEquals(unit.type.localizedName));
         if(uiType != null){
