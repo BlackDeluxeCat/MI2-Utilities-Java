@@ -20,7 +20,7 @@ import static mi2u.MI2UVars.*;
 
 
 public class MI2Utilities extends Mod{
-    public static final String gitURL = "github.com/BlackDeluxeCat/MI2-Utilities-Java";
+    public static final String gitURL = "https://github.com/BlackDeluxeCat/MI2-Utilities-Java";
     public static final String gitRepo = "BlackDeluxeCat/MI2-Utilities-Java";
     public static Mods.LoadedMod MOD;
 
