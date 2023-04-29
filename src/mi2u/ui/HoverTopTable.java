@@ -4,18 +4,15 @@ import arc.*;
 import arc.graphics.*;
 import arc.math.*;
 import arc.math.geom.*;
-import arc.scene.event.*;
 import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.MI2Utils;
 import mi2u.struct.*;
-import mindustry.ai.types.*;
 import mindustry.content.*;
 import mindustry.core.*;
 import mindustry.entities.*;
-import mindustry.entities.abilities.*;
 import mindustry.entities.bullet.*;
 import mindustry.game.*;
 import mindustry.gen.*;
@@ -24,6 +21,8 @@ import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.environment.*;
 
+import java.lang.reflect.*;
+
 import static mindustry.Vars.*;
 
 public class HoverTopTable extends PopupTable{
@@ -31,6 +30,7 @@ public class HoverTopTable extends PopupTable{
 
     private final EventType.UnitDamageEvent singleDamageEvent = MI2Utils.getValue(BulletType.class, "bulletDamageEvent");
     private final EventType.UnitDamageEvent splashDamageEvent = MI2Utils.getValue(Damage.class, "bulletDamageEvent");
+    Field fBar_Name = MI2Utils.getField(Bar.class, "name");
 
     public Displayable lastUnit, lastBuild; Tile tile;
     public Building build;
@@ -211,14 +211,33 @@ public class HoverTopTable extends PopupTable{
 
     /** base on Anuke's*/
     public void display(Table table, Unit unit){
-        //unit.type.display(unit, table);   //TODO this will not fit some mod ui
-        table.table(t -> {
-            t.left();
-            t.add(new Image(unit.type.uiIcon)).size(iconMed).scaling(Scaling.fit);
-            t.labelWrap(unit.type.localizedName + " | " + unit.team.localized()).left().padLeft(5).growX().color(unit.team.color);
-        }).growX().left();
+        unit.type.display(unit, table);   //TODO this will not fit some mod ui
+
+        Table uiType = table.find(e -> e instanceof Table t && t.getChildren().size == 2 && t.getChildren().get(1) instanceof Label l && l.textEquals(unit.type.localizedName));
+        if(uiType != null){
+            uiType.clear();
+            uiType.table(t -> {
+                t.left();
+                t.add(new Image(unit.type.uiIcon)).size(iconMed).scaling(Scaling.fit);
+                t.labelWrap(unit.type.localizedName + " | " + unit.team.localized()).left().padLeft(5).growX().color(unit.team.color);
+            }).growX().left();
+        }
+
+        Bar hpBar = table.find(e -> e instanceof Bar bar && MI2Utils.getValue(fBar_Name, bar).equals(Core.bundle.get("stat.health")));
+        if(hpBar != null){
+            hpBar.set(() -> Core.bundle.get("stat.health") + ":" + Strings.autoFixed(unit.health(), 3) + "(" + Strings.fixed(unit.health * 100 / unit.maxHealth, 0) + "%) + " + Strings.autoFixed(unit.shield, 2), unit::healthf, Pal.health);
+        }
+
+        if(unit instanceof PayloadUnit payload){
+            Bar payloadBar = table.find(e -> e instanceof Bar bar && MI2Utils.getValue(fBar_Name, bar).equals(Core.bundle.get("stat.payloadcapacity")));
+            if(payloadBar != null){
+                payloadBar.set(() -> Core.bundle.get("stat.payloadcapacity") + ":" + Strings.autoFixed(payload.payloadUsed(), 2), () -> payload.payloadUsed() / unit.type().payloadCapacity, Pal.items);
+            }
+        }
+
         table.row();
 
+        /*
         table.table(bars -> {
             bars.defaults().growX().height(20f).pad(4);
 
@@ -247,8 +266,9 @@ public class HoverTopTable extends PopupTable{
                 }).growX().left().height(0f).pad(0f);
             }
         }).growX();
+         */
 
-        table.row();
+        //table.row();
 
         table.table().update(t -> {
             for(var effect : content.statusEffects()){
@@ -265,13 +285,13 @@ public class HoverTopTable extends PopupTable{
             }
         }).growX();
 
-        table.row();
+        //table.row();
 
-        table.label(() -> Blocks.microProcessor.emoji() + (unit.controller() instanceof LogicAI ? Core.bundle.get("units.processorcontrol") : "") + " " + (long)unit.flag).growX().wrap().left();
+        //table.label(() -> Blocks.microProcessor.emoji() + (unit.controller() instanceof LogicAI ? Core.bundle.get("units.processorcontrol") : "") + " " + (long)unit.flag).growX().wrap().left();
 
-        table.row();
+        //table.row();
 
-        table.label(() -> Core.bundle.format("lastcommanded", unit.lastCommanded)).growX().wrap().left();
+        //table.label(() -> Core.bundle.format("lastcommanded", unit.lastCommanded)).growX().wrap().left();
     }
 
     /** Returns the thing being hovered over. */
