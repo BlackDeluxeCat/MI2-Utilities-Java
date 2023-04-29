@@ -49,7 +49,7 @@ public class RendererExt{
             lexecTimer = MI2Utils.getField(LExecutor.class, "unitTimeouts");
 
     public static boolean animatedshields;
-    public static boolean enPlayerCursor, enUnitHpBar, enUnitRangeZone, enOverdriveZone, enMenderZone, enTurretZone, enBlockHpBar, enDistributionReveal, drevealBridge, drevealJunction, drevealUnloader, drevealInventory, enSpawnZone, disableWreck, disableUnit, disableBuilding, disableBullet, shadow;
+    public static boolean enPlayerCursor, enUnitHitbox, enUnitHpBar, enUnitRangeZone, enOverdriveZone, enMenderZone, enTurretZone, enBlockHpBar, enDistributionReveal, drevealBridge, drevealJunction, drevealUnloader, drevealInventory, enSpawnZone, disableWreck, disableUnit, disableBuilding, disableBullet, shadow;
     public static float flashZoneAlpha;
 
     public static void initBase(){
@@ -76,6 +76,7 @@ public class RendererExt{
 
         flashZoneAlpha = MI2USettings.getInt("flashZoneAlpha", 50) / 100f;
         enPlayerCursor = MI2USettings.getBool("enPlayerCursor", false);
+        enUnitHitbox = MI2USettings.getBool("enUnitHitbox");
         enUnitHpBar = MI2USettings.getBool("enUnitHpBar");
         enUnitRangeZone = MI2USettings.getBool("enUnitRangeZone", false);
         enOverdriveZone = MI2USettings.getBool("enOverdriveZone", false);
@@ -229,6 +230,20 @@ public class RendererExt{
             Draw.z(Layer.shields + 6f);
             if(enUnitHpBar){
                 drawUnitHpBar(unit);
+            }
+
+            if(enUnitHitbox){
+                Draw.color(unit.team.color, 0.5f);
+                //Lines.rect(unit.x - unit.hitSize / 2f, unit.y - unit.hitSize / 2f, unit.hitSize, unit.hitSize);
+
+                float size = 16f;
+                Lines.beginLine();
+                for(int i = 0; i <= size; i++){
+                    float a = 360f / size * i + unit.rotation(), mul = 1f + Mathf.pow(0.5f + Math.abs(Mathf.mod(i, size) - size / 2f) / size, 15f), cos = mul * Mathf.cosDeg(a), sin = mul * Mathf.sinDeg(a);
+
+                    Lines.linePoint(unit.x + unit.hitSize / 2f * cos, unit.y + unit.hitSize / 2f * sin);
+                }
+                Lines.endLine();
             }
 
             //display logicAI info by MI2

@@ -71,7 +71,7 @@ public class MI2UI extends Mindow2{
 
         cont.table(tt -> {
             if(MI2USettings.getEntry("enDistributionReveal") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.zoom + Iconc.blockJunction)).minSize(24f);
-            if(MI2USettings.getEntry("disableWreck") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.alphaaaa)).width(36f);
+            if(MI2USettings.getEntry("enUnitHitbox") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.box)).width(36f);
             if(MI2USettings.getEntry("disableUnit") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.unitGamma)).width(36f);
             if(MI2USettings.getEntry("disableBullet") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.unitScatheMissile)).width(36f);
             if(MI2USettings.getEntry("disableBuilding") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.blockDuo)).width(36f);
@@ -227,6 +227,7 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("enBlockHpBar", "@settings.main.blockHpBar", false, null));
         settings.add(new CheckEntry("enTurretZone", "@settings.main.enTurretZone", false, null));
         settings.add(new CheckEntry("enUnitHpBar", "@settings.main.unitHpBar", false, null));
+        settings.add(new CheckEntry("enUnitHitbox", "@settings.main.unitHitbox", false, null));
         settings.add(new CheckEntry("enUnitLogic", "@settings.main.unitLogic", false, null));
         settings.add(new CheckEntry("enUnitPath", "@settings.main.unitPath", false, null));
         settings.add(new FieldEntry("enUnitPath.length", "@settings.main.enUnitPath.length", String.valueOf(40), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 10 && Strings.parseInt(s) <= 300, null));
