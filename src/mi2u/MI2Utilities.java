@@ -1,6 +1,7 @@
 package mi2u;
 
 import arc.*;
+import arc.graphics.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
@@ -12,6 +13,7 @@ import mi2u.ui.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.mod.*;
+import mindustry.ui.*;
 
 import java.util.regex.*;
 
@@ -36,16 +38,16 @@ public class MI2Utilities extends Mod{
             maxSchematicSize = MI2USettings.getInt("maxSchematicSize", 32);
             Time.runTask(40f, () -> {
                 mi2ui.addTo(Core.scene.root);
-                mi2ui.visible(() -> !state.isGame() || ui.hudfrag.shown);
+                mi2ui.visible(() -> state.isGame() && ui.hudfrag.shown);
                 if(MI2USettings.getBool("showEmojis")) emojis.addTo(emojis.hasParent() ? emojis.parent : Core.scene.root);
                 emojis.visible(() -> !state.isGame() || ui.hudfrag.shown);
                 if(MI2USettings.getBool("showCoreInfo")) coreInfo.addTo(coreInfo.hasParent() ? coreInfo.parent : Core.scene.root);
-                coreInfo.visible(() -> !state.isGame() || ui.hudfrag.shown);
+                coreInfo.visible(() -> state.isGame() && ui.hudfrag.shown);
                 if(MI2USettings.getBool("showMindowMap")) mindowmap.addTo(mindowmap.hasParent() ? mindowmap.parent : Core.scene.root);
-                mindowmap.visible(() -> !state.isGame() || ui.hudfrag.shown);
+                mindowmap.visible(() -> state.isGame() && ui.hudfrag.shown);
                 if(MI2USettings.getBool("showLogicHelper", true)) logicHelper.addTo(logicHelper.hasParent() ? logicHelper.parent : ui.logic);
                 if(MI2USettings.getBool("showUIContainer")) container.addTo(container.hasParent() ? container.parent : ui.logic);
-                container.visible(() -> !state.isGame() || ui.hudfrag.shown);
+                container.visible(() -> state.isGame() && ui.hudfrag.shown);
 
                 RendererExt.initBase();
                 ModifyFuncs.modifyVanilla();
@@ -64,72 +66,78 @@ public class MI2Utilities extends Mod{
     }
 
     public static void checkUpdate(){
-        Pattern pattern = Pattern.compile("^([hH][tT]{2}[pP]://|[hH][tT]{2}[pP][sS]://).*");
-        if(!pattern.matcher(MI2USettings.getStr("ghApi", ghApi)).matches()){
-            MI2USettings.putStr("ghApi", ghApi);
-        }
-        new Mindow2("@update.title"){
+        new PopupTable(){
+            int sign = 0;
             Interval in = new Interval();
-            String intro = "", version = "" + Iconc.cancel;;
+            String intro = "", version = "" + Iconc.cancel;
             Label introl;
             float delay = 900f;
+
             {
-                curx = (Core.graphics.getWidth() - getPrefWidth()) / 2;
-                cury = (Core.graphics.getHeight() - getPrefHeight()) / 2;
+                setBackground(Styles.black5);
+                margin(8f);
+                setPositionInScreen((Core.graphics.getWidth() - getPrefWidth()) / 2, (Core.graphics.getHeight() - getPrefHeight()) / 2);
+
                 in.get(1);
 
                 update(() -> {
                     toFront();
-                    if(in.check(0, delay)) addTo(null);
+                    if(in.check(0, delay)) hide();
                 });
-                
-                hovered(() -> {
-                    in.get(1);
-                });
-            }
-            @Override
-            public void setupCont(Table cont){
-                cont.label(() -> intro.isEmpty() ? "@update.checking" : MOD.meta.version.equals(version) ? "@update.latest" : "@update.updateAvailable").align(Align.left).fillX().pad(5f).get().setColor(0f, 1f, 0.3f, 1f);
-                cont.row();
 
-                cont.button(gitRepo + "\n" + Iconc.paste + Iconc.github, textb, () -> {
+                hovered(() -> in.get(1));
+
+                addDragMove();
+
+                this.image().color(Color.coral).growX().height(2f).row();
+                this.add("@update.title").growX().with(l -> l.setFontScale(1.2f)).row();
+                this.image().color(Color.coral).growX().height(2f);
+
+                this.row();
+
+                this.label(() -> sign == 0 ? "@update.checking" : sign == -1 ? "@update.failCheck" : MOD.meta.version.equals(version) ? "@update.latest" : "@update.updateAvailable").align(Align.left).fillX().pad(5f).get().setColor(0f, 1f, 0.3f, 1f);
+                this.row();
+
+                this.button(gitRepo + "\n" + Iconc.paste + Iconc.github + "(copy url)", textb, () -> {
                     Core.app.setClipboardText(gitURL);
-                }).growX().height(50f);
+                }).growX().height(50f).get().getLabel().setFontScale(0.5f);
 
-                cont.row();
+                this.row();
 
-                cont.button("", textb, () -> ui.mods.githubImportMod(gitRepo, true)).growX().height(50f).update(b -> {
+                this.button("", textb, () -> ui.mods.githubImportMod(gitRepo, true)).growX().height(50f).update(b -> {
+                    b.setDisabled(() -> sign <= 0);
                     b.getLabelCell().update(l -> {
                         l.setText(Core.bundle.get("update.download") + ": " + MOD.meta.version + " -> " + version);
                     }).get().setColor(1f, 1f, 0.3f, 1f);
                 });
 
-                cont.row();
+                this.row();
 
-                cont.button("", textb, () -> this.addTo(null)).growX().height(50f).update(b -> {
-                    b.setText(Core.bundle.get("update.close") + " (" + Strings.fixed((delay - in.getTime(0))/60 , 1)+ "s)");
+                this.button("", textb, this::hide).growX().height(50f).update(b -> {
+                    b.setText(Core.bundle.get("update.close") + " (" + Strings.fixed((delay - in.getTime(0)) / 60, 1) + "s)");
                 });
-                cont.row();
+                this.row();
 
-                cont.pane(t -> {
+                this.pane(t -> {
                     introl = t.add(intro).align(Align.left).growX().get();  //drawing update discription possibly cause font color bug.
-                }).width(400f).maxHeight(500f);
+                }).width(300f).maxHeight(600f);
+
+                popup();
 
                 Http.get(gitURL + "/releases/latest", res -> {
+                    sign = 1;
                     var json = Jval.read(res.getResultAsString());
                     version = json.getString("name");
                     intro = json.getString("body");
                     if(introl != null) introl.setText(intro);
-                    if(!MOD.meta.version.equals(version)) addTo(Core.scene.root);
                 }, e -> {
+                    sign = -1;
                     in.get(1);
-                    delay = 10f;
-                    intro = "@update.failCheck";
+                    delay = 100f;
+                    intro = "";
                     if(introl != null) introl.setText(intro);
-                    remove();
                     Log.err(e);
                 });
-
             }
             
         };
