@@ -233,13 +233,13 @@ public class RendererExt{
             }
 
             if(enUnitHitbox){
-                Draw.color(unit.team.color, 0.5f);
+                Draw.color(unit.team.color, 0.6f);
                 //Lines.rect(unit.x - unit.hitSize / 2f, unit.y - unit.hitSize / 2f, unit.hitSize, unit.hitSize);
 
-                float size = 16f;
+                float size = 14f;
                 Lines.beginLine();
                 for(int i = 0; i <= size; i++){
-                    float a = 360f / size * i + unit.rotation(), mul = 1f + Mathf.pow(0.5f + Math.abs(Mathf.mod(i, size) - size / 2f) / size, 15f), cos = mul * Mathf.cosDeg(a), sin = mul * Mathf.sinDeg(a);
+                    float a = 360f / size * i + unit.rotation(), mul = 1f + 0.5f * Mathf.pow(0.5f + Math.abs(Mathf.mod(i, size) - size*0.5f) / size, 35f), cos = mul * Mathf.cosDeg(a), sin = mul * Mathf.sinDeg(a);
 
                     Lines.linePoint(unit.x + unit.hitSize / 2f * cos, unit.y + unit.hitSize / 2f * sin);
                 }
