@@ -52,10 +52,8 @@ public class BuildingInventory extends Element{
     @Override
     public void act(float delta){
         super.act(delta);
-        float scl = graphics.getWidth() / Core.camera.width;
-        setSize(build.block.size * tilesize * scl);
-        Core.camera.project(MI2UTmp.v3.set(build.x, build.y));
-        setPosition(MI2UTmp.v3.x - width / 2f, MI2UTmp.v3.y - height / 2f);
+        Core.camera.project(MI2UTmp.v3.set(-1f, -1f).scl(build.block.size * tilesize / 2f).add(build.x, build.y));
+        setPosition(MI2UTmp.v3.x, MI2UTmp.v3.y);
         if(!vaild()){
             remove();
             used.remove(build.id);
@@ -74,13 +72,17 @@ public class BuildingInventory extends Element{
         Draw.color(Color.white);
         Styles.black3.draw(x, y, width, height);
 
+        Draw.alpha(1f);
+        Draw.color(Color.white);
         int i = 0;
         int size = build.block.size;
-        float count = content.items().count(ii -> build.items != null && build.items.has(ii)) + content.liquids().count(ii -> build.liquids != null && build.liquids.get(ii) > 0f);
+        float count = content.items().count(ii -> build.items != null && (build.items.has(ii) || !itemused.check(ii.id, 1000))) + content.liquids().count(ii -> build.liquids != null && (build.liquids.get(ii) > 0f || !liquidused.check(ii.id, 1000)));
         float rows = Mathf.ceil(count / (float)size);
         float rowdy = Math.min(size / rows + 0.1f, 1);
         float scl = graphics.getWidth() / Core.camera.width * (size > 1 ? 1f : 0.7f);
         float iconsize = tilesize * scl;
+
+        setSize(iconsize * Math.min(count, size), rows * rowdy * iconsize);
 
         Font font = Fonts.outline;
         font.setColor(1f, 1f, 1f, 0.5f);
