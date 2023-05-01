@@ -132,7 +132,7 @@ public class FloatDataRecorder{
         }else{
             //柱状图
             for(int i = 0; i < size; i++){
-                Fill.rect(MI2UTmp.r1.setCentered(x + (size - i) * width/(float)size, y + height*Mathf.clamp((get(i)-min+1f)/(max-min+1f))/2f,  width/(float)size, height*Mathf.clamp((get(i)-min+1f)/(max-min+1f))));
+                Fill.rect(MI2UTmp.r1.set(x + (size - i) * width/(float)size, y,  width/(float)size, height*Mathf.clamp((get(i)-min+1f)/(max-min+1f))));
             }
         }
     }

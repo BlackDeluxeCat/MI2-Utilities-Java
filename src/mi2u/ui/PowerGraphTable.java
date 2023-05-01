@@ -148,7 +148,7 @@ public class PowerGraphTable extends Table{
 
                 Lines.stroke(4f);
                 Draw.color(Pal.power, 0.75f);
-                info.stG.defaultDraw(x, y + 20f, width, height - 40f, true);
+                info.stG.defaultDraw(x, y + 20f, width, height - 40f, false);
                 buildText.get(info.stG.min(), info.stG.max(), 100f, Pal.power.argb8888());
 
                 float min = Math.min(info.consG.min(), info.genG.min()), max = Math.max(info.consG.max(), info.genG.max());
