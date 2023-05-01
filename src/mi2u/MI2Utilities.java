@@ -95,7 +95,34 @@ public class MI2Utilities extends Mod{
 
                 this.row();
 
-                this.label(() -> sign == 0 ? "@update.checking" : sign == -1 ? "@update.failCheck" : MOD.meta.version.equals(version) ? "@update.latest" : "@update.updateAvailable").align(Align.left).fillX().pad(5f).get().setColor(0f, 1f, 0.3f, 1f);
+                Runnable httpreq = () -> {
+                    sign = 0;
+                    Http.get(gitURL + "/releases/latest", res -> {
+                    sign = 1;
+                    in.get(1);
+                    delay = 900f;
+                    var str = res.getResultAsString();
+                    var json = Jval.read(str);//TODO parse failed for unknown reason
+                    version = json.getString("name");
+                    intro = json.getString("body");
+                    if(introl != null) introl.setText(intro);
+                }, e -> {
+                    sign = -1;
+                    in.get(1);
+                    delay = 300f;
+                    intro = "";
+                    if(introl != null) introl.setText(intro);
+                    Log.err(e);
+                });
+                };
+
+                httpreq.run();
+
+                this.table(t -> {
+                    t.label(() -> sign == 0 ? "@update.checking" : sign == -1 ? "@update.failCheck" : MOD.meta.version.equals(version) ? "@update.latest" : "@update.updateAvailable").align(Align.left).growX().pad(5f).get().setColor(0f, 1f, 0.3f, 1f);
+                    t.button("" + Iconc.refresh, textb, httpreq).disabled(tb -> sign != -1).size(32f);
+                }).growX();
+
                 this.row();
 
                 this.button(gitRepo + "\n" + Iconc.paste + Iconc.github + "(copy url)", textb, () -> {
@@ -123,21 +150,6 @@ public class MI2Utilities extends Mod{
                 }).width(300f).maxHeight(600f);
 
                 popup();
-
-                Http.get(gitURL + "/releases/latest", res -> {
-                    sign = 1;
-                    var json = Jval.read(res.getResultAsString());
-                    version = json.getString("name");
-                    intro = json.getString("body");
-                    if(introl != null) introl.setText(intro);
-                }, e -> {
-                    sign = -1;
-                    in.get(1);
-                    delay = 100f;
-                    intro = "";
-                    if(introl != null) introl.setText(intro);
-                    Log.err(e);
-                });
             }
             
         };
