@@ -5,7 +5,7 @@ displayName: "MI2-Utilities Java"
 name: "MI2-Utilities-Java"
 
 #the mod version
-version: 1.2.3b
+version: 1.2.3c
 
 #the minimum game build required to run this mod
 minGameVersion: 143
@@ -23,67 +23,77 @@ main: "mi2u.MI2Utilities"
 
 #the mod description as seen in the mod dialog
 description: "# MI2-Utilities Java
-一个原版辅助工具，有爱自取。
 
-安装方法：
+### Intro
+- [English](README.md) | [中文](README_zh.md)
 
-- 方法1 在游戏里使用“从github导入”，填BlackDeluxeCat/MI2-Utilities-Java
-- 方法2 进入本mod最新(Lateset)Release，下载文件列表中的MI2-Utilities Java.jar，在游戏里使用“导入文件”，导入所下载的jar。
-- 方法3 若已安装老版本，在游戏里点击mod详情页，重新安装。（仅限移动端）
+QOL Mod, powerful assists to vanilla gameplay. For destined Mindustry players.
 
-中文讨论群：875035496
+### Install
 
-无力为其他语言做本地化，接受pr。
+- Method 1: \"Import from github\", with \"BlackDeluxeCat/MI2-Utilities-Java\". This makes reinstall available. (recommended)
+- Method 2: Get the latest release, download \"MI2-Utilities Java.jar\". Then \"Import from a file\" with the file.
 
-## 特性列表（0.9.5）
+QQ Group(中文zh_cn) number: 875035496
 
-### ui
+### Contribution
+- PRs: l18n, bug fix, new feature.
+- Issues: bug report, suggestion.
 
-#### 主界面
-- 快捷功能：一键规划重建、透视物流
-- AI辅助控制：挖矿、建造规划、维修、瞄准、拿取物品、跟随镜头。
-- 自动变速器：合乎逻辑的降速，避免低帧影响建筑工作。
-- 该窗口的选项弹窗包含MI2U的大部分选项。
+---
 
-#### 核心信息
-- 原版核心信息+，资源变化折线图
-- 单位计数器
-- 电量条与电网分析
-- 可切换查看其他队伍
+## Features(1.2.3c)
 
-#### 小地图
-- 基于原版地图渲染器
-- 可缩放至全图
-- 玩家单位显示名称
-- 点击移动视角
-- 天眼查查找全图地形/建筑
+#### MI2UI
+- Functions: one-click planning rebuild, distribution building reveal.
+- Logical FPS simulation.
+- AI-assist: auto mining, auto construct plans, auto self-repair, auto aiming.
+- Most of the map rules.
+- Wave info, force skipwave, wave health bars.
+- RTS Formation creating and selecting.
+- Most of MI2U's options.
 
-#### 地图信息
-- 大部分地图规则
-- 波次预览工具，强制跳波
-- 详细的波次血量条
+#### Core Info
+- Vanilla core info ++, charts of resource changes.
+- Unit counter.
+- Power net bars & net building analyse.
+- Switch to view other teams.
 
-#### 逻辑辅助
-- 整理与快捷复制变量名，可使用分隔符
-- 查找与替换变量名
-- 代码块剪切与复制
+#### MindowMap
+- Renderer based on vanilla.
+- Sensible zoomed to full map.
+- Player labels.
+- Clicking pans camera.
+- Space Scan world finder.
+- Logic Building Stats
+
+#### Map Info
+
+
+#### Logic Helper
+- Sort and fast typing var names, using delimiter.
+- Search & Replace.
+- Cut or Copy, and Paste.
 
 #### Emoji
-- 一个emoji查阅工具
+- Emoji book.
 
-### Mindow2
-本mod的可拖拽窗口。标题栏可进入选项弹窗、帮助页弹窗，具体请查阅各窗口的帮助页。
-拖拽、吸附等均可通过选项保存。
+#### Mindow2
+Draggable window for this mod. On the auto-hidden title bar, you can open settings dialog, minimize it, or tap the title to drag. For details, open settings and see the help pages of each Mindow2.
 
-### 杂项
-- 玩家光标平滑显示
-- 渲染单位血条、逻辑控制、寻路线
-- 维修、超速范围的精致渲染
-- 关闭残骸、单位、射弹、建筑渲染
-- 修改部分方块数值条
-- 更好的方块/单位/地形数值面板
-- 屏边移动视角（桌面端）
-- 添加一套地图筛选器，特色是可复合坐标变换
-- 99.5%的改动可以通过选项关闭
-- MI2U选项存储在$Mindustry/mods/MI2U_Settings/目录下"
+Position, snap, etc. can be saved through settings.
 
+#### Others
+- Smooth multiplayer cursors.
+- Block/Unit hp bar, logic lines, pathfind lines.
+- Disable wrecks, units, bullets rendering.
+- Distribution buildings interior reveal.
+- Modify block stat bars, make it following cursor.
+- 99.5% of changes can be turned off with options.
+- The settings stored at $Mindustry/mods/MI2U_Settings/.
+
+---
+
+Early JS version: [BlackDeluxeCat/MI2-Utilities](https://github.com/BlackDeluxeCat/MI2-Utilities)
+
+My friend did a lot of other functions, see [MinerTools](https://github.com/RlCCJ/MinerTools)."
