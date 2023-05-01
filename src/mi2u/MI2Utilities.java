@@ -102,16 +102,25 @@ public class MI2Utilities extends Mod{
                     in.get(1);
                     delay = 900f;
                     var str = res.getResultAsString();
-                    var json = Jval.read(str);//TODO parse failed for unknown reason
-                    version = json.getString("name");
-                    intro = json.getString("body");
+                    var pp = Pattern.compile("(?<=Release ).*?(?= · BlackDeluxeCat/MI2-Utilities-Java)");
+                    var mm = pp.matcher(str);
+                    mm.find();
+                    version = mm.group();
+
+                    pp = Pattern.compile("(?<=markdown-body my-3\">)[\\S\\s]*?(?=</div>)");
+                    mm = pp.matcher(str);
+                    mm.find();
+                    intro = mm.group();
+
+                    pp = Pattern.compile("<.*?>");
+                    mm = pp.matcher(intro);
+                    intro = mm.replaceAll("");
                     if(introl != null) introl.setText(intro);
                 }, e -> {
                     sign = -1;
                     in.get(1);
                     delay = 300f;
                     intro = "";
-                    if(introl != null) introl.setText(intro);
                     Log.err(e);
                 });
                 };
