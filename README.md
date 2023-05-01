@@ -1,34 +1,35 @@
-TODO List
-
 # MI2-Utilities Java
-
+### Intro
 - [English](README.md) | [中文](README_zh.md)
 
-Powerful utilities supporting vanilla. For destined Mindustry players.
+QOL Mod, powerful assists to vanilla gameplay. For destined Mindustry players.
 
-Early JS version: [BlackDeluxeCat/MI2-Utilities](https://github.com/BlackDeluxeCat/MI2-Utilities)
+### Install
 
-Install:
+- Method 1: "Import from github", with "BlackDeluxeCat/MI2-Utilities-Java". This makes reinstall available. (recommended)
+- Method 2: Get the latest release, download "MI2-Utilities Java.jar". Then "Import from a file" with the file.
 
-- Method 1(recommended): Use "Import from github" in game, with "BlackDeluxeCat/MI2-Utilities-Java"
-- Method 2: Get the latest release, download "MI2-Utilities Java.jar". Then use "Import from  a file" in game, with the downloaded artifact.
-- Method 3: Reinstall if you have installed before.
+QQ Group(中文zh_cn) number: 875035496
 
-Group(zh_cn) number: 875035496
+### Contribution
+- PRs: l18n, bug fix, new feature.
+- Issues: bug report, suggestion.
 
-Unable to localize for other languages, but accepts pr.
+---
 
-## Features(0.8.3)
-
-### ui
+## Features(1.2.3c)
 
 #### MI2UI
 - Functions: one-click planning rebuild, distribution building reveal.
+- Logical FPS simulation.
 - AI-assist: auto mining, auto construct plans, auto self-repair, auto aiming.
-- The options popup of this window contains most of MI2U's options.
+- Most of the map rules.
+- Wave info, force skipwave, wave health bars.
+- RTS Formation creating and selecting.
+- Most of MI2U's options.
 
 #### Core Info
-- Vanilla core info ++, resource line chart.
+- Vanilla core info ++, charts of resource changes.
 - Unit counter.
 - Power net bars & net building analyse.
 - Switch to view other teams.
@@ -37,35 +38,37 @@ Unable to localize for other languages, but accepts pr.
 - Renderer based on vanilla.
 - Sensible zoomed to full map.
 - Player labels.
-- Clicking pans camera (desktop only)
+- Clicking pans camera.
+- Space Scan world finder.
+- Logic Building Stats
 
 #### Map Info
-- Most of the map rules.
-- Wave preview, force skipwave.
-- Wave health bars.
+
 
 #### Logic Helper
 - Sort and fast typing var names, using delimiter. 
-- Search & Replace
-- Cut & Copy, and Paste
+- Search & Replace.
+- Cut or Copy, and Paste.
 
 #### Emoji
 - Emoji book.
 
-### Mindow2
-A draggable window. On the title bar, you can open options dialog, help page. For details, see the help pages of each Mindow2.
+#### Mindow2
+Draggable window for this mod. On the auto-hidden title bar, you can open settings dialog, minimize it, or tap the title to drag. For details, open settings and see the help pages of each Mindow2.
 
-Position, snap, etc. can be saved through options.
+Position, snap, etc. can be saved through settings.
 
-### Other
-- Smooth player cursors.
-- Unit hp bar, logic lines, pathfind line.
+#### Others
+- Smooth multiplayer cursors.
+- Block/Unit hp bar, logic lines, pathfind lines.
 - Disable wrecks, units, bullets rendering.
-- Modify block stat bars.
-- Add a set of map filters, featuring composable coordinate transformations.
+- Distribution buildings interior reveal.
+- Modify block stat bars, make it following cursor.
 - 99.5% of changes can be turned off with options.
-- The MI2U option is stored in the directory $Mindustry/mods/MI2U_Settings/.
+- The settings stored at $Mindustry/mods/MI2U_Settings/.
 
 ---
 
-See [MinerTools](https://github.com/RlCCJ/MinerTools) with other practical functions. 
+Early JS version: [BlackDeluxeCat/MI2-Utilities](https://github.com/BlackDeluxeCat/MI2-Utilities)
+
+My friend did a lot of other functions, see [MinerTools](https://github.com/RlCCJ/MinerTools).
