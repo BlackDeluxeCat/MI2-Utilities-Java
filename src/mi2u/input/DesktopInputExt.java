@@ -169,8 +169,10 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
             fullT.margin(0f, 0f,
                     (Core.input.mouseY() + 15f) / Scl.scl(),
                     Mathf.maxZero(Core.graphics.getWidth() - Core.input.mouseX() - fullT.getChildren().first().getWidth() - 15f) / Scl.scl());
+            fullT.layout();
         }else if(Core.input.keyTap(Binding.control)){
             fullT.margin(0f);
+            fullT.layout();
         }
     }
 }
