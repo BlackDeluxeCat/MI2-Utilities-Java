@@ -92,24 +92,6 @@ public class BuildingInventory extends Element{
         var cache = font.getCache();
         cache.setColor(Color.white);
 
-        if(build.items != null){
-            for(var item : content.items()){
-                int amt = build.items.get(item);
-                if(amt > 0) itemused.get(item.id, 1);
-                if(itemused.check(item.id, 1000)) continue;
-
-                float dx = Mathf.mod(i, size) * iconsize;
-                float dy = rowdy * Mathf.floor(i / (float)size) * iconsize;
-                Draw.rect(item.uiIcon, x + dx + iconsize / 2f, y + dy + iconsize / 2f, iconsize * 0.75f, iconsize * 0.75f);
-
-                cache.clear();
-                cache.addText(UI.formatAmount(amt), x + dx, y + dy + iconsize / 2f);
-                cache.draw(0.8f);
-
-                i++;
-            }
-        }
-
         if(build.liquids != null){
             for(var item : content.liquids()){
                 float amt = build.liquids.get(item);
@@ -122,6 +104,24 @@ public class BuildingInventory extends Element{
 
                 cache.clear();
                 cache.addText(amt < 100f ? Strings.autoFixed(amt, 2) : UI.formatAmount((int)amt), x + dx, y + dy + iconsize / 2f);
+                cache.draw(0.8f);
+
+                i++;
+            }
+        }
+
+        if(build.items != null){
+            for(var item : content.items()){
+                int amt = build.items.get(item);
+                if(amt > 0) itemused.get(item.id, 1);
+                if(itemused.check(item.id, 1000)) continue;
+
+                float dx = Mathf.mod(i, size) * iconsize;
+                float dy = rowdy * Mathf.floor(i / (float)size) * iconsize;
+                Draw.rect(item.uiIcon, x + dx + iconsize / 2f, y + dy + iconsize / 2f, iconsize * 0.75f, iconsize * 0.75f);
+
+                cache.clear();
+                cache.addText(UI.formatAmount(amt), x + dx, y + dy + iconsize / 2f);
                 cache.draw(0.8f);
 
                 i++;
