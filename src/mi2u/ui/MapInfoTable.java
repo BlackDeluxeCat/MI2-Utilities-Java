@@ -240,6 +240,8 @@ public class MapInfoTable extends Table{
             b.setup(showWaveDetail);
             t.row();
         });
+
+        layout();
     }
 
     public void buildPreview(Table t, int curWave, int spawn){
