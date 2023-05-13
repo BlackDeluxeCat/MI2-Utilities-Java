@@ -98,31 +98,36 @@ public class MI2Utilities extends Mod{
                 Runnable httpreq = () -> {
                     sign = 0;
                     Http.get(gitURL + "/releases/latest", res -> {
-                    sign = 1;
-                    in.get(1);
-                    delay = 900f;
-                    var str = res.getResultAsString();
-                    var pp = Pattern.compile("(?<=Release ).*?(?= · BlackDeluxeCat/MI2-Utilities-Java)");
-                    var mm = pp.matcher(str);
-                    mm.find();
-                    version = mm.group();
+                        sign = 1;
+                        in.get(1);
+                        delay = 1200f;
+                        var str = res.getResultAsString();
+                        var pp = Pattern.compile("(?<=Release ).*?(?= · BlackDeluxeCat/MI2-Utilities-Java)");
+                        var mm = pp.matcher(str);
+                        mm.find();
+                        version = mm.group();
+                        if(version.equals(MOD.meta.version)){
+                            this.hide();
+                        }else{
+                            this.popup();
+                        }
 
-                    pp = Pattern.compile("(?<=markdown-body my-3\">)[\\S\\s]*?(?=</div>)");
-                    mm = pp.matcher(str);
-                    mm.find();
-                    intro = mm.group();
+                        pp = Pattern.compile("(?<=markdown-body my-3\">)[\\S\\s]*?(?=</div>)");
+                        mm = pp.matcher(str);
+                        mm.find();
+                        intro = mm.group();
 
-                    pp = Pattern.compile("<.*?>");
-                    mm = pp.matcher(intro);
-                    intro = mm.replaceAll("");
-                    if(introl != null) introl.setText(intro);
-                }, e -> {
-                    sign = -1;
-                    in.get(1);
-                    delay = 300f;
-                    intro = "";
-                    Log.err(e);
-                });
+                        pp = Pattern.compile("<.*?>");
+                        mm = pp.matcher(intro);
+                        intro = mm.replaceAll("");
+                        if(introl != null) introl.setText(intro);
+                    }, e -> {
+                        sign = -1;
+                        in.get(1);
+                        delay = 600f;
+                        intro = "";
+                        Log.err(e);
+                    });
                 };
 
                 httpreq.run();
@@ -157,8 +162,6 @@ public class MI2Utilities extends Mod{
                 this.pane(t -> {
                     introl = t.add(intro).align(Align.left).growX().get();  //drawing update discription possibly cause font color bug.
                 }).width(300f).maxHeight(600f);
-
-                popup();
             }
             
         };
