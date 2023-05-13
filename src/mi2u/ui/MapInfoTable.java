@@ -351,6 +351,8 @@ public class MapInfoTable extends Table{
                     tt.row();
                     addBoolString(() -> state.rules.waitEnemies, "@rules.waitForWaveToEnd", tt);
                     tt.row();
+                    addBoolString(() -> state.rules.waveSending, "@rules.wavesending", tt);
+                    tt.row();
                     tt.label(() -> Core.bundle.get("rules.wavespacing") + ": " + Strings.fixed(state.rules.waveSpacing / 60, 1) + "s").pad(2f).get().setColor(state.rules.waves && state.rules.waveTimer ? Color.white : Color.darkGray);;
                     tt.row();
                     tt.label(() -> Core.bundle.get("rules.initialwavespacing") + ": " + Strings.fixed(state.rules.initialWaveSpacing / 60, 1) + "s").pad(2f).get().setColor(state.rules.waves && state.rules.waveTimer ? Color.white : Color.darkGray);;
@@ -453,12 +455,14 @@ public class MapInfoTable extends Table{
 
             t.table(tt -> {
                 tt.defaults().left();
+                addFloatAttr(() -> Strings.fixed(state.rules.buildCostMultiplier, 2), "@mapInfo.buildCostMutil", tt);
+                addFloatAttr(() -> Strings.fixed(state.rules.deconstructRefundMultiplier, 2), "@mapInfo.buildRefundMutil", tt);
                 addFloatAttr(() -> Strings.fixed(state.rules.blockHealthMultiplier, 2), "@mapInfo.buildingHpMutil", tt);
                 addFloatAttr(() -> Strings.fixed(state.rules.blockDamageMultiplier, 2), "@mapInfo.buildingDamageMutil", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.buildCostMultiplier, 2), "@mapInfo.buildCostMutil", tt);
                 addFloatAttr(() -> Strings.fixed(state.rules.buildSpeedMultiplier, 2), "@mapInfo.buildSpeedMutil", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.deconstructRefundMultiplier, 2), "@mapInfo.buildRefundMutil", tt);
+                addFloatAttr(() -> Strings.fixed(state.rules.unitHealthMultiplier, 2), "@mapInfo.unitHealthMultiplier", tt);
                 addFloatAttr(() -> Strings.fixed(state.rules.unitDamageMultiplier, 2), "@mapInfo.unitDamageMutil", tt);
+                addFloatAttr(() -> Strings.fixed(state.rules.unitCrashDamageMultiplier, 2), "@mapInfo.unitCrashDamageMultiplier", tt);
                 addFloatAttr(() -> Strings.fixed(state.rules.unitBuildSpeedMultiplier, 2), "@mapInfo.unitConstructSpeedMutil", tt);
                 addFloatAttr(() -> Strings.fixed(state.rules.solarMultiplier, 2), "@mapInfo.solarMulti", tt);
             });
@@ -468,7 +472,9 @@ public class MapInfoTable extends Table{
             t.table(teamt -> {
                 teamt.add("@mapInfo.team").padLeft(5).padRight(5);
                 teamt.add("@mapInfo.unitConstructSpeedMutil").padLeft(5).padRight(5);
+                teamt.add("@mapInfo.unitHealthMultiplier").padLeft(5).padRight(5);
                 teamt.add("@mapInfo.unitDamageMutil").padLeft(5).padRight(5);
+                teamt.add("@mapInfo.unitCrashDamageMultiplier").padLeft(5).padRight(5);
                 teamt.add("@mapInfo.buildingHpMutil").padLeft(5).padRight(5);
                 teamt.add("@mapInfo.buildingDamageMutil").padLeft(5).padRight(5);
                 teamt.add("@mapInfo.buildSpeedMutil").padLeft(5).padRight(5);
@@ -482,7 +488,9 @@ public class MapInfoTable extends Table{
                     var teamRule = state.rules.teams.get(teamData.team);
                     teamt.add("[#" + teamData.team.color + "]" + teamData.team.localized());
                     teamt.add("" + teamRule.unitBuildSpeedMultiplier).color(teamData.team.color);
+                    teamt.add("" + teamRule.unitHealthMultiplier).color(teamData.team.color);
                     teamt.add("" + teamRule.unitDamageMultiplier).color(teamData.team.color);
+                    teamt.add("" + teamRule.unitCrashDamageMultiplier).color(teamData.team.color);
                     teamt.add("" + teamRule.blockHealthMultiplier).color(teamData.team.color);
                     teamt.add("" + teamRule.blockDamageMultiplier).color(teamData.team.color);
                     teamt.add("" + teamRule.buildSpeedMultiplier).color(teamData.team.color);
