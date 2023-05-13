@@ -11,11 +11,11 @@ import arc.scene.*;
 import arc.scene.event.*;
 import arc.scene.ui.TextField;
 import arc.scene.ui.layout.*;
+import arc.struct.*;
 import arc.util.*;
 import arc.util.pooling.*;
-import mi2u.MI2UTmp;
-import mi2u.MI2UVars;
-import mi2u.MI2Utils;
+import mi2u.*;
+import mi2u.game.*;
 import mi2u.input.InputOverwrite;
 import mi2u.io.*;
 import mi2u.io.MI2USettings.*;
@@ -37,13 +37,7 @@ public class MinimapMindow extends Mindow2{
     public boolean catching = false;
     public MinimapMindow(){
         super("@minimap.MI2U");
-    }
 
-    @Override
-    public void init() {
-        super.init();
-        mindowName = "MindowMap";
-        titleAlign = Align.bottomLeft;
         update(() -> {
             if(control.input instanceof InputOverwrite && control.input.block != null && Core.input.keyDown(KeyCode.controlLeft) && Core.input.keyDown(KeyCode.f)){
                 finderTable.find = control.input.block;
@@ -59,15 +53,24 @@ public class MinimapMindow extends Mindow2{
         });
 
         buttons = new PopupTable();
-
-        buttons.defaults().height(32f).pad(2f).fillX();
-        buttons.button(Iconc.players + Core.bundle.get("minimap.buttons.label"), MI2UVars.textbtoggle, () -> m.drawLabel = !m.drawLabel).update(b -> b.setChecked(m.drawLabel)).with(MI2UVars.funcSetTextb);
-        buttons.row();
-        buttons.button(Iconc.blockSpawn + Core.bundle.get("minimap.buttons.spawn"), MI2UVars.textbtoggle, () -> m.drawSpawn = !m.drawSpawn).update(b -> b.setChecked(m.drawSpawn)).with(MI2UVars.funcSetTextb);
-        buttons.row();
-        buttons.button(Iconc.map + Core.bundle.get("minimap.buttons.fog"), MI2UVars.textbtoggle, () -> m.drawFog = !m.drawFog).with(MI2UVars.funcSetTextb).update(b -> b.setChecked(m.drawFog)).get().getLabel().setColor(Color.slate);
-
         buttons.update(() -> buttons.hideWithoutFocusOn(this, buttons));
+
+        //ewwww
+        Events.on(MI2UEvents.FinishSettingInitEvent.class, e -> {
+            buttons.defaults().height(32f).minWidth(100f).pad(2f).fillX();
+            if(MI2USettings.getEntry(mindowName + ".drawLabel") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawLabel")).row();
+            if(MI2USettings.getEntry(mindowName + ".drawSpawn") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawSpawn")).row();
+            if(MI2USettings.getEntry(mindowName + ".drawFog") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawFog")).row();
+            if(MI2USettings.getEntry(mindowName + ".drawIndicator") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawIndicator")).row();
+            if(MI2USettings.getEntry(mindowName + ".drawObjective") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawObjective")).row();
+        });
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        mindowName = "MindowMap";
+        titleAlign = Align.bottomLeft;
     }
 
     @Override
@@ -118,6 +121,11 @@ public class MinimapMindow extends Mindow2{
     @Override
     public void initSettings(){
         super.initSettings();
+        settings.add(new CheckEntry(mindowName + ".drawLabel", "@settings.mindowMap.drawLabel", false, b -> m.drawLabel = b));
+        settings.add(new CheckEntry(mindowName + ".drawSpawn", "@settings.mindowMap.drawSpawn", true, b -> m.drawSpawn = b));
+        settings.add(new CheckEntry(mindowName + ".drawFog", "@settings.mindowMap.drawFog", true, b -> m.drawFog = b));
+        settings.add(new CheckEntry(mindowName + ".drawIndicator", "@settings.mindowMap.drawIndicator", true, b -> m.drawIndicator = b));
+        settings.add(new CheckEntry(mindowName + ".drawObjective", "@settings.mindowMap.drawObjective", true, b -> m.drawObjective = b));
         settings.add(new FieldEntry(mindowName + ".size", "@settings.mindowMap.size", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 600, s -> rebuild()));
         settings.add(new CollapseGroupEntry("WorldData", ""){
             private CheckEntry check1 = new CheckEntry("worldDataUpdate", "@settings.mindowMap.worldDataUpdate", true, null);
@@ -141,12 +149,13 @@ public class MinimapMindow extends Mindow2{
     
     public static class Minimap2 extends Table{
         protected Element map;
-        public boolean drawLabel = true, drawSpawn = true, drawFog = true;
+        public boolean drawLabel = false, drawSpawn = true, drawFog = true, drawIndicator = true, drawObjective = true;
+        public Rect rect = new Rect();
         private static final float baseSize = 16f;
         public float zoom = 4;
 
         public Minimap2(float size){
-            float margin = 5f;
+            float margin = 0f;
             this.touchable = Touchable.enabled;
             map = new Element(){
                 {
@@ -164,6 +173,7 @@ public class MinimapMindow extends Mindow2{
                 public void draw(){
                     if(renderer.minimap.getRegion() == null) return;
                     if(!clipBegin()) return;
+                    setRect();
                     
                     Draw.reset();
                     Draw.rect(getRegion(), x + width / 2f, y + height / 2f, width, height);
@@ -224,6 +234,7 @@ public class MinimapMindow extends Mindow2{
                 public void clicked(InputEvent event, float x, float y){
                     if(control.input instanceof DesktopInput || control.input instanceof InputOverwrite){
                         try{
+                            setRect();
                             float sz = baseSize * zoom;
                             float dx = (Core.camera.position.x / tilesize);
                             float dy = (Core.camera.position.y / tilesize);
@@ -265,6 +276,7 @@ public class MinimapMindow extends Mindow2{
         }
 
         /** these methods below are replacing vanilla minimap renderer method*/
+        /** zoom is private in renderer */
         public void zoomBy(float amount){
             zoom += amount;
             setZoom(zoom);
@@ -274,15 +286,26 @@ public class MinimapMindow extends Mindow2{
             zoom = Mathf.clamp(amount, 1f, Math.max(world.width(), world.height()) / baseSize / 2f);
         }
 
-        public void drawEntities(float x, float y, float w, float h, float scaling, boolean withLabels){
+        /** set the world area corresponding to map camera. */
+        public void setRect(){
             float sz = baseSize * zoom;
-            float dx = (Core.camera.position.x / tilesize);
-            float dy = (Core.camera.position.y / tilesize);
-            dx = (2 * sz) <= world.width() ? Mathf.clamp(dx, sz, world.width() - sz) : world.width() / 2f;
-            dy = (2 * sz) <= world.height() ? Mathf.clamp(dy, sz, world.height() - sz) : world.height() / 2f;
+            float cx = (Core.camera.position.x / tilesize);
+            float cy = (Core.camera.position.y / tilesize);
+            cx = (2 * sz) <= world.width() ? Mathf.clamp(cx, sz, world.width() - sz) : world.width() / 2f;
+            cy = (2 * sz) <= world.height() ? Mathf.clamp(cy, sz, world.height() - sz) : world.height() / 2f;
+            rect.set((cx - sz) * tilesize, (cy - sz) * tilesize, sz * 2 * tilesize, sz * 2 * tilesize);
+        }
 
-            Rect rect = MI2UTmp.r1.set((dx - sz) * tilesize, (dy - sz) * tilesize, sz * 2 * tilesize, sz * 2 * tilesize);
+        /** world 2 map ui */
+        public Vec2 transform(Vec2 position){
+            return position.sub(rect.x, rect.y).scl(width / rect.width, height / rect.height);
+        }
 
+        public float scale(float radius){
+            return width / rect.width * radius;
+        }
+
+        public void drawEntities(float x, float y, float w, float h, float scaling, boolean withLabels){
             //draw a linerect of view area
             Lines.stroke(1f, MI2UTmp.c1.set(Color.white).a(0.5f));
             float cx = (Core.camera.position.x - rect.x) / rect.width * w;
@@ -292,15 +315,17 @@ public class MinimapMindow extends Mindow2{
                     Core.graphics.getWidth() / rect.width * w / renderer.getScale() ,
                     Core.graphics.getHeight() / rect.width * h / renderer.getScale());
             Draw.color();
+
             //just render unit group
             Groups.unit.each(unit -> {
+                if(unit.inFogTo(player.team()) || !unit.type.drawMinimap) return;
                 float rx = (unit.x - rect.x) / rect.width * w;
                 float ry = (unit.y - rect.y) / rect.width * h;
 
                 float scale = Scl.scl(1f) / 2f * scaling * 32f;
                 var region = unit.icon();
                 //color difference between block and unit in setting
-                Draw.mixcol(MI2UTmp.c1.set(unit.team().color.r * 0.9f, unit.team().color.g * 0.9f, unit.team().color.b * 0.9f, 1f), 1f);
+                Draw.mixcol(MI2UTmp.c1.set(unit.team().color).mul(0.9f), 1f);
                 Draw.rect(region, x + rx, y + ry, scale, scale * (float)region.height / region.width, unit.rotation() - 90);
                 Draw.reset();
             });
@@ -345,6 +370,47 @@ public class MinimapMindow extends Mindow2{
                 Draw.color();
                 Draw.shader();
             }
+
+            if(drawIndicator){
+                LongSeq indicators = control.indicators.list();
+                float fin = ((Time.globalTime / 30f) % 1f);
+                float rad = 2f + scale(fin * 5f + tilesize - 2f);
+                Lines.stroke(Scl.scl((1f - fin) * 4f + 0.5f));
+
+                for(int i = 0; i < indicators.size; i++){
+                    long ind = indicators.items[i];
+                    int
+                            pos = Indicator.pos(ind),
+                            ix = Point2.x(pos),
+                            iy = Point2.y(pos);
+                    float time = Indicator.time(ind), offset = 0f;
+
+                    //fix multiblock offset - this is suboptimal
+                    Building build = world.build(pos);
+                    if(build != null){
+                        offset = build.block.offset / tilesize;
+                    }
+
+                    Vec2 v = transform(Tmp.v1.set((ix + 0.5f + offset) * tilesize, (iy + 0.5f + offset) * tilesize));
+                    //v.sub(getMarginBottom(), getMarginBottom());
+
+                    Draw.color(Color.orange, Color.scarlet, Mathf.clamp(time / 70f));
+                    Lines.square(x + v.x, y + v.y, rad);
+                }
+
+                Draw.reset();
+            }
+
+            //could be buggy
+            if(drawObjective){
+                state.rules.objectives.eachRunning(obj -> {
+                    for(var marker : obj.markers){
+                        marker.drawMinimap(renderer.minimap);
+                    }
+                });
+            }
+
+            Draw.reset();
         }
 
         public void drawSpawns(float x, float y, float w, float h, float scaling){
@@ -358,14 +424,7 @@ public class MinimapMindow extends Mindow2{
 
             float curve = Mathf.curve(Time.time % 240f, 120f, 240f);
 
-            float sz = baseSize * zoom;
-            float dx = (Core.camera.position.x / tilesize);
-            float dy = (Core.camera.position.y / tilesize);
-            dx = (2 * sz) <= world.width() ? Mathf.clamp(dx, sz, world.width() - sz) : world.width() / 2f;
-            dy = (2 * sz) <= world.height() ? Mathf.clamp(dy, sz, world.height() - sz) : world.height() / 2f;
-            float rad = state.rules.dropZoneRadius / (2 * sz * tilesize) * w;
-
-            Rect rect = MI2UTmp.r1.set((dx - sz) * tilesize, (dy - sz) * tilesize, sz * 2 * tilesize, sz * 2 * tilesize);
+            float rad = scale(state.rules.dropZoneRadius);
 
             for(Tile tile : spawner.getSpawns()){
                 if(!rect.contains(tile.worldx(), tile.worldy())) continue;
@@ -387,16 +446,12 @@ public class MinimapMindow extends Mindow2{
             if(texture == null) return null;
             var region = renderer.minimap.getRegion();
             if(region == null) return null;
-            //2 * sz = map width/height in tiles
-            float sz = baseSize * zoom;
-            float dx = (Core.camera.position.x / tilesize);
-            float dy = (Core.camera.position.y / tilesize);
-            dx = (2 * sz) <= world.width() ? Mathf.clamp(dx, sz, world.width() - sz) : world.width() / 2f;
-            dy = (2 * sz) <= world.height() ? Mathf.clamp(dy, sz, world.height() - sz) : world.height() / 2f;
-            float invTexWidth = 1f / texture.width;
-            float invTexHeight = 1f / texture.height;
-            float x = dx - sz, y = world.height() - dy - sz, width = sz * 2, height = sz * 2;
-            region.set(x * invTexWidth, y * invTexHeight, (x + width) * invTexWidth, (y + height) * invTexHeight);
+
+            float invTexWidth = 1f / texture.width / tilesize;
+            float invTexHeight = 1f / texture.height / tilesize;
+            float pixmapy = world.height() * tilesize - (rect.y + rect.height);
+
+            region.set(rect.x * invTexWidth, pixmapy * invTexHeight, (rect.x + rect.width) * invTexWidth, (pixmapy + rect.height) * invTexHeight);
             return region;
         }
 
