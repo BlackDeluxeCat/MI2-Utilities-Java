@@ -57,12 +57,22 @@ public class MinimapMindow extends Mindow2{
 
         //ewwww
         Events.on(MI2UEvents.FinishSettingInitEvent.class, e -> {
+            m.drawLabel = MI2USettings.getBool(mindowName + ".drawLabel", false);
+            m.drawSpawn = MI2USettings.getBool(mindowName + ".drawSpawn", true);
+            m.drawFog = MI2USettings.getBool(mindowName + ".drawFog", true);
+            m.drawIndicator = MI2USettings.getBool(mindowName + ".drawIndicator", true);
+            m.drawObjective = MI2USettings.getBool(mindowName + ".drawObjective", true);
+
             buttons.defaults().height(32f).minWidth(100f).pad(2f).fillX();
             if(MI2USettings.getEntry(mindowName + ".drawLabel") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawLabel")).row();
             if(MI2USettings.getEntry(mindowName + ".drawSpawn") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawSpawn")).row();
             if(MI2USettings.getEntry(mindowName + ".drawFog") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawFog")).row();
             if(MI2USettings.getEntry(mindowName + ".drawIndicator") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawIndicator")).row();
             if(MI2USettings.getEntry(mindowName + ".drawObjective") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawObjective")).row();
+        });
+
+        Events.on(EventType.WorldLoadEvent.class, e -> {
+            m.setZoom(m.zoom);
         });
     }
 
@@ -126,10 +136,10 @@ public class MinimapMindow extends Mindow2{
         settings.add(new CheckEntry(mindowName + ".drawFog", "@settings.mindowMap.drawFog", true, b -> m.drawFog = b));
         settings.add(new CheckEntry(mindowName + ".drawIndicator", "@settings.mindowMap.drawIndicator", true, b -> m.drawIndicator = b));
         settings.add(new CheckEntry(mindowName + ".drawObjective", "@settings.mindowMap.drawObjective", true, b -> m.drawObjective = b));
-        settings.add(new FieldEntry(mindowName + ".size", "@settings.mindowMap.size", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 600, s -> rebuild()));
+        settings.add(new FieldEntry(mindowName + ".size", "@settings.mindowMap.size", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 3200, s -> rebuild()));
         settings.add(new CollapseGroupEntry("WorldData", ""){
             private CheckEntry check1 = new CheckEntry("worldDataUpdate", "@settings.mindowMap.worldDataUpdate", true, null);
-            private FieldEntry field1 = new FieldEntry("worldDataUpdate.interval", "@settings.mindowMap.worldDataUpdate.interval", String.valueOf(10), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 3 && Strings.parseInt(s) <= 60, null);
+            private FieldEntry field1 = new FieldEntry("worldDataUpdate.interval", "@settings.mindowMap.worldDataUpdate.interval", String.valueOf(10), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 3 && Strings.parseInt(s) <= 240, null);
             {
                 collapsep = () -> !check1.value;
                 headBuilder = t -> check1.build(t);
