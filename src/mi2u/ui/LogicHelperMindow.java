@@ -13,7 +13,7 @@ import arc.scene.ui.TextField;
 import arc.scene.ui.layout.Table;
 import arc.struct.*;
 import arc.util.*;
-import mi2u.MI2UTmp;
+import mi2u.*;
 import mindustry.gen.Iconc;
 import mindustry.logic.LCanvas;
 import mindustry.logic.LExecutor;
@@ -44,12 +44,17 @@ public class LogicHelperMindow extends Mindow2{
     int cutStart = 0, cutEnd = 0, pasteStart = 0;
     boolean copyCode = false, transJump = true;
 
+    public Table backupTable;
+    public boolean shouldRebuildBackups = true;
+    public MI2Utils.IntervalMillis backupTimer = new MI2Utils.IntervalMillis();
+    public Queue<String> backups = new Queue<>(30);
+
     public LogicHelperMindow(){
         super("@logicHelper.MI2U", "@logicHelper.help");
     }
 
     @Override
-    public void init() {
+    public void init(){
         super.init();
         //closable = false;
         mindowName = "LogicHelper";
@@ -58,9 +63,18 @@ public class LogicHelperMindow extends Mindow2{
         varsTable = new Table();
         searchBaseTable = new Table();
         cutPasteBaseTable = new Table();
+        backupTable = new Table();
         setupVarsMode(varsBaseTable);
         setupSearchMode(searchBaseTable);
         setupCutPasteMode(cutPasteBaseTable);
+        setupBackupMode(backupTable);
+
+        update(() -> {
+            var canvas = parent instanceof LogicDialog ld ? ld.canvas : null;
+            if(canvas != null && backupTimer.get(0, 60000)){
+                backup(canvas.save());
+            }
+        });
     }
 
     @Override
@@ -78,10 +92,15 @@ public class LogicHelperMindow extends Mindow2{
                 setupCont(cont);
             }).update(b -> b.setChecked(mode == Mode.search)).with(funcSetTextb);
 
-            tt.button("" + Iconc.paste, textbtoggle, () -> {
+            tt.button("" + Iconc.copy, textbtoggle, () -> {
                 mode = Mode.cutPaste;
                 setupCont(cont);
             }).update(b -> b.setChecked(mode == Mode.cutPaste)).with(funcSetTextb);
+
+            tt.button("" + Iconc.save, textbtoggle, () -> {
+                mode = Mode.backup;
+                setupCont(cont);
+            }).update(b -> b.setChecked(mode == Mode.backup)).with(funcSetTextb);
         }).fillX();
         cont.row();
         cont.image().color(Color.pink).growX().height(2f);
@@ -90,7 +109,52 @@ public class LogicHelperMindow extends Mindow2{
             case vars -> cont.add(varsBaseTable);
             case search -> cont.add(searchBaseTable);
             case cutPaste -> cont.add(cutPasteBaseTable);
+            case backup -> cont.add(backupTable).growX();
         }
+    }
+
+    public void setupBackupMode(Table cont){
+        cont.table(t -> {
+            t.button("" + Iconc.cancel, textb, () -> {
+                backups.clear();
+                shouldRebuildBackups = true;
+            }).size(32f);
+            t.image().color(Color.pink).width(2f).growY();
+
+            t.button(Iconc.save + "Backup Now", textb, () -> {
+                var canvas = parent instanceof LogicDialog ld ? ld.canvas : null;
+                if(canvas == null) return;
+                backup(canvas.save());
+            }).update(tb -> {
+                tb.getLabel().setWrap(false);
+                tb.setText(Iconc.save + Core.bundle.get("logichelper.backup.backupIn") + Strings.fixed(60 - backupTimer.getTime(0) / 1000f, 1));
+            }).growX().height(32f);
+        }).growX();
+
+        cont.row();
+
+        cont.pane(t -> {
+            t.update(() -> {
+                if(!shouldRebuildBackups) return;
+                shouldRebuildBackups = false;
+                t.clearChildren();
+                backups.each(str -> {
+                    t.labelWrap(str.substring(0, Math.min(str.length(), 30))).fontScale(0.5f).growX();
+                    t.button("" + Iconc.redo, textb, () -> {
+                        var canvas = parent instanceof LogicDialog ld ? ld.canvas : null;
+                        if(canvas == null) return;
+                        //backup(canvas.save());
+                        canvas.load(str);
+                    }).size(32f);
+                    t.row();
+                });
+            });
+        }).growX().maxHeight(400f);
+    }
+
+    public void backup(String str){
+        backups.add(str + "");
+        shouldRebuildBackups = true;
     }
 
     public void setupCutPasteMode(Table cont){
@@ -391,7 +455,9 @@ public class LogicHelperMindow extends Mindow2{
         return "(" + cooking + ")";
     }
 
+
+
     public enum Mode{
-        vars, search, cutPaste
+        vars, search, cutPaste, backup
     }
 }
