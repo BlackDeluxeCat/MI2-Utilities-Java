@@ -749,27 +749,20 @@ public class RendererExt{
                 Draw.z(Layer.block + 1f);
 
                 Vec2 off = MI2UTmp.v1, end = MI2UTmp.v2;
-                //line length: sum of block sizes sub xy distance
-                end.set(ub).sub(fromb);
-                end.x = (ub.block.size + fromb.block.size) * tilesize / 2f - Math.abs(end.x);
-                end.y = (ub.block.size + fromb.block.size) * tilesize / 2f - Math.abs(end.y);
-                //line offset: coords greater block xy - block size
-                off.x = ub.x > fromb.x ? ub.x - ub.block.size * tilesize / 2f : fromb.x - fromb.block.size * tilesize / 2f;
-                off.y = ub.y > fromb.y ? ub.y - ub.block.size * tilesize / 2f : fromb.y - fromb.block.size * tilesize / 2f;
-                end.add(off);
+                //im a dumbness. just think the two blocks as intervals, and get their intersection.
+                end.x = Math.min(ub.x + ub.block.size * tilesize / 2f, fromb.x + fromb.block.size * tilesize / 2f);
+                end.y = Math.min(ub.y + ub.block.size * tilesize / 2f, fromb.y + fromb.block.size * tilesize / 2f);
+                off.x = Math.max(ub.x - ub.block.size * tilesize / 2f, fromb.x - fromb.block.size * tilesize / 2f);
+                off.y = Math.max(ub.y - ub.block.size * tilesize / 2f, fromb.y - fromb.block.size * tilesize / 2f);
 
                 Draw.color(Pal.placing, ub.unloadTimer < block.speed ? 1f : 0.25f);
                 Lines.stroke(1.5f);
                 Lines.line(off.x, off.y, end.x, end.y);
 
-                //line length: sum of block sizes sub xy distance
-                end.set(ub).sub(tob);
-                end.x = (ub.block.size + tob.block.size) * tilesize / 2f - Math.abs(end.x);
-                end.y = (ub.block.size + tob.block.size) * tilesize / 2f - Math.abs(end.y);
-                //line offset: coords greater block xy - block size
-                off.x = ub.x > tob.x ? ub.x - ub.block.size * tilesize / 2f : tob.x - tob.block.size * tilesize / 2f;
-                off.y = ub.y > tob.y ? ub.y - ub.block.size * tilesize / 2f : tob.y - tob.block.size * tilesize / 2f;
-                end.add(off);
+                end.x = Math.min(ub.x + ub.block.size * tilesize / 2f, tob.x + tob.block.size * tilesize / 2f);
+                end.y = Math.min(ub.y + ub.block.size * tilesize / 2f, tob.y + tob.block.size * tilesize / 2f);
+                off.x = Math.max(ub.x - ub.block.size * tilesize / 2f, tob.x - tob.block.size * tilesize / 2f);
+                off.y = Math.max(ub.y - ub.block.size * tilesize / 2f, tob.y - tob.block.size * tilesize / 2f);
 
                 Draw.color(Pal.remove, ub.unloadTimer < block.speed ? 1f : 0.25f);
                 Lines.stroke(1.5f);
