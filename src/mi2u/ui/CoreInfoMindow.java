@@ -155,7 +155,7 @@ public class CoreInfoMindow extends Mindow2{
                         }else{
                             delta = (charting.get(0) - charting.get(9))/10f;
                         }
-                        return charting.titleGetter.get() + (delta > 0 ? "[green]+":"[red]") + Strings.autoFixed(delta, 2) + "/s (10s)";
+                        return charting.titleGetter.get() + (delta > 0 ? "[green]+":"[red]") + Strings.autoFixed(delta, 2) + "/s(10s)";
                     }
                     return (charting != null ? charting.titleGetter.get():"") + "No Data";
                 }).growX();
@@ -168,7 +168,7 @@ public class CoreInfoMindow extends Mindow2{
                         }else{
                             delta = (charting.get(0) - charting.get(charting.size() - 1))/(float)charting.size();
                         }
-                        return charting.titleGetter.get() + (delta > 0 ? "[green]+":"[red]") + Strings.autoFixed(delta, 2) + "/s (60s)";
+                        return charting.titleGetter.get() + (delta > 0 ? "[green]+":"[red]") + Strings.autoFixed(delta, 2) + "/s(60s)";
                     }
                     return (charting != null ? charting.titleGetter.get():"") + "No Data";
                 }).growX();
@@ -179,32 +179,32 @@ public class CoreInfoMindow extends Mindow2{
     @Override
     public void setupCont(Table cont){
         cont.clear();
+        cont.table(teamt -> {
+            teamt.button(itemTimerInt + "s", textb, null).size(48f).with(b -> {
+                b.clicked(() -> {
+                    switch(itemTimerInt){
+                        case 1 -> itemTimerInt = 10;
+                        case 10 -> itemTimerInt = 30;
+                        case 30 -> itemTimerInt = 60;
+                        default -> itemTimerInt = 1;
+                    }
+                    b.setText(itemTimerInt + "s");
+                });
+            });
+            teamt.row();
+            teamt.button("Select", textb, () -> {
+                rebuildSelect();
+                teamSelect.popup();
+                teamSelect.snapTo(this);
+            }).growY().width(48f).update(b -> {
+                b.setText(Core.bundle.get("coreInfo.selectButton.team") + team.localized() + (select == null ? Core.bundle.get("coreInfo.selectButton.playerteam"):""));
+                b.getLabel().setColor(team == null ? Color.white:team.color);
+                b.getLabel().setWrap(true);
+                b.getLabel().setFontScale(0.75f);
+            });
+        }).grow();
+
         cont.table(ipt -> {
-            ipt.table(utt -> {
-                utt.image(Mindow2.white).width(48f).growY().update(i -> i.setColor(team.color));
-                utt.button("Select", textb, () -> {
-                    rebuildSelect();
-                    teamSelect.popup();
-                    teamSelect.snapTo(this);
-                }).growX().height(48f).update(b -> {
-                    b.setText(Core.bundle.get("coreInfo.selectButton.team") + team.localized() + (select == null ? Core.bundle.get("coreInfo.selectButton.playerteam"):""));
-                    b.getLabel().setColor(team == null ? Color.white:team.color);
-                });
-                utt.button(itemTimerInt + "s", textb, null).size(48f).with(b -> {
-                    b.clicked(() -> {
-                        switch(itemTimerInt){
-                            case 1 -> itemTimerInt = 10;
-                            case 10 -> itemTimerInt = 30;
-                            case 30 -> itemTimerInt = 60;
-                            default -> itemTimerInt = 1;
-                        }
-                        b.setText(itemTimerInt + "s");
-                    });
-                });
-            }).grow();
-
-            ipt.row();
-
             if(MI2USettings.getBool(mindowName + ".showCoreItems", true)){
                 ipt.pane(iut -> {
                     int i = 0;
