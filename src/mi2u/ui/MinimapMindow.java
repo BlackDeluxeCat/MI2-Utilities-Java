@@ -239,24 +239,18 @@ public class MinimapMindow extends Mindow2{
                         this.clicked(null, x, y);
                     }
                 }
-    
+
                 @Override
                 public void clicked(InputEvent event, float x, float y){
+                    setRect();
+                    untransform(MI2UTmp.v1.set(x, y));
                     if(control.input instanceof DesktopInput || control.input instanceof InputOverwrite){
                         try{
-                            setRect();
-                            float sz = baseSize * zoom;
-                            float dx = (Core.camera.position.x / tilesize);
-                            float dy = (Core.camera.position.y / tilesize);
-                            dx = (2 * sz) <= world.width() ? Mathf.clamp(dx, sz, world.width() - sz) : world.width() / 2f;
-                            dy = (2 * sz) <= world.height() ? Mathf.clamp(dy, sz, world.height() - sz) : world.height() / 2f;
                             if(control.input instanceof InputOverwrite ino){
-                                ino.pan(true, MI2UTmp.v1.set((x / width - 0.5f) * 2f * sz * tilesize + dx * tilesize, (y / height - 0.5f) * 2f * sz * tilesize + dy * tilesize));
+                                ino.pan(true, MI2UTmp.v1);
                             }else if(control.input instanceof DesktopInput inp){
                                 inp.panning = true;
-                                Core.camera.position.set(
-                                        ((x / width - 0.5f) * 2f * sz * tilesize + dx * tilesize),
-                                        ((y / height - 0.5f) * 2f * sz * tilesize + dy * tilesize));
+                                Core.camera.position.set(MI2UTmp.v1);
                             }
                         }catch(Exception e){
                             Log.err("Minimap", e);
@@ -264,6 +258,18 @@ public class MinimapMindow extends Mindow2{
                     }else{
                         ui.minimapfrag.toggle();
                     }
+                }
+
+                @Override
+                public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
+                    if(button == KeyCode.mouseRight && control.input.commandMode){
+                        setRect();
+                        untransform(MI2UTmp.v1.set(x, y));
+                        Core.camera.project(MI2UTmp.v1);
+                        control.input.commandTap(MI2UTmp.v1.x, MI2UTmp.v1.y);
+                    }
+
+                    return super.touchDown(event, x, y, pointer, button);
                 }
             });
     
@@ -309,6 +315,10 @@ public class MinimapMindow extends Mindow2{
         /** world 2 map ui */
         public Vec2 transform(Vec2 position){
             return position.sub(rect.x, rect.y).scl(width / rect.width, height / rect.height);
+        }
+        /** map 2 world */
+        public Vec2 untransform(Vec2 position){
+            return position.scl(rect.width / width, rect.height / height).add(rect.x, rect.y);
         }
 
         public float scale(float radius){
