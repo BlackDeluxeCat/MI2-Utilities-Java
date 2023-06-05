@@ -130,6 +130,7 @@ public class Mindow2 extends Table{
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, KeyCode button){
                 super.touchUp(event, x, y, pointer, button);
+                interval.get(0, 0);
                 Mindow2.this.toFront();
             }
         });
@@ -152,7 +153,6 @@ public class Mindow2 extends Table{
             }).height(titleButtonSize).update(b -> b.setChecked(minimized)).with(funcSetTextb);
         }
 
-        interval.get(0, 1);
         titleBar.update(() -> {
             cont.touchable = Touchable.enabled;
             //TODO add a abovesnap listener
@@ -177,13 +177,12 @@ public class Mindow2 extends Table{
         });
 
         var coll = new Collapser(titleBar, false);
-        coll.setCollapsed(true, () -> !(cont.getPrefHeight() < 20f || minimized || (!interval.check(0, 3000))));
+        coll.setCollapsed(true, () -> !(cont.getPrefHeight() < 20f || minimized || (hasMouse() && interval.check(0, 3000))));
         coll.setDuration(0.1f);
         coll.update(() -> {
             float w = titleBar.getPrefWidth(), h = titleBar.getPrefHeight();
             coll.setSize(w, h);
             coll.toFront();
-            if(hasMouse()) interval.get(0, 1);
 
             if(titleAlign == Align.topLeft) coll.setPosition(0f,getHeight() - h);
             else if(titleAlign == Align.topRight) coll.setPosition(0f,0f);
