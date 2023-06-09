@@ -394,8 +394,8 @@ public class LogicHelperMindow extends Mindow2{
 
             t.row();
 
-            t.pane(varsTable).growX().maxSize(Core.graphics.getWidth() / 4f, Core.graphics.getHeight() / 3f);
-        });
+            t.pane(varsTable).growX().maxHeight(Core.graphics.getHeight() / 3f);
+        }).growX();
 
         cont.update(() -> {
             exec = Reflect.get(ui.logic, "executor");

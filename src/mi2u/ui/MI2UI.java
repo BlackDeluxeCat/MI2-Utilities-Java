@@ -201,7 +201,6 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("enMenderZone", "@settings.main.menderZone", false, null));
         settings.add(new FieldEntry("flashZoneAlpha", "@settings.main.flashZoneAlpha", String.valueOf(50), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 0 && Strings.parseInt(s) <= 150, null));
         settings.add(new CheckEntry("enSpawnZone", "@settings.main.spawnZone", true, null));
-        settings.add(new CheckEntry("enDistributionReveal", "@settings.main.distributionReveal", true, null));
 
         settings.add(new CollapseGroupEntry("DistributionReveal", ""){
             CheckEntry check1 = new CheckEntry("enDistributionReveal", "@settings.main.distributionReveal", true, null);

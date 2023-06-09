@@ -69,6 +69,7 @@ public class MinimapMindow extends Mindow2{
             if(MI2USettings.getEntry(mindowName + ".drawFog") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawFog")).row();
             if(MI2USettings.getEntry(mindowName + ".drawIndicator") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawIndicator")).row();
             if(MI2USettings.getEntry(mindowName + ".drawObjective") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawObjective")).row();
+            buttons.touchable = Touchable.enabled;
         });
 
         Events.on(EventType.WorldLoadEvent.class, e -> {
@@ -80,7 +81,6 @@ public class MinimapMindow extends Mindow2{
     public void init() {
         super.init();
         mindowName = "MindowMap";
-        titleAlign = Align.bottomLeft;
     }
 
     @Override
@@ -116,15 +116,8 @@ public class MinimapMindow extends Mindow2{
                 }).fillX().growY().minHeight(32f);
             };
 
-            if(size < 32 * 3 + titleBar.getPrefWidth()){
-                b.get(t);
-                t.row();
-                t.add().growX();
-                l.get(t);
-            }else{
-                l.get(t);
-                b.get(t);
-            }
+            l.get(t);
+            b.get(t);
         }).growX();
     }
 
