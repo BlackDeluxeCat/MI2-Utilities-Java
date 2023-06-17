@@ -12,7 +12,7 @@ QOL Mod, powerful assists to vanilla gameplay. For destined Mindustry players.
 QQ Group(中文zh_cn) number: 875035496
 
 ### Contribution
-- PRs: l18n, bug fix, new feature.
+- PRs: l10n, bug fix, new feature.
 - Issues: bug report, suggestion.
 
 ---
