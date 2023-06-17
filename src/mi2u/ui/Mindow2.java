@@ -1,6 +1,7 @@
 package mi2u.ui;
 
 import arc.*;
+import arc.func.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.input.*;
@@ -40,56 +41,17 @@ public class Mindow2 extends Table{
     public static Drawable titleBarbgNormal, titleBarbgSnapped, white, gray2;
 
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
+    boolean dragging = false;
     public boolean minimized = false;
     public String titleText, helpInfo = "", mindowName;
     protected Table titleBar = new Table();
     protected Table cont = new Table();
     protected Seq<SettingEntry> settings = new Seq<>();
-    protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(1);
-    @Nullable public Element aboveSnap; public int edgesnap = Align.center;
-    public Element[] elemsnaps = new Element[4];
-
-    protected static Element uiFrame = new Element(){
-        float size = 60f;
-        Mat oldTransf = new Mat(), matTransf = new Mat();
-        Affine2 selfTransf = new Affine2();
-        {
-            this.touchable = Touchable.disabled;
-            Core.scene.add(this);
-        }
-
-        @Override
-        public void act(float delta){
-            super.act(delta);
-            this.toFront();
-            if(frameUI == null) return;
-            setSize(frameUI.width + 2 * size, frameUI.height + 2 * size);
-            setPosition(frameUI.curx - size, frameUI.cury - size);
-        }
-
-        @Override
-        public void draw(){
-            super.draw();
-            //Styles.black8.draw(x, y, width, height);
-            if(frameUI == null) return;
-            Draw.reset();
-            oldTransf.set(Draw.trans());
-            selfTransf.setToTranslation(frameUI.curx, frameUI.cury);
-            matTransf.set(selfTransf);
-            Draw.trans(matTransf);
-            float lerp = Mathf.pow(Mathf.mod(Time.time, 60f) / 60f, 0.4f);
-            Lines.stroke((1f - lerp) * 5f);
-            Draw.color(Color.acid);
-            int edge = frameUI.testEdgeSnap(frameUI.curx, frameUI.cury, 64f);
-            if(Align.isLeft(edge)) Lines.line(-lerp * size, -lerp * size, -lerp * size, frameUI.height + lerp * size);
-            if(Align.isRight(edge)) Lines.line(frameUI.width + lerp * size, -lerp * size, frameUI.width + lerp * size, frameUI.height + lerp * size);
-            if(Align.isBottom(edge)) Lines.line(-lerp * size, -lerp * size, frameUI.width + lerp * size, -lerp * size);
-            if(Align.isTop(edge)) Lines.line(-lerp * size, frameUI.height + lerp * size, frameUI.width + lerp * size, frameUI.height + lerp * size);
-            Draw.trans(oldTransf);
-            Draw.reset();
-        }
-    };
-    protected static Mindow2 frameUI;
+    protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(2);
+    public int edgesnap = Align.center;
+    @Nullable public Mindow2 tbSnap, lrSnap;
+    public int tbSnapAlign, lrSnapAlign;
+    public float tbLeftOff, lrBottomOff;
 
     public Mindow2(String title){
         init();
@@ -138,49 +100,33 @@ public class Mindow2 extends Table{
         title.name = "Mindow2Title";
         title.setAlignment(Align.left);
         title.addListener(new InputListener(){
-            boolean dragging = false;
             static Vec2 tmpv = new Vec2();
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
                 fromx = x;
                 fromy = y;
                 tmpv.set(curx, cury);
-                dragging = false;
-                frameUI = Mindow2.this;
                 return true;
             }
 
             @Override
             public void touchDragged(InputEvent event, float x, float y, int pointer){
-                frameUI = Mindow2.this;
-                var ints = mindow2s.mapInt(Element::getZIndex);
-                ints.sort();
-                Mindow2.this.setZIndex(Math.max(0, ints.first()));
                 Vec2 v = localToStageCoordinates(MI2UTmp.v1.set(x, y));
-                Vec2 v2 = title.localToStageCoordinates(MI2UTmp.v2.set(x, y));
-                Element hit = Core.scene.hit(v2.x, v2.y, false);
-                if(hit != null && hit.name != null && hit.name.equals("Mindow2Title") && !hit.isDescendantOf(Mindow2.this)){
-                    try{
-                        aboveSnap = hit.parent.parent.parent;
-                    }catch(Exception e){}
-                    return;
-                }
-                aboveSnap = null;
-                curx = v.x - fromx;
-                cury = v.y - fromy;
+                v.sub(fromx, fromy);
+                curx = v.x;
+                cury = v.y;
 
-                v2.set(curx, cury);
-                dragging = v2.sub(tmpv).len() > 5f;
+                setSnap(v.x, v.y);
+                dragging = v.sub(tmpv).len() > 5f;
             }
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, KeyCode button){
                 super.touchUp(event, x, y, pointer, button);
                 if(!dragging) interval.get(0, 0);
-                setSnap(curx, cury);
+                dragging = false;
                 Mindow2.this.toFront();
                 saveUISettings();
-                frameUI = null;
             }
         });
 
@@ -207,19 +153,20 @@ public class Mindow2 extends Table{
         titleBar.update(() -> {
             cont.touchable = Touchable.enabled;
             //TODO add a abovesnap listener
-            titleBar.setBackground(aboveSnap == null ? titleBarbgNormal : titleBarbgSnapped);
-            title.color.set(aboveSnap == null ? MI2UTmp.c1.set(0.8f,0.9f,1f,1f) : MI2UTmp.c1.set(0.1f,0.6f,0.6f,1f));
+            titleBar.setBackground(titleBarbgNormal);
+            title.color.set(MI2UTmp.c1.set(0.8f,0.9f,1f,1f));
 
-            if(aboveSnap != null){
-                setPosition(aboveSnap.x, aboveSnap.y, Align.isRight(edgesnap) ? Align.topRight : Align.topLeft);
-            }else if(edgesnap != Align.center && hasParent()){
-                Vec2 vec = MI2UTmp.v1;
-                vec.set(curx, cury);
-                edgeSnap(edgesnap, vec);
-                setPosition(vec.x, vec.y);
+            boolean slideAnime = edgeSnap(edgesnap);
+            slideAnime = slideAnime | elementSnap(tbSnap, tbSnapAlign, lrSnap == null && !Align.isLeft(edgesnap) && !Align.isRight(edgesnap));
+            slideAnime = slideAnime | elementSnap(lrSnap, lrSnapAlign, tbSnap == null && !Align.isBottom(edgesnap) && !Align.isTop(edgesnap));
+            if(slideAnime) interval.reset(1, 0);
+
+            if(!interval.check(1, 400)){
+                setPosition(Mathf.lerpDelta(x, curx, 0.4f), Mathf.lerpDelta(y, cury, 0.4f));
             }else{
                 setPosition(curx, cury);
             }
+
             keepInStage();
             invalidateHierarchy();
             pack();
@@ -248,15 +195,35 @@ public class Mindow2 extends Table{
         return Math.max(super.getPrefWidth(), titleBar.getPrefWidth());
     }
 
-    protected void edgeSnap(int align, Vec2 vec){
-        if(parent == null) return;
-        if(Align.isTop(align)) vec.y = parent.getHeight() - getPrefHeight();
-        if(Align.isBottom(align)) vec.y = 0;
-        if(Align.isRight(align)) vec.x = parent.getWidth() - getPrefWidth();
-        if(Align.isLeft(align)) vec.x = 0;
+    protected boolean edgeSnap(int align){
+        if(parent == null) return false;
+        if(Align.isTop(align)) cury = parent.getHeight() - getPrefHeight();
+        if(Align.isBottom(align)) cury = 0;
+        if(Align.isRight(align)) curx = parent.getWidth() - getPrefWidth();
+        if(Align.isLeft(align)) curx = 0;
+        return align != Align.center;
     }
 
-    public int testEdgeSnap(float mindowX, float mindowY, float dst){
+    protected boolean elementSnap(Element e, int align, boolean off){
+        if(e == null) return false;
+        if(Align.isTop(align)) cury = e.getY(Align.top);
+        if(Align.isBottom(align)) cury = e.getY(Align.bottom) - getHeight();
+
+        if(Align.isRight(align)) curx = e.getX(Align.right);
+        if(Align.isLeft(align)) curx = e.getX(Align.left) - getWidth();
+
+        if(off){
+            if(Align.isTop(align) || Align.isBottom(align)){
+                curx = e.x + tbLeftOff;
+            }
+            if(Align.isRight(align) || Align.isLeft(align)){
+                cury = e.y + lrBottomOff;
+            }
+        }
+        return true;
+    }
+
+    public int computeEdgeSnap(float mindowX, float mindowY, float dst){
         int top = Core.graphics.getHeight() - mindowY - getHeight() < dst ? Align.top : 0;
         int bottom = mindowY < dst ? Align.bottom : 0;
         int right = Core.graphics.getWidth() - mindowX - getWidth() < dst ? Align.right : 0;
@@ -265,8 +232,76 @@ public class Mindow2 extends Table{
     }
 
     public void setSnap(float mindowX, float mindowY){
-        edgesnap = testEdgeSnap(mindowX, mindowY, 64f);
+        edgesnap = computeEdgeSnap(mindowX, mindowY, 32f);
         if(edgesnap == 0) edgesnap = Align.center;
+
+        Func3<Float, Float, Float, Boolean> between = (v, min, max) -> max >= min && v <= max && v >= min;
+
+        lrSnap = null;
+        tbSnap = null;
+
+        float dst1 = Float.MAX_VALUE, dst2 = Float.MAX_VALUE, dst;
+        for(Mindow2 m : mindow2s){
+            if(m == this || m.mindowName.equals("")) continue;
+            if(m.lrSnap == this || m.tbSnap == this) continue;
+            if(!m.visible || !m.hasParent()) continue;
+
+            dst = Math.abs(m.getX(Align.left) - (mindowX + getWidth()));
+            if(dst < 32f && dst <= dst1 && between.get(mindowY, m.y - getHeight(), m.y + m.getHeight())){
+                dst1 = dst;
+                lrSnap = m;
+                lrSnapAlign = Align.left;
+                lrBottomOff = mindowY - m.y;
+            };
+
+            dst = Math.abs(m.getX(Align.right) - mindowX);
+            if(dst < 32f && dst <= dst1 && between.get(mindowY, m.y - getHeight(), m.y + m.getHeight())){
+                dst1 = dst;
+                lrSnap = m;
+                lrSnapAlign = Align.right;
+                lrBottomOff = mindowY - m.y;
+            };
+
+            dst = Math.abs(m.getY(Align.bottom) - (mindowY + getHeight()));
+            if(dst < 32f && dst <= dst2 && between.get(mindowX, m.x - getWidth(), m.x + m.getWidth())){
+                dst2 = dst;
+                tbSnap = m;
+                tbSnapAlign = Align.bottom;
+                tbLeftOff = mindowX - m.x;
+            };
+
+            dst = Math.abs(m.getY(Align.top) - mindowY);
+            if(dst < 32f && dst <= dst2 && between.get(mindowX, m.x - getWidth(), m.x + m.getWidth())){
+                dst2 = dst;
+                tbSnap = m;
+                tbSnapAlign = Align.top;
+                tbLeftOff = mindowX - m.x;
+            };
+        }
+        testSnaps();
+    }
+
+    public void testSnaps(){
+        ObjectSet<Mindow2> set = new ObjectSet<>();
+        set.add(this);
+        if(lrSnap != null && !lrSnap.testSnap(set)) lrSnap = null;
+        set.clear();
+        set.add(this);
+        if(tbSnap != null && !tbSnap.testSnap(set)) tbSnap = null;
+    }
+
+    //circular snapping
+    public boolean testSnap(ObjectSet<Mindow2> set){
+        set.add(this);
+        if(lrSnap != null && !set.add(lrSnap)){
+            return false;
+        }
+
+        if(tbSnap != null && !set.add(tbSnap)){
+            return false;
+        }
+
+        return (lrSnap == null || lrSnap.testSnap(set)) && (tbSnap == null || tbSnap.testSnap(set));
     }
 
     public boolean addTo(Group newParent){
@@ -332,16 +367,20 @@ public class Mindow2 extends Table{
         edgesnap = MI2USettings.getInt(mindowName + ".edgesnap", -1);
         curx = (float)MI2USettings.getInt(mindowName + ".curx");
         cury = (float)MI2USettings.getInt(mindowName + ".cury");
-        if(MI2USettings.getStr(mindowName + ".abovesnapTarget").equals("null")){
-            aboveSnap = null;
-        }else{
-            mindow2s.each(m -> {
-                if(m.mindowName.equals(MI2USettings.getStr(mindowName + ".abovesnapTarget"))){
-                    aboveSnap = m;
-                    Log.info(mindowName + " snaps to " + m.mindowName);
-                }
-            });
-        }
+        mindow2s.each(m -> {
+            if(m == this) return;
+            if(m.mindowName.equals(MI2USettings.getStr(mindowName + ".LRsnap", "null"))){
+                lrSnap = m;
+            }
+            if(m.mindowName.equals(MI2USettings.getStr(mindowName + ".TBsnap", "null"))){
+                tbSnap = m;
+            }
+        });
+        lrSnapAlign = MI2USettings.getInt(mindowName + ".LRsnapAlign");
+        lrBottomOff = MI2USettings.getInt(mindowName + ".LRsnapOff");
+        tbSnapAlign = MI2USettings.getInt(mindowName + ".TBsnapAlign");
+        tbLeftOff = MI2USettings.getInt(mindowName + ".TBsnapOff");
+        testSnaps();
         return true;
     }
 
@@ -364,6 +403,13 @@ public class Mindow2 extends Table{
         if(!Align.isLeft(edgesnap) && !Align.isRight(edgesnap)){
             MI2USettings.putInt(mindowName + ".curx", (int)curx);
         }
+
+        MI2USettings.putStr(mindowName + ".LRsnap", lrSnap == null ? "null" : lrSnap.mindowName);
+        MI2USettings.putInt(mindowName + ".LRsnapAlign", lrSnapAlign);
+        MI2USettings.putInt(mindowName + ".LRsnapOff", (int)lrBottomOff);
+        MI2USettings.putStr(mindowName + ".TBsnap", tbSnap == null ? "null" : tbSnap.mindowName);
+        MI2USettings.putInt(mindowName + ".TBsnapAlign", tbSnapAlign);
+        MI2USettings.putInt(mindowName + ".TBsnapOff", (int)tbLeftOff);
         return true;
     }
 
@@ -469,7 +515,7 @@ public class Mindow2 extends Table{
 
                                     mindow2s.each(mind -> {
                                         if(mind.parent != Mindow2.this.parent) return;
-                                        Draw.color(mind == Mindow2.this ? Color.coral : mind == aboveSnap ? Color.royal : Color.grays(0.4f));
+                                        Draw.color(mind == Mindow2.this ? Color.coral : Color.grays(0.4f));
                                         Draw.alpha(0.8f * parentAlpha * 0.8f);
                                         float mindw = (mind.getWidth()/Core.graphics.getWidth())*this.getWidth(),
                                                 mindh = (mind.getHeight()/Core.graphics.getHeight())*this.getHeight();
@@ -493,37 +539,6 @@ public class Mindow2 extends Table{
                             entry4.build(ttt);
                             ttt.row();
                             entry5.build(ttt);
-                        }).growX();
-
-                        rightt.row();
-
-                        rightt.table(t3 -> {
-                            var b = t3.button("@settings.mindow.abovesnapTarget", textb, null).growX().get();
-                            b.clicked(() -> {
-                                new PopupTable(){{
-                                    this.setBackground(Styles.black5);
-                                    this.defaults().growX().height(40f);
-                                    for(var m : mindow2s){
-                                        if(m == Mindow2.this || m.parent != Mindow2.this.parent) continue;
-                                        this.button(Core.bundle.get(new StringBuilder(m.titleText).substring(1)) + "(" + m.mindowName + ")", textbtoggle, () -> {
-                                            MI2USettings.putStr(mindowName + ".abovesnapTarget", m.mindowName);
-                                            aboveSnap = m;
-                                            this.hide();
-                                        }).with(funcSetTextb).get().setChecked(aboveSnap == m);
-                                        this.row();
-                                    }
-                                    this.button(Iconc.cancel + "null", textbtoggle, () -> {
-                                        MI2USettings.putStr(mindowName + ".abovesnapTarget", "null");
-                                        aboveSnap = null;
-                                        this.hide();
-                                    }).with(funcSetTextb).get().getLabel().setColor(Color.royal);
-                                    this.snapTo(b);
-                                    this.update(() -> this.hideWithoutFocusOn(this, buildTarget));
-                                    this.addCloseButton();
-                                    this.popup();
-                                }};
-                            });
-                            b.getLabelCell().pad(5f,2f,5f,2f);
                         }).growX();
                     }).minWidth(220f).pad(4f);
                 });
