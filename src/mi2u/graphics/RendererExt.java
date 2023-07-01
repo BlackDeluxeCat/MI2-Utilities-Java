@@ -49,7 +49,6 @@ public class RendererExt{
 
     public static boolean animatedshields;
     public static boolean enPlayerCursor, enUnitHitbox, enUnitHpBar, enUnitHpBarDamagedOnly, enUnitRangeZone, enOverdriveZone, enMenderZone, enTurretZone, enBlockHpBar, enDistributionReveal, drevealBridge, drevealJunction, drevealUnloader, drevealInventory, enSpawnZone, disableWreck, disableUnit, disableBuilding, disableBullet, shadow;
-    public static float flashZoneAlpha;
 
     public static void initBase(){
         BuildingInventory.init();
@@ -73,7 +72,6 @@ public class RendererExt{
     public static void updateSettings(){
         animatedshields = Core.settings.getBool("animatedshields");
 
-        flashZoneAlpha = MI2USettings.getInt("flashZoneAlpha", 50) / 100f;
         enPlayerCursor = MI2USettings.getBool("enPlayerCursor", false);
         enUnitHitbox = MI2USettings.getBool("enUnitHitbox");
         enUnitHpBar = MI2USettings.getBool("enUnitHpBar");
@@ -578,11 +576,21 @@ public class RendererExt{
     public static void drawMender(MendProjector.MendBuild mb){
         if(mb.efficiency() <= 0f) return;
         MendProjector block = (MendProjector)mb.block;
-        float alpha = Mathf.pow(1f - (mb.charge / block.reload), 5);
+        float pulse = Mathf.pow(1f - (mb.charge / block.reload), 5);
         Draw.z(91.2f);
-        Draw.color(block.baseColor);
-        Draw.alpha((animatedshields?0.6f:0.2f) * alpha * flashZoneAlpha + 0.12f);
-        Fill.poly(mb.x, mb.y, (int)(block.range + mb.phaseHeat * block.phaseRangeBoost) / 4, block.range + mb.phaseHeat * block.phaseRangeBoost);
+        if(animatedshields){
+            Draw.color(pulse > 0.9f ? Color.blue : Color.green);
+            Draw.alpha(0.1f);
+            Fill.poly(mb.x, mb.y, 24, block.range + mb.phaseHeat * block.phaseRangeBoost);
+            Draw.color(Color.blue, pulse > 0.1f ? pulse * 0.5f : 0f);
+            Lines.poly(mb.x, mb.y, 24, block.range + mb.phaseHeat * block.phaseRangeBoost);
+        }else{
+            Draw.color(block.baseColor);
+            Draw.alpha(0.05f * pulse);
+            Fill.poly(mb.x, mb.y, 24, block.range + mb.phaseHeat * block.phaseRangeBoost);
+            Draw.color(block.baseColor, pulse > 0.1f ? pulse * 0.5f : 0f);
+            Lines.poly(mb.x, mb.y, 24, block.range + mb.phaseHeat * block.phaseRangeBoost);
+        }
     }
 
     public static void drawRegen(RegenProjector.RegenProjectorBuild rb){
