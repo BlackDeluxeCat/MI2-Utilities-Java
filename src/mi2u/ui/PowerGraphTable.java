@@ -34,7 +34,6 @@ public class PowerGraphTable extends Table{
     static Element[][] blocksI = new Element[content.blocks().size][6];
 
     private static Interval interval = new Interval(2);
-    //P.G. set for ui generation, to keep P.G. order（让多电网的次序不会每次都变化）
     private final Seq<PGInfo> saved = new Seq<>();
     private float totalCap = 0f;
 
@@ -95,6 +94,7 @@ public class PowerGraphTable extends Table{
             bar.set(() -> barsWidth * info.totalcap / totalCap <= 50f ? "" : "" + UI.formatAmount((long)info.pg.getLastPowerStored()) + " " + (info.pg.getPowerBalance() >= 0 ? "+" : "") + UI.formatAmount((long)(info.pg.getPowerBalance() * 60)), () -> info.pg.getLastPowerStored() / info.totalcap, Pal.accent);
             bar.blink(Color.white).outline(MI2UTmp.c2.set(0.3f, 0.3f, 0.6f, 0.3f), 2f);
 
+            bar.clearListeners();
             bar.clicked(() -> {
                 if(control.input instanceof InputOverwrite iow) iow.pan(true, MI2UTmp.v1.set(info.pg.all.random()));
             });
