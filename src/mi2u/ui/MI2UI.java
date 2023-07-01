@@ -16,6 +16,7 @@ import mindustry.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.ui.*;
+import mindustry.world.blocks.*;
 
 import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
@@ -38,6 +39,19 @@ public class MI2UI extends Mindow2{
                 runTime += Time.timeSinceMillis(lastRunTime);
                 lastRealRun = Time.millis();
                 lastRunTime = Time.millis();
+
+                if(!net.active() && state.isGame() && !state.isPaused() && player.unit() != null && MI2USettings.getBool("instantBuild", true)){
+                    player.unit().plans.each(bp -> {
+                        var tile = world.tiles.getc(bp.x, bp.y);
+                        if(bp.breaking){
+                            tile.setAir();
+                        }else{
+                            Call.beginPlace(player.unit(), bp.block, player.team(), bp.x, bp.y, bp.rotation);
+                            if(bp.tile().build instanceof ConstructBlock.ConstructBuild cb) cb.construct(player.unit(), null, 1f, bp.config);
+                            player.unit().plans.remove(bp);
+                        }
+                    });
+                }
             }
         });
 
@@ -199,7 +213,6 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("enPlayerCursor", "@settings.main.playerCursor", true, null));
         settings.add(new CheckEntry("enOverdriveZone", "@settings.main.overdriveZone", false, null));
         settings.add(new CheckEntry("enMenderZone", "@settings.main.menderZone", false, null));
-        settings.add(new FieldEntry("flashZoneAlpha", "@settings.main.flashZoneAlpha", String.valueOf(50), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 0 && Strings.parseInt(s) <= 150, null));
         settings.add(new CheckEntry("enSpawnZone", "@settings.main.spawnZone", true, null));
 
         settings.add(new CollapseGroupEntry("DistributionReveal", ""){
@@ -275,6 +288,8 @@ public class MI2UI extends Mindow2{
         });
 
         settings.add(new FieldEntry("maxSchematicSize", "@settings.main.maxSchematicSize", String.valueOf(32), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 16 && Strings.parseInt(s) <= 512, s -> Vars.maxSchematicSize = Mathf.clamp(Strings.parseInt(s), 16, 512)));
+
+        settings.add(new CheckEntry("instantBuild", "@settings.main.instantBuild", true, null));
 
         settings.add(new FieldEntry("blockSelectTableHeight", "@settings.main.blockSelectTableHeight", String.valueOf(194), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 1000, null));
 
