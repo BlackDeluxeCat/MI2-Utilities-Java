@@ -473,6 +473,7 @@ public class FullAI extends AIController{
             if(timer.get(500)){
                 ai.targetTimer = 0f;
                 ai.controlTimer = LogicAI.logicControlTimeout;
+                ai.updateMovement();
             }
 
             unit.controller(ctrl);
