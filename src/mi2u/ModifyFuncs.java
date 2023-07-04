@@ -167,7 +167,7 @@ public class ModifyFuncs{
             st.pane(t -> {
                 t.name = "Mindow Help";
                 for(var m : mindow2s){
-                    if(!m.mindowName.equals("")) t.button(Iconc.infoCircle + Core.bundle.get(m.titleText), textb, m::showHelp).with(funcSetTextb).pad(4f);
+                    if(!m.mindowName.equals("")) t.button(Iconc.infoCircle + Core.bundle.get(m.titleText.substring(1)), textb, m::showHelp).with(funcSetTextb).pad(4f);
                 }
             }).with(p -> {
                 p.setForceScroll(true, false);
