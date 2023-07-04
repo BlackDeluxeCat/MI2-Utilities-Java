@@ -116,12 +116,12 @@ public class MI2UI extends Mindow2{
                         else img.setRotation(0f);
                         img.setColor(!b.isChecked() ? Color.white : SpeedController.lowerThanMin() ? Color.scarlet : Color.lime);
                     }).left();
-                    bii.add().growX();
-                }).growX();
+                    bii.add().grow();
+                }).grow();
                 b.getLabelCell().expand(false, false).fill(false).width(0.5f);
                 b.getLabel().setAlignment(Align.right);
                 b.getCells().swap(0,1);
-            }).growX();
+            }).grow();
         }).fillX();
 
         cont.row();
@@ -155,7 +155,7 @@ public class MI2UI extends Mindow2{
                 fullAI.modes.each(mode -> {
                     ttt.button(mode.btext, textbtoggle, () -> {
                         mode.enable = !mode.enable;
-                    }).checked(b -> mode.enable).minSize(36f).with(c -> {
+                    }).checked(b -> mode.enable).minSize(32f).with(c -> {
                         c.getLabel().setAlignment(Align.center);
                     }).grow();
                 });
@@ -197,7 +197,7 @@ public class MI2UI extends Mindow2{
                     button.addChild(label);
                 }
             }).growX();
-        }, () -> true).growX().get().setDuration(0.25f).setCollapsed(true, () -> !Vars.control.input.commandMode).setCollapsed(!Vars.control.input.commandMode);
+        }, () -> true).growX().get().setDuration(0.15f).setCollapsed(true, () -> !Vars.control.input.commandMode).setCollapsed(!Vars.control.input.commandMode);
 
     }
 
