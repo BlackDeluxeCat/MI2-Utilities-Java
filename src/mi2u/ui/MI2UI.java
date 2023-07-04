@@ -291,6 +291,16 @@ public class MI2UI extends Mindow2{
 
         settings.add(new CheckEntry("instantBuild", "@settings.main.instantBuild", true, null));
 
+        settings.add(new CollapseGroupEntry("BlockSelectTable", ""){
+            CheckEntry check1 = new CheckEntry("modifyBlockSelectTable", "@settings.main.modifyBlockSelectTable", false, null);
+            FieldEntry check2 = new FieldEntry("blockSelectTableHeight", "@settings.main.blockSelectTableHeight", String.valueOf(194), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 1000, null);
+            {
+                collapsep = () -> !check1.value;
+                headBuilder = t -> check1.build(t);
+                builder = t -> check2.build(t);
+            }
+        });
+
         settings.add(new FieldEntry("blockSelectTableHeight", "@settings.main.blockSelectTableHeight", String.valueOf(194), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 1000, null));
 
         settings.add(new FieldEntry("rtsFormDoubleTap", "@settings.main.rtsFormDoubleTap", "300", TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) > 0, s -> RtsCommand.doubleTapInterval = Strings.parseInt(s)));
