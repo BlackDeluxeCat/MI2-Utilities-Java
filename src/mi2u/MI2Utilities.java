@@ -3,9 +3,7 @@ package mi2u;
 import arc.*;
 import arc.graphics.*;
 import arc.scene.ui.*;
-import arc.scene.ui.layout.*;
 import arc.util.*;
-import arc.util.serialization.*;
 import mi2u.graphics.*;
 import mi2u.input.*;
 import mi2u.io.*;
@@ -17,8 +15,8 @@ import mindustry.ui.*;
 
 import java.util.regex.*;
 
-import static mindustry.Vars.*;
 import static mi2u.MI2UVars.*;
+import static mindustry.Vars.*;
 
 
 public class MI2Utilities extends Mod{

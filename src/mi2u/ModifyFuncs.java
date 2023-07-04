@@ -164,6 +164,15 @@ public class ModifyFuncs{
         ui.settings.addCategory("@mindow2.settings.title", new TextureRegionDrawable(new TextureRegion(MI2Utilities.MOD.iconTexture)), st ->{
             st.add("@mindow2.settings.allIntro");
             st.row();
+            st.pane(t -> {
+                t.name = "Mindow Help";
+                for(var m : mindow2s){
+                    if(!m.mindowName.equals("")) t.button(Iconc.infoCircle + Core.bundle.get(m.titleText), textb, m::showHelp).with(funcSetTextb).pad(4f);
+                }
+            }).with(p -> {
+                p.setForceScroll(true, false);
+            }).growX();
+            st.row();
             st.table(t -> {
                 int index = 0;
                 for(var entry : MI2USettings.entries){
