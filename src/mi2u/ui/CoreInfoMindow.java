@@ -90,7 +90,7 @@ public class CoreInfoMindow extends Mindow2{
                 rebuild();
             }
 
-            if(player.unit() != null && player.unit().plans().isEmpty() && control.input.selectPlans.isEmpty()){
+            if(player.unit() != null && player.unit().plans().isEmpty() && control.input.selectPlans.isEmpty() || !(this.visible && this.hasParent())){
                 buildPlanTable.hide();
                 buildPlanTable.clearChildren();
             }else{
