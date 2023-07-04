@@ -96,21 +96,21 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
     }
 
     @Override
-    public void boost(Boolean boost){
+    public void boost(boolean boost){
         ctrlBoost = true;
         this.boost = boost;
     }
 
     /** set ctrl to false to cancel control*/
     @Override
-    public void pan(Boolean ctrl, Vec2 panXY){
+    public void pan(boolean ctrl, Vec2 panXY){
         if(ctrl) panTimer.reset(0,0);  //set a timer for extended smooth panning
         panning = ctrl;
         this.panXY.set(panXY);
     }
 
     @Override
-    public void shoot(Vec2 vec, Boolean shoot, Boolean ctrl){
+    public void shoot(Vec2 vec, boolean shoot, boolean ctrl){
         ctrlShoot = ctrl;
         shootXY.set(vec);
         this.shoot = shoot;

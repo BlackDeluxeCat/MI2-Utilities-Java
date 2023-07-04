@@ -9,13 +9,17 @@ import static mindustry.Vars.*;
 
 /** The inputOverwrite accept commands and change control states, implements of control should be overwritten and run according to states on each update. */
 public interface InputOverwrite{
-    default void build(Boolean build){};
+    default void headless(boolean headless){};
+    default boolean headless(){
+        return false;
+    };
+    default void build(boolean build){};
 
-    default void boost(Boolean boost){};
+    default void boost(boolean boost){};
 
-    default void pan(Boolean ctrl, Vec2 panXY){};
+    default void pan(boolean ctrl, Vec2 panXY){};
 
-    default void shoot(Vec2 vec, Boolean shoot, Boolean ctrl){};
+    default void shoot(Vec2 vec, boolean shoot, boolean ctrl){};
 
     default void move(Vec2 movement){};
 

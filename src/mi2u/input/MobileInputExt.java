@@ -63,19 +63,19 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
     }
 
     @Override
-    public void boost(Boolean value){
+    public void boost(boolean value){
         ctrlBoost = true;
         boost = value;
     }
 
     @Override
-    public void pan(Boolean ctrl, Vec2 panXY){
+    public void pan(boolean ctrl, Vec2 panXY){
         if(ctrl) panTimer.reset(0,0f);  //set a timer for extended smooth panning
         this.panXY.set(panXY);
     }
 
     @Override
-    public void shoot(Vec2 vec, Boolean value, Boolean ctrl){
+    public void shoot(Vec2 vec, boolean value, boolean ctrl){
         ctrlShoot = ctrl;
         shootXY.set(vec);
         shoot = value;
