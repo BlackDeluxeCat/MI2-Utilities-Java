@@ -40,7 +40,7 @@ public class MI2UI extends Mindow2{
                 lastRealRun = Time.millis();
                 lastRunTime = Time.millis();
 
-                if(!net.active() && state.isGame() && !state.isPaused() && player.unit() != null && MI2USettings.getBool("instantBuild", true)){
+                if(state.rules.mode() == Gamemode.sandbox && !net.active() && state.isGame() && !state.isPaused() && player.unit() != null && MI2USettings.getBool("instantBuild", true)){
                     player.unit().plans.each(bp -> {
                         var tile = world.tiles.getc(bp.x, bp.y);
                         if(bp.breaking){

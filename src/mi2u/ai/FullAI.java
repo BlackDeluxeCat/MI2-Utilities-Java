@@ -465,15 +465,15 @@ public class FullAI extends AIController{
             var ctrl = unit.controller();
             unit.controller(ai);
 
-            for(int i = 0; i < Mathf.clamp(instructionsPerTick, 1, 2000); i++){
-                exec.setconst(LExecutor.varUnit, unit);
-                exec.runOnce();
-            }
-
-            if(timer.get(500)){
+            if(timer.get(200)){
                 ai.targetTimer = 0f;
                 ai.controlTimer = LogicAI.logicControlTimeout;
                 ai.updateMovement();
+            }
+
+            for(int i = 0; i < Mathf.clamp(instructionsPerTick, 1, 2000); i++){
+                exec.setconst(LExecutor.varUnit, unit);
+                exec.runOnce();
             }
 
             unit.controller(ctrl);
