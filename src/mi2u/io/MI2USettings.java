@@ -219,22 +219,17 @@ public class MI2USettings{
     }
 
     public static class SingleEntry extends SettingEntry{
-        public MI2USetting setting;
+        public @Nullable MI2USetting setting;
 
         public SingleEntry(String name, String help){
             super(name, help);
             setting = getSetting(name);
-            checkInitSetting();
         }
 
         @Override
         public void build(Table table){
             setting = getSetting(name);
             table.labelWrap(() -> this.name + " = " + (setting != null ? setting.get() : "invaild")).left().growX().get().setColor(0, 1, 1, 0.7f);
-        }
-
-        public void checkInitSetting(){
-            if(setting == null) setting = new MI2USetting(name, "");
         }
     }
 
@@ -293,7 +288,6 @@ public class MI2USettings{
         public Cons<String> changed;
         public TextFieldFilter filter;
         public TextFieldValidator validator;
-        public String value;
 
         public FieldEntry(String name, String help, String def, TextFieldFilter filter, TextFieldValidator validator, Cons<String> changed){
             super(name, help);
@@ -301,7 +295,6 @@ public class MI2USettings{
             this.filter = filter;
             this.validator = validator;
             if(setting == null) setting = putStr(name, def);    //父类构造时已按name尝试抓取，子类构造只需要按def类型处理put
-            value = setting.value;
         }
 
         @Override
