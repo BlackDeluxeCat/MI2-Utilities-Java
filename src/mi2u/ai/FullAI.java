@@ -13,7 +13,6 @@ import mi2u.game.*;
 import mi2u.input.*;
 import mi2u.io.*;
 import mi2u.ui.*;
-import mindustry.*;
 import mindustry.ai.types.*;
 import mindustry.content.*;
 import mindustry.entities.*;
@@ -22,6 +21,7 @@ import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.input.*;
 import mindustry.logic.*;
+import mindustry.logic.LExecutor.*;
 import mindustry.type.*;
 import mindustry.type.weapons.RepairBeamWeapon;
 import mindustry.world.*;
@@ -440,6 +440,7 @@ public class FullAI extends AIController{
     }
 
     public class LogicMode extends Mode{
+        static final Seq<Class<? extends LInstruction>> bannedInstructions = new Seq<>();
         LExecutor exec = new LExecutor();
         String code;
         LogicAI ai = new LogicAI();
@@ -451,6 +452,8 @@ public class FullAI extends AIController{
 
         public LogicMode(){
             super();
+            bannedInstructions.clear();
+            bannedInstructions.addAll(ControlI.class, WriteI.class, StopI.class, SetBlockI.class, SpawnUnitI.class, ApplyEffectI.class, SetRuleI.class, SetRateI.class, ExplosionI.class, SetFlagI.class, SpawnWaveI.class, SetPropI.class);
             btext = Iconc.blockWorldProcessor + "";
             Events.on(MI2UEvents.FinishSettingInitEvent.class, e -> {
                 code = MI2USettings.getStr("ai.logic.code.0");
@@ -472,7 +475,9 @@ public class FullAI extends AIController{
             }
 
             for(int i = 0; i < Mathf.clamp(instructionsPerTick, 1, 2000); i++){
+                if(exec.instructions.length == 0) break;
                 exec.setconst(LExecutor.varUnit, unit);
+                if((net.client() || state.rules.mode() != Gamemode.sandbox) && bannedInstructions.contains(exec.instructions[Mathf.mod((int)(exec.counter.numval), exec.instructions.length)].getClass())) continue;
                 exec.runOnce();
             }
 
