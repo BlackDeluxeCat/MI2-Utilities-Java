@@ -12,6 +12,7 @@ import mi2u.*;
 import mi2u.game.*;
 import mi2u.input.*;
 import mi2u.io.*;
+import mi2u.struct.*;
 import mi2u.ui.*;
 import mindustry.ai.types.*;
 import mindustry.content.*;
@@ -136,7 +137,11 @@ public class FullAI extends AIController{
                     mining = false;
                 }else{
                     if(timer.get(1, 60) && targetItem != null){
-                        ore = indexer.findClosestOre(unit, targetItem);
+                        if(unit.type.mineWalls){
+                            //TODO wall ore
+                        }else{
+                            ore = indexer.findClosestOre(unit, targetItem);
+                        }
                     }
                     if(ore != null){
                         moveAction(ore, 50f, false);
