@@ -221,9 +221,9 @@ public class FullAI extends AIController{
                             float dist = Math.min(cons.dst(unit) - buildingRange, 0);
 
                             //make sure you can reach the request in time
-                            if(dist / unit.speed() < cons.buildCost * 0.9f && (cobuildplan == null || MI2UTmp.v1.set(u.buildPlan()).dst(unit) < MI2UTmp.v2.set(cobuildplan).dst(unit))){
+                            if(dist / unit.speed() < cons.buildCost * 0.9f && (cobuildplan == null || MI2UTmp.v1.set(plan).dst(unit) < MI2UTmp.v2.set(cobuildplan).dst(unit))){
                                 boolean itemreq = true;
-                                for(var item : cobuildplan.block.requirements){
+                                for(var item : plan.block.requirements){
                                     if(player.team().core() != null && !player.team().core().items.has(item.item)){
                                         itemreq = false;
                                         break;
