@@ -312,13 +312,10 @@ public class HoverTopTable extends PopupTable{
         Tile hoverTile = world.tileWorld(Core.input.mouseWorld().x, Core.input.mouseWorld().y);
         if(hoverTile != null){
             //if the tile has a building, display it
-            build = hoverTile.build;
+            build = hoverTile.build != null && state.rules.fog && hoverTile.build.inFogTo(player.team()) ? null : hoverTile.build;
             MI2Utils.setValue(ui.hudfrag.blockfrag, "nextFlowBuild", build);
 
-            //if the tile has a drop, display the drop
-            //if(hoverTile.drop() != null || hoverTile.wallDrop() != null){
-                tile = hoverTile;
-            //}
+            tile = hoverTile;
         }else{
             build = null;
             MI2Utils.setValue(ui.hudfrag.blockfrag, "nextFlowBuild", build);
@@ -335,9 +332,5 @@ public class HoverTopTable extends PopupTable{
     public boolean hasInfo(){
         hovered();
         return unit != null || tile != null || build != null;
-    }
-
-    public void addColorBar(Table table){
-        table.table(Tex.whiteui).height(4f).growX().pad(4f,0f,4f,0f).color(Color.grays(0.2f));
     }
 }

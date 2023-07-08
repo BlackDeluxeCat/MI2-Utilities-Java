@@ -80,7 +80,7 @@ public class BuildingInventory extends Element{
 
     @Override
     public void draw(){
-        if(!vaild()) return;
+        if(!vaild() || (state.rules.fog && build.inFogTo(player.team()))) return;
         super.draw();
         Draw.alpha(1f);
         Draw.color(Color.white);
