@@ -45,8 +45,8 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
             if(player.shooting){
                 player.mouseX = shootXY.x;
                 player.mouseY = shootXY.y;
-                Vec2 aimxy = MI2UTmp.v1.set(player.mouseX, player.mouseY);
-                unit.aim(unit.type.faceTarget ? aimxy : Tmp.v1.trns(unit.rotation, aimxy.dst(unit)).add(unit.x, unit.y));
+                Vec2 aimxy = shootXY;
+                unit.aim(aimxy);
 
                 float mouseAngle = Angles.mouseAngle(unit.x, unit.y);
                 boolean aimCursor = unit.type.omniMovement && player.shooting && unit.type.hasWeapons() && unit.type.faceTarget && !boosted;
