@@ -48,6 +48,7 @@ public class RendererExt{
             lexecTimer = MI2Utils.getField(LExecutor.class, "unitTimeouts");
 
     public static boolean animatedshields;
+    public static String unitHpBarStyle;
     public static boolean enPlayerCursor, enUnitHitbox, enUnitHpBar, enUnitHpBarDamagedOnly, enUnitRangeZone, enOverdriveZone, enMenderZone, enTurretZone, enBlockHpBar, enDistributionReveal, drevealBridge, drevealJunction, drevealUnloader, drevealInventory, enSpawnZone, disableWreck, disableUnit, disableBuilding, disableBullet, shadow;
 
     public static void initBase(){
@@ -71,6 +72,8 @@ public class RendererExt{
 
     public static void updateSettings(){
         animatedshields = Core.settings.getBool("animatedshields");
+
+        unitHpBarStyle = MI2USettings.getStr("unitHpBarStyle", "1");
 
         enPlayerCursor = MI2USettings.getBool("enPlayerCursor", false);
         enUnitHitbox = MI2USettings.getBool("enUnitHitbox");
@@ -106,7 +109,7 @@ public class RendererExt{
         drawZoneShader();
 
         Groups.draw.each(d -> {
-            //No-bug way. TODO find out the reason of Bullet wrong removeIndex.
+            //No-bug way.
             if(disableWreck && d instanceof Decal dd){
                 Groups.draw.removeIndex(dd, MI2Utils.getValue(drawIndexDecal, dd));
                 dd.setIndex__draw(-1);
@@ -226,7 +229,7 @@ public class RendererExt{
         if(Math.abs(unit.x - Core.camera.position.x) <= (Core.camera.width / 2) && Math.abs(unit.y - Core.camera.position.y) <= (Core.camera.height / 2)){
             //display healthbar by MI2
             Draw.z(Layer.shields + 6f);
-            if(enUnitHpBar && (unit.shield > Math.min(0.5f * unit.maxHealth, 100f) || !enUnitHpBarDamagedOnly || unit.damaged())){
+            if(enUnitHpBar){
                 drawUnitHpBar(unit);
             }
 
@@ -255,11 +258,20 @@ public class RendererExt{
                         Draw.color(0.2f, 1f, 0.2f, 0.6f);
                         Fill.arc(unit.x, unit.y, 4f, 1f - Mathf.clamp((Time.time - utimer.get(unit.id)) / LogicAI.transferDelay), 90f, 16);
                     }
+
                     if(Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) <= 3200f){
                         Lines.stroke(1f);
-                        Draw.color(0.2f, 0.2f, 1f, 0.8f);
-                        Lines.dashLine(unit.x, unit.y, logicai.moveX, logicai.moveY, (int) (Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) / 8));
-                        Lines.dashCircle(logicai.moveX, logicai.moveY, logicai.moveRad);
+
+                        if(logicai.control == LUnitControl.pathfind && !unit.isFlying()){
+                            Draw.color(Color.blue, Color.gray, Mathf.absin(Time.time, 8f, 1f));
+                            Draw.alpha(0.8f);
+                            drawUnitPath(unit, MI2Utils.getValue(logicai, "lastPathId"), MI2UTmp.v2.set(logicai.moveX, logicai.moveY));
+                        }else{
+                            Draw.color(Color.blue, 0.8f);
+                            Lines.dashLine(unit.x, unit.y, logicai.moveX, logicai.moveY, (int) (Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) / 8));
+                            Lines.dashCircle(logicai.moveX, logicai.moveY, logicai.moveRad);
+                        }
+
                         Draw.reset();
                     }
                 }
@@ -301,29 +313,8 @@ public class RendererExt{
                     Lines.stroke(1.5f);
 
                     if(unit.isGrounded()){
-                        try{
-                            Tile tile = unit.tileOn();
-                            ObjectMap requests = MI2Utils.getValue(controlPath, "requests");
-                            Object req = requests.get(unit);
-                            IntSeq result = MI2Utils.getValue(req, "result");
-                            int start = MI2Utils.getValue(req, "rayPathIndex");
-                            for(int tileIndex = start; tileIndex < result.size; tileIndex++){
-                                Tile nextTile = world.tiles.geti(result.get(tileIndex));
-                                if(nextTile == null) break;
-                                if(!Core.camera.bounds(MI2UTmp.r1).contains(tile.worldx(), tile.worldy()) && !Core.camera.bounds(MI2UTmp.r1).contains(nextTile.worldx(), nextTile.worldy())) continue;  //Skip paths outside screen
-                                if(nextTile == tile) break;
-                                Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
-                                if(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) > 4000f) break;
-                                Lines.dashLine(tile.worldx(), tile.worldy(), nextTile.worldx(), nextTile.worldy(), (int)(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) / 4f));
-                                tile = nextTile;
-                            }
-                        }catch(Exception ignore){
-                            boolean move = controlPath.getPathPosition(unit, MI2Utils.getValue(ai, "pathId"), ai.targetPos, MI2UTmp.v1);
-                            if(move){
-                                Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
-                                Lines.dashLine(unit.x, unit.y, MI2UTmp.v1.x, MI2UTmp.v1.y, (int)(Mathf.len(MI2UTmp.v1.x - unit.x, MI2UTmp.v1.y - unit.y) / 4f));
-                            }
-                        }
+                        Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
+                        drawUnitPath(unit, MI2Utils.getValue(ai, "pathId"), ai.targetPos);
                     }
 
                     if(ai.targetPos != null){
@@ -355,47 +346,84 @@ public class RendererExt{
         }
     }
 
-    public static void drawUnitHpBar(Unit unit){
-        float width = 1.2f, halfwidth = width / 2f;
+    public static void drawUnitPath(Unit unit, int pathId, Vec2 destination){
+        try{
+            Tile tile = unit.tileOn();
+            ObjectMap requests = MI2Utils.getValue(controlPath, "requests");
+            Object req = requests.get(unit);
+            IntSeq result = MI2Utils.getValue(req, "result");
+            int start = MI2Utils.getValue(req, "rayPathIndex");
+            for(int tileIndex = start; tileIndex < result.size; tileIndex++){
+                Tile nextTile = world.tiles.geti(result.get(tileIndex));
+                if(nextTile == null) break;
+                if(!Core.camera.bounds(MI2UTmp.r1).contains(tile.worldx(), tile.worldy()) && !Core.camera.bounds(MI2UTmp.r1).contains(nextTile.worldx(), nextTile.worldy())) continue;  //Skip paths outside screen
+                if(nextTile == tile) break;
+                if(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) > 4000f) break;
 
-        if(unit.hitTime > 0f){
-            Lines.stroke(4f + Mathf.lerp(0f, 2f, unit.hitTime));
-            Draw.color(Color.white, Mathf.lerp(0.1f, 1f, unit.hitTime));
-            Lines.line(unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f), unit.x + unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f));
-        }
+                Lines.dashLine(tile.worldx(), tile.worldy(), nextTile.worldx(), nextTile.worldy(), (int)(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) / 4f));
 
-        Lines.stroke(4f);
-        Draw.color(unit.team.color, 0.5f);
-        Lines.line(unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f), unit.x + unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f));
-
-        Draw.color((unit.health > 0 ? Pal.health:Color.gray), 0.8f);
-        Lines.stroke(2);
-        Lines.line(
-                unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f),
-                unit.x + unit.hitSize * ((unit.health > 0 ? unit.health : Mathf.maxZero(unit.maxHealth + unit.health)) / unit.maxHealth * width - halfwidth), unit.y + (unit.hitSize / 2f));
-
-        if(unit.shield > 0){
-            for(int didgt = 1; didgt <= Mathf.digits((int)(unit.shield / unit.maxHealth)) + 1; didgt++){
-                Draw.color(Pal.shield, 0.8f);
-                float barLength = Mathf.mod(unit.shield / unit.maxHealth, Mathf.pow(10f, (float)didgt - 1f)) / Mathf.pow(10f, (float)didgt - 1f);
-                if(didgt > 1){
-                    float y = unit.y + unit.hitSize / 2f + didgt * 2f;
-                    float h = 2f;
-                    int counts = Mathf.floor(barLength * 10f);
-                    for(float i = 1; i <= counts; i++){
-                        Fill.rect(unit.x - 0.55f * unit.hitSize + (i - 1f) * 0.12f * unit.hitSize, y, 0.1f * unit.hitSize, h);
-                    }
-                }else{
-                    float x = unit.x - (1f - barLength) * halfwidth * unit.hitSize;
-                    float y = unit.y + unit.hitSize / 2f + didgt * 2f;
-                    float h = 2f;
-                    float w = width * barLength * unit.hitSize;
-                    Fill.rect(x, y, w, h);
-                }
+                tile = nextTile;
+            }
+        }catch(Exception ignore){
+            boolean move = controlPath.getPathPosition(unit, pathId, destination, MI2UTmp.v1);
+            if(move){
+                Lines.dashLine(unit.x, unit.y, MI2UTmp.v1.x, MI2UTmp.v1.y, (int)(Mathf.len(MI2UTmp.v1.x - unit.x, MI2UTmp.v1.y - unit.y) / 4f));
             }
         }
 
-        Draw.reset();
+    }
+
+    public static void drawUnitHpBar(Unit unit){
+        float width = 1.2f, halfwidth = width / 2f;
+        if(unit.shield > Math.min(0.5f * unit.maxHealth, 100f) || !enUnitHpBarDamagedOnly || unit.damaged()){
+            if(unit.hitTime > 0f){
+                Lines.stroke(4f + Mathf.lerp(0f, 2f, unit.hitTime));
+                Draw.color(Color.white, Mathf.lerp(0.1f, 1f, unit.hitTime));
+                Lines.line(unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f), unit.x + unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f));
+            }
+
+            Lines.stroke(4f);
+            Draw.color(unit.team.color, 0.5f);
+            Lines.line(unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f), unit.x + unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f));
+
+            Draw.color((unit.health > 0 ? Pal.health:Color.gray), 0.8f);
+            Lines.stroke(2);
+            Lines.line(
+                    unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f),
+                    unit.x + unit.hitSize * ((unit.health > 0 ? unit.health : Mathf.maxZero(unit.maxHealth + unit.health)) / unit.maxHealth * width - halfwidth), unit.y + (unit.hitSize / 2f));
+
+            if(unit.shield > 0){
+                if(unitHpBarStyle.equals("1")){
+                    for(int didgt = 1; didgt <= Mathf.digits((int)(unit.shield / unit.maxHealth)) + 1; didgt++){
+                        Draw.color(Pal.shield, 0.8f);
+                        float barLength = Mathf.mod(unit.shield / unit.maxHealth, Mathf.pow(10f, (float)didgt - 1f)) / Mathf.pow(10f, (float)didgt - 1f);
+                        if(didgt > 1){
+                            float y = unit.y + unit.hitSize / 2f + didgt * 2f;
+                            float h = 2f;
+                            int counts = Mathf.floor(barLength * 10f);
+                            for(float i = 1; i <= counts; i++){
+                                Fill.rect(unit.x - 0.55f * unit.hitSize + (i - 1f) * 0.12f * unit.hitSize, y, 0.1f * unit.hitSize, h);
+                            }
+                        }else{
+                            float x = unit.x - (1f - barLength) * halfwidth * unit.hitSize;
+                            float y = unit.y + unit.hitSize / 2f + didgt * 2f;
+                            float h = 2f;
+                            float w = width * barLength * unit.hitSize;
+                            Fill.rect(x, y, w, h);
+                        }
+                    }
+                }else{
+                    Draw.color(Pal.shield, 0.8f);
+                    Lines.stroke(2);
+                    Lines.line(
+                            unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f),
+                            unit.x + unit.hitSize * (Mathf.mod(unit.shield / unit.maxHealth, 1f) * width - halfwidth), unit.y + (unit.hitSize / 2f));
+                    if(unit.shield > unit.maxHealth) drawText("x" + Mathf.floor(unit.shield / unit.maxHealth), unit.x + unit.hitSize * halfwidth - 4f, unit.y + (unit.hitSize / 2f), Pal.shield, 1f, Align.left);
+                }
+            }
+
+            Draw.reset();
+        }
 
         float index = 0f;
         int columns = Mathf.floor(unit.hitSize * width / 4f);
@@ -807,7 +835,6 @@ public class RendererExt{
     }
 
     public static void drawRouter(Router.RouterBuild rb){
-        Router block = (Router)rb.block;
         Building fromb = rb.lastInput == null ? null : rb.lastInput.build;
         Building tob = rb.proximity.size == 0 ? null : rb.proximity.get(((rb.rotation) % rb.proximity.size - 1 + rb.proximity.size) % rb.proximity.size);
 
@@ -872,7 +899,7 @@ public class RendererExt{
         Draw.reset();
     }
 
-    public static void drawText(String text, float x, float y, Color color, float scl,  int align){
+    public static void drawText(String text, float x, float y, Color color, float scl, int align){
         Font font = Fonts.outline;
         GlyphLayout layout = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
         boolean ints = font.usesIntegerPositions();
@@ -881,7 +908,7 @@ public class RendererExt{
         layout.setText(font, text);
 
         font.setColor(color);
-        font.draw(text, x, y + layout.height + 1, align);
+        font.draw(text, x, y + layout.height, align);
 
         font.setUseIntegerPositions(ints);
         font.setColor(Color.white);

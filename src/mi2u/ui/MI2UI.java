@@ -239,6 +239,7 @@ public class MI2UI extends Mindow2{
         settings.add(new CheckEntry("enBlockHpBar", "@settings.main.blockHpBar", false, null));
         settings.add(new CheckEntry("enTurretZone", "@settings.main.enTurretZone", false, null));
         settings.add(new CheckEntry("enUnitHpBar", "@settings.main.unitHpBar", false, null));
+        settings.add(new ChooseEntry("unitHpBarStyle", "@settings.main.unitHpBarStyle", new String[]{"1", "2"}, str -> str.equals("1") ? "三" : "x[accent][[i]", null));
         settings.add(new CheckEntry("enUnitHpBarDamagedOnly", "@settings.main.unitHpBarDamagedOnly", true, null));
         settings.add(new CheckEntry("enUnitHitbox", "@settings.main.unitHitbox", false, null));
         settings.add(new CheckEntry("enUnitLogic", "@settings.main.unitLogic", false, null));
