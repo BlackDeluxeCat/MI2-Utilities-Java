@@ -334,6 +334,7 @@ public class MI2USettings{
             this.items = items;
             this.buttonTextFunc = buttonTextFunc;
             this.changed = changed;
+            if(setting == null) setting = putStr(name, items[0]);
         }
 
         @Override
