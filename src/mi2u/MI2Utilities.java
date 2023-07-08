@@ -33,7 +33,9 @@ public class MI2Utilities extends Mod{
             MI2USettings.init();
             InputUtils.init();
 
-            maxSchematicSize = MI2USettings.getInt("maxSchematicSize", 32);
+            maxSchematicSize = MI2USettings.getInt("maxSchematicSize", 64);
+            renderer.maxZoom = Strings.parseFloat(MI2USettings.getStr("maxZoom", "6"));
+            renderer.minZoom = Strings.parseFloat(MI2USettings.getStr("minZoom", "1.5"));
             Time.runTask(40f, () -> {
                 mi2ui.addTo(Core.scene.root);
                 mi2ui.visible(() -> state.isGame() && ui.hudfrag.shown);
