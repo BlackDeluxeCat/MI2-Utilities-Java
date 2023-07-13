@@ -32,7 +32,7 @@ public class MI2UI extends Mindow2{
 
         Events.run(EventType.Trigger.update, () -> {
             if(state.isGame()){
-                RtsCommand.desktopFormation();//Independent of inputoverwrite, may bug
+                RtsCommand.desktopFormation();//Independent from inputoverwrite, may bug
                 if(!state.isPaused()){
                     realRunTime += Time.timeSinceMillis(lastRealRun);
                 }
@@ -40,7 +40,7 @@ public class MI2UI extends Mindow2{
                 lastRealRun = Time.millis();
                 lastRunTime = Time.millis();
 
-                if(state.rules.mode() == Gamemode.sandbox && !net.active() && state.isGame() && !state.isPaused() && player.unit() != null && MI2USettings.getBool("instantBuild", true)){
+                if(state.rules.mode() == Gamemode.sandbox && !net.active() && state.isGame() && !state.isPaused() && player.unit() != null && control.input.isBuilding && MI2USettings.getBool("instantBuild", true)){
                     player.unit().plans.each(bp -> {
                         var tile = world.tiles.getc(bp.x, bp.y);
                         if(bp.breaking){
