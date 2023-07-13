@@ -583,9 +583,9 @@ public class FullAI extends AIController{
                 switch(li.type){
                     case itemTake -> {
                         if(!(exec.obj(li.p2) instanceof Item item)) return false;
-                        if(!itemTrans || player.unit() == null || (player.unit().acceptsItem(item))) return false;
+                        if(!itemTrans || player.unit() == null || !player.unit().acceptsItem(item)) return false;
                         Building build = exec.building(li.p1);
-                        if(build != null && build.team == unit.team && build.isValid() && build.items != null && unit.within(build, logicItemTransferRange + build.block.size * tilesize/2f)){
+                        if(build != null && build.team == unit.team && build.isValid() && build.items != null && unit.within(build, itemTransferRange + build.block.size * tilesize/2f)){
                             Call.requestItem(player, build, item, exec.numi(li.p3));
                             itemTrans = false;
                         }
@@ -594,11 +594,13 @@ public class FullAI extends AIController{
                     case itemDrop -> {
                         if(!itemTrans || player.unit() == null || player.unit().stack.amount == 0) return false;
                         Building build = exec.building(li.p1);
-                        if(build != null && unit.within(build, logicItemTransferRange + build.block.size * tilesize/2f)){
-                            control.input.tryDropItems(build, build.x, build.y);
+                        if(build != null && unit.within(build, itemTransferRange + build.block.size * tilesize/2f)){
+                            control.input.droppingItem = true;
+                            control.input.tryDropItems(build, 0f, 0f);
+                            control.input.droppingItem = false;
                             itemTrans = false;
                         }else if(exec.obj(li.p1) == Blocks.air){
-                            control.input.tryDropItems(null, Mathf.random(), Mathf.random());
+                            control.input.tryDropItems(null, 0f, 0f);
                             itemTrans = false;
                         }
                         return true;
@@ -621,10 +623,12 @@ public class FullAI extends AIController{
                         if(build != null){
                             payloadTrans = false;
                             Call.buildingControlSelect(player, build);
-                            return true;
                         }
+                        return true;
                     }
-                    case flag -> {}
+                    case flag -> {
+                        return true;
+                    }
                 }
             }
 
