@@ -12,7 +12,6 @@ import mi2u.*;
 import mi2u.game.*;
 import mi2u.input.*;
 import mi2u.io.*;
-import mi2u.struct.*;
 import mi2u.ui.*;
 import mindustry.ai.types.*;
 import mindustry.content.*;
@@ -95,6 +94,11 @@ public class FullAI extends AIController{
         public void buildConfig(Table table){
             table.table(t -> {
                 t.setBackground(Mindow2.gray2);
+                t.button(b -> {
+                    b.image().grow().update(img -> img.setColor(enable ? Color.acid : Color.red));
+                }, textb, () -> {
+                    enable = !enable;
+                }).size(16f);
                 t.add(btext).color(Color.sky).left();
                 t.add().growX();
             }).growX().minHeight(18f).padTop(8f);
@@ -180,8 +184,7 @@ public class FullAI extends AIController{
                 for(var item : content.items()){
                     if(!content.blocks().contains(b -> b.itemDrop == item)) continue;
                     p.button(b -> {
-                        b.image(item.uiIcon).size(16f);
-                        b.add(item.localizedName);
+                        b.image(item.uiIcon).size(24f);
                         b.margin(4f);
                         }, textbtoggle, () -> {
                         if(list.contains(item)){
@@ -191,7 +194,7 @@ public class FullAI extends AIController{
                         }
                     }).fill().update(b -> b.setChecked(list.contains(item)));
                     i++;
-                    if(i >= 3){
+                    if(i >= 7){
                         i = 0;
                         p.row();
                     }
@@ -433,7 +436,7 @@ public class FullAI extends AIController{
                         return !state.isGame() || core == null || core.items == null || !core.items.has(item);
                     });
                     i++;
-                    if(i >= 5){
+                    if(i >= 7){
                         i = 0;
                         p.row();
                     }
@@ -445,12 +448,14 @@ public class FullAI extends AIController{
     }
 
     public class LogicMode extends Mode{
-        static final Seq<Class<? extends LInstruction>> bannedInstructions = new Seq<>();
-        LExecutor exec = new LExecutor();
-        String code;
-        LogicAI ai = new LogicAI();
-        int instructionsPerTick = 100;
+        public static final Seq<Class<? extends LInstruction>> bannedInstructions = new Seq<>();
+        public LExecutor exec = new LExecutor();
+        public String code;
+        public LogicAI ai = new LogicAI();
+        public int instructionsPerTick = 100;
         MI2Utils.IntervalMillis timer = new MI2Utils.IntervalMillis();
+        public boolean itemTrans, payloadTrans;
+        public static StringBuffer log = new StringBuffer();
 
         //public int lastPathId = 0;
         //public float lastMoveX, lastMoveY;
@@ -473,16 +478,26 @@ public class FullAI extends AIController{
             var ctrl = unit.controller();
             unit.controller(ai);
 
+            updatePlayerActionTimer();
             if(timer.get(200)){
                 ai.targetTimer = 0f;
                 ai.controlTimer = LogicAI.logicControlTimeout;
-                ai.updateMovement();
+
+                //unbind stop
+                if(!(exec.instructions[Mathf.mod((int)(exec.counter.numval), exec.instructions.length)] instanceof UnitControlI uci && uci.type == LUnitControl.unbind)) ai.updateMovement();
             }
 
             for(int i = 0; i < Mathf.clamp(instructionsPerTick, 1, 2000); i++){
                 if(exec.instructions.length == 0) break;
                 exec.setconst(LExecutor.varUnit, unit);
-                if((net.client() || state.rules.mode() != Gamemode.sandbox) && bannedInstructions.contains(exec.instructions[Mathf.mod((int)(exec.counter.numval), exec.instructions.length)].getClass())) continue;
+                if(tryRunOverwrite(exec.instructions[Mathf.mod((int)(exec.counter.numval), exec.instructions.length)])){
+                    exec.counter.numval++;
+                    continue;
+                }
+                if(!isLocalSandbox() && bannedInstructions.contains(exec.instructions[Mathf.mod((int)(exec.counter.numval), exec.instructions.length)].getClass())){
+                    exec.counter.numval++;
+                    continue;
+                }
                 exec.runOnce();
             }
 
@@ -510,17 +525,24 @@ public class FullAI extends AIController{
         @Override
         public void buildConfig(Table table){
             super.buildConfig(table);
-            table.button(Iconc.pencil + "" + Iconc.blockWorldProcessor, textb, () -> {
-                ui.logic.show(code, exec, true, str -> {
-                    readCode(str);
-                });
-            }).growX().pad(4f).height(32f);
-            table.row();
             table.table(t -> {
-                t.name = "ipt";
+                t.name = "cfg";
+                t.button(Iconc.pencil + "" + Iconc.blockWorldProcessor, textb, () -> {
+                    ui.logic.show(code, exec, true, str -> {
+                        readCode(str);
+                    });
+                }).grow();
                 t.add("ipt=");
                 t.field(String.valueOf(instructionsPerTick), TextField.TextFieldFilter.digitsOnly, str -> instructionsPerTick = Strings.parseInt(str)).growX();
-            });
+            }).grow();
+            table.row();
+            table.add("Print Log").left().color(Color.royal);
+            table.row();
+            table.table(t -> {
+                t.name = "log";
+                t.image().color(Color.royal).growY().width(2f);
+                t.labelWrap(() -> log).grow();
+            }).grow();
 
         }
 
@@ -534,6 +556,79 @@ public class FullAI extends AIController{
             asm.putConst("@ipt", instructionsPerTick);
             exec.load(asm);
             exec.privileged = true;
+        }
+
+        public void updatePlayerActionTimer(){
+            itemTrans = true;
+            payloadTrans = true;
+        }
+
+        public boolean isLocalSandbox(){
+            return !net.client() || state.rules.mode() == Gamemode.sandbox;
+        }
+
+        public boolean tryRunOverwrite(LInstruction inst){
+            if(inst instanceof ControlI li){
+                if(!player.dead() && exec.obj(li.target) instanceof Building b && (isLocalSandbox() || b.team == exec.team)){
+                    if(li.type == LAccess.config){
+                        b.configured(player.unit(), exec.obj(li.p1));
+                    }
+                }
+                return true;
+            }else if(inst instanceof PrintFlushI){
+                log.setLength(0);
+                log.append(exec.textBuffer, 0, exec.textBuffer.length());
+                exec.textBuffer.setLength(0);
+            }else if(inst instanceof UnitControlI li){
+                switch(li.type){
+                    case itemTake -> {
+                        if(!(exec.obj(li.p2) instanceof Item item)) return false;
+                        if(!itemTrans || player.unit() == null || (player.unit().acceptsItem(item))) return false;
+                        Building build = exec.building(li.p1);
+                        if(build != null && build.team == unit.team && build.isValid() && build.items != null && unit.within(build, logicItemTransferRange + build.block.size * tilesize/2f)){
+                            Call.requestItem(player, build, item, exec.numi(li.p3));
+                            itemTrans = false;
+                        }
+                        return true;
+                    }
+                    case itemDrop -> {
+                        if(!itemTrans || player.unit() == null || player.unit().stack.amount == 0) return false;
+                        Building build = exec.building(li.p1);
+                        if(build != null && unit.within(build, logicItemTransferRange + build.block.size * tilesize/2f)){
+                            control.input.tryDropItems(build, build.x, build.y);
+                            itemTrans = false;
+                        }else if(exec.obj(li.p1) == Blocks.air){
+                            control.input.tryDropItems(null, Mathf.random(), Mathf.random());
+                            itemTrans = false;
+                        }
+                        return true;
+                    }
+                    case payTake -> {
+                        if(!payloadTrans) return false;
+                        control.input.tryPickupPayload();
+                        payloadTrans = false;
+                        return true;
+                    }
+                    case payDrop -> {
+                        if(!payloadTrans) return false;
+                        control.input.tryDropPayload();
+                        payloadTrans = false;
+                        return true;
+                    }
+                    case payEnter -> {
+                        if(!payloadTrans) return false;
+                        Building build = world.buildWorld(unit.x, unit.y);
+                        if(build != null){
+                            payloadTrans = false;
+                            Call.buildingControlSelect(player, build);
+                            return true;
+                        }
+                    }
+                    case flag -> {}
+                }
+            }
+
+            return false;
         }
     }
 }
