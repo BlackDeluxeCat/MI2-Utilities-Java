@@ -482,9 +482,7 @@ public class FullAI extends AIController{
             if(timer.get(200)){
                 ai.targetTimer = 0f;
                 ai.controlTimer = LogicAI.logicControlTimeout;
-
-                //unbind stop
-                if(!(exec.instructions[Mathf.mod((int)(exec.counter.numval), exec.instructions.length)] instanceof UnitControlI uci && uci.type == LUnitControl.unbind)) ai.updateMovement();
+                ai.updateMovement();
             }
 
             for(int i = 0; i < Mathf.clamp(instructionsPerTick, 1, 2000); i++){
