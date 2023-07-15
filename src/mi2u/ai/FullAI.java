@@ -454,6 +454,7 @@ public class FullAI extends AIController{
         public LogicAI ai = new LogicAI();
         public int instructionsPerTick = 100;
         MI2Utils.IntervalMillis timer = new MI2Utils.IntervalMillis();
+        MI2Utils.IntervalMillis actionTimer = new MI2Utils.IntervalMillis(2);
         public boolean itemTrans, payloadTrans;
         public static StringBuffer log = new StringBuffer();
 
@@ -502,10 +503,11 @@ public class FullAI extends AIController{
             unit.controller(ctrl);
             fullAI.unit(unit);
 
-            boostAction(ai.boost);
-            if(ai.control != LUnitControl.pathfind || unit.isFlying()){
-                moveAction(ai.moveX, ai.moveY, Math.max(ai.moveRad, 1f), false);
-            }/*else{
+            if(!actionTimer.check(0, (int)LogicAI.logicControlTimeout / 60 * 1000)){
+                boostAction(ai.boost);
+                if(ai.control != LUnitControl.pathfind || unit.isFlying()){
+                    moveAction(ai.moveX, ai.moveY, Math.max(ai.moveRad, 1f), false);
+                }/*else{
                 if(!Mathf.equal(ai.moveX, lastMoveX, 0.1f) || !Mathf.equal(ai.moveY, lastMoveY, 0.1f)){
                     lastPathId ++;
                     lastMoveX = ai.moveX;
@@ -516,8 +518,12 @@ public class FullAI extends AIController{
                 }
                 moveAction(Tmp.v1, Math.max(ai.moveRad, 1f), false);//tmp.v1 is set in ai.updateMovement()
             }*/
-            var tgt = ai.target(0, 0, 0, false, false);
-            if(tgt != null) shootAction(MI2UTmp.v3.set(tgt.getX(), tgt.getY()), ai.shoot);
+            }
+
+            if(!actionTimer.check(1, (int)LogicAI.logicControlTimeout / 60 * 1000)){
+                var tgt = ai.target(0, 0, 0, false, false);
+                if(tgt != null) shootAction(MI2UTmp.v3.set(tgt.getX(), tgt.getY()), ai.shoot);
+            }
         }
 
         @Override
@@ -579,6 +585,22 @@ public class FullAI extends AIController{
                 exec.textBuffer.setLength(0);
             }else if(inst instanceof UnitControlI li){
                 switch(li.type){
+                    case target, targetp -> {
+                        actionTimer.get(1, 1);
+                        return false;
+                    }
+                    case move, pathfind -> {
+                        actionTimer.get(0, 1);
+                        return false;
+                    }
+                    case idle -> {
+                        actionTimer.reset(0, 100000);
+                        return false;
+                    }
+                    case stop -> {
+                        actionTimer.reset(1, 100000);
+                        return false;
+                    }
                     case itemTake -> {
                         if(!(exec.obj(li.p2) instanceof Item item)) return false;
                         if(!itemTrans || player.unit() == null || !player.unit().acceptsItem(item)) return false;
