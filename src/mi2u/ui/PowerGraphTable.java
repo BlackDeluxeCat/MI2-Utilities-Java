@@ -107,6 +107,7 @@ public class PowerGraphTable extends Table{
 
     public void showDetailFor(PGInfo info, MI2Bar bar){
         detailTable.shown = false;
+        detailTable.popupDuration = 0.05f;
         detailTable.background(Styles.black6);
         detailTable.clearChildren();
         buildInfo(detailTable, info);

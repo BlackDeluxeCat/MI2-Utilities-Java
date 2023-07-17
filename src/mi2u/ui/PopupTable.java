@@ -17,6 +17,7 @@ import mindustry.gen.*;
 public class PopupTable extends Table{
     public boolean shown = false;
     public float fromx, fromy;
+    public float popupDuration = 0.15f;
 
     public void popup(int align){
         if(shown) return;
@@ -24,19 +25,18 @@ public class PopupTable extends Table{
         shown = true;
         setTransform(true);
         clearActions();
-        float duration = 0.15f;
         if(Align.isTop(align)){
             actions(Actions.scaleTo(1f,0f), Actions.translateBy(0f, getPrefHeight()));
-            actions(Actions.parallel(Actions.scaleTo(1f, 1f, duration, Interp.fade), Actions.translateBy(0f , -getPrefHeight(), duration, Interp.fade), Actions.run(this::keepInScreen)));
+            actions(Actions.parallel(Actions.scaleTo(1f, 1f, popupDuration, Interp.fade), Actions.translateBy(0f , -getPrefHeight(), popupDuration, Interp.fade), Actions.run(this::keepInScreen)));
         }else if(Align.isBottom(align)){
             actions(Actions.scaleTo(1f,0f));
-            actions(Actions.parallel(Actions.scaleTo(1f, 1f, duration, Interp.fade), Actions.run(this::keepInScreen)));
+            actions(Actions.parallel(Actions.scaleTo(1f, 1f, popupDuration, Interp.fade), Actions.run(this::keepInScreen)));
         }else if(Align.isLeft(align)){
             actions(Actions.scaleTo(0f,1f));
-            actions(Actions.parallel(Actions.scaleTo(1f, 1f, duration, Interp.fade), Actions.run(this::keepInScreen)));
+            actions(Actions.parallel(Actions.scaleTo(1f, 1f, popupDuration, Interp.fade), Actions.run(this::keepInScreen)));
         }else if(Align.isRight(align)){
             actions(Actions.scaleTo(0f,1f), Actions.translateBy(getPrefWidth(), 0f));
-            actions(Actions.parallel(Actions.scaleTo(1f, 1f, duration, Interp.fade), Actions.translateBy(-getPrefWidth() , 0f, duration, Interp.fade), Actions.run(this::keepInScreen)));
+            actions(Actions.parallel(Actions.scaleTo(1f, 1f, popupDuration, Interp.fade), Actions.translateBy(-getPrefWidth() , 0f, popupDuration, Interp.fade), Actions.run(this::keepInScreen)));
         }
     }
 
@@ -45,7 +45,7 @@ public class PopupTable extends Table{
     public void hide(){
         if(!shown) return;
         shown = false;
-        actions(Actions.scaleTo(1f,0f, 0.15f, Interp.fade), Actions.delay(0.15f), Actions.remove());
+        actions(Actions.scaleTo(1f,0f, popupDuration, Interp.fade), Actions.delay(popupDuration), Actions.remove());
     }
 
     public void snapTo(Element e){
