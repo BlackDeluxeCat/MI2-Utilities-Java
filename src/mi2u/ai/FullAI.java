@@ -538,6 +538,9 @@ public class FullAI extends AIController{
                 }).grow();
                 t.add("ipt=");
                 t.field(String.valueOf(instructionsPerTick), TextField.TextFieldFilter.digitsOnly, str -> instructionsPerTick = Strings.parseInt(str)).growX();
+                t.button(Iconc.info + "", textb, () -> {
+                    ui.showText("", Core.bundle.get("fullAI.help"), Align.left);
+                }).size(32f);
             }).grow();
             table.row();
             table.add("Print Log").left().color(Color.royal);
@@ -589,7 +592,7 @@ public class FullAI extends AIController{
                         actionTimer.get(1, 1);
                         return false;
                     }
-                    case move, pathfind -> {
+                    case move, pathfind, boost -> {
                         actionTimer.get(0, 1);
                         return false;
                     }
