@@ -85,6 +85,9 @@ public class MapInfoTable extends Table{
 
         //wave tools
         wavesPopup.addInGameVisible();
+        wavesPopup.update(() -> {
+            wavesPopup.keepInScreen();
+        });
         wavesPopup.addCloseButton();
         wavesPopup.addDragMove();
         wavesPopup.background(Styles.black3);
