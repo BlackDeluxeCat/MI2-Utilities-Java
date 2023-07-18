@@ -45,8 +45,10 @@ public class FullAI extends AIController{
         modes.add(new LogicMode());
 
         Events.run(EventType.Trigger.update, () -> {
-            fullAI.unit(player.unit());
-            fullAI.updateUnit();
+            if(state.isGame()){
+                fullAI.unit(player.unit());
+                fullAI.updateUnit();
+            }
         });
     }
 
@@ -61,7 +63,9 @@ public class FullAI extends AIController{
         }
         if(control.input instanceof InputOverwrite inp){
             inp.clear();
-            modes.each(Mode::act);
+            modes.each(mode -> {
+                if(mode.enable) mode.act();
+            });
         }
     }
 
@@ -88,7 +92,7 @@ public class FullAI extends AIController{
         public Mode(){
             btext = Iconc.units + "";
         }
-        /** override it. enable should be checked first */
+        /** override it. enable auto checked. */
         public void act(){}
 
         public void buildConfig(Table table){
@@ -119,7 +123,6 @@ public class FullAI extends AIController{
 
         @Override
         public void act(){
-            if(!enable) return;
             Building core = unit.closestCore();
             boostAction(true);
             if(!(unit.canMine()) || !unit.type.mineFloor || core == null) return;
@@ -211,7 +214,6 @@ public class FullAI extends AIController{
         }
         @Override
         public void act(){
-            if(!enable) return;
             if(!control.input.isBuilding) return;
             if(!unit.canBuild()) return;
             //help others building, catching the closest plan to co-op.
@@ -321,7 +323,6 @@ public class FullAI extends AIController{
         }
         @Override
         public void act(){
-            if(!enable) return;
             if(unit.dead || !unit.isValid()) return;
             if(unit.health > unit.maxHealth * hold) return;
             Building tile = Geometry.findClosest(unit.x, unit.y, indexer.getFlagged(unit.team, BlockFlag.repair));
@@ -344,7 +345,6 @@ public class FullAI extends AIController{
         }
         @Override
         public void act(){
-            if(!enable) return;
             if(Core.input.keyDown(Binding.select)) return;
 
             if(timer.get(6, 30f)){
@@ -474,7 +474,6 @@ public class FullAI extends AIController{
 
         @Override
         public void act(){
-            if(!enable) return;
             ai.unit(unit);
             var ctrl = unit.controller();
             unit.controller(ai);
