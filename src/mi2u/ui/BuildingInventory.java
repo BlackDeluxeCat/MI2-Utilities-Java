@@ -19,6 +19,7 @@ import mindustry.ui.*;
 import mindustry.world.blocks.storage.*;
 
 import static arc.Core.graphics;
+import static mi2u.MI2UVars.fadeBackground;
 import static mindustry.Vars.*;
 
 public class BuildingInventory extends Element{
@@ -82,9 +83,8 @@ public class BuildingInventory extends Element{
     public void draw(){
         if(!vaild() || (state.rules.fog && build.inFogTo(player.team()))) return;
         super.draw();
-        Draw.alpha(1f);
-        Draw.color(Color.white);
-        Styles.black3.draw(x, y, width, height);
+        Draw.reset();
+        fadeBackground.draw(x, y, width, height);
 
         Draw.alpha(1f);
         Draw.color(Color.white);

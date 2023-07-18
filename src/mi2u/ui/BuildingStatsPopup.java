@@ -1,34 +1,24 @@
 package mi2u.ui;
 
-import arc.Core;
-import arc.func.Cons;
-import arc.graphics.Color;
-import arc.math.Mathf;
-import arc.math.geom.Vec2;
-import arc.scene.Action;
-import arc.scene.Element;
-import arc.scene.actions.Actions;
-import arc.scene.event.Touchable;
-import arc.scene.ui.Image;
-import arc.scene.ui.Label;
-import arc.scene.ui.layout.Table;
-import arc.struct.ObjectMap;
-import arc.struct.Queue;
-import arc.struct.Seq;
-import arc.util.Align;
-import arc.util.Interval;
-import arc.util.Log;
-import arc.util.Strings;
-import mi2u.MI2UTmp;
-import mi2u.input.InputOverwrite;
+import arc.*;
+import arc.func.*;
+import arc.graphics.*;
+import arc.math.*;
+import arc.scene.*;
+import arc.scene.actions.*;
+import arc.scene.event.*;
+import arc.scene.ui.*;
+import arc.struct.*;
+import arc.util.*;
+import mi2u.*;
+import mi2u.input.*;
 import mindustry.gen.*;
-import mindustry.logic.LExecutor;
-import mindustry.ui.Styles;
-import mindustry.world.blocks.logic.LogicBlock;
-import mindustry.world.blocks.logic.MessageBlock;
+import mindustry.logic.*;
+import mindustry.ui.*;
+import mindustry.world.blocks.logic.*;
 
-import static mindustry.Vars.*;
 import static mi2u.MI2UVars.*;
+import static mindustry.Vars.*;
 
 public class BuildingStatsPopup<B extends Building> extends PopupTable{
     public static ObjectMap<Object, Cons> popNew = new ObjectMap<>();

@@ -1,6 +1,11 @@
 package mi2u;
 
+import arc.*;
 import arc.func.*;
+import arc.graphics.*;
+import arc.graphics.g2d.*;
+import arc.math.*;
+import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.scene.ui.TextButton.*;
 import arc.struct.*;
@@ -17,6 +22,8 @@ public class MI2UVars{
         c.getLabel().setWrap(false);
         c.margin(6f);
     };
+
+    public static Drawable fadeBackground;
 
     public static Seq<Mindow2> mindow2s = new Seq<>();
 

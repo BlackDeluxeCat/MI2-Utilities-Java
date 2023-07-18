@@ -1,7 +1,11 @@
 package mi2u;
 
 import arc.*;
+import arc.func.*;
 import arc.graphics.*;
+import arc.graphics.g2d.*;
+import arc.math.*;
+import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.util.*;
 import mi2u.graphics.*;
@@ -29,6 +33,18 @@ public class MI2Utilities extends Mod{
             MOD = mods.getMod(MI2Utilities.class);
             titleButtonSize = 32f;
 
+            Pixmap fade = new Pixmap(128, 128);
+            for(int x = 0; x < fade.width; x++){
+                for(int y = 0; y < fade.height; y++){
+                    FloatFloatf func = f -> Mathf.pow(f, 0.6f);
+                    fade.set(x, y, MI2UTmp.c2.set(Color.black).a(0.4f * func.get(
+                            Math.min(x, Math.min(y, Math.min(fade.width-x-1, fade.height-y-1))) / (fade.width/2f)
+                    )));
+                }
+            }
+            Core.atlas.addRegion("fadeBackground", new TextureRegion(new Texture(fade)));
+            fadeBackground = new TextureRegionDrawable(Core.atlas.find("fadeBackground"));
+
             Mindow2.initMindowStyles();
             MI2USettings.init();
             InputUtils.init();
@@ -36,6 +52,7 @@ public class MI2Utilities extends Mod{
             maxSchematicSize = MI2USettings.getInt("maxSchematicSize", 64);
             renderer.maxZoom = Strings.parseFloat(MI2USettings.getStr("maxZoom", "6"));
             renderer.minZoom = Strings.parseFloat(MI2USettings.getStr("minZoom", "1.5"));
+
             Time.runTask(40f, () -> {
                 mi2ui.addTo(Core.scene.root);
                 mi2ui.visible(() -> state.isGame() && ui.hudfrag.shown);
