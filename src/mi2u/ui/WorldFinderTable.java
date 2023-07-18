@@ -162,7 +162,7 @@ public class WorldFinderTable extends PopupTable{
         selectTable.background(Styles.black6);
         selectTable.update(() -> {
             selectTable.setPositionInScreen(this.x, this.y - selectTable.getPrefHeight());
-            if(!this.shown && !this.visible) selectTable.hide();
+            if(!this.shown || !this.visible) selectTable.hide();
         });
 
         switch(showSubTableID){
