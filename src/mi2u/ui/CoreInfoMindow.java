@@ -33,27 +33,31 @@ public class CoreInfoMindow extends Mindow2{
     protected Team select, team;
 
     protected PowerGraphTable pg = new PowerGraphTable(330);
-    protected PopupTable teamSelect = new PopupTable(), buildPlanTable = new PopupTable(), chartTable;
+    protected PopupTable teamSelect = new PopupTable(), buildPlanTable = new PopupTable();
     protected int[] unitIndex = new int[content.units().size];
 
     protected ObjectSet<UnitType> usedUnits;
     protected ObjectSet<Item> usedItems;
     protected FloatDataRecorder[] itemRecoders;
-    protected FloatDataRecorder charting = null;
+    public PopupTable[] itemCharts;
     public int itemTimerInt = 1;
 
     public CoreInfoMindow(){
         super("@coreInfo.MI2U", "@coreInfo.help");
         itemRecoders = new FloatDataRecorder[content.items().size];
+        itemCharts = new PopupTable[content.items().size];
         content.items().each(item -> {
             itemRecoders[item.id] = new FloatDataRecorder(60);
             itemRecoders[item.id].getter = () -> core == null ? 0 : core.items.get(item);
             itemRecoders[item.id].titleGetter = () -> item.localizedName + ": ";
+            itemCharts[item.id] = getItemChart(item);
         });
 
         Events.on(EventType.ContentInitEvent.class, e -> {
+            itemCharts = new PopupTable[content.items().size];
             content.items().each(item -> {
                 itemRecoders[item.id].getter = () -> core == null ? 0 : core.items.get(item);
+                itemCharts[item.id] = getItemChart(item);
             });
         });
 
@@ -97,8 +101,6 @@ public class CoreInfoMindow extends Mindow2{
                 buildPlanTable.popup();
                 buildPlanTable.setPositionInScreen(this.x, this.y - buildPlanTable.getPrefHeight());
             }
-
-            if(chartTable.hasParent()) chartTable.toFront();
         });
     }
 
@@ -108,72 +110,6 @@ public class CoreInfoMindow extends Mindow2{
         mindowName = "CoreInfo";
         usedItems = new ObjectSet<>();
         usedUnits = new ObjectSet<>();
-
-        chartTable = new PopupTable(){
-            {
-                this.setBackground(Styles.black8);
-                this.addCloseButton();
-                this.addDragMove();
-                this.addInGameVisible();
-                var ch = new Element(){
-                    @Override
-                    public void draw(){
-                        super.draw();
-                        Draw.reset();
-                        if(charting != null){
-                            Lines.stroke(2f);
-                            charting.defaultDraw(x, y, width, height, true);
-                            Draw.color();
-
-                            Font font = Fonts.outline;
-                            font.setColor(1f, 1f, 1f, 0.5f);
-                            GlyphLayout lay = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
-
-                            String text = UI.formatAmount((long)charting.min());
-                            lay.setText(font, text);
-                            font.getCache().clear();
-                            font.getCache().addText(text, this.x, this.y + lay.height);
-                            font.getCache().draw(parentAlpha);
-
-                            text = UI.formatAmount((long)charting.max());
-                            lay.setText(font, text);
-                            font.getCache().clear();
-                            font.getCache().addText(text, this.x, this.y + this.getHeight());
-                            font.getCache().draw(parentAlpha);
-
-                            Pools.free(lay);
-                        }
-                    }
-                };
-                this.add(ch).fill().size(200f,120f);
-                this.row();
-                this.label(() -> {
-                    if(charting != null && charting.size() > 0){
-                        float delta;
-                        if(charting.size() < 10){
-                            delta = (charting.get(0) - charting.get(charting.size() - 2))/(charting.size() - 1f);
-                        }else{
-                            delta = (charting.get(0) - charting.get(9))/10f;
-                        }
-                        return charting.titleGetter.get() + (delta > 0 ? "[green]+":"[red]") + Strings.autoFixed(delta, 2) + "/s(10s)";
-                    }
-                    return (charting != null ? charting.titleGetter.get():"") + "No Data";
-                }).growX();
-                this.row();
-                this.label(() -> {
-                    if(charting != null && charting.size() > 0){
-                        float delta;
-                        if(charting.size() < charting.cap()){
-                            delta = (charting.get(0) - charting.get(charting.size() - 2))/(charting.size() - 1f);
-                        }else{
-                            delta = (charting.get(0) - charting.get(charting.size() - 1))/(float)charting.size();
-                        }
-                        return charting.titleGetter.get() + (delta > 0 ? "[green]+":"[red]") + Strings.autoFixed(delta, 2) + "/s(60s)";
-                    }
-                    return (charting != null ? charting.titleGetter.get():"") + "No Data";
-                }).growX();
-            }
-        };
     }
 
     @Override
@@ -224,9 +160,13 @@ public class CoreInfoMindow extends Mindow2{
                                 t.image(item.uiIcon).size(iconSmall);
                                 t.label(() -> core == null ? "0" : UI.formatAmount(core.items.get(item))).padRight(3).minWidth(52f).left();
                         }), l).padLeft(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel)).get().clicked(() -> {
-                            charting = ir;
-                            if(!chartTable.shown) chartTable.setPositionInScreen(this.x - chartTable.getPrefWidth(), this.y);
-                            chartTable.popup();
+                            var chart = getItemChart(item);
+                            if(chart != null){
+                                chart.setPositionInScreen(this.x - chart.getPrefWidth(), this.y);
+                                chart.popup();
+                            }else{
+                                Log.infoTag("MI2U", "Item Chart error. Contact the develop.");
+                            }
                         });
 
                         if(++i % 4 == 0){
@@ -408,5 +348,80 @@ public class CoreInfoMindow extends Mindow2{
         settings.add(new CheckEntry(mindowName + ".showPowerGraphs", "@settings.coreInfo.showPowerGraphs", true, b -> rebuild()));
         settings.add(new FieldEntry(mindowName + ".itemsMaxHeight", "@settings.coreInfo.itemsMaxHeight", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, s -> rebuild()));
         settings.add(new FieldEntry(mindowName + ".unitsMaxHeight", "@settings.coreInfo.unitsMaxHeight", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, s -> rebuild()));
+    }
+
+    public @Nullable PopupTable getItemChart(Item item){
+        if(itemCharts[item.id] == null){
+            itemCharts[item.id] = new PopupTable(){
+                {
+                    this.setBackground(Styles.black8);
+                    this.addCloseButton();
+                    this.addDragMove();
+                    this.addInGameVisible();
+                    this.update(this::toFront);
+                    var ch = new Element(){
+                        @Override
+                        public void draw(){
+                            super.draw();
+                            Draw.reset();
+                            var chart = itemRecoders[item.id];
+                            if(chart != null){
+                                Lines.stroke(2f);
+                                chart.defaultDraw(x, y, width, height, true);
+                                Draw.color();
+
+                                Font font = Fonts.outline;
+                                font.setColor(1f, 1f, 1f, 0.5f);
+                                GlyphLayout lay = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
+
+                                String text = UI.formatAmount((long)chart.min());
+                                lay.setText(font, text);
+                                font.getCache().clear();
+                                font.getCache().addText(text, this.x, this.y + lay.height);
+                                font.getCache().draw(parentAlpha);
+
+                                text = UI.formatAmount((long)chart.max());
+                                lay.setText(font, text);
+                                font.getCache().clear();
+                                font.getCache().addText(text, this.x, this.y + this.getHeight());
+                                font.getCache().draw(parentAlpha);
+
+                                Pools.free(lay);
+                            }
+                        }
+                    };
+                    this.add(ch).fill().size(200f,120f);
+                    this.row();
+                    this.label(() -> {
+                        var chart = itemRecoders[item.id];
+                        if(chart != null && chart.size() > 0){
+                            float delta;
+                            if(chart.size() < 10){
+                                delta = (chart.get(0) - chart.get(chart.size() - 2))/(chart.size() - 1f);
+                            }else{
+                                delta = (chart.get(0) - chart.get(9))/10f;
+                            }
+                            return chart.titleGetter.get() + (delta > 0 ? "[green]+":"[red]") + Strings.autoFixed(delta, 2) + "/s(10s)";
+                        }
+                        return (chart != null ? chart.titleGetter.get():"") + "No Data";
+                    }).growX();
+                    this.row();
+                    this.label(() -> {
+                        var chart = itemRecoders[item.id];
+                        if(chart != null && chart.size() > 0){
+                            float delta;
+                            if(chart.size() < chart.cap()){
+                                delta = (chart.get(0) - chart.get(chart.size() - 2))/(chart.size() - 1f);
+                            }else{
+                                delta = (chart.get(0) - chart.get(chart.size() - 1))/(float)chart.size();
+                            }
+                            return chart.titleGetter.get() + (delta > 0 ? "[green]+":"[red]") + Strings.autoFixed(delta, 2) + "/s(60s)";
+                        }
+                        return (chart != null ? chart.titleGetter.get():"") + "No Data";
+                    }).growX();
+                }
+            };
+        }
+        return itemCharts[item.id];
     }
 }
