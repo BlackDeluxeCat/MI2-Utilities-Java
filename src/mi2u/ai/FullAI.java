@@ -544,11 +544,11 @@ public class FullAI extends AIController{
             table.row();
             table.add("Print Log").left().color(Color.royal);
             table.row();
-            table.table(t -> {
+            table.pane(t -> {
                 t.name = "log";
                 t.image().color(Color.royal).growY().width(2f);
                 t.labelWrap(() -> log).grow();
-            }).grow();
+            }).grow().maxHeight(200f);
 
         }
 
