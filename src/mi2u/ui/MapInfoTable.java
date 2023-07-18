@@ -88,6 +88,7 @@ public class MapInfoTable extends Table{
         wavesPopup.update(() -> {
             wavesPopup.keepInScreen();
         });
+        wavesPopup.touchable = Touchable.enabled;
         wavesPopup.addCloseButton();
         wavesPopup.addDragMove();
         wavesPopup.background(Styles.black3);
