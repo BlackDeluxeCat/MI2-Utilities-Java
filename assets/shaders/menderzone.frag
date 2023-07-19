@@ -23,7 +23,7 @@ void main(){
 	if(color.a <= 0.001 && maxed.a > 0.01){
 		gl_FragColor = vec4(u_color.rgb, 0.3);
     }else if(color.a > 0.001){
-        gl_FragColor = vec4(u_color.rgb, color.b > 0.05 ? 0.1 + color.b * 0.5 : 0.1);
+        gl_FragColor = vec4(u_color.rgb, 0.1 + color.b * 0.4);
     }else{
         gl_FragColor = color;
     }
