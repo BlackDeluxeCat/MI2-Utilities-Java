@@ -609,15 +609,15 @@ public class RendererExt{
         if(animatedshields){
             Draw.color(pulse > 0.9f ? Color.blue : Color.green);
             Draw.alpha(0.1f);
-            Fill.poly(mb.x, mb.y, 24, block.range + mb.phaseHeat * block.phaseRangeBoost);
+            Fill.poly(mb.x, mb.y, 18, block.range + mb.phaseHeat * block.phaseRangeBoost);
             Draw.color(Color.blue, pulse > 0.1f ? pulse * 0.5f : 0f);
-            Lines.poly(mb.x, mb.y, 24, block.range + mb.phaseHeat * block.phaseRangeBoost);
+            Lines.poly(mb.x, mb.y, 18, block.range + mb.phaseHeat * block.phaseRangeBoost);
         }else{
             Draw.color(block.baseColor);
             Draw.alpha(0.05f * pulse);
-            Fill.poly(mb.x, mb.y, 24, block.range + mb.phaseHeat * block.phaseRangeBoost);
+            Fill.poly(mb.x, mb.y, 18, block.range + mb.phaseHeat * block.phaseRangeBoost);
             Draw.color(block.baseColor, pulse > 0.1f ? pulse * 0.5f : 0f);
-            Lines.poly(mb.x, mb.y, 24, block.range + mb.phaseHeat * block.phaseRangeBoost);
+            Lines.poly(mb.x, mb.y, 18, block.range + mb.phaseHeat * block.phaseRangeBoost);
         }
     }
 
