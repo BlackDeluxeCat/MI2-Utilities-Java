@@ -160,6 +160,7 @@ public class WorldFinderTable extends PopupTable{
         selectTable.clear();
         selectTable.addCloseButton();
         selectTable.background(Styles.black6);
+        selectTable.addDragMove();
         selectTable.update(() -> {
             selectTable.setPositionInScreen(this.x, this.y - selectTable.getPrefHeight());
             if(!this.shown || !this.visible) selectTable.hide();
@@ -220,13 +221,16 @@ public class WorldFinderTable extends PopupTable{
             //replace block selection
             case 1 -> {
                 if(!MI2USettings.getBool("worldDataUpdate")) WorldData.scanWorld();
-                selectTable.button("@minimap.finder.showBlockNames", textbtoggle, null).height(36f).growX().with(funcSetTextb).with(b -> {
-                    b.clicked(() -> {
-                        withName = !withName;
-                        setupSelect();
-                    });
-                    b.setChecked(withName);
-                }).minWidth(36f);
+                selectTable.table(t -> {
+                    t.button("@minimap.finder.showBlockNames", textbtoggle, null).height(36f).growX().with(funcSetTextb).with(b -> {
+                        b.clicked(() -> {
+                            withName = !withName;
+                            setupSelect();
+                        });
+                        b.setChecked(withName);
+                    }).minWidth(36f).left();
+                }).growX();
+
 
                 selectTable.row();
                 selectTable.pane(t -> {
