@@ -45,7 +45,7 @@ public class FullAI extends AIController{
         modes.add(new LogicMode());
 
         Events.run(EventType.Trigger.update, () -> {
-            if(state.isGame()){
+            if(state.isGame() && state.isPlaying()){
                 fullAI.unit(player.unit());
                 fullAI.updateUnit();
             }
@@ -457,6 +457,7 @@ public class FullAI extends AIController{
         MI2Utils.IntervalMillis actionTimer = new MI2Utils.IntervalMillis(2);
         public boolean itemTrans, payloadTrans;
         public static StringBuffer log = new StringBuffer();
+        Queue<BuildPlan> plans = new Queue<>();
 
         //public int lastPathId = 0;
         //public float lastMoveX, lastMoveY;
@@ -474,7 +475,6 @@ public class FullAI extends AIController{
 
         @Override
         public void act(){
-            ai.unit(unit);
             var ctrl = unit.controller();
             unit.controller(ai);
 
@@ -485,6 +485,8 @@ public class FullAI extends AIController{
                 ai.updateMovement();
             }
 
+            plans.clear();
+            if(unit.plans != null) unit.plans.each(bp -> plans.add(bp));
             for(int i = 0; i < Mathf.clamp(instructionsPerTick, 1, 2000); i++){
                 if(exec.instructions.length == 0) break;
                 exec.setconst(LExecutor.varUnit, unit);
@@ -498,6 +500,7 @@ public class FullAI extends AIController{
                 }
                 exec.runOnce();
             }
+            if(unit.plans != null && unit.plans.isEmpty()) plans.each(bp -> unit.plans.add(bp));
 
             unit.controller(ctrl);
             fullAI.unit(unit);
