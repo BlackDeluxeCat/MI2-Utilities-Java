@@ -65,7 +65,6 @@ public class CoreInfoMindow extends Mindow2{
             content.items().each(item -> {
                 itemRecoders[item.id].reset();
             });
-            WorldData.clear();
         });
 
         Events.on(EventType.ResetEvent.class, e -> {

@@ -19,6 +19,7 @@ import mi2u.game.*;
 import mi2u.input.InputOverwrite;
 import mi2u.io.*;
 import mi2u.io.MI2USettings.*;
+import mi2u.struct.*;
 import mindustry.core.*;
 import mindustry.game.EventType;
 import mindustry.gen.*;
@@ -44,6 +45,7 @@ public class MinimapMindow extends Mindow2{
                 finderTable.popup();
                 finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
             }
+            if(state.isGame()) WorldData.scanWorld(Mathf.clamp(MI2USettings.getInt("worldDataUpdate.tiles", 50), 10, 10000));
         });
 
         Events.on(EventType.TapEvent.class, e -> {
@@ -130,15 +132,7 @@ public class MinimapMindow extends Mindow2{
         settings.add(new CheckEntry(mindowName + ".drawIndicator", "@settings.mindowMap.drawIndicator", true, b -> m.drawIndicator = b));
         settings.add(new CheckEntry(mindowName + ".drawObjective", "@settings.mindowMap.drawObjective", true, b -> m.drawObjective = b));
         settings.add(new FieldEntry(mindowName + ".size", "@settings.mindowMap.size", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 3200, s -> rebuild()));
-        settings.add(new CollapseGroupEntry("WorldData", ""){
-            private CheckEntry check1 = new CheckEntry("worldDataUpdate", "@settings.mindowMap.worldDataUpdate", true, null);
-            private FieldEntry field1 = new FieldEntry("worldDataUpdate.interval", "@settings.mindowMap.worldDataUpdate.interval", String.valueOf(10), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 3 && Strings.parseInt(s) <= 240, null);
-            {
-                collapsep = () -> !check1.value;
-                headBuilder = t -> check1.build(t);
-                builder = t -> field1.build(t);
-            }
-        });
+        settings.add(new FieldEntry("worldDataUpdate.tiles", "@settings.mindowMap.worldDataUpdate.tiles", String.valueOf(50), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 10 && Strings.parseInt(s) <= 10000, null));
     }
 
     @Override

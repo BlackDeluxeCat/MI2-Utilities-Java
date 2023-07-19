@@ -32,7 +32,6 @@ public class WorldFinderTable extends PopupTable{
     protected PopupTable selectTable = new PopupTable();
     private boolean withName = false;
     private int showSubTableID = -1;
-    private static final Interval worldDataTimer = new Interval();
     @Nullable
     public Team team;
     public Block find = Blocks.air, replace = Blocks.air;
@@ -45,9 +44,6 @@ public class WorldFinderTable extends PopupTable{
         addInGameVisible();
         update(() -> {
             this.keepInScreen();
-            if(MI2USettings.getBool("worldDataUpdate") && worldDataTimer.get(Mathf.clamp(MI2USettings.getInt("worldDataUpdate.interval", 10), 3, 60))){
-                WorldData.scanWorld();
-            }
         });
         touchable = Touchable.enabled;
         setBackground(Styles.black8);
@@ -165,11 +161,12 @@ public class WorldFinderTable extends PopupTable{
             selectTable.setPositionInScreen(this.x, this.y - selectTable.getPrefHeight());
             if(!this.shown || !this.visible) selectTable.hide();
         });
+        selectTable.image().height(24f).color(Color.royal);
+        selectTable.row();
 
         switch(showSubTableID){
             //block selection
             case 0 -> {
-                if(!MI2USettings.getBool("worldDataUpdate")) WorldData.scanWorld();
                 selectTable.button("@minimap.finder.showBlockNames", textbtoggle, null).height(36f).growX().with(funcSetTextb).with(b -> {
                     b.clicked(() -> {
                         withName = !withName;
@@ -220,7 +217,6 @@ public class WorldFinderTable extends PopupTable{
 
             //replace block selection
             case 1 -> {
-                if(!MI2USettings.getBool("worldDataUpdate")) WorldData.scanWorld();
                 selectTable.table(t -> {
                     t.button("@minimap.finder.showBlockNames", textbtoggle, null).height(36f).growX().with(funcSetTextb).with(b -> {
                         b.clicked(() -> {
