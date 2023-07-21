@@ -173,6 +173,7 @@ public class MI2USettings{
         
     }
 
+    //TODO better validation and default.
     public static class MI2USetting{
         public String name;
         protected String value;
@@ -294,6 +295,7 @@ public class MI2USettings{
             this.changed = changed;
             this.filter = filter;
             this.validator = validator;
+            if(this.validator != null && !validator.valid(setting.value)) setting.value = def;
             if(setting == null) setting = putStr(name, def);    //父类构造时已按name尝试抓取，子类构造只需要按def类型处理put
         }
 

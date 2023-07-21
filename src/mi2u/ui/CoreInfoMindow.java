@@ -192,7 +192,7 @@ public class CoreInfoMindow extends Mindow2{
 
         if(MI2USettings.getBool(mindowName + ".showUnits")){
             cont.pane(uut -> {
-                int i = 0, column = Mathf.clamp(usedUnits.size / (MI2USettings.getInt(mindowName + ".unitsMaxHeight", 200) / 24 - 2), 2, 5);
+                int i = 0, column = Mathf.clamp(usedUnits.size / Math.max(1, MI2USettings.getInt(mindowName + ".unitsMaxHeight", 200) / 24 - 2), 2, 8);
                 for(UnitType type : content.units()){
                     //if(type.isHidden()) continue;
                     if(!usedUnits.contains(type)) continue;
