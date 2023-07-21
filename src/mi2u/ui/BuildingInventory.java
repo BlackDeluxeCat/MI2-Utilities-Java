@@ -16,6 +16,7 @@ import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.ui.*;
+import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.storage.*;
 
 import static arc.Core.graphics;
@@ -48,7 +49,7 @@ public class BuildingInventory extends Element{
     }
 
     public static void get(Building b){
-        if(state.isGame() && ((b.block.itemCapacity >= 10 && b.items != null && !(b instanceof StorageBlock.StorageBuild sb && sb.linkedCore != null)) || b.liquids != null)){
+        if(b.liquids != null || state.isGame() && ((b.block.itemCapacity >= 10 && b.items != null && !(b instanceof StorageBlock.StorageBuild sb && sb.linkedCore != null) && !(b instanceof StackConveyor.StackConveyorBuild)))){
             if(used.add(b.id)) pool.obtain().setBuilding(b);
         }
     }
@@ -63,9 +64,9 @@ public class BuildingInventory extends Element{
     @Override
     public void act(float delta){
         super.act(delta);
+        if(!vaild()) remove();
         Core.camera.project(MI2UTmp.v3.set(-1f, -1f).scl(build.block.size * tilesize / 2f).add(build.x, build.y));
         setPosition(MI2UTmp.v3.x, MI2UTmp.v3.y);
-        if(!vaild()) remove();
     }
 
     public boolean vaild(){
@@ -76,6 +77,7 @@ public class BuildingInventory extends Element{
     public boolean remove(){
         if(build != null) used.remove(build.id);
         build = null;
+        pool.free(this);
         return super.remove();
     }
 
