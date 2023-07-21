@@ -223,7 +223,9 @@ public class MapInfoTable extends Table{
     public void buildBars(Table t){
         tmp.clear();
         t.clearChildren();
+        final int[] i = {0};
         allwaves.each(d -> {
+            if(i[0]++ > 50) return;
             if(d.totalHp + d.totalHp <= 0f) return;
             var found = hpBars.find(b -> b.wave == d.wave);
             if(found != null){
