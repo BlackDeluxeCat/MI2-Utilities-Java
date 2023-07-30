@@ -23,6 +23,7 @@ import mindustry.gen.*;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
 
+import static arc.util.Align.*;
 import static mi2u.MI2UVars.*;
 /**  
  * Mindow2 is a dragable Table that partly works like a window. 
@@ -167,6 +168,7 @@ public class Mindow2 extends Table{
                 setPosition(curx, cury);
             }
 
+            cont.setTransform(true);
             keepInStage();
             invalidateHierarchy();
             pack();
@@ -179,27 +181,37 @@ public class Mindow2 extends Table{
             float w = titleBar.getPrefWidth(), h = titleBar.getPrefHeight();
             coll.setSize(w, h);
             coll.toFront();
-            coll.setPosition(0f,getHeight() - h);
+            coll.setPosition(0f, getHeight() * cont.scaleY - titleBar.getHeight());
         });
 
         addChild(coll);
     }
 
-    @Override
-    public float getPrefHeight(){
-        return Math.max(super.getPrefHeight(), titleBar.getPrefHeight());
+    /** Returns the X position of the specified {@link Align alignment}. */
+    public float getX(int alignment){
+        float x = this.x;
+        if((alignment & right) != 0)
+            x += width * cont.scaleX;
+        else if((alignment & left) == 0) //
+            x += width * cont.scaleX / 2;
+        return x;
     }
 
-    @Override
-    public float getPrefWidth(){
-        return Math.max(super.getPrefWidth(), titleBar.getPrefWidth());
+    /** Returns the Y position of the specified {@link Align alignment}. */
+    public float getY(int alignment){
+        float y = this.y;
+        if((alignment & top) != 0)
+            y += height * cont.scaleY;
+        else if((alignment & bottom) == 0) //
+            y += height * cont.scaleY / 2;
+        return y;
     }
 
     protected boolean edgeSnap(int align){
         if(parent == null) return false;
-        if(Align.isTop(align)) cury = parent.getHeight() - getPrefHeight();
+        if(Align.isTop(align)) cury = parent.getHeight() - getHeight() * cont.scaleY;
         if(Align.isBottom(align)) cury = 0;
-        if(Align.isRight(align)) curx = parent.getWidth() - getPrefWidth();
+        if(Align.isRight(align)) curx = parent.getWidth() - getWidth() * cont.scaleX;
         if(Align.isLeft(align)) curx = 0;
         return align != Align.center;
     }
@@ -207,10 +219,10 @@ public class Mindow2 extends Table{
     protected boolean elementSnap(Element e, int align, boolean off){
         if(e == null) return false;
         if(Align.isTop(align)) cury = e.getY(Align.top);
-        if(Align.isBottom(align)) cury = e.getY(Align.bottom) - getHeight();
+        if(Align.isBottom(align)) cury = e.getY(Align.bottom) - getHeight() * cont.scaleY;
 
         if(Align.isRight(align)) curx = e.getX(Align.right);
-        if(Align.isLeft(align)) curx = e.getX(Align.left) - getWidth();
+        if(Align.isLeft(align)) curx = e.getX(Align.left) - getWidth() * cont.scaleX;
 
         if(off){
             if(Align.isTop(align) || Align.isBottom(align)){
@@ -224,9 +236,9 @@ public class Mindow2 extends Table{
     }
 
     public int computeEdgeSnap(float mindowX, float mindowY, float dst){
-        int top = Core.graphics.getHeight() - mindowY - getHeight() < dst ? Align.top : 0;
+        int top = Core.graphics.getHeight() - mindowY - getHeight() * cont.scaleY < dst ? Align.top : 0;
         int bottom = mindowY < dst ? Align.bottom : 0;
-        int right = Core.graphics.getWidth() - mindowX - getWidth() < dst ? Align.right : 0;
+        int right = Core.graphics.getWidth() - mindowX - getWidth() * cont.scaleX < dst ? Align.right : 0;
         int left = mindowX < dst ? Align.left : 0;
         return top | left | right | bottom;
     }
@@ -246,8 +258,8 @@ public class Mindow2 extends Table{
             if(m.lrSnap == this || m.tbSnap == this) continue;
             if(!m.visible || !m.hasParent()) continue;
 
-            dst = Math.abs(m.getX(Align.left) - (mindowX + getWidth()));
-            if(dst < 32f && dst <= dst1 && between.get(mindowY, m.y - getHeight(), m.y + m.getHeight())){
+            dst = Math.abs(m.getX(Align.left) - (mindowX + getWidth() * cont.scaleX));
+            if(dst < 32f && dst <= dst1 && between.get(mindowY, m.y - getHeight() * cont.scaleY, m.y + m.getHeight() * m.cont.scaleY)){
                 dst1 = dst;
                 lrSnap = m;
                 lrSnapAlign = Align.left;
@@ -255,15 +267,15 @@ public class Mindow2 extends Table{
             };
 
             dst = Math.abs(m.getX(Align.right) - mindowX);
-            if(dst < 32f && dst <= dst1 && between.get(mindowY, m.y - getHeight(), m.y + m.getHeight())){
+            if(dst < 32f && dst <= dst1 && between.get(mindowY, m.y - getHeight() * cont.scaleY, m.y + m.getHeight() * m.cont.scaleY)){
                 dst1 = dst;
                 lrSnap = m;
                 lrSnapAlign = Align.right;
                 lrBottomOff = mindowY - m.y;
             };
 
-            dst = Math.abs(m.getY(Align.bottom) - (mindowY + getHeight()));
-            if(dst < 32f && dst <= dst2 && between.get(mindowX, m.x - getWidth(), m.x + m.getWidth())){
+            dst = Math.abs(m.getY(Align.bottom) - (mindowY + getHeight() * cont.scaleY));
+            if(dst < 32f && dst <= dst2 && between.get(mindowX, m.x - getWidth() * cont.scaleX, m.x + m.getWidth() * m.cont.scaleX)){
                 dst2 = dst;
                 tbSnap = m;
                 tbSnapAlign = Align.bottom;
@@ -271,7 +283,7 @@ public class Mindow2 extends Table{
             };
 
             dst = Math.abs(m.getY(Align.top) - mindowY);
-            if(dst < 32f && dst <= dst2 && between.get(mindowX, m.x - getWidth(), m.x + m.getWidth())){
+            if(dst < 32f && dst <= dst2 && between.get(mindowX, m.x - getWidth() * cont.scaleX, m.x + m.getWidth() * m.cont.scaleX)){
                 dst2 = dst;
                 tbSnap = m;
                 tbSnapAlign = Align.top;
@@ -367,6 +379,7 @@ public class Mindow2 extends Table{
         edgesnap = MI2USettings.getInt(mindowName + ".edgesnap", -1);
         curx = (float)MI2USettings.getInt(mindowName + ".curx");
         cury = (float)MI2USettings.getInt(mindowName + ".cury");
+        cont.setScale(MI2USettings.getInt(mindowName + ".scale", 100) / 100f);
         mindow2s.each(m -> {
             if(m == this) return;
             if(m.mindowName.equals(MI2USettings.getStr(mindowName + ".LRsnap", "null"))){
@@ -404,6 +417,8 @@ public class Mindow2 extends Table{
             MI2USettings.putInt(mindowName + ".curx", (int)curx);
         }
 
+        MI2USettings.putInt(mindowName + ".scale", (int)(cont.scaleX * 100));
+
         MI2USettings.putStr(mindowName + ".LRsnap", lrSnap == null ? "null" : lrSnap.mindowName);
         MI2USettings.putInt(mindowName + ".LRsnapAlign", lrSnapAlign);
         MI2USettings.putInt(mindowName + ".LRsnapOff", (int)lrBottomOff);
@@ -440,6 +455,8 @@ public class Mindow2 extends Table{
                 table.labelWrap(() -> this.name + " = " + (setting != null ? Align.toString(Strings.parseInt(setting.get())) : "invaild")).left().growX().get().setColor(0, 1, 1, 0.7f);
             }
         };
+        FieldEntry entry6 = new FieldEntry(mindowName + ".scale", "", "100", TextField.TextFieldFilter.digitsOnly, str -> Strings.canParseInt(str) && Strings.parseInt(str) >= 5 && Strings.parseInt(str) <= 400, str -> cont.setScale(Strings.parseInt(str, 100)/100f));
+
         Table buildTarget;
         public MindowUIGroupEntry(String name, String help) {
             super(name, help);
@@ -542,6 +559,8 @@ public class Mindow2 extends Table{
                         }).growX();
                     }).minWidth(220f).pad(4f);
                 });
+                t.row();
+                t.table(tt -> entry6.build(tt)).growX();
             };
         }
     }
