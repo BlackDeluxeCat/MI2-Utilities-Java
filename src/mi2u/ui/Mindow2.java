@@ -455,7 +455,7 @@ public class Mindow2 extends Table{
                 table.labelWrap(() -> this.name + " = " + (setting != null ? Align.toString(Strings.parseInt(setting.get())) : "invaild")).left().growX().get().setColor(0, 1, 1, 0.7f);
             }
         };
-        FieldEntry entry6 = new FieldEntry(mindowName + ".scale", "", "100", TextField.TextFieldFilter.digitsOnly, str -> Strings.canParseInt(str) && Strings.parseInt(str) >= 5 && Strings.parseInt(str) <= 400, str -> cont.setScale(Strings.parseInt(str, 100)/100f));
+        FieldEntry entry6 = new FieldEntry(mindowName + ".scale", "@settings.mindow2.scale", "100", TextField.TextFieldFilter.digitsOnly, str -> Strings.canParseInt(str) && Strings.parseInt(str) >= 5 && Strings.parseInt(str) <= 400, str -> cont.setScale(Strings.parseInt(str, 100)/100f));
 
         Table buildTarget;
         public MindowUIGroupEntry(String name, String help) {
