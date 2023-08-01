@@ -537,7 +537,7 @@ public class FullAI extends AIController{
                     ui.logic.show(code, exec, true, str -> {
                         readCode(str);
                     });
-                }).grow();
+                }).grow().minWidth(40f);
                 t.add("ipt=");
                 t.field(String.valueOf(instructionsPerTick), TextField.TextFieldFilter.digitsOnly, str -> instructionsPerTick = Strings.parseInt(str)).growX();
                 t.button(Iconc.info + "", textb, () -> {

@@ -134,6 +134,8 @@ public class MI2UI extends Mindow2{
                 popup.addInGameVisible();
                 popup.setSize(300f, 200f);
                 popup.margin(4f).setBackground(Styles.black8);
+                popup.image().color(Color.cyan).growX().height(8f);
+                popup.row();
                 popup.pane(p -> {
                     for(var mode : fullAI.modes){
                         p.table(mode::buildConfig).growX();
@@ -146,7 +148,7 @@ public class MI2UI extends Mindow2{
                     }else if(p.hasScroll()){
                         Core.scene.setScrollFocus(null);
                     }
-                });
+                }).maxHeight(Core.graphics.getHeight()*0.6f);
                 popup.popup();
                 popup.update(popup::keepInScreen);
                 popup.setPositionInScreen(Core.graphics.getWidth()/2f, Core.graphics.getHeight()/2f);
