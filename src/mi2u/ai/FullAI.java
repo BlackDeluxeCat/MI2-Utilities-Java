@@ -4,6 +4,7 @@ import arc.*;
 import arc.graphics.*;
 import arc.math.*;
 import arc.math.geom.*;
+import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
@@ -89,6 +90,7 @@ public class FullAI extends AIController{
     public class Mode{
         public boolean enable = false;
         public String btext;
+        public Drawable bimg;
         public Mode(){
             btext = Iconc.units + "";
         }
@@ -103,7 +105,11 @@ public class FullAI extends AIController{
                 }, textb, () -> {
                     enable = !enable;
                 }).size(16f);
-                t.add(btext).color(Color.sky).left();
+                if(bimg != null){
+                    t.image(bimg).size(18f).scaling(Scaling.fit);
+                }else{
+                    t.add(btext).color(Color.sky).left();
+                }
                 t.add().growX();
             }).growX().minHeight(18f).padTop(8f);
             table.row();
@@ -342,6 +348,7 @@ public class FullAI extends AIController{
         public boolean attack = true, heal = true;
         public AutoTargetMode(){
             btext = "AT";
+            bimg = Core.atlas.drawable("mi2-utilities-java-ui-shoot");
         }
         @Override
         public void act(){
@@ -384,6 +391,7 @@ public class FullAI extends AIController{
         public CenterFollowMode(){
             btext = Iconc.move + "";
             enable = mobile;
+            bimg = Core.atlas.drawable("mi2-utilities-java-ui-centermove");
         }
         @Override
         public void act(){

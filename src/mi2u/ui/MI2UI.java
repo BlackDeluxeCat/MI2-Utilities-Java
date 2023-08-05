@@ -4,6 +4,7 @@ import arc.*;
 import arc.graphics.*;
 import arc.math.*;
 import arc.scene.*;
+import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
@@ -111,11 +112,12 @@ public class MI2UI extends Mindow2{
             }).with(funcSetTextb).with(b -> {
                 b.margin(4f);
                 b.table(bii -> {
-                    bii.image(Icon.settingsSmall).size(16f).update(img -> {
-                        if(SpeedController.update) img.rotateBy(-1f);
+                    bii.image(Core.atlas.find("mi2-utilities-java-ui-speed")).size(24f).with(img -> {
+                        img.setOrigin(Align.center);
+                    }).update(img -> {
+                        if(SpeedController.update) img.setRotation(Mathf.log2(SpeedController.scl) * 45f);
                         else img.setRotation(0f);
-                        img.setColor(!b.isChecked() ? Color.white : SpeedController.lowerThanMin() ? Color.scarlet : Color.lime);
-                    }).left();
+                    });
                     bii.add().grow();
                 }).grow();
                 b.getLabelCell().expand(false, false).fill(false).width(0.5f);
@@ -127,7 +129,9 @@ public class MI2UI extends Mindow2{
         cont.row();
 
         cont.table(tt -> {
-            tt.button("AI\n" + Iconc.settings, textb, () -> {
+            tt.button(b -> {
+                b.image(Core.atlas.drawable("mi2-utilities-java-ui-aicfg")).size(24f).scaling(Scaling.fit);
+            }, textb, () -> {
                 popup.clear();
                 popup.addCloseButton();
                 popup.addDragMove();
@@ -148,18 +152,22 @@ public class MI2UI extends Mindow2{
                     }else if(p.hasScroll()){
                         Core.scene.setScrollFocus(null);
                     }
-                }).maxHeight(Core.graphics.getHeight()*0.6f);
+                }).maxHeight(Core.graphics.getHeight()*0.6f/Scl.scl());
                 popup.popup();
                 popup.update(popup::keepInScreen);
                 popup.setPositionInScreen(Core.graphics.getWidth()/2f, Core.graphics.getHeight()/2f);
-            }).grow().minSize(36f).with(funcSetTextb);
+            }).grow();
             tt.table(ttt -> {
                 fullAI.modes.each(mode -> {
-                    ttt.button(mode.btext, textbtoggle, () -> {
+                    ttt.button(bbb -> {
+                        if(mode.bimg != null){
+                            bbb.image(mode.bimg).size(24f).scaling(Scaling.fit).pad(4f);
+                        }else{
+                            bbb.add(mode.btext).align(Align.center);
+                        }
+                    }, textbtoggle, () -> {
                         mode.enable = !mode.enable;
-                    }).checked(b -> mode.enable).minSize(32f).with(c -> {
-                        c.getLabel().setAlignment(Align.center);
-                    }).grow();
+                    }).checked(b -> mode.enable).minSize(32f).grow();
                 });
             }).grow();
         }).growX();
