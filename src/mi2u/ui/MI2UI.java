@@ -112,9 +112,8 @@ public class MI2UI extends Mindow2{
             }).with(funcSetTextb).with(b -> {
                 b.margin(4f);
                 b.table(bii -> {
-                    bii.image(Core.atlas.find("mi2-utilities-java-ui-speed")).size(24f).with(img -> {
+                    bii.image(Core.atlas.find("mi2-utilities-java-ui-speed")).size(24f).update(img -> {
                         img.setOrigin(Align.center);
-                    }).update(img -> {
                         if(SpeedController.update) img.setRotation(Mathf.log2(SpeedController.scl) * 45f);
                         else img.setRotation(0f);
                     });

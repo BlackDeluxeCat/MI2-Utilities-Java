@@ -84,6 +84,8 @@ public class Mindow2 extends Table{
             cont.setBackground(Styles.black3);
             setupCont(cont);
             add(cont);
+        }else{
+            add().size(titleBar.getPrefWidth(), titleBar.getPrefHeight());
         }
     }
 
