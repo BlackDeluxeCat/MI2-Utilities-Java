@@ -457,6 +457,7 @@ public class FullAI extends AIController{
 
     public class LogicMode extends Mode{
         public static final Seq<Class<? extends LInstruction>> bannedInstructions = new Seq<>();
+        static LogicMode logicMode;
         public LExecutor exec = new LExecutor();
         public String code;
         public LogicAI ai = new LogicAI();
@@ -472,12 +473,18 @@ public class FullAI extends AIController{
 
         public LogicMode(){
             super();
+            logicMode = this;
             bannedInstructions.clear();
             bannedInstructions.addAll(ControlI.class, WriteI.class, StopI.class, SetBlockI.class, SpawnUnitI.class, ApplyEffectI.class, SetRuleI.class, SetRateI.class, ExplosionI.class, SetFlagI.class, SpawnWaveI.class, SetPropI.class);
             btext = Iconc.blockWorldProcessor + "";
             Events.on(MI2UEvents.FinishSettingInitEvent.class, e -> {
                 code = MI2USettings.getStr("ai.logic.code.0");
                 readCode(code);
+            });
+            Events.on(EventType.WorldLoadEvent.class, e-> {
+                if(logicMode != null){
+                    logicMode.readCode(logicMode.code);
+                }
             });
         }
 

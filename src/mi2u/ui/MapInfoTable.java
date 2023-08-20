@@ -208,13 +208,16 @@ public class MapInfoTable extends Table{
             }
         }).row();
 
-        wavesPopup.pane(t -> barsTable = t).fillX().maxHeight(Core.graphics.getHeight()*0.5f/Scl.scl()).update(p -> {
-            Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-            if(e != null && e.isDescendantOf(p)){
-                p.requestScroll();
-            }else if(p.hasScroll()){
-                Core.scene.setScrollFocus(null);
-            }
+        wavesPopup.pane(t -> barsTable = t).fillX().self(c -> {
+            c.update(p -> {
+                c.maxHeight(Core.graphics.getHeight()*0.5f/Scl.scl());
+                Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
+                if(e != null && e.isDescendantOf(p)){
+                    p.requestScroll();
+                }else if(p.hasScroll()){
+                    Core.scene.setScrollFocus(null);
+                }
+            });
         });
 
     }
