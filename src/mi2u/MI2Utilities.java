@@ -76,7 +76,6 @@ public class MI2Utilities extends Mod{
             Time.runTask(140f, () -> {
                 if(MI2USettings.getBool("enableUpdate", true)) checkUpdate();
             });
-
         });
 
         Events.on(FileTreeInitEvent.class, e -> Core.app.post(MI2UShaders::load));
