@@ -47,7 +47,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: build/libs/${{ github.event.repository.name }}.jar
-        asset_name: ${{ github.event.repository.name }}.${{ steps.get_version.outputs.VERSION }}-145.jar
+        asset_name: ${{ github.event.repository.name }}.${{ steps.get_version.outputs.VERSION }}-146.jar
         asset_content_type: application/java-archive
 
   buildWindows:
