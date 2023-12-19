@@ -44,6 +44,7 @@ public class Mindow2 extends Table{
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
     boolean dragging = false;
     public boolean minimized = false;
+    boolean titleCfg = false;
     public String titleText, helpInfo = "", mindowName;
     protected Table titleBar = new Table();
     protected Table cont = new Table();
@@ -79,6 +80,7 @@ public class Mindow2 extends Table{
     public void rebuild(){
         clear();
         setupTitle();
+        add(titleBar).left();
         row();
         if(!minimized){
             cont.setBackground(Styles.black3);
@@ -99,11 +101,10 @@ public class Mindow2 extends Table{
 
     public void setupTitle(){
         titleBar.clear();
-        var title = new Label(titleText);
-        title.name = "Mindow2Title";
-        title.setAlignment(Align.left);
-        title.addListener(new InputListener(){
-            static Vec2 tmpv = new Vec2();
+        titleBar.button("" + Iconc.move, textb, () -> {
+            titleCfg = !titleCfg;
+        }).size(titleButtonSize).get().addListener(new InputListener(){
+            Vec2 tmpv = new Vec2();
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
                 fromx = x;
@@ -118,7 +119,6 @@ public class Mindow2 extends Table{
                 v.sub(fromx, fromy);
                 curx = v.x;
                 cury = v.y;
-
                 setSnap(v.x, v.y);
                 dragging = v.sub(tmpv).len() > 5f;
             }
@@ -133,31 +133,34 @@ public class Mindow2 extends Table{
             }
         });
 
-        if(!minimized){
-            titleBar.add(title).pad(0, 1, 0, 1);
+        var toast = new Table(){
+            @Override
+            public void draw(){
+                super.draw();
+            }
+        };
 
-            titleBar.button("" + Iconc.settings, textb, this::showSettings).size(titleButtonSize);
-
-            titleBar.button("-", textbtoggle, () -> {
+        titleBar.table(t -> {
+            t.add(titleText).color(MI2UTmp.c1.set(0.8f,0.9f,1f,1f));
+            t.button("" + Iconc.settings, textb, this::showSettings).size(titleButtonSize);
+            t.button("-", textbtoggle, () -> {
                 minimized = !minimized;
                 cury += (minimized ? 1f : -1f) * cont.getHeight();
                 saveUISettings();
                 minimize();
             }).size(titleButtonSize).update(b -> b.setChecked(minimized));
-        }else{
-            titleBar.button(titleText != null ? titleText : "-", textbtoggle, () -> {
-                minimized = !minimized;
-                cury += (minimized ? 1f : -1f) * cont.getHeight();
-                saveUISettings();
-                minimize();
-            }).height(titleButtonSize).update(b -> b.setChecked(minimized)).with(funcSetTextb);
-        }
+        }).update(t -> {
+            t.setClip(true);
+            if(titleCfg && !minimized){
+                t.setWidth(0f);
+            }else{
+                t.setWidth(t.getPrefWidth());
+            }
+        });
 
         titleBar.update(() -> {
             cont.touchable = Touchable.enabled;
-            //TODO add a abovesnap listener
             titleBar.setBackground(titleBarbgNormal);
-            title.color.set(MI2UTmp.c1.set(0.8f,0.9f,1f,1f));
 
             boolean slideAnime = edgeSnap(edgesnap);
             slideAnime = slideAnime | elementSnap(tbSnap, tbSnapAlign, lrSnap == null && !Align.isLeft(edgesnap) && !Align.isRight(edgesnap));
@@ -175,18 +178,6 @@ public class Mindow2 extends Table{
             invalidateHierarchy();
             pack();
         });
-
-        var coll = new Collapser(titleBar, false);
-        coll.setCollapsed(true, () -> !(cont.getPrefHeight() < 20f || minimized || (hasMouse() && interval.check(0, 3000))));
-        coll.setDuration(0.1f);
-        coll.update(() -> {
-            float w = titleBar.getPrefWidth(), h = titleBar.getPrefHeight();
-            coll.setSize(w, h);
-            coll.toFront();
-            coll.setPosition(0f, getHeight() * cont.scaleY - titleBar.getHeight());
-        });
-
-        addChild(coll);
     }
 
     /** Returns the X position of the specified {@link Align alignment}. */
@@ -440,7 +431,7 @@ public class Mindow2 extends Table{
 
     public static void initMindowStyles(){
         var whiteui = (TextureRegionDrawable)Tex.whiteui;
-        titleBarbgNormal = whiteui.tint(1f, 0.1f, 0.2f, 0.8f);
+        titleBarbgNormal = whiteui.tint(1f, 0.1f, 0.2f, 0.3f);
         titleBarbgSnapped = whiteui.tint(1f, 0.1f, 0.2f, 0.2f);
         white = whiteui.tint(1f, 1f, 1f, 1f);
         gray2 = whiteui.tint(0.2f, 0.2f, 0.2f, 1f);
