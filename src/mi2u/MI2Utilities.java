@@ -63,8 +63,6 @@ public class MI2Utilities extends Mod{
                 if(MI2USettings.getBool("showMindowMap")) mindowmap.addTo(mindowmap.hasParent() ? mindowmap.parent : Core.scene.root);
                 mindowmap.visible(() -> state.isGame() && ui.hudfrag.shown);
                 if(MI2USettings.getBool("showLogicHelper", true)) logicHelper.addTo(logicHelper.hasParent() ? logicHelper.parent : ui.logic);
-                if(MI2USettings.getBool("showUIContainer")) container.addTo(container.hasParent() ? container.parent : ui.logic);
-                container.visible(() -> state.isGame() && ui.hudfrag.shown);
 
                 RendererExt.initBase();
                 ModifyFuncs.modifyVanilla();

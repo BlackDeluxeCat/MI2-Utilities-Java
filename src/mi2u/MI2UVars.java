@@ -33,6 +33,5 @@ public class MI2UVars{
     public static EmojiMindow emojis = new EmojiMindow();
     public static CoreInfoMindow coreInfo = new CoreInfoMindow();
     public static LogicHelperMindow logicHelper = new LogicHelperMindow();
-    public static CustomContainerMindow container = new CustomContainerMindow();
     public static MinimapMindow mindowmap = new MinimapMindow();
 }

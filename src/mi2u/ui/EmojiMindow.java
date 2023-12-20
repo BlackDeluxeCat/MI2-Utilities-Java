@@ -29,13 +29,7 @@ public class EmojiMindow extends Mindow2{
     private int tmpindex = 0;
 
     public EmojiMindow() {
-        super("@emoji.MI2U", "@emoji.help");
-    }
-
-    @Override
-    public void init() {
-        super.init();
-        mindowName = "Emojis";
+        super("Emojis", "@emoji.MI2U", "@emoji.help");
 
         var map = new ObjectMap<String, String>();
         listt = new Table();

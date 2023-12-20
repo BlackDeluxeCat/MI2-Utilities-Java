@@ -43,7 +43,10 @@ public class CoreInfoMindow extends Mindow2{
     public int itemTimerInt = 1;
 
     public CoreInfoMindow(){
-        super("@coreInfo.MI2U", "@coreInfo.help");
+        super("CoreInfo", "@coreInfo.MI2U", "@coreInfo.help");
+        usedItems = new ObjectSet<>();
+        usedUnits = new ObjectSet<>();
+
         itemRecoders = new FloatDataRecorder[content.items().size];
         itemCharts = new PopupTable[content.items().size];
         content.items().each(item -> {
@@ -101,14 +104,6 @@ public class CoreInfoMindow extends Mindow2{
                 buildPlanTable.setPositionInScreen(this.x, this.y - buildPlanTable.getPrefHeight());
             }
         });
-    }
-
-    @Override
-    public void init() {
-        super.init();
-        mindowName = "CoreInfo";
-        usedItems = new ObjectSet<>();
-        usedUnits = new ObjectSet<>();
     }
 
     @Override
