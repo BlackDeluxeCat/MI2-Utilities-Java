@@ -1,7 +1,6 @@
 package mi2u.ui;
 
 import arc.*;
-import arc.graphics.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.style.*;
@@ -10,6 +9,7 @@ import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.MI2Utils;
 import mi2u.struct.*;
+import mi2u.ui.elements.*;
 import mindustry.content.*;
 import mindustry.core.*;
 import mindustry.entities.*;

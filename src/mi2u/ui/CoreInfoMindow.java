@@ -1,6 +1,7 @@
 package mi2u.ui;
 
 import arc.*;
+import arc.func.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
@@ -15,6 +16,7 @@ import mi2u.input.*;
 import mi2u.io.*;
 import mi2u.io.MI2USettings.*;
 import mi2u.struct.*;
+import mi2u.ui.elements.*;
 import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.game.Teams.*;
@@ -42,10 +44,39 @@ public class CoreInfoMindow extends Mindow2{
     public PopupTable[] itemCharts;
     public int itemTimerInt = 1;
 
+    public Prov<String> rollingTitle;
+
     public CoreInfoMindow(){
         super("CoreInfo", "@coreInfo.MI2U", "@coreInfo.help");
         usedItems = new ObjectSet<>();
         usedUnits = new ObjectSet<>();
+
+        titlePane.table(teamt -> {
+            teamt.add(new MCollapser(t -> {
+                t.label(() -> rollingTitle == null ? "" : rollingTitle.get()).minWidth(80f);
+                t.image().width(2f).growY().color(Color.white);
+            }, true).setCollapsed(true, () -> rollingTitle == null).setDirection(true, false));
+            teamt.button(itemTimerInt + "s", textb, null).size(titleButtonSize).with(b -> {
+                b.clicked(() -> {
+                    switch(itemTimerInt){
+                        case 1 -> itemTimerInt = 10;
+                        case 10 -> itemTimerInt = 30;
+                        case 30 -> itemTimerInt = 60;
+                        default -> itemTimerInt = 1;
+                    }
+                    b.setText(itemTimerInt + "s");
+                });
+            });
+            teamt.button("Select", textb, () -> {
+                rebuildSelect();
+                teamSelect.popup();
+                teamSelect.snapTo(this);
+            }).grow().update(b -> {
+                b.setText(team.localized() + (select == null ? Core.bundle.get("coreInfo.selectButton.playerteam"):""));
+                b.getLabel().setColor(team == null ? Color.white:team.color);
+                b.getLabel().setFontScale(0.8f);
+            });
+        }).height(titleButtonSize).growX();
 
         itemRecoders = new FloatDataRecorder[content.items().size];
         itemCharts = new PopupTable[content.items().size];
@@ -109,30 +140,6 @@ public class CoreInfoMindow extends Mindow2{
     @Override
     public void setupCont(Table cont){
         cont.clear();
-        cont.table(teamt -> {
-            teamt.button(itemTimerInt + "s", textb, null).size(48f).with(b -> {
-                b.clicked(() -> {
-                    switch(itemTimerInt){
-                        case 1 -> itemTimerInt = 10;
-                        case 10 -> itemTimerInt = 30;
-                        case 30 -> itemTimerInt = 60;
-                        default -> itemTimerInt = 1;
-                    }
-                    b.setText(itemTimerInt + "s");
-                });
-            });
-            teamt.row();
-            teamt.button("Select", textb, () -> {
-                rebuildSelect();
-                teamSelect.popup();
-                teamSelect.snapTo(this);
-            }).growY().width(48f).update(b -> {
-                b.setText(Core.bundle.get("coreInfo.selectButton.team") + team.localized() + (select == null ? Core.bundle.get("coreInfo.selectButton.playerteam"):""));
-                b.getLabel().setColor(team == null ? Color.white:team.color);
-                b.getLabel().setWrap(true);
-                b.getLabel().setFontScale(0.75f);
-            });
-        }).grow();
 
         cont.table(ipt -> {
             if(MI2USettings.getBool(mindowName + ".showCoreItems", true)){
@@ -153,14 +160,18 @@ public class CoreInfoMindow extends Mindow2{
                         iut.stack(new Table(t -> {
                                 t.image(item.uiIcon).size(iconSmall);
                                 t.label(() -> core == null ? "0" : UI.formatAmount(core.items.get(item))).padRight(3).minWidth(52f).left();
-                        }), l).padLeft(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel)).get().clicked(() -> {
-                            var chart = getItemChart(item);
-                            if(chart != null){
-                                chart.setPositionInScreen(this.x - chart.getPrefWidth(), this.y);
-                                chart.popup();
-                            }else{
-                                Log.infoTag("MI2U", "Item Chart error. Contact the develop.");
-                            }
+                        }), l).padLeft(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel)).with(s -> {
+                            s.clicked(() -> {
+                                var chart = getItemChart(item);
+                                if(chart != null){
+                                    chart.setPositionInScreen(this.x - chart.getPrefWidth(), this.y);
+                                    chart.popup();
+                                }else{
+                                    Log.infoTag("MI2U", "Item Chart error. Contact the develop.");
+                                }
+                            });
+                            s.hovered(() -> rollingTitle = () -> item.localizedName + (core == null ? "" : ": " + core.items.get(item)));
+                            s.exited(() -> rollingTitle = null);
                         });
 
                         if(++i % 4 == 0){

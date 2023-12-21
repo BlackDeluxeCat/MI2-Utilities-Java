@@ -12,6 +12,7 @@ import arc.struct.*;
 import arc.util.*;
 import mi2u.*;
 import mi2u.input.*;
+import mi2u.ui.elements.*;
 import mindustry.gen.*;
 import mindustry.logic.*;
 import mindustry.ui.*;

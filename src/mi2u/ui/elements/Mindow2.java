@@ -1,4 +1,4 @@
-package mi2u.ui;
+package mi2u.ui.elements;
 
 import arc.*;
 import arc.func.*;
@@ -8,7 +8,6 @@ import arc.input.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.*;
-import arc.scene.actions.*;
 import arc.scene.event.*;
 import arc.scene.style.*;
 import arc.scene.ui.*;
@@ -106,22 +105,20 @@ public class Mindow2 extends Table{
                 return 0f;
             }
         }).scrollX(true).scrollY(false).with(sp -> {
+            sp.update(() -> {
+                Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
+                if(e != null && e.isDescendantOf(sp)){
+                    sp.requestScroll();
+                }else if(sp.hasScroll()){
+                    Core.scene.setScrollFocus(null);
+                }
+            });
             sp.setFadeScrollBars(true);
             sp.setupFadeScrollBars(0.3f, 0f);
         }).growX().left().minWidth(32f);
         titleBar.image().width(2f).growY().color(Color.white);
 
-        var toast = new Table(){
-            {
-                setTransform(true);
-            }
-            @Override
-            public void act(float delta){
-                super.act(delta);
-                if(titleCfg) this.scaleX = Mathf.lerp(this.scaleX, 1f, 0.2f);
-                if(!titleCfg) this.scaleX = Mathf.lerp(this.scaleX, 0f, 0.2f);
-            }
-        };
+        var toast = new Table();
         toast.add(titleText).color(MI2UTmp.c1.set(0.8f,0.9f,1f,1f));
         toast.button("-", textbtoggle, () -> {
             minimized = !minimized;
@@ -134,9 +131,9 @@ public class Mindow2 extends Table{
             resizing = !resizing;
             titleCfg = false;
         }).size(titleButtonSize);*/
-
         toast.setBackground(titleBarbgNormal);
-        titleBar.add(toast).self(c -> {
+
+        titleBar.add(new MCollapser(toast, true).setCollapsed(true, () -> !titleCfg).setDirection(true, true)).self(c -> {
             c.update(cc -> {
                 c.width(cc.getPrefWidth() * cc.scaleX/Scl.scl());
             });

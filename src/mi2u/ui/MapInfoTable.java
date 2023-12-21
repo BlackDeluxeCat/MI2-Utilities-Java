@@ -14,6 +14,7 @@ import arc.util.*;
 import mi2u.*;
 import mi2u.input.*;
 import mi2u.struct.*;
+import mi2u.ui.elements.*;
 import mindustry.content.*;
 import mindustry.core.*;
 import mindustry.game.*;

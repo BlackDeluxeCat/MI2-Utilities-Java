@@ -8,7 +8,7 @@ import arc.scene.ui.TextButton.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
-import mindustry.content.Blocks;
+import mi2u.ui.elements.*;
 import mindustry.gen.*;
 import mindustry.ui.*;
 

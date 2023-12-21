@@ -13,7 +13,7 @@ import mi2u.*;
 import mi2u.game.*;
 import mi2u.input.*;
 import mi2u.io.*;
-import mi2u.ui.*;
+import mi2u.ui.elements.*;
 import mindustry.ai.types.*;
 import mindustry.content.*;
 import mindustry.entities.*;

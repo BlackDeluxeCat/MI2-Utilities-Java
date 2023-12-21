@@ -1,4 +1,4 @@
-package mi2u.ui;
+package mi2u.ui.elements;
 
 import arc.*;
 import arc.input.*;

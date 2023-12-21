@@ -20,6 +20,7 @@ import mi2u.input.InputOverwrite;
 import mi2u.io.*;
 import mi2u.io.MI2USettings.*;
 import mi2u.struct.*;
+import mi2u.ui.elements.*;
 import mindustry.core.*;
 import mindustry.game.EventType;
 import mindustry.gen.*;
@@ -83,7 +84,7 @@ public class MinimapMindow extends Mindow2{
             t.add().growX();//let coords being right align
             Cons<Table> l = tl -> {
                 tl.table(tt -> {
-                    tt.defaults().width(1f);
+                    tt.defaults().width(1f).fontScale(0.8f);
                     tt.label(() -> Strings.fixed(World.conv(player.x), 1) + ", "+ Strings.fixed(World.conv(player.y), 1)).get().setAlignment(Align.right);
                     tt.row();
                     tt.label(() -> Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1)).color(Color.coral).get().setAlignment(Align.right);

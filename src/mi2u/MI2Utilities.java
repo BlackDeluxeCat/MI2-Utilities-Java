@@ -12,6 +12,7 @@ import mi2u.graphics.*;
 import mi2u.input.*;
 import mi2u.io.*;
 import mi2u.ui.*;
+import mi2u.ui.elements.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.mod.*;

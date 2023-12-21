@@ -14,6 +14,7 @@ import arc.scene.ui.layout.Table;
 import arc.struct.*;
 import arc.util.*;
 import mi2u.*;
+import mi2u.ui.elements.*;
 import mindustry.gen.Iconc;
 import mindustry.logic.LCanvas;
 import mindustry.logic.LExecutor;
