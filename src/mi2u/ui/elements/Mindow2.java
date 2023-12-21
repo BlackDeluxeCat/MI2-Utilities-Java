@@ -133,11 +133,10 @@ public class Mindow2 extends Table{
         }).size(titleButtonSize);*/
         toast.setBackground(titleBarbgNormal);
 
-        titleBar.add(new MCollapser(toast, true).setCollapsed(true, () -> !titleCfg).setDirection(true, true)).self(c -> {
-            c.update(cc -> {
-                c.width(cc.getPrefWidth() * cc.scaleX/Scl.scl());
-            });
-        });
+        titleBar.add(new MCollapser(toast, true).setCollapsed(true, () -> {
+            if(titleCfg && interval.check(0, 10000)) titleCfg = false;
+            return !titleCfg;
+        }).setDirection(true, true));
 
         titleBar.update(() -> {
             titleBar.invalidate();
@@ -146,6 +145,7 @@ public class Mindow2 extends Table{
 
         titleBar.button(b -> b.label(() -> "" + (resizing ? Iconc.resize : Iconc.move)), textb, () -> {
             titleCfg = !titleCfg;
+            interval.get(0,0);
         }).size(titleButtonSize).get().addListener(new InputListener(){
             Vec2 tmpv = new Vec2();
             @Override

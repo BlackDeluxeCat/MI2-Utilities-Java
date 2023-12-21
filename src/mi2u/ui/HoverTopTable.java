@@ -10,6 +10,7 @@ import arc.util.*;
 import mi2u.MI2Utils;
 import mi2u.struct.*;
 import mi2u.ui.elements.*;
+import mindustry.*;
 import mindustry.content.*;
 import mindustry.core.*;
 import mindustry.entities.*;
@@ -45,6 +46,10 @@ public class HoverTopTable extends PopupTable{
     public HoverTopTable(){
         initChild();
         build();
+
+        Events.run(EventType.Trigger.update, () -> {
+            if(state.isGame()) hovered();
+        });
 
         //伤害事件不带伤害值，手算
         Events.on(EventType.UnitDamageEvent.class, e -> {
@@ -190,7 +195,7 @@ public class HoverTopTable extends PopupTable{
 
     public void build(){
         clear();
-        addInGameVisible();
+        visible(() -> Vars.state.isGame() && Vars.ui.hudfrag.shown && hasInfo());
         table(t -> {
             t.clear();
             t.background(Styles.black3);
@@ -330,7 +335,6 @@ public class HoverTopTable extends PopupTable{
     }
 
     public boolean hasInfo(){
-        hovered();
         return unit != null || tile != null || build != null;
     }
 }

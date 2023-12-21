@@ -28,7 +28,7 @@ public class MI2UI extends Mindow2{
 
     private long runTime = 0, lastRunTime = 0, realRunTime = 0, lastRealRun = 0;
 
-    protected Table[] tabs;
+    protected TabsTable tabs;
     public int tabId;
 
     public MI2UI(){
@@ -67,28 +67,27 @@ public class MI2UI extends Mindow2{
         titlePane.clear();
         titlePane.table(t -> {
             t.defaults().size(titleButtonSize);
-            t.button("Play", textb, () -> {
+            t.button("" + Iconc.play, textb, () -> {
                 tabId = 0;
-                setupCont(cont);
-            });
-            t.button("In", textb, () -> {
+                tabs.toggle(tabId);
+            }).color(Color.yellow);
+            t.button("" + Iconc.info, textb, () -> {
                 tabId = 1;
-                setupCont(cont);
-            });
-            t.button("Set", textb, () -> {
+                tabs.toggle(tabId);
+            }).color(Color.cyan);
+            t.button("" + Iconc.units, textb, () -> {
                 tabId = 2;
-                setupCont(cont);
-            });
-            t.button("Team", textb, () -> {
+                tabs.toggle(tabId);
+            }).color(Color.salmon);
+            t.button("" + Iconc.settings, textb, () -> {
                 tabId = 3;
-                setupCont(cont);
-            });
+                tabs.toggle(tabId);
+            }).color(Color.green);
         });
 
-        tabs = new Table[4];
+        tabs = new TabsTable(true);
 
         var play = new Table();
-        tabs[0] = play;
         play.table(t -> {
             t.button("" + Iconc.refresh, textb, () -> {
                 Call.sendChatMessage("/sync");
@@ -165,7 +164,6 @@ public class MI2UI extends Mindow2{
         });
 
         var info = new Table();
-        tabs[1] = info;
         info.table(t -> {
             t.table(timet -> {
                 timet.label(() -> Iconc.save + Strings.formatMillis(control.saves.getTotalPlaytime())).minWidth(40f).padRight(8f);
@@ -178,20 +176,33 @@ public class MI2UI extends Mindow2{
         }).growX();
 
         var set = new Table();
-        tabs[2] = set;
         Events.on(MI2UEvents.FinishSettingInitEvent.class, e -> {
-            set.table(tt -> {
-                tt.defaults().minSize(32f, 32f);
-                if(MI2USettings.getEntry("enDistributionReveal") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.zoom + Iconc.blockJunction)).minSize(24f);
-                if(MI2USettings.getEntry("enUnitHitbox") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.box)).width(36f);
-                if(MI2USettings.getEntry("disableUnit") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.unitGamma)).width(36f);
-                if(MI2USettings.getEntry("disableBullet") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.unitScatheMissile)).width(36f);
-                if(MI2USettings.getEntry("disableBuilding") instanceof CheckEntry ce) tt.add(ce.newTextButton("" + Iconc.cancel + Iconc.blockDuo)).width(36f);
+            set.table(t -> {
+                t.defaults().minWidth(16f);
+                if(MI2USettings.getEntry("disableWreck") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.teamDerelict));
+                if(MI2USettings.getEntry("disableUnit") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.cancel + Iconc.unitGamma));
+                if(MI2USettings.getEntry("disableBullet") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.cancel + Iconc.unitScatheMissile));
+                if(MI2USettings.getEntry("disableBuilding") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.cancel + Iconc.blockDuo));
+                t.row();
+                if(MI2USettings.getEntry("enUnitHpBar") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.defense + Iconc.unitDagger));
+                if(MI2USettings.getEntry("enBlockHpBar") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.defense + Iconc.blockDuo));
+                if(MI2USettings.getEntry("enUnitLogic") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.units + Iconc.blockLogicProcessor));
+                if(MI2USettings.getEntry("enUnitHitbox") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.units + Iconc.box));
+                if(MI2USettings.getEntry("enUnitPath") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.teamCrux + Iconc.planet));
             }).growX();
+
+            set.row();
+            set.table(t -> {
+                t.defaults().minSize(16f);
+                if(MI2USettings.getEntry("enDistributionReveal") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.zoom + Iconc.blockJunction));
+                if(MI2USettings.getEntry("drevealBridge") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.blockBridgeConveyor));
+                if(MI2USettings.getEntry("drevealJunction") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.blockJunction));
+                if(MI2USettings.getEntry("drevealUnloader") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.blockUnloader));
+                if(MI2USettings.getEntry("drevealInventory") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.blockVault));
+            });
         });
 
         var team = new Table();
-        tabs[3] = team;
         team.table(t -> {
             t.button("@main.buttons.createForm", textbtoggle, () -> {
                 RtsCommand.creatingFormation = !RtsCommand.creatingFormation;
@@ -227,13 +238,14 @@ public class MI2UI extends Mindow2{
             }).growX();
         }).growX();
 
+        tabs.queue(play, info, team, set);
     }
 
     @Override
     public void setupCont(Table cont){
         cont.clear();
-        tabId = Mathf.clamp(tabId, 0, tabs.length - 1);
-        cont.add(tabs[tabId]);
+        cont.add(tabs);
+        tabs.toggle(tabId);
     }
 
     @Override

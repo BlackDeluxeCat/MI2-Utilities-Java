@@ -12,7 +12,7 @@ public class MCollapser extends WidgetGroup{
     Table table;
     @Nullable
     Boolp collapsedFunc;
-    private MCollapser.CollapseAction collapseAction = new MCollapser.CollapseAction();
+    private final CollapseAction collapseAction = new CollapseAction();
     boolean collapsed, autoAnimate;
     boolean horizontal, vertical = true;
     boolean actionRunning;
@@ -55,8 +55,14 @@ public class MCollapser extends WidgetGroup{
         return this;
     }
 
+    public MCollapser setInterpolation(Interp x, Interp y){
+        collapseAction.interpolationHorizontal = x;
+        collapseAction.interpolationVertical = y;
+        return this;
+    }
+
     public MCollapser setInterpolation(Interp interp){
-        collapseAction.interpolation = interp;
+        setInterpolation(interp, interp);
         return this;
     }
 
@@ -105,7 +111,7 @@ public class MCollapser extends WidgetGroup{
     public void draw(){
         if(currentHeight > 1 && currentWidth > 1){
             Draw.flush();
-            if(clipBegin(x, y, currentWidth, currentHeight)){
+            if(clipBegin(x, y, horizontal ? currentWidth : getWidth(), vertical ? currentHeight : getHeight())){
                 super.draw();
                 Draw.flush();
                 clipEnd();
@@ -188,7 +194,7 @@ public class MCollapser extends WidgetGroup{
     }
 
     private class CollapseAction extends Action{
-        Interp interpolation = Interp.exp5;
+        Interp interpolationHorizontal = Interp.exp5, interpolationVertical = Interp.exp5;
         float progress = 0f;
         CollapseAction(){}
 
@@ -209,11 +215,11 @@ public class MCollapser extends WidgetGroup{
             }
 
             if(vertical){
-                currentHeight = interpolation.apply(progress) * table.getPrefHeight();
+                currentHeight = interpolationVertical.apply(progress) * table.getPrefHeight();
             }
 
             if(horizontal){
-                currentWidth = interpolation.apply(progress) * table.getPrefWidth();
+                currentWidth = interpolationHorizontal.apply(progress) * table.getPrefWidth();
             }
 
             invalidateHierarchy();
