@@ -131,7 +131,7 @@ public class MinimapMindow extends Mindow2{
         cont.clear();
         int size = MI2USettings.getInt(mindowName + ".size", 140);
         m.setMapSize(size);
-        cont.add(m);
+        cont.add(m).margin(2f);
     }
 
     @Override
