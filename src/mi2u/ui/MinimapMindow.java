@@ -112,7 +112,7 @@ public class MinimapMindow extends Mindow2{
                     tt.row();
                     tt.add("").color(Color.coral).with(c -> {
                         c.update(() -> {
-                            c.setText(Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(Core.input.mouseWorldY(), 1));
+                            c.setText(Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1));
                             c.setFontScale(titlePane.getWidth() > 110f ? 0.8f : 0.5f);
                         });
                         c.setAlignment(Align.right);
@@ -131,7 +131,7 @@ public class MinimapMindow extends Mindow2{
         cont.clear();
         int size = MI2USettings.getInt(mindowName + ".size", 140);
         m.setMapSize(size);
-        cont.add(m).margin(2f);
+        cont.add(m);
     }
 
     @Override
