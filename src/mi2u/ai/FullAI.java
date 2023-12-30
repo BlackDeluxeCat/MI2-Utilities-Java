@@ -477,6 +477,7 @@ public class FullAI extends AIController{
             bannedInstructions.clear();
             bannedInstructions.addAll(ControlI.class, WriteI.class, StopI.class, SetBlockI.class, SpawnUnitI.class, ApplyEffectI.class, SetRuleI.class, SetRateI.class, ExplosionI.class, SetFlagI.class, SpawnWaveI.class, SetPropI.class);
             btext = Iconc.blockWorldProcessor + "";
+            bimg = Core.atlas.drawable("mi2-utilities-java-ui-customai");
             Events.on(MI2UEvents.FinishSettingInitEvent.class, e -> {
                 code = MI2USettings.getStr("ai.logic.code.0");
                 readCode(code);
