@@ -100,23 +100,8 @@ public class Mindow2 extends Table{
     }
 
     public void setupTitle(){
-        titleBar.add(new ScrollPane(titlePane){
-            @Override
-            public float getPrefWidth(){
-                return 0f;
-            }
-        }).scrollX(true).scrollY(false).with(sp -> {
-            sp.update(() -> {
-                Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-                if(e != null && e.isDescendantOf(sp)){
-                    sp.requestScroll();
-                }else if(sp.hasScroll()){
-                    Core.scene.setScrollFocus(null);
-                }
-            });
-            sp.setFadeScrollBars(true);
-            sp.setupFadeScrollBars(0.3f, 0f);
-        }).growX().right().get().hovered(() -> titleCfg = false);
+        titlePane.touchable = Touchable.enabled;
+        titleBar.add(new MCollapser(titlePane, false).setCollapsed(() -> minimized)).growX().get().hovered(() -> titleCfg = false);
         titleBar.image().width(2f).growY().color(Color.white);
 
         var toast = new Table();
