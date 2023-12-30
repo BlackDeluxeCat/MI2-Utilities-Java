@@ -78,8 +78,9 @@ public class Mindow2 extends Table{
     public void rebuild(){
         clear();
         cont.setBackground(Styles.black3);
-        setupCont(cont);
         cont.touchable = Touchable.enabled;
+        setupCont(cont);
+        titleBar.clear();
         setupTitle();
 
         add(titleBar).growX();
@@ -87,6 +88,7 @@ public class Mindow2 extends Table{
         if(!minimized){
             add(cont).growX();
         }
+        setTransform(true);
     }
 
     /** called when rebuild Mindow2, should be overrided */
@@ -98,7 +100,6 @@ public class Mindow2 extends Table{
     }
 
     public void setupTitle(){
-        titleBar.clear();
         titleBar.add(new ScrollPane(titlePane){
             @Override
             public float getPrefWidth(){
@@ -115,14 +116,14 @@ public class Mindow2 extends Table{
             });
             sp.setFadeScrollBars(true);
             sp.setupFadeScrollBars(0.3f, 0f);
-        }).growX().left().minWidth(32f);
+        }).growX().right().get().hovered(() -> titleCfg = false);
         titleBar.image().width(2f).growY().color(Color.white);
 
         var toast = new Table();
         toast.add(titleText).color(MI2UTmp.c1.set(0.8f,0.9f,1f,1f));
         toast.button("-", textbtoggle, () -> {
             minimized = !minimized;
-            cury += (minimized ? 1f : -1f) * cont.getHeight();
+            cury += (minimized ? 1f : -1f) * cont.getHeight() * scaleY;
             saveUISettings();
             minimize();
         }).size(titleButtonSize).update(b -> b.setChecked(minimized));
@@ -135,8 +136,8 @@ public class Mindow2 extends Table{
 
         titleBar.add(new MCollapser(toast, true).setCollapsed(true, () -> {
             if(titleCfg && interval.check(0, 10000)) titleCfg = false;
-            return !titleCfg;
-        }).setDirection(true, true));
+            return !titleCfg && !minimized;
+        }).setDirection(true, true).setDuration(0.2f));
 
         titleBar.update(() -> {
             titleBar.invalidate();
@@ -187,10 +188,10 @@ public class Mindow2 extends Table{
         boolean slideAnime = edgeSnap(edgesnap);
         slideAnime = slideAnime | elementSnap(tbSnap, tbSnapAlign, lrSnap == null && !Align.isLeft(edgesnap) && !Align.isRight(edgesnap));
         slideAnime = slideAnime | elementSnap(lrSnap, lrSnapAlign, tbSnap == null && !Align.isBottom(edgesnap) && !Align.isTop(edgesnap));
-        if(slideAnime) interval.reset(1, 0);
+        if(slideAnime) interval.get(1, 0);
 
         if(!interval.check(1, 400)){
-            setPosition(Mathf.lerpDelta(x, curx, 0.4f), Mathf.lerpDelta(y, cury, 0.4f));
+            setPosition(Mathf.lerp(x, curx, 0.4f), Mathf.lerp(y, cury, 0.4f));
         }else{
             setPosition(curx, cury);
         }
@@ -202,30 +203,50 @@ public class Mindow2 extends Table{
     }
 
     /** Returns the X position of the specified {@link Align alignment}. */
+    @Override
     public float getX(int alignment){
         float x = this.x;
         if((alignment & right) != 0)
-            x += width * cont.scaleX;
+            x += width * scaleX;
         else if((alignment & left) == 0) //
-            x += width * cont.scaleX / 2;
+            x += width * scaleX / 2;
         return x;
     }
 
     /** Returns the Y position of the specified {@link Align alignment}. */
+    @Override
     public float getY(int alignment){
         float y = this.y;
         if((alignment & top) != 0)
-            y += height * cont.scaleY;
+            y += height * scaleY;
         else if((alignment & bottom) == 0) //
-            y += height * cont.scaleY / 2;
+            y += height * scaleY / 2;
         return y;
+    }
+
+    @Override
+    public void setPosition(float x, float y, int alignment){
+        if((alignment & right) != 0)
+            x -= width * scaleX;
+        else if((alignment & left) == 0) //
+            x -= width * scaleX / 2;
+
+        if((alignment & top) != 0)
+            y -= height * scaleY;
+        else if((alignment & bottom) == 0) //
+            y -= height * scaleY / 2;
+
+        if(this.x != x || this.y != y){
+            this.x = x;
+            this.y = y;
+        }
     }
 
     protected boolean edgeSnap(int align){
         if(parent == null) return false;
-        if(Align.isTop(align)) cury = parent.getHeight() - getHeight() * cont.scaleY;
+        if(Align.isTop(align)) cury = parent.getHeight() - height * scaleY;
         if(Align.isBottom(align)) cury = 0;
-        if(Align.isRight(align)) curx = parent.getWidth() - getWidth() * cont.scaleX;
+        if(Align.isRight(align)) curx = parent.getWidth() - width * scaleX;
         if(Align.isLeft(align)) curx = 0;
         return align != Align.center;
     }
@@ -233,10 +254,10 @@ public class Mindow2 extends Table{
     protected boolean elementSnap(Element e, int align, boolean off){
         if(e == null) return false;
         if(Align.isTop(align)) cury = e.getY(Align.top);
-        if(Align.isBottom(align)) cury = e.getY(Align.bottom) - getHeight() * cont.scaleY;
+        if(Align.isBottom(align)) cury = e.getY(Align.bottom) - height * scaleY;
 
         if(Align.isRight(align)) curx = e.getX(Align.right);
-        if(Align.isLeft(align)) curx = e.getX(Align.left) - getWidth() * cont.scaleX;
+        if(Align.isLeft(align)) curx = e.getX(Align.left) - width * scaleX;
 
         if(off){
             if(Align.isTop(align) || Align.isBottom(align)){
@@ -250,9 +271,9 @@ public class Mindow2 extends Table{
     }
 
     public int computeEdgeSnap(float mindowX, float mindowY, float dst){
-        int top = Core.graphics.getHeight() - mindowY - getHeight() * cont.scaleY < dst ? Align.top : 0;
+        int top = Core.graphics.getHeight() - mindowY - getHeight() * scaleY < dst ? Align.top : 0;
         int bottom = mindowY < dst ? Align.bottom : 0;
-        int right = Core.graphics.getWidth() - mindowX - getWidth() * cont.scaleX < dst ? Align.right : 0;
+        int right = Core.graphics.getWidth() - mindowX - getWidth() * scaleX < dst ? Align.right : 0;
         int left = mindowX < dst ? Align.left : 0;
         return top | left | right | bottom;
     }
@@ -272,8 +293,8 @@ public class Mindow2 extends Table{
             if(m.lrSnap == this || m.tbSnap == this) continue;
             if(!m.visible || !m.hasParent()) continue;
 
-            dst = Math.abs(m.getX(Align.left) - (mindowX + getWidth() * cont.scaleX));
-            if(dst < 32f && dst <= dst1 && between.get(mindowY, m.y - getHeight() * cont.scaleY, m.y + m.getHeight() * m.cont.scaleY)){
+            dst = Math.abs(m.getX(Align.left) - (mindowX + getWidth() * scaleX));
+            if(dst < 32f && dst <= dst1 && between.get(mindowY, m.y - getHeight() * scaleY, m.y + m.getHeight() * m.scaleY)){
                 dst1 = dst;
                 lrSnap = m;
                 lrSnapAlign = Align.left;
@@ -281,15 +302,15 @@ public class Mindow2 extends Table{
             };
 
             dst = Math.abs(m.getX(Align.right) - mindowX);
-            if(dst < 32f && dst <= dst1 && between.get(mindowY, m.y - getHeight() * cont.scaleY, m.y + m.getHeight() * m.cont.scaleY)){
+            if(dst < 32f && dst <= dst1 && between.get(mindowY, m.y - getHeight() * scaleY, m.y + m.getHeight() * m.scaleY)){
                 dst1 = dst;
                 lrSnap = m;
                 lrSnapAlign = Align.right;
                 lrBottomOff = mindowY - m.y;
             };
 
-            dst = Math.abs(m.getY(Align.bottom) - (mindowY + getHeight() * cont.scaleY));
-            if(dst < 32f && dst <= dst2 && between.get(mindowX, m.x - getWidth() * cont.scaleX, m.x + m.getWidth() * m.cont.scaleX)){
+            dst = Math.abs(m.getY(Align.bottom) - (mindowY + getHeight() * scaleY));
+            if(dst < 32f && dst <= dst2 && between.get(mindowX, m.x - getWidth() * scaleX, m.x + m.getWidth() * m.scaleX)){
                 dst2 = dst;
                 tbSnap = m;
                 tbSnapAlign = Align.bottom;
@@ -297,7 +318,7 @@ public class Mindow2 extends Table{
             };
 
             dst = Math.abs(m.getY(Align.top) - mindowY);
-            if(dst < 32f && dst <= dst2 && between.get(mindowX, m.x - getWidth() * cont.scaleX, m.x + m.getWidth() * m.cont.scaleX)){
+            if(dst < 32f && dst <= dst2 && between.get(mindowX, m.x - getWidth() * scaleX, m.x + m.getWidth() * m.scaleX)){
                 dst2 = dst;
                 tbSnap = m;
                 tbSnapAlign = Align.top;
@@ -338,7 +359,7 @@ public class Mindow2 extends Table{
         newParent.addChild(this);
         return true;
     }
-    
+
     public void showHelp(){
         new BaseDialog("@mindow2.helpInfoTitle"){
             {
@@ -353,7 +374,7 @@ public class Mindow2 extends Table{
         };
     }
 
-    /** Settings shoulded be set in Seq: settings, will be shown and configurable in SettingsDialog 
+    /** Settings shoulded be set in Seq: settings, will be shown and configurable in SettingsDialog
      * UISetting will be shown to, but not configurable
     */
     public void showSettings(){
@@ -387,7 +408,6 @@ public class Mindow2 extends Table{
      * rebuild() called once finished loading
      */
     public boolean loadUISettingsRaw(){
-        //it is a no-named mindow2, no settings can be loaded.
         if(mindowName == null || mindowName.equals("")) return false;
         minimized = MI2USettings.getBool(mindowName + ".minimized");
         edgesnap = MI2USettings.getInt(mindowName + ".edgesnap", -1);
@@ -395,7 +415,7 @@ public class Mindow2 extends Table{
         cury = (float)MI2USettings.getInt(mindowName + ".cury");
         //curw = (float)MI2USettings.getInt(mindowName + ".curw");
         //curh = (float)MI2USettings.getInt(mindowName + ".curh");
-        cont.setScale(MI2USettings.getInt(mindowName + ".scale", 100) / 100f);
+        setScale(MI2USettings.getInt(mindowName + ".scale", 100) / 100f);
         mindow2s.each(m -> {
             if(m == this) return;
             if(m.mindowName.equals(MI2USettings.getStr(mindowName + ".LRsnap", "null"))){
@@ -418,11 +438,12 @@ public class Mindow2 extends Table{
         rebuild();
     }
 
-    /** Override this method for custom UI settings save
+    /**
+     * Override this method for custom UI settings save
      */
-    public boolean saveUISettings(){
+    public void saveUISettings(){
         //it is a not-named mindow2, no settings can be saved.
-        if(mindowName == null || mindowName.equals("")) return false;
+        if(mindowName == null || mindowName.equals("")) return;
         MI2USettings.putBool(mindowName + ".minimized", minimized);
         MI2USettings.putInt(mindowName + ".edgesnap", edgesnap);
         //edgesnap will disable curx / cury changes, so they shouldn't be saved when edgesnapping.
@@ -434,7 +455,7 @@ public class Mindow2 extends Table{
         }
         //MI2USettings.putInt(mindowName + ".curw", (int)curw);
         //MI2USettings.putInt(mindowName + ".curh", (int)curh);
-        MI2USettings.putInt(mindowName + ".scale", (int)(cont.scaleX * 100));
+        MI2USettings.putInt(mindowName + ".scale", (int)(scaleX * 100));
 
         MI2USettings.putStr(mindowName + ".LRsnap", lrSnap == null ? "null" : lrSnap.mindowName);
         MI2USettings.putInt(mindowName + ".LRsnapAlign", lrSnapAlign);
@@ -442,23 +463,12 @@ public class Mindow2 extends Table{
         MI2USettings.putStr(mindowName + ".TBsnap", tbSnap == null ? "null" : tbSnap.mindowName);
         MI2USettings.putInt(mindowName + ".TBsnapAlign", tbSnapAlign);
         MI2USettings.putInt(mindowName + ".TBsnapOff", (int)tbLeftOff);
-        return true;
     }
 
-    public boolean registerName(){
+    public void registerName(){
         if(mindowName != null && !mindowName.equals("") && !mindow2s.contains(m -> m.mindowName.equals(this.mindowName))){
             mindow2s.add(this);
-            return true;
         }
-        return false;
-    }
-
-    public static void initMindowStyles(){
-        var whiteui = (TextureRegionDrawable)Tex.whiteui;
-        titleBarbgNormal = whiteui.tint(1f, 0.1f, 0.2f, 0.3f);
-        titleBarbgSnapped = whiteui.tint(1f, 0.1f, 0.2f, 0.2f);
-        white = whiteui.tint(1f, 1f, 1f, 1f);
-        gray2 = whiteui.tint(0.2f, 0.2f, 0.2f, 1f);
     }
 
     public class MindowUIGroupEntry extends SettingGroupEntry{
@@ -472,7 +482,7 @@ public class Mindow2 extends Table{
                 table.labelWrap(() -> this.name + " = " + (setting != null ? Align.toString(Strings.parseInt(setting.get())) : "invaild")).left().growX().get().setColor(0, 1, 1, 0.7f);
             }
         };
-        FieldEntry entry6 = new FieldEntry(mindowName + ".scale", "@settings.mindow2.scale", "100", TextField.TextFieldFilter.digitsOnly, str -> Strings.canParseInt(str) && Strings.parseInt(str) >= 5 && Strings.parseInt(str) <= 400, str -> cont.setScale(Strings.parseInt(str, 100)/100f));
+        FieldEntry entry6 = new FieldEntry(mindowName + ".scale", "@settings.mindow2.scale", "100", TextField.TextFieldFilter.digitsOnly, str -> Strings.canParseInt(str) && Strings.parseInt(str) >= 5 && Strings.parseInt(str) <= 400, str -> setScale(Strings.parseInt(str, 100)/100f));
 
         Table buildTarget;
         public MindowUIGroupEntry(String name, String help) {
@@ -551,8 +561,8 @@ public class Mindow2 extends Table{
                                         if(mind.parent != Mindow2.this.parent) return;
                                         Draw.color(mind == Mindow2.this ? Color.coral : Color.grays(0.4f));
                                         Draw.alpha(0.8f * parentAlpha * 0.8f);
-                                        float mindw = (mind.getWidth()/Core.graphics.getWidth())*this.getWidth(),
-                                                mindh = (mind.getHeight()/Core.graphics.getHeight())*this.getHeight();
+                                        float mindw = (mind.getWidth()*mind.scaleX/Core.graphics.getWidth())*this.getWidth(),
+                                                mindh = (mind.getHeight()*mind.scaleY/Core.graphics.getHeight())*this.getHeight();
                                         float mindx = x + (mind.x/Core.graphics.getWidth())*this.getWidth() + mindw/2f, mindy = y + (mind.y/Core.graphics.getHeight())*this.getHeight() + mindh/2f;
                                         Fill.rect(mindx, mindy, mindw, mindh);
                                         Draw.reset();
