@@ -66,8 +66,10 @@ public class MinimapMindow extends Mindow2{
             m.drawFog = MI2USettings.getBool(mindowName + ".drawFog", true);
             m.drawIndicator = MI2USettings.getBool(mindowName + ".drawIndicator", true);
             m.drawObjective = MI2USettings.getBool(mindowName + ".drawObjective", true);
+            m.drawUnitColorDifference = MI2USettings.getInt(mindowName + ".drawUnitColorDiff", 90) / 100f;
+            m.drawUnitOutline = MI2USettings.getInt(mindowName + ".drawUnitOutline", 0) / 100f;
 
-            buttons.defaults().height(32f).minWidth(100f).pad(2f).fillX();
+            buttons.defaults().height(32f).minWidth(100f).fillX();
             if(MI2USettings.getEntry(mindowName + ".drawLabel") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawLabel")).row();
             if(MI2USettings.getEntry(mindowName + ".drawSpawn") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawSpawn")).row();
             if(MI2USettings.getEntry(mindowName + ".drawFog") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawFog")).row();
@@ -81,15 +83,6 @@ public class MinimapMindow extends Mindow2{
         });
 
         titlePane.table(t -> {
-            t.add().growX();//let coords being right align
-            Cons<Table> l = tl -> {
-                tl.table(tt -> {
-                    tt.defaults().width(1f).fontScale(0.8f);
-                    tt.label(() -> Strings.fixed(World.conv(player.x), 1) + ", "+ Strings.fixed(World.conv(player.y), 1)).get().setAlignment(Align.right);
-                    tt.row();
-                    tt.label(() -> Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1)).color(Color.coral).get().setAlignment(Align.right);
-                }).right();
-            };
             Cons<Table> b = tb -> {
                 tb.table(tt -> {
                     tt.button(Iconc.logic + "", MI2UVars.textbtoggle, () -> {
@@ -106,9 +99,31 @@ public class MinimapMindow extends Mindow2{
                 }).fillX().growY().height(titleButtonSize);
             };
 
-            l.get(t);
-            b.get(t);
-        }).growX();
+            Cons<Table> l = tl -> {
+                tl.table(tt -> {
+                    tt.defaults().width(1f);
+                    tt.add("").with(c -> {
+                        c.update(() -> {
+                            c.setText(Strings.fixed(World.conv(player.x), 1) + ", "+ Strings.fixed(World.conv(player.y), 1));
+                            c.setFontScale(titlePane.getWidth() > 110f ? 0.8f : 0.5f);
+                        });
+                        c.setAlignment(Align.right);
+                    });
+                    tt.row();
+                    tt.add("").color(Color.coral).with(c -> {
+                        c.update(() -> {
+                            c.setText(Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(Core.input.mouseWorldY(), 1));
+                            c.setFontScale(titlePane.getWidth() > 110f ? 0.8f : 0.5f);
+                        });
+                        c.setAlignment(Align.right);
+                    });
+                }).right();
+            };
+            t.add(new MCollapser(b, true).setCollapsed(true, () -> !hasMouse()).setDuration(0.2f).setDirection(true, false));
+
+            t.add().growX();
+            t.table(l).right();
+        }).right().growX();
     }
 
     @Override
@@ -128,6 +143,8 @@ public class MinimapMindow extends Mindow2{
         settings.add(new CheckEntry(mindowName + ".drawIndicator", "@settings.mindowMap.drawIndicator", true, b -> m.drawIndicator = b));
         settings.add(new CheckEntry(mindowName + ".drawObjective", "@settings.mindowMap.drawObjective", true, b -> m.drawObjective = b));
         settings.add(new FieldEntry(mindowName + ".size", "@settings.mindowMap.size", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 3200, s -> rebuild()));
+        settings.add(new FieldEntry(mindowName + ".drawUnitColorDiff", "@settings.mindowMap.drawUnitColorDiff", String.valueOf(10), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 1 && Strings.parseInt(s) <= 100, s -> m.drawUnitColorDifference = MI2USettings.getInt(mindowName + ".drawUnitColorDiff", 90) / 100f));
+        settings.add(new FieldEntry(mindowName + ".drawUnitOutline", "@settings.mindowMap.drawUnitOutline", String.valueOf(0), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 1 && Strings.parseInt(s) <= 100, s -> m.drawUnitOutline = MI2USettings.getInt(mindowName + ".drawUnitOutline", 90) / 100f));
         settings.add(new FieldEntry("worldDataUpdate.tiles", "@settings.mindowMap.worldDataUpdate.tiles", String.valueOf(50), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 10 && Strings.parseInt(s) <= 10000, null));
     }
 
@@ -142,10 +159,13 @@ public class MinimapMindow extends Mindow2{
     
     public static class Minimap2 extends Table{
         protected Element map;
-        public boolean drawLabel = false, drawSpawn = true, drawFog = true, drawIndicator = true, drawObjective = true;
         public Rect rect = new Rect();
         private static final float baseSize = 16f;
         public float zoom = 4;
+
+        public boolean drawLabel = false, drawSpawn = true, drawFog = true, drawIndicator = true, drawObjective = true;
+        public float drawUnitOutline = 0f;
+        public float drawUnitColorDifference = 0.9f;
 
         public Minimap2(float size){
             float margin = 0f;
@@ -327,8 +347,12 @@ public class MinimapMindow extends Mindow2{
 
                 float scale = Scl.scl(1f) / 2f * scaling * 32f;
                 var region = unit.icon();
+                if(drawUnitOutline > 0.01f){
+                    Draw.mixcol(Color.white, 1f);
+                    Draw.rect(region, x + rx, y + ry, (1f + drawUnitOutline) * scale, (1f + drawUnitOutline) * scale * (float)region.height / region.width, unit.rotation() - 90);
+                }
                 //color difference between block and unit in setting
-                Draw.mixcol(MI2UTmp.c1.set(unit.team().color).mul(0.9f), 1f);
+                Draw.mixcol(MI2UTmp.c1.set(unit.team().color).mul(Mathf.clamp(1f - drawUnitColorDifference)), 1f);
                 Draw.rect(region, x + rx, y + ry, scale, scale * (float)region.height / region.width, unit.rotation() - 90);
                 Draw.reset();
             });
