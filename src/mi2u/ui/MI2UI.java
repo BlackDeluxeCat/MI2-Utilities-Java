@@ -102,7 +102,7 @@ public class MI2UI extends Mindow2{
                 SpeedController.update();
                 b.getLabel().setFontScale(1f);
                 b.getLabel().layout();
-                b.getLabel().setFontScale(Math.min((b.getWidth()- 8f - 16f - 8f) / b.getLabel().getGlyphLayout().width, 1f));
+                b.getLabel().setFontScale(Mathf.clamp((b.getWidth()- 8f - 16f - 8f) / b.getLabel().getGlyphLayout().width, 0.01f, 1f));
             }).with(funcSetTextb).with(b -> {
                 b.margin(4f);
                 b.table(bii -> {
