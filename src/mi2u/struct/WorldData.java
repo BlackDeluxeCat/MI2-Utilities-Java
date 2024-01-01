@@ -23,8 +23,9 @@ public class WorldData{
     static ObjectMap<Block, IntSeq[]> backTiles1 = new ObjectMap<>(), backTiles2 = new ObjectMap<>();
     private static ObjectSet<Building> scanned = new ObjectSet<>();
 
-    public static Seq<Integer> spawnPoints = new Seq<>();
-    public static Seq<Integer> groundSpawns = new Seq<>();
+    public static IntSeq spawnPoints = new IntSeq();
+    public static IntSeq groundSpawns = new IntSeq();
+    public static Seq<Integer> usedSpawns = new Seq<>();
 
     //temp
     static boolean any = false;
@@ -111,10 +112,15 @@ public class WorldData{
     public static void updateSpanwer(){
         spawnPoints.clear();
         groundSpawns.clear();
+        usedSpawns.clear();
 
         for(Tile tile : spawner.getSpawns()){
             spawnPoints.add(tile.pos());
             groundSpawns.add(tile.pos());
+        }
+
+        for(var group : state.rules.spawns){
+            if(group.spawn != -1 && !usedSpawns.contains(group.spawn)) usedSpawns.add(group.spawn);
         }
 
         //rewrite Anuke's, as invoking private method "each.*Spawn" with private interface param is too hard for me.

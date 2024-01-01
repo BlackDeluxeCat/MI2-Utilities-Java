@@ -18,6 +18,7 @@ public class PopupTable extends Table{
     public boolean shown = false;
     public float fromx, fromy;
     public float popupDuration = 0.15f;
+    public boolean cancelDrag;
 
     public void popup(int align){
         if(shown) return;
@@ -88,6 +89,7 @@ public class PopupTable extends Table{
 
             @Override
             public void touchDragged(InputEvent event, float x, float y, int pointer){
+                if(cancelDrag) return;
                 Vec2 v = localToStageCoordinates(MI2UTmp.v1.set(x, y));
                 setPositionInScreen(v.x - fromx, v.y - fromy);
             }
