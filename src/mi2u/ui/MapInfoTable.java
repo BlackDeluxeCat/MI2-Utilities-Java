@@ -169,25 +169,30 @@ public class MapInfoTable extends Table{
                     p.popup();
                     p.snapTo(b);
                     p.background(Styles.grayPanel).margin(10f);
+                    p.defaults().size(70f, 32f);
                     int i = 0;
                     int cols = 4;
 
                     for(var spawn : WorldData.usedSpawns){
                         int x = Point2.x(spawn), y = Point2.y(spawn);
                         p.button(x + ", " + y, Styles.flatTogglet, () -> {
+                            boolean rebuild = curSpawn != spawn;
                             curSpawn = spawn;
+                            if(rebuild) hpBars.each(WaveBar::buildPreview);
                             b.setText(Iconc.blockSpawn + ": " + x + ", " + y);
                             p.hide();
-                        }).size(50, 32f).checked(spawn == curSpawn);
+                        }).checked(spawn == curSpawn);
 
                         if(++i % cols == 0) p.row();
                     }
 
                     p.button("@waves.spawn.all", Styles.flatTogglet, () -> {
+                        boolean rebuild = curSpawn != -1;
                         curSpawn = -1;
+                        if(rebuild) hpBars.each(WaveBar::buildPreview);
                         b.setText(Iconc.blockSpawn + Core.bundle.get("waves.spawn.all"));
                         p.hide();
-                    }).size(50f, 32f).checked(-1 == curSpawn);
+                    }).checked(-1 == curSpawn);
                 });
             });
         }).growX().row();
@@ -267,6 +272,7 @@ public class MapInfoTable extends Table{
     }
 
     //single wave details
+    //TODO for future use
     public void buildDetailBars(Table t, WaveData data){
         t.pane(p -> {
             for(int id = 0; id < data.totalsByType.length; id++){
@@ -442,15 +448,16 @@ public class MapInfoTable extends Table{
 
             t.table(tt -> {
                 tt.defaults().left();
-                addFloatAttr(() -> Strings.fixed(state.rules.buildCostMultiplier, 2), "@mapInfo.buildCostMutil", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.deconstructRefundMultiplier, 2), "@mapInfo.buildRefundMutil", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.blockHealthMultiplier, 2), "@mapInfo.buildingHpMutil", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.blockDamageMultiplier, 2), "@mapInfo.buildingDamageMutil", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.buildSpeedMultiplier, 2), "@mapInfo.buildSpeedMutil", tt);
+                addFloatAttr(() -> Strings.fixed(state.rules.buildCostMultiplier, 2), "@mapInfo.buildCostMulti", tt);
+                addFloatAttr(() -> Strings.fixed(state.rules.blockHealthMultiplier, 2), "@mapInfo.buildingHpMulti", tt);
+                addFloatAttr(() -> Strings.fixed(state.rules.blockDamageMultiplier, 2), "@mapInfo.buildingDamageMulti", tt);
+                addFloatAttr(() -> Strings.fixed(state.rules.buildSpeedMultiplier, 2), "@mapInfo.buildSpeedMulti", tt);
+                addFloatAttr(() -> Strings.fixed(state.rules.unitBuildSpeedMultiplier, 2), "@mapInfo.unitConstructSpeedMulti", tt);
+                addFloatAttr(() -> Strings.fixed(state.rules.unitCostMultiplier, 2), "@mapInfo.unitCostMulti", tt);
                 addFloatAttr(() -> Strings.fixed(state.rules.unitHealthMultiplier, 2), "@mapInfo.unitHealthMultiplier", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.unitDamageMultiplier, 2), "@mapInfo.unitDamageMutil", tt);
+                addFloatAttr(() -> Strings.fixed(state.rules.unitDamageMultiplier, 2), "@mapInfo.unitDamageMulti", tt);
                 addFloatAttr(() -> Strings.fixed(state.rules.unitCrashDamageMultiplier, 2), "@mapInfo.unitCrashDamageMultiplier", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.unitBuildSpeedMultiplier, 2), "@mapInfo.unitConstructSpeedMutil", tt);
+                addFloatAttr(() -> Strings.fixed(state.rules.deconstructRefundMultiplier, 2), "@mapInfo.buildRefundMulti", tt);
                 addFloatAttr(() -> Strings.fixed(state.rules.solarMultiplier, 2), "@mapInfo.solarMulti", tt);
             });
 
@@ -458,13 +465,14 @@ public class MapInfoTable extends Table{
 
             t.table(teamt -> {
                 teamt.add("@mapInfo.team").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.unitConstructSpeedMutil").padLeft(5).padRight(5);
+                teamt.add("@mapInfo.buildingHpMulti").padLeft(5).padRight(5);
+                teamt.add("@mapInfo.buildingDamageMulti").padLeft(5).padRight(5);
+                teamt.add("@mapInfo.buildSpeedMulti").padLeft(5).padRight(5);
+                teamt.add("@mapInfo.unitConstructSpeedMulti").padLeft(5).padRight(5);
+                teamt.add("@mapInfo.unitCostMulti").padLeft(5).padRight(5);
                 teamt.add("@mapInfo.unitHealthMultiplier").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.unitDamageMutil").padLeft(5).padRight(5);
+                teamt.add("@mapInfo.unitDamageMulti").padLeft(5).padRight(5);
                 teamt.add("@mapInfo.unitCrashDamageMultiplier").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.buildingHpMutil").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.buildingDamageMutil").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.buildSpeedMutil").padLeft(5).padRight(5);
                 teamt.add("@mapInfo.infAmmo").padLeft(5).padRight(5);
                 teamt.add("@mapInfo.infRes").padLeft(5).padRight(5);
                 teamt.add("@mapInfo.cheat").padLeft(5).padRight(5);
@@ -474,13 +482,14 @@ public class MapInfoTable extends Table{
                     teamt.row();
                     var teamRule = state.rules.teams.get(teamData.team);
                     teamt.add("[#" + teamData.team.color + "]" + teamData.team.localized());
-                    teamt.add(String.valueOf(teamRule.unitBuildSpeedMultiplier)).color(teamData.team.color);
-                    teamt.add(String.valueOf(teamRule.unitHealthMultiplier)).color(teamData.team.color);
-                    teamt.add(String.valueOf(teamRule.unitDamageMultiplier)).color(teamData.team.color);
-                    teamt.add(String.valueOf(teamRule.unitCrashDamageMultiplier)).color(teamData.team.color);
                     teamt.add(String.valueOf(teamRule.blockHealthMultiplier)).color(teamData.team.color);
                     teamt.add(String.valueOf(teamRule.blockDamageMultiplier)).color(teamData.team.color);
                     teamt.add(String.valueOf(teamRule.buildSpeedMultiplier)).color(teamData.team.color);
+                    teamt.add(String.valueOf(teamRule.unitBuildSpeedMultiplier)).color(teamData.team.color);
+                    teamt.add(String.valueOf(teamRule.unitCostMultiplier)).color(teamData.team.color);
+                    teamt.add(String.valueOf(teamRule.unitHealthMultiplier)).color(teamData.team.color);
+                    teamt.add(String.valueOf(teamRule.unitDamageMultiplier)).color(teamData.team.color);
+                    teamt.add(String.valueOf(teamRule.unitCrashDamageMultiplier)).color(teamData.team.color);
                     teamt.add(String.valueOf(teamRule.infiniteAmmo)).color(teamData.team.color);
                     teamt.add(String.valueOf(teamRule.infiniteResources)).color(teamData.team.color);
                     teamt.add(String.valueOf(teamRule.cheat)).color(teamData.team.color);
@@ -555,15 +564,15 @@ public class MapInfoTable extends Table{
                     },
                     () -> (state.wave - 1 > d.wave || d.sumHp() > 0) ? Color.scarlet : Color.darkGray);
             bar.blink(Color.white).outline(MI2UTmp.c2.set(0.3f, 0.3f, 0.6f, 0.3f), 1f).setFontScale(0.8f);
-            table.clear();
-            buildPreview(table, curSpawn);
+            buildPreview();
         }
 
-        public void buildPreview(Table t, int spawn){
-            t.table(tt -> {
+        public void buildPreview(){
+            table.clear();
+            table.table(tt -> {
                 int i = 0;
                 for(SpawnGroup group : state.rules.spawns){
-                    if(spawn != -1 && group.spawn != -1 && spawn != group.spawn) continue;
+                    if(curSpawn != -1 && group.spawn != -1 && curSpawn != group.spawn) continue;
                     if(group.getSpawned(wave) < 1) continue;
                     tt.table(g -> {
                         g.table(gt -> {
