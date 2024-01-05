@@ -246,7 +246,7 @@ public class PowerGraphTable extends Table{
 
         @Override
         public float getPrefHeight(){
-            return powerIOBars ? 160f : 32f;
+            return powerIOBars ? 160f : totalCap < 1f ? 0f : 32f;
         }
 
         @Override
@@ -260,21 +260,22 @@ public class PowerGraphTable extends Table{
             //IO条在简洁版会被裁剪掉
             float h = powerIOBars ? 24f : 32f, yc = powerIOBars ? 0f : -1000f, yg = (powerIOBars ? 0f : -1000f) + (getHeight() - h) / 2.5f, ys = getHeight() - h;
             float x1 = 0f, x2 = 0f, x3 = 0f;
+            float maxIO = Math.max(totalGen, totalCons);
             for(var info : pgInfos){
                 addChild(info.barStore);
-                info.barStore.setSize(width * info.ltotalcap / totalCap, h);
+                info.barStore.setSize(totalCap < 10f ? 0f : width * info.ltotalcap / totalCap, h);
                 info.barStore.x = x2;
                 x2 += info.barStore.getWidth();
                 info.barStore.y = ys;
 
                 addChild(info.barGen);
-                info.barGen.setSize(width * info.ltotalgen / Math.max(totalGen, totalCons), h);
+                info.barGen.setSize(maxIO < 0.1f ? 0f : (width * info.ltotalgen / maxIO), h);
                 info.barGen.x = x1;
                 x1 += info.barGen.getWidth();
                 info.barGen.y = yg;
 
                 addChild(info.barCons);
-                info.barCons.setSize(width * info.ltotalcons / Math.max(totalGen, totalCons), h);
+                info.barCons.setSize(maxIO < 0.1f ? 0f : (width * info.ltotalcons / maxIO), h);
                 info.barCons.x = x3;
                 x3 += info.barCons.getWidth();
                 info.barCons.y = yc;
@@ -285,7 +286,7 @@ public class PowerGraphTable extends Table{
             if(powerIOBars){
                 for(var info : pgInfos){
                     float fromx, fromy, tox, toy;
-                    if(info.barStore.getWidth() < 1f && (info.barCons.getWidth() >= 1f && info.barGen.getWidth() >= 1f)){
+                    if(info.totalcap < 10f && (info.barCons.getWidth() >= 1f && info.barGen.getWidth() >= 1f)){
                         Draw.color(info.ltotalcons > info.ltotalgen ? Color.scarlet : Color.green, 0.5f);
                         Lines.stroke(2f);
                         fromx = info.barGen.getX(Align.center);
@@ -469,9 +470,9 @@ public class PowerGraphTable extends Table{
                 totalgen += bgen[i];
             }
 
-            ltotalcap = Mathf.lerp(ltotalcap, totalcap, 0.5f);
-            ltotalgen = Mathf.lerp(ltotalgen, totalgen, 0.5f);
-            ltotalcons = Mathf.lerp(ltotalcons, totalcons, 0.5f);
+            ltotalcap = Mathf.lerp(ltotalcap, totalcap, 0.2f);
+            ltotalgen = Mathf.lerp(ltotalgen, totalgen, 0.2f);
+            ltotalcons = Mathf.lerp(ltotalcons, totalcons, 0.2f);
         }
 
         public void updateG(){
