@@ -29,25 +29,30 @@ import static mindustry.Vars.*;
 
 public class PowerGraphTable extends Table{
     public Team team;
-    public float barsWidth;
     public PopupTable detailTable = new PopupTable();
-    private Seq<MI2Bar> bars = new Seq<>();
+    public final AlluvialDiagram diagram = new AlluvialDiagram();
+    public boolean powerIOBars;
+
+    //n x 6 Element array with icons and labels from generator, consumer, storage.
     static Element[][] blocksI = new Element[content.blocks().size][6];
 
     private static Interval interval = new Interval(2);
-    private final Seq<PGInfo> saved = new Seq<>();
-    private float totalCap = 0f;
+    private final Seq<PGInfo> pgInfos = new Seq<>();
+    private float totalCap = 0f, totalCons = 0f, totalGen = 0f;
 
-    public PowerGraphTable(float w){
+    public PowerGraphTable(){
         super();
-        barsWidth = w;
-        update(() -> {
-            saved.each(PGInfo::update);
-            if(interval.get(0, 50f)){
-                rebuild();
-            }
-        });
         detailTable.touchable = Touchable.disabled;
+    }
+
+    @Override
+    public void act(float delta){
+        super.act(delta);
+        pgInfos.each(PGInfo::update);
+        if(interval.get(0, 50f)){
+            pgInfos.each(PGInfo::updateG);
+            rebuild();
+        }
     }
 
     public void rebuild(){
@@ -56,6 +61,8 @@ public class PowerGraphTable extends Table{
         if(team == null) return;
         if(state.teams.get(team).buildings == null) return;
         totalCap = 0f;
+        totalCons = 0f;
+        totalGen = 0f;
 
         OrderedSet<PowerGraph> graphs = new OrderedSet<>();
         state.teams.get(team).buildings.each(b -> {
@@ -65,7 +72,7 @@ public class PowerGraphTable extends Table{
         //find and select presented graphs,
         //also select and renew remained graphs. So recorder data is probably get kept.
         //remove others.
-        saved.removeAll(pi -> {
+        pgInfos.removeAll(pi -> {
             final PowerGraph[] used = new PowerGraph[1];
             boolean remove = !graphs.orderedItems().contains(pgn -> {
                 if(pgn == pi.pg || (!pgn.batteries.isEmpty() && pi.pg.batteries.contains(pgn.batteries.find(Building::isValid)))){
@@ -76,34 +83,26 @@ public class PowerGraphTable extends Table{
                 return false;
             });
             if(used[0] != null) graphs.remove(used[0]);
+            if(remove){
+                diagram.removeChild(pi.barGen);
+                diagram.removeChild(pi.barStore);
+                diagram.removeChild(pi.barCons);
+                Pools.free(pi);
+            }
             return remove;
         });
 
         graphs.orderedItems().each(p -> {
-            if(!saved.contains(pp -> pp.pg == p)) saved.add(new PGInfo(p));
+            if(!pgInfos.contains(pp -> pp.pg == p)) pgInfos.add(Pools.obtain(PGInfo.class, PGInfo::new).renew(p));
         });
 
-        saved.each(c -> totalCap += c.totalcap);
-        
-        int index = 0;
-        for(var info : saved){
-            if(info.totalcap <= 0f) continue;
-            info.updateG();
-            if(index >= bars.size) bars.add(new MI2Bar());
-
-            MI2Bar bar = bars.get(index);
-            bar.set(() -> barsWidth * info.totalcap / totalCap <= 50f ? "" : "" + UI.formatAmount((long)info.pg.getLastPowerStored()) + " " + (info.pg.getPowerBalance() >= 0 ? "+" : "") + UI.formatAmount((long)(info.pg.getPowerBalance() * 60)), () -> info.pg.getLastPowerStored() / info.totalcap, Pal.accent);
-            bar.blink(Color.white).outline(MI2UTmp.c2.set(0.3f, 0.3f, 0.6f, 0.3f), 2f);
-
-            bar.clearListeners();
-            bar.clicked(() -> {
-                if(control.input instanceof InputOverwrite iow) iow.pan(true, MI2UTmp.v1.set(info.pg.all.random()));
-            });
-            bar.hovered(() -> showDetailFor(info, bar));
-
-            add(bars.get(index)).width(barsWidth * info.totalcap / totalCap).height(24f);
-            index++;
-        }
+        pgInfos.each(c -> {
+            totalCap += c.totalcap;
+            totalGen += c.totalgen;
+            totalCons += c.totalcons;
+        });
+        setBackground(Styles.grayPanel);
+        add(diagram).grow();
     }
 
     public void showDetailFor(PGInfo info, MI2Bar bar){
@@ -114,6 +113,7 @@ public class PowerGraphTable extends Table{
         buildInfo(detailTable, info);
 
         detailTable.update(() -> {
+            if(info.pg == null) detailTable.clear();
             detailTable.hideWithoutFocusOn(bar);
             detailTable.setPositionInScreen(Core.input.mouseX() - 20f, Core.input.mouseY() - detailTable.getPrefHeight() - 20f);
         });
@@ -230,10 +230,6 @@ public class PowerGraphTable extends Table{
                         }
                     }
                 });
-
-
-
-
             });
         });
     }
@@ -242,26 +238,212 @@ public class PowerGraphTable extends Table{
         return blocksI[id][i3] != null ? blocksI[id][i3] : (blocksI[id][i3] = getter.get());
     }
 
-    public static class PGInfo{
+    public class AlluvialDiagram extends WidgetGroup{
+        public AlluvialDiagram(){
+            setFillParent(true);
+            setClip(true);
+        }
+
+        @Override
+        public float getPrefHeight(){
+            return powerIOBars ? 160f : 32f;
+        }
+
+        @Override
+        public void draw(){
+            if(!state.isGame()){
+                clear();
+                return;
+            }
+
+            //三行放条，设置位置
+            //IO条在简洁版会被裁剪掉
+            float h = powerIOBars ? 24f : 32f, yc = powerIOBars ? 0f : -1000f, yg = (powerIOBars ? 0f : -1000f) + (getHeight() - h) / 2.5f, ys = getHeight() - h;
+            float x1 = 0f, x2 = 0f, x3 = 0f;
+            for(var info : pgInfos){
+                addChild(info.barStore);
+                info.barStore.setSize(width * info.ltotalcap / totalCap, h);
+                info.barStore.x = x2;
+                x2 += info.barStore.getWidth();
+                info.barStore.y = ys;
+
+                addChild(info.barGen);
+                info.barGen.setSize(width * info.ltotalgen / Math.max(totalGen, totalCons), h);
+                info.barGen.x = x1;
+                x1 += info.barGen.getWidth();
+                info.barGen.y = yg;
+
+                addChild(info.barCons);
+                info.barCons.setSize(width * info.ltotalcons / Math.max(totalGen, totalCons), h);
+                info.barCons.x = x3;
+                x3 += info.barCons.getWidth();
+                info.barCons.y = yc;
+            }
+            float dist = getHeight() / 6f;
+
+            //对应条之间画曲线
+            if(powerIOBars){
+                for(var info : pgInfos){
+                    float fromx, fromy, tox, toy;
+                    if(info.barStore.getWidth() < 1f && (info.barCons.getWidth() >= 1f && info.barGen.getWidth() >= 1f)){
+                        Draw.color(info.ltotalcons > info.ltotalgen ? Color.scarlet : Color.green, 0.5f);
+                        Lines.stroke(2f);
+                        fromx = info.barGen.getX(Align.center);
+                        fromy = info.barGen.getY(Align.center);
+                        tox = info.barCons.getX(Align.center);
+                        toy = info.barCons.getY(Align.center);
+                        Lines.curve(fromx, fromy, fromx, fromy - dist, tox, toy + dist, tox, toy, 8);
+                    }
+
+                    if(info.barStore.getWidth() >= 1f){
+                        if(info.ltotalgen > info.ltotalcons){
+                            Draw.color(Pal.accent, 0.5f);
+                            fillBetweenBars(info.barGen, 0f, info.ltotalcons/info.ltotalgen, info.barCons, 0f, 1f, dist);
+                            fillBetweenBars(info.barStore, 0f, 1f, info.barGen, info.ltotalcons/info.ltotalgen, 1f, dist);
+                        }
+                        if(info.ltotalgen < info.ltotalcons){
+                            Draw.color(Pal.accent, 0.5f);
+                            fillBetweenBars(info.barGen, 0f, 1f, info.barCons, 0f, info.ltotalgen/info.ltotalcons, dist);
+                            Draw.color(Color.scarlet, 0.5f);
+                            fillBetweenBars(info.barStore, 0f, 1f, info.barCons, info.ltotalgen/info.ltotalcons, 1f, dist);
+                        }
+                    }
+                }
+            }
+
+            //画条
+            super.draw();
+        }
+
+        public void fillBetweenBars(MI2Bar barUp, float upl, float upr, MI2Bar barDown, float downl, float downr, float dist){
+            fillCurve(barUp.x + barUp.getWidth() * upl, barUp.getY(Align.bottom), barUp.x + barUp.getWidth() * upr, barUp.getY(Align.bottom), barDown.x + barDown.getWidth() * downl, barDown.getY(Align.top), barDown.x + barDown.getWidth() * downr, barDown.getY(Align.top), 8, dist);
+        }
+
+        /**   ---------
+         *    |       \
+         *   |         \
+         *  /            \
+         * ----------------
+         * */
+        public static void fillCurve(float fx1, float fy1, float fx2, float fy2, float tx1, float ty1, float tx2, float ty2, float segments, float dist){
+            float cfx1 = fx1, ctx1 = tx1, cfy1 = fy1 - dist, cty1 = ty1 + dist;
+            float cfx2 = fx2, ctx2 = tx2, cfy2 = fy2 - dist, cty2 = ty2 + dist;
+
+            float subdiv_step = 1f / segments;
+            float subdiv_step2 = subdiv_step * subdiv_step;
+            float subdiv_step3 = subdiv_step * subdiv_step * subdiv_step;
+
+            float pre1 = 3 * subdiv_step;
+            float pre2 = 3 * subdiv_step2;
+            float pre4 = 6 * subdiv_step2;
+            float pre5 = 6 * subdiv_step3;
+
+            float tmp1x1 = fx1 - cfx1 * 2 + ctx1;
+            float tmp1y1 = fy1 - cfy1 * 2 + cty1;
+            float tmp1x2 = fx2 - cfx2 * 2 + ctx2;
+            float tmp1y2 = fy2 - cfy2 * 2 + cty2;
+
+            float tmp2x1 = (cfx1 - ctx1) * 3 - fx1 + tx1;
+            float tmp2y1 = (cfy1 - cty1) * 3 - fy1 + ty1;
+            float tmp2x2 = (cfx2 - ctx2) * 3 - fx2 + tx2;
+            float tmp2y2 = (cfy2 - cty2) * 3 - fy2 + ty2;
+
+            float f1x = fx1;
+            float f1y = fy1;
+            float f2x = fx2;
+            float f2y = fy2;
+
+            float dfx1 = (cfx1 - fx1) * pre1 + tmp1x1 * pre2 + tmp2x1 * subdiv_step3;
+            float dfy1 = (cfy1 - fy1) * pre1 + tmp1y1 * pre2 + tmp2y1 * subdiv_step3;
+            float dfx2 = (cfx2 - fx2) * pre1 + tmp1x2 * pre2 + tmp2x2 * subdiv_step3;
+            float dfy2 = (cfy2 - fy2) * pre1 + tmp1y2 * pre2 + tmp2y2 * subdiv_step3;
+
+            float ddfx1 = tmp1x1 * pre4 + tmp2x1 * pre5;
+            float ddfy1 = tmp1y1 * pre4 + tmp2y1 * pre5;
+            float ddfx2 = tmp1x2 * pre4 + tmp2x2 * pre5;
+            float ddfy2 = tmp1y2 * pre4 + tmp2y2 * pre5;
+
+            float dddfx1 = tmp2x1 * pre5;
+            float dddfy1 = tmp2y1 * pre5;
+            float dddfx2 = tmp2x2 * pre5;
+            float dddfy2 = tmp2y2 * pre5;
+
+            float l1x, l1y, l2x, l2y;
+            while(segments-- > 0){
+                l1x = f1x;
+                l1y = f1y;
+                l2x = f2x;
+                l2y = f2y;
+
+                f1x += dfx1;
+                f1y += dfy1;
+                dfx1 += ddfx1;
+                dfy1 += ddfy1;
+                ddfx1 += dddfx1;
+                ddfy1 += dddfy1;
+
+                f2x += dfx2;
+                f2y += dfy2;
+                dfx2 += ddfx2;
+                dfy2 += ddfy2;
+                ddfx2 += dddfx2;
+                ddfy2 += dddfy2;
+                Fill.polyBegin();
+                Fill.polyPoint(l1x, l1y);
+                Fill.polyPoint(l2x, l2y);
+                Fill.polyPoint(f2x, f2y);
+                Fill.polyPoint(f1x, f1y);
+                Fill.polyEnd();
+            }
+        }
+    }
+
+    public class PGInfo implements Pool.Poolable{
         public PowerGraph pg;
         public FloatDataRecorder consG, genG, stG;
         public float totalcons, totalgen, totalcap;
+        public float ltotalcons, ltotalgen, ltotalcap;
         public float[] bcons = new float[blocksI.length], bgen = new float[blocksI.length], bstore = new float[blocksI.length];
         public int[] blocks = new int[blocksI.length];
 
-        public PGInfo(PowerGraph pg){
+        MI2Bar barStore;
+        MI2Bar barGen;
+        MI2Bar barCons;
+
+        public PGInfo(){
             consG = new FloatDataRecorder(90);
             genG = new FloatDataRecorder(90);
             stG = new FloatDataRecorder(90);
             consG.getter = () -> totalcons;
             genG.getter = () -> totalgen;
-            renew(pg);
+
+            Runnable clicked = () -> {
+                if(control.input instanceof InputOverwrite iow) iow.pan(true, MI2UTmp.v1.set(pg.all.random()));
+            };
+
+            barStore = new MI2Bar().blink(Color.white).outline(MI2UTmp.c2.set(0.3f, 0.3f, 0.6f, 0.3f), 2f);
+            barStore.clicked(clicked);
+            barStore.hovered(() -> showDetailFor(this, barStore));
+
+            barGen = new MI2Bar().blink(Color.white).outline(MI2UTmp.c2.set(0.3f, 0.3f, 0.6f, 0.3f), 2f);
+            barGen.set(() -> barGen.getWidth() <= 50f ? "" : "+" + UI.formatAmount((long)totalgen), () -> 1f, Pal.items);
+            barGen.clicked(clicked);
+            barGen.hovered(() -> showDetailFor(this, barGen));
+
+            barCons = new MI2Bar().blink(Color.white).outline(MI2UTmp.c2.set(0.3f, 0.3f, 0.6f, 0.3f), 2f);
+            barCons.set(() -> barCons.getWidth() <= 50f ? "" : "-" + UI.formatAmount((long)totalcons), () -> 1f, Pal.health);
+            barCons.clicked(clicked);
+            barCons.hovered(() -> showDetailFor(this, barCons));
         }
 
-        public void renew(PowerGraph pg){
+        public PGInfo renew(PowerGraph pg){
             this.pg = pg;
+
+            barStore.set(() -> barStore.getWidth() <= 50f ? "" : UI.formatAmount((long)pg.getLastPowerStored()) + (barStore.getWidth() <= 100f ? "" : (" " + (pg.getPowerBalance() >= 0 ? "+" : "") + UI.formatAmount((long)(pg.getPowerBalance() * 60)))), () -> pg.getLastPowerStored() / totalcap, Pal.accent);
+
             update();
             stG.getter = pg::getBatteryStored;
+            return this;
         }
 
         public boolean vaild(){
@@ -286,12 +468,32 @@ public class PowerGraphTable extends Table{
                 totalcons += bcons[i];
                 totalgen += bgen[i];
             }
+
+            ltotalcap = Mathf.lerp(ltotalcap, totalcap, 0.5f);
+            ltotalgen = Mathf.lerp(ltotalgen, totalgen, 0.5f);
+            ltotalcons = Mathf.lerp(ltotalcons, totalcons, 0.5f);
         }
 
         public void updateG(){
             consG.update();
             genG.update();
             stG.update();
+        }
+
+        @Override
+        public void reset(){
+            pg = null;
+            Arrays.fill(blocks, 0);
+            Arrays.fill(bcons, 0);
+            Arrays.fill(bgen, 0);
+            Arrays.fill(bstore, 0);
+            totalcons = totalcap = totalgen = 0;
+            genG.reset();
+            genG.resize(90);
+            consG.reset();
+            consG.resize(90);
+            stG.reset();
+            stG.resize(90);
         }
     }
 }

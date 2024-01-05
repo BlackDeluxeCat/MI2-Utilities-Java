@@ -34,7 +34,7 @@ public class CoreInfoMindow extends Mindow2{
     protected CoreBuild core;
     protected Team select, team;
 
-    protected PowerGraphTable pg = new PowerGraphTable(330);
+    protected PowerGraphTable pg = new PowerGraphTable();
     protected PopupTable teamSelect = new PopupTable(), buildPlanTable = new PopupTable();
     protected int[] unitIndex = new int[content.units().size];
 
@@ -76,6 +76,9 @@ public class CoreInfoMindow extends Mindow2{
                 b.getLabel().setColor(team == null ? Color.white:team.color);
                 b.getLabel().setFontScale(0.8f);
             });
+            teamt.button(t -> t.label(() -> Iconc.power + String.valueOf(pg.powerIOBars ? Iconc.list : Iconc.line)), textb, () -> {
+                pg.powerIOBars = !pg.powerIOBars;
+            }).growY();
         }).height(titleButtonSize).growX();
 
         itemRecoders = new FloatDataRecorder[content.items().size];
@@ -113,28 +116,30 @@ public class CoreInfoMindow extends Mindow2{
                 }
             }
         });
+    }
 
-        update(() -> {
-            if(select == null || !select.active()){
-                team = player.team();
-            }else{
-                team = select;
-            }
-            core = team.core();
-            pg.team = team;
+    @Override
+    public void act(float delta){
+        if(select == null || !select.active()){
+            team = player.team();
+        }else{
+            team = select;
+        }
+        core = team.core();
+        pg.team = team;
+        super.act(delta);
 
-            if(state.isGame() && ((content.items().count(item -> core != null && core.items.get(item) > 0 && usedItems.add(item)) > 0) || (content.units().count(type -> team.data().countType(type) > 0 && usedUnits.add(type)) > 0))){
-                rebuild();
-            }
+        if(state.isGame() && ((content.items().count(item -> core != null && core.items.get(item) > 0 && usedItems.add(item)) > 0) || (content.units().count(type -> team.data().countType(type) > 0 && usedUnits.add(type)) > 0))){
+            rebuild();
+        }
 
-            if(player.unit() != null && player.unit().plans().isEmpty() && control.input.selectPlans.isEmpty() || !(this.visible && this.hasParent())){
-                buildPlanTable.hide();
-                buildPlanTable.clearChildren();
-            }else{
-                buildPlanTable.popup();
-                buildPlanTable.setPositionInScreen(this.x, this.y - buildPlanTable.getPrefHeight());
-            }
-        });
+        if(player.unit() != null && player.unit().plans().isEmpty() && control.input.selectPlans.isEmpty() || !(this.visible && this.hasParent())){
+            buildPlanTable.hide();
+            buildPlanTable.clearChildren();
+        }else{
+            buildPlanTable.popup();
+            buildPlanTable.setPositionInScreen(this.x, this.y - buildPlanTable.getPrefHeight());
+        }
     }
 
     @Override
@@ -190,9 +195,9 @@ public class CoreInfoMindow extends Mindow2{
 
             if(MI2USettings.getBool(mindowName + ".showPowerGraphs", true)){
                 ipt.row();
-                ipt.add(pg).fillX();
+                ipt.add(pg).grow();
             }
-        });
+        }).growY();
 
         //cont.row();
 

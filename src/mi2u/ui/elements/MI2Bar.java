@@ -42,9 +42,7 @@ public class MI2Bar extends Element{
         });
     }
 
-    public MI2Bar(){
-
-    }
+    public MI2Bar(){}
 
     public void reset(float value){
         this.value = lastValue = blink = value;

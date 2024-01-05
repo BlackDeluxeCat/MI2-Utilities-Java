@@ -4,12 +4,16 @@ import arc.func.*;
 import arc.graphics.g2d.Fill;
 import arc.graphics.g2d.Lines;
 import arc.math.Mathf;
+import arc.util.*;
 import mi2u.MI2UTmp;
+
+import java.util.*;
 
 public class FloatDataRecorder{
     private float[] values;
     public Floatp getter = null;
-    private int head = -1;
+    //the position of last data
+    private int head = 0;
     private int size = 0;
     public boolean disable = false;
     public Boolf<FloatDataRecorder> disableF = null;
@@ -36,15 +40,13 @@ public class FloatDataRecorder{
     public void reset(){
         head = 0;
         size = 0;
-        for(int i = 0; i < values.length; i++){
-            values[i] = 0f;
-        }
+        Arrays.fill(values, 0f);
     }
 
     public float get(int before){
         if(before >= size) return size == 0 ? values[head] : values[Mathf.mod(head + 1, size)];
         if(before < 0) return values[head];
-        return values[head - before + (head - before < 0 ? values.length : 0)];
+        return values[head - before + ((head - before) < 0 ? values.length : 0)];
     }
 
     public void add(float value){
@@ -111,8 +113,11 @@ public class FloatDataRecorder{
     public void resize(int newSize){
         float[] newArray = new float[newSize];
         if(newSize > values.length){
-            System.arraycopy(values, 0, newArray, 0, head);
-            System.arraycopy(values, head + 1, newArray, newSize - values.length + head + 1, values.length - head - 1);
+            System.arraycopy(values, 0, newArray, 0, head + 1);
+            System.arraycopy(values, head + 1, newArray, head + 1 + newSize - values.length, values.length - (head + 1));
+        }else{
+            //i don't want to make it, just clean data
+            head = 0;
         }
         this.values = newArray;
     }
