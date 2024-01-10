@@ -39,24 +39,26 @@ public class EmojiMindow extends Mindow2{
         try{
             map.clear();
             Field[] fs = Iconc.class.getFields();
-
-            tmpindex = 0;
             for(Field f : fs){
                 if(f.getType() == char.class){
                     map.put(f.getName(), Reflect.get(Iconc.class, f) + "");
-                    var emoji = map.get(f.getName());
-                    tablet.button(emoji, textb, () -> {
-                        Core.app.setClipboardText(emoji);
-                    }).with(funcSetTextb).get().getLabel().setFontScale(1.5f);
-                    if(++tmpindex > 8){
-                        tablet.row();
-                        tmpindex = 0;
-                    }
+                }
+            }
+            var keyseq = map.keys().toSeq();
+            keyseq.sort();
+
+            tmpindex = 0;
+            for(var name : keyseq){
+                var emoji = map.get(name);
+                tablet.button(emoji, textb, () -> {
+                    Core.app.setClipboardText(emoji);
+                }).with(funcSetTextb).get().getLabel().setFontScale(1.5f);
+                if(++tmpindex > 8){
+                    tablet.row();
+                    tmpindex = 0;
                 }
             }
 
-            var keyseq = map.keys().toSeq();
-            keyseq.sort();
             keyseq.each(name -> {
                 listt.button(name, textbStyle, () -> {
                     Core.app.setClipboardText(name);
@@ -68,22 +70,24 @@ public class EmojiMindow extends Mindow2{
                 listt.row();
             });
         }catch(Exception ignore){Log.err(ignore);}
-    }
 
-    @Override
-    public void setupCont(Table cont){
-        cont.clear();
-        cont.table(t -> {
+        titlePane.table(t -> {
             t.button("" + Iconc.list, textbtoggle, () -> {
                 listMode = !listMode;
                 rebuild();
             }).height(titleButtonSize).update(b -> {
                 b.setChecked(listMode);
             }).growX();
+        }).grow().minWidth(32f);
+    }
 
-            t.row();
+    @Override
+    public void setupCont(Table cont){
+        cont.clear();
+        cont.table(t -> {
+            //TODO search bar
 
-            t.pane(listMode ? listt : tablet).maxHeight(Core.graphics.getHeight() / 3).growX().update(p -> {
+            t.pane(listMode ? listt : tablet).maxHeight(Core.graphics.getHeight() / 3f).growX().update(p -> {
                 Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
                 if(e != null && e.isDescendantOf(p)){
                     p.requestScroll();
