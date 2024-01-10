@@ -30,8 +30,8 @@ allprojects{
 
 dependencies{
     compileOnly "com.github.anuken.Arc:arc-core:$mindustryVersion"
-    compileOnly "com.github.anuken.Mindustry:core:$mindustryVersion"
-    annotationProcessor "com.github.anuken:jabel:$jabelVersion"
+    compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+    annotationProcessor "com.github.Anuken:jabel:$jabelVersion"
 }
 
 task jarAndroid{
