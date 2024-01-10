@@ -78,6 +78,7 @@ public class CoreInfoMindow extends Mindow2{
             });
             teamt.button(t -> t.label(() -> Iconc.power + String.valueOf(pg.powerIOBars ? Iconc.list : Iconc.line)), textb, () -> {
                 pg.powerIOBars = !pg.powerIOBars;
+                pg.diagram.clearChildren();
             }).growY();
         }).height(titleButtonSize).growX();
 
@@ -195,9 +196,9 @@ public class CoreInfoMindow extends Mindow2{
 
             if(MI2USettings.getBool(mindowName + ".showPowerGraphs", true)){
                 ipt.row();
-                ipt.add(pg).grow();
+                ipt.add(pg).growX().minWidth(300f);
             }
-        }).growY();
+        }).grow();
 
         //cont.row();
 

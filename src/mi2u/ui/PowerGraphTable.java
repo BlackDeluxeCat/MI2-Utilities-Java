@@ -49,7 +49,7 @@ public class PowerGraphTable extends Table{
     public void act(float delta){
         super.act(delta);
         pgInfos.each(PGInfo::update);
-        if(interval.get(0, 50f)){
+        if(interval.get(0, 60f)){
             pgInfos.each(PGInfo::updateG);
             rebuild();
         }
@@ -101,8 +101,8 @@ public class PowerGraphTable extends Table{
             totalGen += c.totalgen;
             totalCons += c.totalcons;
         });
-        setBackground(Styles.grayPanel);
-        add(diagram).grow();
+        setBackground(Styles.black5);
+        add(diagram).growX();
     }
 
     public void showDetailFor(PGInfo info, MI2Bar bar){
@@ -239,6 +239,7 @@ public class PowerGraphTable extends Table{
     }
 
     public class AlluvialDiagram extends WidgetGroup{
+        MI2Utils.IntervalMillis timer = new MI2Utils.IntervalMillis();
         public AlluvialDiagram(){
             setFillParent(true);
             setClip(true);
@@ -257,31 +258,34 @@ public class PowerGraphTable extends Table{
             }
 
             //三行放条，设置位置
-            //IO条在简洁版会被裁剪掉
-            float h = powerIOBars ? 24f : 32f, yc = powerIOBars ? 0f : -1000f, yg = (powerIOBars ? 0f : -1000f) + (getHeight() - h) / 2.5f, ys = getHeight() - h;
-            float x1 = 0f, x2 = 0f, x3 = 0f;
-            float maxIO = Math.max(totalGen, totalCons);
-            for(var info : pgInfos){
-                addChild(info.barStore);
-                info.barStore.setSize(totalCap < 10f ? 0f : width * info.ltotalcap / totalCap, h);
-                info.barStore.x = x2;
-                x2 += info.barStore.getWidth();
-                info.barStore.y = ys;
+            //IO条在简洁版会被移除
+            if(timer.get(400)){
+                float h = powerIOBars ? 24f : 32f, yc = 0f, yg = (getHeight() - h) / 2.5f, ys = getHeight() - h;
+                float x1 = 0f, x2 = 0f, x3 = 0f;
+                float maxIO = Math.max(totalGen, totalCons);
+                for(var info : pgInfos){
+                    addChild(info.barStore);
+                    info.barStore.setSize(totalCap < 10f ? 0f : width * info.ltotalcap / totalCap, h);
+                    info.barStore.x = x2;
+                    x2 += info.barStore.getWidth();
+                    info.barStore.y = ys;
 
-                addChild(info.barGen);
-                info.barGen.setSize(maxIO < 0.1f ? 0f : (width * info.ltotalgen / maxIO), h);
-                info.barGen.x = x1;
-                x1 += info.barGen.getWidth();
-                info.barGen.y = yg;
+                    if(!powerIOBars) continue;
+                    addChild(info.barGen);
+                    info.barGen.setSize(maxIO < 0.1f ? 0f : (width * info.ltotalgen / maxIO), h);
+                    info.barGen.x = x1;
+                    x1 += info.barGen.getWidth();
+                    info.barGen.y = yg;
 
-                addChild(info.barCons);
-                info.barCons.setSize(maxIO < 0.1f ? 0f : (width * info.ltotalcons / maxIO), h);
-                info.barCons.x = x3;
-                x3 += info.barCons.getWidth();
-                info.barCons.y = yc;
+                    addChild(info.barCons);
+                    info.barCons.setSize(maxIO < 0.1f ? 0f : (width * info.ltotalcons / maxIO), h);
+                    info.barCons.x = x3;
+                    x3 += info.barCons.getWidth();
+                    info.barCons.y = yc;
+                }
             }
-            float dist = getHeight() / 6f;
 
+            float dist = getHeight() / 6f;
             //对应条之间画曲线
             if(powerIOBars){
                 for(var info : pgInfos){
@@ -469,10 +473,9 @@ public class PowerGraphTable extends Table{
                 totalcons += bcons[i];
                 totalgen += bgen[i];
             }
-
-            ltotalcap = Mathf.lerp(ltotalcap, totalcap, 0.2f);
-            ltotalgen = Mathf.lerp(ltotalgen, totalgen, 0.2f);
-            ltotalcons = Mathf.lerp(ltotalcons, totalcons, 0.2f);
+            ltotalcap = Mathf.lerp(ltotalcap, totalcap, 0.9f);
+            ltotalgen = Mathf.lerp(ltotalgen, totalgen, 0.9f);
+            ltotalcons = Mathf.lerp(ltotalcons, totalcons, 0.9f);
         }
 
         public void updateG(){
