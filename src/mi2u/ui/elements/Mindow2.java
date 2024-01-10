@@ -49,7 +49,7 @@ public class Mindow2 extends Table{
     protected Table titleBar = new Table(), titlePane = new Table(Styles.black6);
     protected Table cont = new Table();
     protected Seq<SettingEntry> settings = new Seq<>();
-    protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(2);
+    protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(3);
     public int edgesnap = Align.center;
     @Nullable public Mindow2 tbSnap, lrSnap;
     public int tbSnapAlign, lrSnapAlign;
@@ -120,7 +120,7 @@ public class Mindow2 extends Table{
         toast.setBackground(titleBarbgNormal);
 
         titleBar.add(new MCollapser(toast, true).setCollapsed(true, () -> {
-            if(titleCfg && interval.check(0, 10000)) titleCfg = false;
+            if(titleCfg && interval.check(0, 5000)) titleCfg = false;
             return !titleCfg && !minimized;
         }).setDirection(true, true).setDuration(0.2f));
 
@@ -132,50 +132,54 @@ public class Mindow2 extends Table{
         titleBar.button(b -> b.label(() -> "" + (resizing ? Iconc.resize : Iconc.move)), textb, () -> {
             titleCfg = !titleCfg;
             interval.get(0,0);
-        }).size(titleButtonSize).get().addListener(new InputListener(){
-            Vec2 tmpv = new Vec2();
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
-                fromx = x;
-                fromy = y;
-                tmpv.set(curx, cury);
-                return true;
-            }
-
-            @Override
-            public void touchDragged(InputEvent event, float x, float y, int pointer){
-                Vec2 v = localToStageCoordinates(MI2UTmp.v1.set(x, y));
-                dragging = MI2UTmp.v2.set(v).sub(fromx, fromy).sub(tmpv).len() > 5f;
-                if(resizing){
-                    curw = Mathf.clamp(v.x - getX(left), 50f, 800f);
-                    curh = Mathf.clamp(v.y - getY(bottom), 50f, 800f);
-                }else{
-                    curx = v.x;
-                    cury = v.y;
-                    setSnap(v.x, v.y);
+        }).size(titleButtonSize).with(b -> {
+            b.addListener(new InputListener(){
+                Vec2 tmpv = new Vec2();
+                @Override
+                public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
+                    fromx = x;
+                    fromy = y;
+                    tmpv.set(curx, cury);
+                    return true;
                 }
-            }
 
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, KeyCode button){
-                super.touchUp(event, x, y, pointer, button);
-                if(!dragging) interval.get(0, 0);
-                dragging = false;
-                Mindow2.this.toFront();
-                saveUISettings();
-            }
+                @Override
+                public void touchDragged(InputEvent event, float x, float y, int pointer){
+                    Vec2 v = localToStageCoordinates(MI2UTmp.v1.set(x, y)).sub(fromx, fromy);
+                    dragging = MI2UTmp.v2.set(v).sub(tmpv).len() > 5f;
+                    if(resizing){
+                        curw = Mathf.clamp(v.x - getX(left), 50f, 800f);
+                        curh = Mathf.clamp(v.y - getY(bottom), 50f, 800f);
+                    }else{
+                        curx = v.x;
+                        cury = v.y;
+                        setSnap(v.x, v.y);
+                    }
+                }
+
+                @Override
+                public void touchUp(InputEvent event, float x, float y, int pointer, KeyCode button){
+                    super.touchUp(event, x, y, pointer, button);
+                    if(!dragging) interval.get(0, 0);
+                    dragging = false;
+                    Mindow2.this.toFront();
+                    saveUISettings();
+                }
+            });
         });
     }
 
     @Override
     public void act(float delta){
         super.act(delta);
-        boolean slideAnime = edgeSnap(edgesnap);
-        slideAnime = slideAnime | elementSnap(tbSnap, tbSnapAlign, lrSnap == null && !Align.isLeft(edgesnap) && !Align.isRight(edgesnap));
-        slideAnime = slideAnime | elementSnap(lrSnap, lrSnapAlign, tbSnap == null && !Align.isBottom(edgesnap) && !Align.isTop(edgesnap));
-        if(slideAnime) interval.get(1, 0);
+        if(interval.get(1, 300)){
+            boolean slideAnime = edgeSnap(edgesnap);
+            slideAnime = slideAnime | elementSnap(tbSnap, tbSnapAlign, lrSnap == null && !Align.isLeft(edgesnap) && !Align.isRight(edgesnap));
+            slideAnime = slideAnime | elementSnap(lrSnap, lrSnapAlign, tbSnap == null && !Align.isBottom(edgesnap) && !Align.isTop(edgesnap));
+            if(slideAnime && MI2UTmp.v1.set(curx, cury).sub(x, y).len() >= 3f) interval.reset(2, 0);
+        }
 
-        if(!interval.check(1, 400)){
+        if(!interval.check(2, 400)){
             setPosition(Mathf.lerp(x, curx, 0.4f), Mathf.lerp(y, cury, 0.4f));
         }else{
             setPosition(curx, cury);
@@ -311,6 +315,7 @@ public class Mindow2 extends Table{
             };
         }
         testSnaps();
+        interval.reset(1, 10000);
     }
 
     public void testSnaps(){
