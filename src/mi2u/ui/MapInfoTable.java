@@ -198,10 +198,10 @@ public class MapInfoTable extends Table{
         }).growX().row();
 
         final float[] h = new float[1];
-        h[0] = Core.graphics.getHeight()*0.5f/Scl.scl();
+        h[0] = 300f;
         wavesPopup.pane(t -> barsTable = t).fillX().self(c -> {
             c.update(p -> {
-                h[0] = Mathf.clamp(h[0], 10f, (Core.graphics.getHeight() - 200f)/Scl.scl());
+                h[0] = Mathf.clamp(h[0], 20f, (Core.graphics.getHeight() - 400f)/Scl.scl());
                 c.height(h[0]);
                 Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
                 if(e != null && e.isDescendantOf(p)){
@@ -550,7 +550,7 @@ public class MapInfoTable extends Table{
 
         public void setup(){
             clear();
-            add(bar).growX().height(18f).minWidth(250f);
+            add(bar).growX().height(24f).minWidth(250f);
             row();
             add(collapser);
         }
