@@ -156,7 +156,7 @@ public class ModifyFuncs{
         if(MI2USettings.getBool("modifyBlockSelectTable", false)){
             Table blockCatTable = MI2Utils.getValue(ui.hudfrag.blockfrag, "blockCatTable");
 
-            ((Table)blockCatTable.getCells().first().get()).getCells().first().maxHeight(Mathf.clamp(MI2USettings.getInt("blockSelectTableHeight", 194), 50, 1000));
+            ((Table)blockCatTable.getCells().first().get()).getCells().first().height(Mathf.clamp(MI2USettings.getInt("blockSelectTableHeight", 194), 50, 1000));
             blockCatTable.getCells().get(1).height(Mathf.clamp(MI2USettings.getInt("blockSelectTableHeight", 194) + 52, 50, 1000));
         }
     }
