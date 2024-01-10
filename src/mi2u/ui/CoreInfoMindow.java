@@ -71,7 +71,7 @@ public class CoreInfoMindow extends Mindow2{
                 rebuildSelect();
                 teamSelect.popup();
                 teamSelect.snapTo(this);
-            }).grow().update(b -> {
+            }).grow().minWidth(32f).update(b -> {
                 b.setText(team.localized() + (select == null ? Core.bundle.get("coreInfo.selectButton.playerteam"):""));
                 b.getLabel().setColor(team == null ? Color.white:team.color);
                 b.getLabel().setFontScale(0.8f);
