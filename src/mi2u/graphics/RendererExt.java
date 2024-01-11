@@ -235,7 +235,6 @@ public class RendererExt{
 
             if(enUnitHitbox){
                 Draw.color(unit.team.color, 0.6f);
-                //Lines.rect(unit.x - unit.hitSize / 2f, unit.y - unit.hitSize / 2f, unit.hitSize, unit.hitSize);
 
                 float size = 14f;
                 Lines.beginLine();
@@ -374,23 +373,26 @@ public class RendererExt{
     }
 
     public static void drawUnitHpBar(Unit unit){
-        float width = 1.2f, halfwidth = width / 2f;
-        if(unit.shield > Math.min(0.5f * unit.maxHealth, 100f) || !enUnitHpBarDamagedOnly || unit.damaged()){
-            if(unit.hitTime > 0f){
-                Lines.stroke(4f + Mathf.lerp(0f, 2f, unit.hitTime));
-                Draw.color(Color.white, Mathf.lerp(0.1f, 1f, unit.hitTime));
-                Lines.line(unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f), unit.x + unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f));
-            }
-
+        float width = 1.2f, hhitsize = unit.hitSize / 2f;
+        float uwidth = unit.hitSize * width, uhwidth = uwidth / 2f;
+        if(unit.shield > Math.min(0.5f * unit.maxHealth, 100f) || !enUnitHpBarDamagedOnly || unit.damaged() || unit.drownTime > 0f){
             Lines.stroke(4f);
-            Draw.color(unit.team.color, 0.5f);
-            Lines.line(unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f), unit.x + unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f));
+            Draw.color(MI2UTmp.c1.set(unit.team.color).lerp(Color.white, Mathf.clamp(unit.hitTime)), Mathf.lerp(0.5f, 1f, Mathf.clamp(unit.hitTime)));
+            Lines.line(unit.x - uhwidth, unit.y + hhitsize, unit.x + uhwidth, unit.y + hhitsize);
 
             Draw.color((unit.health > 0 ? Pal.health:Color.gray), 0.8f);
             Lines.stroke(2);
             Lines.line(
-                    unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f),
-                    unit.x + unit.hitSize * ((unit.health > 0 ? unit.health : Mathf.maxZero(unit.maxHealth + unit.health)) / unit.maxHealth * width - halfwidth), unit.y + (unit.hitSize / 2f));
+                    unit.x - uhwidth, unit.y + hhitsize,
+                    unit.x - uhwidth + uwidth * (unit.health > 0 ? unit.health : Mathf.maxZero(unit.maxHealth + unit.health)) / unit.maxHealth, unit.y + hhitsize);
+
+            if(unit.drownTime > 0f){
+                Draw.color(Color.royal, 0.5f);
+                Lines.stroke(2);
+                Lines.line(
+                        unit.x - uhwidth, unit.y + hhitsize,
+                        unit.x - uhwidth + uwidth * unit.drownTime, unit.y + hhitsize);
+            }
 
             if(unit.shield > 0){
                 if(unitHpBarStyle.equals("1")){
@@ -398,17 +400,17 @@ public class RendererExt{
                         Draw.color(Pal.shield, 0.8f);
                         float barLength = Mathf.mod(unit.shield / unit.maxHealth, Mathf.pow(10f, (float)didgt - 1f)) / Mathf.pow(10f, (float)didgt - 1f);
                         if(didgt > 1){
-                            float y = unit.y + unit.hitSize / 2f + didgt * 2f;
+                            float y = unit.y + hhitsize + didgt * 2f;
                             float h = 2f;
                             int counts = Mathf.floor(barLength * 10f);
                             for(float i = 1; i <= counts; i++){
                                 Fill.rect(unit.x - 0.55f * unit.hitSize + (i - 1f) * 0.12f * unit.hitSize, y, 0.1f * unit.hitSize, h);
                             }
                         }else{
-                            float x = unit.x - (1f - barLength) * halfwidth * unit.hitSize;
-                            float y = unit.y + unit.hitSize / 2f + didgt * 2f;
+                            float x = unit.x - (1f - barLength) * uhwidth;
+                            float y = unit.y + hhitsize + didgt * 2f;
                             float h = 2f;
-                            float w = width * barLength * unit.hitSize;
+                            float w = uwidth * barLength;
                             Fill.rect(x, y, w, h);
                         }
                     }
@@ -416,9 +418,9 @@ public class RendererExt{
                     Draw.color(Pal.shield, 0.8f);
                     Lines.stroke(2);
                     Lines.line(
-                            unit.x - unit.hitSize * halfwidth, unit.y + (unit.hitSize / 2f),
-                            unit.x + unit.hitSize * (Mathf.mod(unit.shield / unit.maxHealth, 1f) * width - halfwidth), unit.y + (unit.hitSize / 2f));
-                    if(unit.shield > unit.maxHealth) drawText("x" + Mathf.floor(unit.shield / unit.maxHealth), unit.x + unit.hitSize * halfwidth - 4f, unit.y + (unit.hitSize / 2f), Pal.shield, 1f, Align.left);
+                            unit.x - uhwidth, unit.y + hhitsize,
+                            unit.x - uhwidth + uwidth * Mathf.mod(unit.shield / unit.maxHealth, 1f), unit.y + hhitsize);
+                    if(unit.shield > unit.maxHealth) drawText("x" + Mathf.floor(unit.shield / unit.maxHealth), unit.x + uhwidth - 4f, unit.y + hhitsize, Pal.shield, 1f, Align.left);
                 }
             }
 
@@ -426,14 +428,14 @@ public class RendererExt{
         }
 
         float index = 0f;
-        int columns = Mathf.floor(unit.hitSize * width / 4f);
+        int columns = Mathf.floor(uwidth / 4f);
         for(StatusEffect eff : content.statusEffects()){
             if(eff == StatusEffects.none) continue;
             if(unit.hasEffect(eff)){
                 Draw.alpha(unit.getDuration(eff) < 180f ? 0.3f + 0.7f * Math.abs(Mathf.sin(Time.time / 20f)) : 1f);
                 Draw.rect(eff.uiIcon,
-                        unit.x - unit.hitSize * halfwidth + 2f + 4f * Mathf.mod(index, columns),
-                        unit.y + (unit.hitSize / 2f) + 3f + 5f * Mathf.floor(index / columns),
+                        unit.x - uhwidth + 2f + 4f * Mathf.mod(index, columns),
+                        unit.y + hhitsize + 3f + 5f * Mathf.floor(index / columns),
                         eff.uiIcon.width / (float)eff.uiIcon.height * 5f, 5f);
                 index++;
             }
@@ -442,13 +444,13 @@ public class RendererExt{
         if(unit instanceof PayloadUnit pu && pu.payloads != null){
             Draw.alpha(0.9f);
             //the smaller pui is, the further payload is in drop list. And those further ones can be slightly covered.
-            float fullIconCells = width * unit.hitSize / pu.payloads.size < 6f ? Mathf.floor(unit.hitSize * width * 0.5f / 6f) : 100f;
+            float fullIconCells = uwidth / pu.payloads.size < 6f ? Mathf.floor(uwidth * 0.5f / 6f) : 100f;
             for(int pui = 0; pui < pu.payloads.size; pui++){
                 var p = pu.payloads.get(pu.payloads.size - 1 - pui);
                 if(p == null) continue;
                 Draw.rect(p.icon(),
-                        unit.x + (1f + (pui > fullIconCells ? unit.hitSize * -halfwidth + fullIconCells * 6f + (pui - fullIconCells) * (unit.hitSize * width - fullIconCells * 6f) / (pu.payloads.size - fullIconCells) : unit.hitSize * -halfwidth + pui * 6f)),
-                        unit.y + (unit.hitSize / 2f) - 4f,
+                        unit.x + (1f + (pui > fullIconCells ? -uhwidth + fullIconCells * 6f + (pui - fullIconCells) * (uwidth - fullIconCells * 6f) / (pu.payloads.size - fullIconCells) : -uhwidth + pui * 6f)),
+                        unit.y + hhitsize - 4f,
                         6f, 6f);
             }
         }
