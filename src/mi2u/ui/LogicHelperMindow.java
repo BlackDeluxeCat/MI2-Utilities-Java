@@ -1,6 +1,6 @@
 package mi2u.ui;
 
-import arc.Core;
+import arc.*;
 import arc.func.Boolf;
 import arc.func.Cons;
 import arc.graphics.Color;
@@ -11,12 +11,14 @@ import arc.scene.*;
 import arc.scene.actions.Actions;
 import arc.scene.actions.TemporalAction;
 import arc.scene.event.*;
-import arc.scene.ui.TextField;
+import arc.scene.ui.*;
 import arc.scene.ui.layout.Table;
 import arc.struct.*;
 import arc.struct.Queue;
 import arc.util.*;
 import mi2u.*;
+import mi2u.game.*;
+import mi2u.io.*;
 import mi2u.ui.elements.*;
 import mindustry.gen.Iconc;
 import mindustry.logic.LCanvas;
@@ -64,19 +66,23 @@ public class LogicHelperMindow extends Mindow2{
             TextField field;
             String last = "";
             Table buttons;
-            MI2Utils.IntervalMillis timer = new MI2Utils.IntervalMillis();
+            ScrollPane pane;
+            MI2Utils.IntervalMillis timer = new MI2Utils.IntervalMillis(3);
             int tabIndex = 0;
             boolean hasKey = false, hasMouse = false;
             {
                 Core.scene.addListener(new InputListener(){
                     @Override
                     public boolean keyDown(InputEvent event, KeyCode keycode){
-                        if(field != null && keycode == KeyCode.tab){
+                        if(field != null && keycode == KeyCode.tab && MI2USettings.getBool(mindowName + ".autocomplete", true)){
                             if(hasKey){
                                 field.setFocusTraversal(false);
                                 Core.scene.setKeyboardFocus(field);
                                 field.setCursorPosition(field.getText().length());
-                                Time.run(2f, () -> field.setFocusTraversal(true));
+                                Time.run(2f, () -> {
+                                    if(field == null) return;
+                                    field.setFocusTraversal(true);
+                                });
                             }else{
                                 Core.scene.setKeyboardFocus(autoFillVarTable);
                                 tabIndex = 0;
@@ -116,19 +122,41 @@ public class LogicHelperMindow extends Mindow2{
                 addListener(new InputListener(){
                     @Override
                     public boolean keyDown(InputEvent event, KeyCode keycode){
+                        timer.get(1, 0);
                         if(buttons.getChildren().size > 0){
                             if(keycode == KeyCode.up) tabIndex = Mathf.mod(--tabIndex, buttons.getChildren().size);
                             if(keycode == KeyCode.down) tabIndex = Mathf.mod(++tabIndex, buttons.getChildren().size);
                             if(field != null && keycode == KeyCode.enter){
                                 tabIndex = Mathf.mod(tabIndex, buttons.getChildren().size);
-                                buttons.getCells().get(tabIndex).get().fireClick();
+                                var button = buttons.getCells().get(tabIndex).get();
+                                button.fireClick();
                                 Core.scene.setKeyboardFocus(field);
                                 field.setCursorPosition(field.getText().length());
                             }
+                            //scroll
+                            if(keycode == KeyCode.up || keycode == KeyCode.down) scrollToTabIndex();
                         }
                         return super.keyDown(event, keycode);
                     }
                 });
+            }
+
+            @Override
+            public void act(float delta){
+                super.act(delta);
+                if(timer.check(1, 700) && Core.input.keyDown(KeyCode.up) && timer.get(2, 50)){
+                    tabIndex = Mathf.mod(--tabIndex, buttons.getChildren().size);
+                    scrollToTabIndex();
+                }
+                if(timer.check(1, 700) && Core.input.keyDown(KeyCode.down) && timer.get(2, 50)){
+                    tabIndex = Mathf.mod(++tabIndex, buttons.getChildren().size);
+                    scrollToTabIndex();
+                }
+            }
+
+            void scrollToTabIndex(){
+                var button = buttons.getCells().get(tabIndex).get();
+                pane.scrollTo(button.x, button.y, button.getWidth(), button.getHeight());
             }
 
             void build(){
@@ -183,44 +211,29 @@ public class LogicHelperMindow extends Mindow2{
                         }
                     }catch(Exception ignored){}
                 }).minWidth(100f).maxWidth(200f).maxHeight(300f).with(sp -> {
+                    pane = sp;
                     sp.setScrollingDisabledX(true);
                     sp.setFadeScrollBars(true);
                     sp.setupFadeScrollBars(0.5f, 0.5f);
                 });
             }
         };
-        autoFillVarTable.popup(Align.topLeft);
+        if(MI2USettings.getBool(mindowName + ".autocomplete", true)) autoFillVarTable.popup(Align.topLeft);
 
         varsBaseTable = new Table();
         varsTable = new Table();
         searchBaseTable = new Table();
         cutPasteBaseTable = new Table();
         backupTable = new Table();
-        setupVarsMode(varsBaseTable);
-        setupSearchMode(searchBaseTable);
-        setupCutPasteMode(cutPasteBaseTable);
-        setupBackupMode(backupTable);
-    }
+        Events.on(MI2UEvents.FinishSettingInitEvent.class, e -> {
+            setupVarsMode(varsBaseTable);
+            setupSearchMode(searchBaseTable);
+            setupCutPasteMode(cutPasteBaseTable);
+            setupBackupMode(backupTable);
+        });
 
-    @Override
-    public void act(float delta){
-        super.act(delta);
-        if(targetLogicDialog.canvas != null && backupTimer.get(0, 60000)){
-            backup(targetLogicDialog.canvas.save());
-        }
-
-
-    }
-
-    public void setTargetDialog(LogicDialog ld){
-        targetLogicDialog = ld;
-    }
-
-    @Override
-    public void setupCont(Table cont) {
-        cont.clear();
-        cont.table(tt -> {
-            tt.defaults().growX().minSize(48f);
+        titlePane.table(tt -> {
+            tt.defaults().growX().minSize(32f);
             tt.button("" + Iconc.list, textbtoggle, () -> {
                 mode = Mode.vars;
                 setupCont(cont);
@@ -240,14 +253,39 @@ public class LogicHelperMindow extends Mindow2{
                 mode = Mode.backup;
                 setupCont(cont);
             }).update(b -> b.setChecked(mode == Mode.backup)).with(funcSetTextb);
-        }).fillX();
-        cont.row();
+        });
+    }
+
+    @Override
+    public void act(float delta){
+        super.act(delta);
+        if(targetLogicDialog.canvas != null && backupTimer.get(0, 60000)){
+            backup(targetLogicDialog.canvas.save());
+        }
+    }
+
+    @Override
+    public void initSettings(){
+        super.initSettings();
+        settings.add(new MI2USettings.CheckEntry(mindowName + ".autocomplete", "@settings.logicHelper.autocomplete", true, b -> {
+            if(b) autoFillVarTable.popup();
+            else autoFillVarTable.hide();
+        }));
+    }
+
+    public void setTargetDialog(LogicDialog ld){
+        targetLogicDialog = ld;
+    }
+
+    @Override
+    public void setupCont(Table cont) {
+        cont.clear();
         cont.image().color(Color.pink).growX().height(2f);
         cont.row();
         switch(mode){
-            case vars -> cont.add(varsBaseTable);
-            case search -> cont.add(searchBaseTable);
-            case cutPaste -> cont.add(cutPasteBaseTable);
+            case vars -> cont.add(varsBaseTable).growX();
+            case search -> cont.add(searchBaseTable).growX();
+            case cutPaste -> cont.add(cutPasteBaseTable).growX();
             case backup -> cont.add(backupTable).growX();
         }
     }
@@ -498,8 +536,7 @@ public class LogicHelperMindow extends Mindow2{
             if(index < 0) index = results.size - 1;
             Element e = results.get(index);
             e.localToAscendantCoordinates(targetLogicDialog.canvas.pane.getWidget(), MI2UTmp.v2.setZero());
-            //may not fit UI scaling config
-            targetLogicDialog.canvas.pane.setScrollPercentY(1 - (MI2UTmp.v2.y-0.5f*targetLogicDialog.canvas.pane.getScrollHeight())/(targetLogicDialog.canvas.pane.getWidget().getPrefHeight()-targetLogicDialog.canvas.pane.getScrollHeight()));
+            targetLogicDialog.canvas.pane.scrollTo(MI2UTmp.v2.x, MI2UTmp.v2.y, e.getWidth(), e.getHeight());
             blinkElement(e);
             if(e instanceof TextField tf) {
                 tf.requestKeyboard();
@@ -525,9 +562,11 @@ public class LogicHelperMindow extends Mindow2{
                 tt.field(split, Styles.nodeField, s -> {
                     split = s;
                     rebuildVars(varsTable);
-                }).fillX().with(f -> {
+                }).growX().with(f -> {
                     f.setMessageText("@logicHelper.splitField.msg");
-                });
+                }).minWidth(48f);
+
+                tt.add(((MI2USettings.CheckEntry)MI2USettings.getEntry(mindowName + ".autocomplete")).newTextButton("@settings.logicHelper.autocomplete")).minSize(32f);
             });
 
             t.row();
