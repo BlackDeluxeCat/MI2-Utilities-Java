@@ -4,14 +4,17 @@ import arc.Core;
 import arc.func.Boolf;
 import arc.func.Cons;
 import arc.graphics.Color;
+import arc.input.*;
 import arc.math.Interp;
 import arc.math.Mathf;
 import arc.scene.*;
 import arc.scene.actions.Actions;
 import arc.scene.actions.TemporalAction;
+import arc.scene.event.*;
 import arc.scene.ui.TextField;
 import arc.scene.ui.layout.Table;
 import arc.struct.*;
+import arc.struct.Queue;
 import arc.util.*;
 import mi2u.*;
 import mi2u.ui.elements.*;
@@ -27,13 +30,15 @@ import static mindustry.Vars.*;
 
 public class LogicHelperMindow extends Mindow2{
     public Mode mode;
+    public LogicDialog targetLogicDialog;
+    LExecutor exec = null, lastexec = null;
+    Seq<String> vars = new Seq<>();
 
     public Table varsBaseTable;
     public Table varsTable;
-    TextField f;
-    LExecutor exec = null, lastexec = null;
     public String split = "";
     public int depth = 6;
+    PopupTable autoFillVarTable;
 
     public Table searchBaseTable;
     public String keyWord = "", replace = "";
@@ -53,6 +58,139 @@ public class LogicHelperMindow extends Mindow2{
     public LogicHelperMindow(){
         super("LogicHelper", "@logicHelper.MI2U", "@logicHelper.help");
         mode = Mode.vars;
+        setTargetDialog(ui.logic);
+
+        autoFillVarTable = new PopupTable(){
+            TextField field;
+            String last = "";
+            Table buttons;
+            MI2Utils.IntervalMillis timer = new MI2Utils.IntervalMillis();
+            int tabIndex = 0;
+            boolean hasKey = false, hasMouse = false;
+            {
+                Core.scene.addListener(new InputListener(){
+                    @Override
+                    public boolean keyDown(InputEvent event, KeyCode keycode){
+                        if(field != null && keycode == KeyCode.tab){
+                            if(hasKey){
+                                field.setFocusTraversal(false);
+                                Core.scene.setKeyboardFocus(field);
+                                field.setCursorPosition(field.getText().length());
+                                Time.run(2f, () -> field.setFocusTraversal(true));
+                            }else{
+                                Core.scene.setKeyboardFocus(autoFillVarTable);
+                                tabIndex = 0;
+                            }
+                        }
+                        return super.keyDown(event, keycode);
+                    }
+                });
+                touchable = Touchable.enabled;
+                background(Styles.black5);
+                visible(() -> {
+                    hasKey = hasKeyboard();
+                    hasMouse = hasMouse();
+                    if(timer.get(300)){
+                        if(!hasKey){
+                            if(targetLogicDialog != null && Core.scene.getKeyboardFocus() instanceof TextField f && targetLogicDialog.isAscendantOf(f)){
+                                field = f;
+                            }else{
+                                field = null;
+                            }
+                        }
+                    }
+
+                    if(field != null){
+                        var v = field.localToStageCoordinates(MI2UTmp.v1.setZero());
+                        setPosition(v.x, v.y, Align.bottomRight);
+                        keepInScreen();
+                        setZIndex(1000);
+                        if(!last.equals(field.getText())){
+                            last = field.getText();
+                            build();
+                        }
+                    }
+                    return field != null;
+                });
+
+                addListener(new InputListener(){
+                    @Override
+                    public boolean keyDown(InputEvent event, KeyCode keycode){
+                        if(buttons.getChildren().size > 0){
+                            if(keycode == KeyCode.up) tabIndex = Mathf.mod(--tabIndex, buttons.getChildren().size);
+                            if(keycode == KeyCode.down) tabIndex = Mathf.mod(++tabIndex, buttons.getChildren().size);
+                            if(field != null && keycode == KeyCode.enter){
+                                tabIndex = Mathf.mod(tabIndex, buttons.getChildren().size);
+                                buttons.getCells().get(tabIndex).get().fireClick();
+                                Core.scene.setKeyboardFocus(field);
+                                field.setCursorPosition(field.getText().length());
+                            }
+                        }
+                        return super.keyDown(event, keycode);
+                    }
+                });
+            }
+
+            void build(){
+                clearChildren();
+                pane(t -> {
+                    buttons = t;
+                    String input = field.getText();
+                    t.defaults().left().growX().minWidth(100f);
+                    int mimi = 0;
+                    try{
+                        if(!split.equals("")){
+                            int blockIndex = Strings.count(input, split);
+                            var inputBlocks = input.split(cookSplit(split), depth);
+                            ObjectSet<String> used = new ObjectSet<>();
+                            varsfor : for(var v : vars){
+                                if(Strings.count(v, split) < blockIndex) continue;
+                                var varBlocks = v.split(cookSplit(split), depth);
+                                if(blockIndex > 0){
+                                    for(int i = 0; i < blockIndex; i++){
+                                        if(!inputBlocks[i].equals(varBlocks[i])) continue varsfor;
+                                    }
+                                }
+                                if(varBlocks[blockIndex].equals(inputBlocks[blockIndex]) || !varBlocks[blockIndex].startsWith(inputBlocks[blockIndex])) continue;
+                                if(used.add(varBlocks[blockIndex])){
+                                    int finalMimi = mimi++;
+                                    t.add(varBlocks[blockIndex]).with(l -> {
+                                        l.clicked(() -> {
+                                            var str = Strings.join(split, new Seq<>(false, varBlocks, 0, blockIndex + 1));
+                                            field.setText(str);
+                                            field.change();
+                                        });
+                                        l.hovered(() -> tabIndex = finalMimi);
+                                        l.update(() -> l.setColor(tabIndex == finalMimi && (hasKey || hasMouse) ? Color.acid : varBlocks.length >= blockIndex + 1 ? Color.royal : Color.white));
+                                    });
+                                    t.row();
+                                }
+                            }
+                        }else{
+                            for(var v : vars){
+                                if(!v.startsWith(input)) continue;
+                                int finalMimi1 = mimi++;
+                                t.add(v).with(l -> {
+                                    l.clicked(() -> {
+                                        field.setText(v);
+                                        field.change();
+                                    });
+                                    l.hovered(() -> tabIndex = finalMimi1);
+                                    l.update(() -> l.setColor(tabIndex == finalMimi1 && (hasKey || hasMouse) ? Color.acid : Color.white));
+                                });
+                                t.row();
+                            }
+                        }
+                    }catch(Exception ignored){}
+                }).minWidth(100f).maxWidth(200f).maxHeight(300f).with(sp -> {
+                    sp.setScrollingDisabledX(true);
+                    sp.setFadeScrollBars(true);
+                    sp.setupFadeScrollBars(0.5f, 0.5f);
+                });
+            }
+        };
+        autoFillVarTable.popup(Align.topLeft);
+
         varsBaseTable = new Table();
         varsTable = new Table();
         searchBaseTable = new Table();
@@ -62,13 +200,20 @@ public class LogicHelperMindow extends Mindow2{
         setupSearchMode(searchBaseTable);
         setupCutPasteMode(cutPasteBaseTable);
         setupBackupMode(backupTable);
+    }
 
-        update(() -> {
-            var canvas = parent instanceof LogicDialog ld ? ld.canvas : null;
-            if(canvas != null && backupTimer.get(0, 60000)){
-                backup(canvas.save());
-            }
-        });
+    @Override
+    public void act(float delta){
+        super.act(delta);
+        if(targetLogicDialog.canvas != null && backupTimer.get(0, 60000)){
+            backup(targetLogicDialog.canvas.save());
+        }
+
+
+    }
+
+    public void setTargetDialog(LogicDialog ld){
+        targetLogicDialog = ld;
     }
 
     @Override
@@ -116,9 +261,8 @@ public class LogicHelperMindow extends Mindow2{
             t.image().color(Color.pink).width(2f).growY();
 
             t.button(Iconc.save + "Backup Now", textb, () -> {
-                var canvas = parent instanceof LogicDialog ld ? ld.canvas : null;
-                if(canvas == null) return;
-                backup(canvas.save());
+                if(targetLogicDialog.canvas == null) return;
+                backup(targetLogicDialog.canvas.save());
             }).update(tb -> {
                 tb.getLabel().setWrap(false);
                 tb.setText(Iconc.save + Core.bundle.get("logichelper.backup.backupIn") + Strings.fixed(60 - backupTimer.getTime(0) / 1000f, 1));
@@ -135,10 +279,9 @@ public class LogicHelperMindow extends Mindow2{
                 backups.each(str -> {
                     t.labelWrap(str.substring(0, Math.min(str.length(), 30))).fontScale(0.5f).growX();
                     t.button("" + Iconc.redo, textb, () -> {
-                        var canvas = parent instanceof LogicDialog ld ? ld.canvas : null;
-                        if(canvas == null) return;
+                        if(targetLogicDialog.canvas == null) return;
                         //backup(canvas.save());
-                        canvas.load(str);
+                        targetLogicDialog.canvas.load(str);
                     }).size(32f);
                     t.row();
                 });
@@ -185,14 +328,14 @@ public class LogicHelperMindow extends Mindow2{
 
             t.row();
 
-            t.button("||| " + Iconc.play + " |||", textb, this::doCutPaste).with(funcSetTextb).height(36f).disabled(tb -> !(parent instanceof LogicDialog ld && cutStart < ld.canvas.statements.getChildren().size && cutEnd < ld.canvas.statements.getChildren().size && pasteStart <= ld.canvas.statements.getChildren().size && cutEnd >= cutStart)).colspan(2);
+            t.button("||| " + Iconc.play + " |||", textb, this::doCutPaste).with(funcSetTextb).height(36f).disabled(tb -> !(targetLogicDialog != null && cutStart < targetLogicDialog.canvas.statements.getChildren().size && cutEnd < targetLogicDialog.canvas.statements.getChildren().size && pasteStart <= targetLogicDialog.canvas.statements.getChildren().size && cutEnd >= cutStart)).colspan(2);
         });
 
 
     }
 
     public void doCutPaste(){
-        var stats = parent instanceof LogicDialog ld ? ld.canvas.statements : null;
+        var stats = targetLogicDialog != null ? targetLogicDialog.canvas.statements : null;
         if(stats == null) return;
         int times = cutEnd - cutStart + 1;
         int ind = 0;
@@ -315,8 +458,8 @@ public class LogicHelperMindow extends Mindow2{
     }
 
     private void doSearch(){
-        if(!keyWord.equals("") && parent instanceof LogicDialog ld){
-            if(ld.canvas.pane.getWidget() instanceof Table ldt){
+        if(!keyWord.equals("") && targetLogicDialog != null){
+            if(targetLogicDialog.canvas.pane.getWidget() instanceof Table ldt){
                 results.clear();
                 ldt.getChildren().each(e -> deepSelect(e, e2 -> e2 instanceof TextField tf && findMatch(keyWord, tf.getText()) != null));
             }
@@ -349,14 +492,14 @@ public class LogicHelperMindow extends Mindow2{
     }
 
     private void locateElement(Cons<Element> cons){
-        if(results.any() && parent instanceof LogicDialog ld){
-            if(results.remove(rem -> !rem.isDescendantOf(ld))) doSearch();  //if remove works, probably lstatement is changed || lcanvas is rebuilt, so previous TextFields are invalid anymore.
+        if(results.any() && targetLogicDialog != null){
+            if(results.remove(rem -> !rem.isDescendantOf(targetLogicDialog))) doSearch();  //if remove works, probably lstatement is changed || lcanvas is rebuilt, so previous TextFields are invalid anymore.
             if(index >= results.size) index = 0;
             if(index < 0) index = results.size - 1;
             Element e = results.get(index);
-            e.localToAscendantCoordinates(ld.canvas.pane.getWidget(), MI2UTmp.v2.setZero());
+            e.localToAscendantCoordinates(targetLogicDialog.canvas.pane.getWidget(), MI2UTmp.v2.setZero());
             //may not fit UI scaling config
-            ld.canvas.pane.setScrollPercentY(1 - (MI2UTmp.v2.y-0.5f*ld.canvas.pane.getScrollHeight())/(ld.canvas.pane.getWidget().getPrefHeight()-ld.canvas.pane.getScrollHeight()));
+            targetLogicDialog.canvas.pane.setScrollPercentY(1 - (MI2UTmp.v2.y-0.5f*targetLogicDialog.canvas.pane.getScrollHeight())/(targetLogicDialog.canvas.pane.getWidget().getPrefHeight()-targetLogicDialog.canvas.pane.getScrollHeight()));
             blinkElement(e);
             if(e instanceof TextField tf) {
                 tf.requestKeyboard();
@@ -379,16 +522,19 @@ public class LogicHelperMindow extends Mindow2{
         cont.table(t -> {
             t.clear();
             t.table(tt -> {
-                f = tt.field(split, Styles.nodeField, s -> {
+                tt.field(split, Styles.nodeField, s -> {
                     split = s;
                     rebuildVars(varsTable);
-                }).fillX().get();
-                f.setMessageText("@logicHelper.splitField.msg");
+                }).fillX().with(f -> {
+                    f.setMessageText("@logicHelper.splitField.msg");
+                });
             });
 
             t.row();
 
-            t.pane(varsTable).growX().maxHeight(Core.graphics.getHeight() / 3f);
+            t.pane(varsTable).growX().self(c -> {
+                c.maxHeight(Core.graphics.getHeight() / 3f);
+            });
         }).growX();
 
         cont.update(() -> {
@@ -406,12 +552,12 @@ public class LogicHelperMindow extends Mindow2{
     private void rebuildVars(Table tt){
         if(exec != null){
             tt.clear();
+            vars.clear();
+            new Seq<>(exec.vars).each(v -> {if(!v.constant && !v.name.startsWith("___")) this.vars.add(v.name);});
+            Sort.instance().sort(vars);
+
             if(!split.equals("")){
-                Seq<String> seq = new Seq<>();
-                new Seq<>(exec.vars).each(v -> {if(!v.constant && !v.name.startsWith("___")) seq.add(v.name);});
-                Sort.instance().sort(seq);
-            
-                seq.each(s -> {
+                vars.each(s -> {
                     tt.button("" + Iconc.paste, textb, () -> Core.app.setClipboardText(s)).size(36,24);
             
                     String[] blocks = s.split(cookSplit(split), depth);
@@ -428,11 +574,7 @@ public class LogicHelperMindow extends Mindow2{
                     tt.row();
                 });
             }else{
-                Seq<String> seq = new Seq<>();
-                new Seq<>(exec.vars).each(v -> seq.add(v.name));
-                Sort.instance().sort(seq);
-
-                seq.each(s -> {
+                vars.each(s -> {
                     tt.button(s, textb, () -> Core.app.setClipboardText(s)).growX().get().getLabel().setAlignment(Align.left);
                     tt.row();
                 });
