@@ -10,11 +10,11 @@ jobs:
     - uses: actions/checkout@v2
     - name: Set up PATH
       run: |
-        echo "${ANDROID_HOME}/build-tools/30.0.1" >> $GITHUB_PATH
-    - name: Set up JDK 16
+        echo "${ANDROID_HOME}/build-tools/34.0.0" >> $GITHUB_PATH
+    - name: Set up JDK 17
       uses: actions/setup-java@v1
       with:
-        java-version: 16
+        java-version: 17
     - name: Build mod jar
       run: ./gradlew deploy
     - name: Upload built jar file
