@@ -18,7 +18,6 @@ ext{
     //the build number that this mod is made for
     mindustryVersion = 'v146'
     jabelVersion = "93fde537c7"
-    //windows sucks
     sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
 }
 
