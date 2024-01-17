@@ -8,12 +8,12 @@ import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
+import arc.struct.Queue;
 import arc.util.*;
 import mi2u.*;
 import mi2u.game.*;
 import mi2u.input.*;
 import mi2u.io.*;
-import mi2u.ui.elements.*;
 import mindustry.ai.types.*;
 import mindustry.content.*;
 import mindustry.entities.*;
@@ -24,13 +24,15 @@ import mindustry.input.*;
 import mindustry.logic.*;
 import mindustry.logic.LExecutor.*;
 import mindustry.type.*;
-import mindustry.type.weapons.RepairBeamWeapon;
+import mindustry.type.weapons.*;
 import mindustry.world.*;
 import mindustry.world.blocks.*;
 import mindustry.world.meta.*;
 
-import static mindustry.Vars.*;
+import java.util.*;
+
 import static mi2u.MI2UVars.*;
+import static mindustry.Vars.*;
 
 public class FullAI extends AIController{
     public Seq<Mode> modes = new Seq<>();
@@ -91,29 +93,15 @@ public class FullAI extends AIController{
         public boolean enable = false;
         public String btext;
         public Drawable bimg;
+
+        public boolean configUIExpand = true;
         public Mode(){
             btext = Iconc.units + "";
         }
         /** override it. enable auto checked. */
         public void act(){}
 
-        public void buildConfig(Table table){
-            table.table(t -> {
-                t.setBackground(Mindow2.gray2);
-                t.button(b -> {
-                    b.image().grow().update(img -> img.setColor(enable ? Color.acid : Color.red));
-                }, textb, () -> {
-                    enable = !enable;
-                }).size(16f);
-                if(bimg != null){
-                    t.image(bimg).size(18f).scaling(Scaling.fit);
-                }else{
-                    t.add(btext).color(Color.sky).left();
-                }
-                t.add().growX();
-            }).growX().minHeight(18f).padTop(8f);
-            table.row();
-        }
+        public void buildConfig(Table table){}
     }
 
     public class BaseMineMode extends Mode{
@@ -457,7 +445,7 @@ public class FullAI extends AIController{
 
     public class LogicMode extends Mode{
         public static final Seq<Class<? extends LInstruction>> bannedInstructions = new Seq<>();
-        static LogicMode logicMode;
+        public static LogicMode logicMode;
         public LExecutor exec = new LExecutor();
         public String code;
         public LogicAI ai = new LogicAI();
@@ -468,11 +456,15 @@ public class FullAI extends AIController{
         public static StringBuffer log = new StringBuffer();
         Queue<BuildPlan> plans = new Queue<>();
 
+        public Table customAIUITable = new Table();
+
         //public int lastPathId = 0;
         //public float lastMoveX, lastMoveY;
 
         public LogicMode(){
             super();
+            Events.on(EventType.WorldLoadEvent.class, e -> readCode(code));
+
             logicMode = this;
             bannedInstructions.clear();
             bannedInstructions.addAll(ControlI.class, WriteI.class, StopI.class, SetBlockI.class, SpawnUnitI.class, ApplyEffectI.class, SetRuleI.class, SetRateI.class, ExplosionI.class, SetFlagI.class, SpawnWaveI.class, SetPropI.class);
@@ -524,7 +516,7 @@ public class FullAI extends AIController{
             if(!actionTimer.check(0, (int)LogicAI.logicControlTimeout / 60 * 1000)){
                 boostAction(ai.boost);
                 if(ai.control != LUnitControl.pathfind || unit.isFlying()){
-                    moveAction(ai.moveX, ai.moveY, Math.max(ai.moveRad, 1f), false);
+                    moveAction(ai.moveX, ai.moveY, Math.max(ai.moveRad, 1f), ai.control == LUnitControl.approach);
                 }/*else{
                 if(!Mathf.equal(ai.moveX, lastMoveX, 0.1f) || !Mathf.equal(ai.moveY, lastMoveY, 0.1f)){
                     lastPathId ++;
@@ -550,9 +542,7 @@ public class FullAI extends AIController{
             table.table(t -> {
                 t.name = "cfg";
                 t.button(Iconc.pencil + "" + Iconc.blockWorldProcessor, textb, () -> {
-                    ui.logic.show(code, exec, true, str -> {
-                        readCode(str);
-                    });
+                    ui.logic.show(code, exec, true, this::readCode);
                 }).grow().minWidth(40f);
                 t.add("ipt=");
                 t.field(String.valueOf(instructionsPerTick), TextField.TextFieldFilter.digitsOnly, str -> instructionsPerTick = Strings.parseInt(str)).growX();
@@ -561,6 +551,8 @@ public class FullAI extends AIController{
                 }).size(32f);
             }).grow();
             table.row();
+            table.pane(customAIUITable).grow().maxHeight(200f);
+            table.row();
             table.add("Print Log").left().color(Color.royal);
             table.row();
             table.pane(t -> {
@@ -568,7 +560,6 @@ public class FullAI extends AIController{
                 t.image().color(Color.royal).growY().width(2f);
                 t.labelWrap(() -> log).grow();
             }).grow().maxHeight(200f);
-
         }
 
         public void readCode(String str){
@@ -581,6 +572,8 @@ public class FullAI extends AIController{
             asm.putConst("@ipt", instructionsPerTick);
             exec.load(asm);
             exec.privileged = true;
+            customAIUITable.clear();
+            customAIUITable.defaults().size(80, 32);
         }
 
         public void updatePlayerActionTimer(){
@@ -671,8 +664,41 @@ public class FullAI extends AIController{
                         return true;
                     }
                 }
+            }else if(inst instanceof PrintI printI){
+                return printUI(printI);
             }
 
+            return false;
+        }
+
+        public boolean printUI(PrintI inst){
+            //format: UI.type(var)
+            var v = exec.var(inst.value);
+            var str = v.isobj && inst.value != 0 ? PrintI.toString(v.objval) : String.valueOf(v.numval);
+            if(!str.endsWith(")")) return false;
+            String[] blocks = str.substring(0, str.length() - 1).split("\\.|\\(", 3);
+
+            if(blocks.length < 2 || !blocks[0].equals("UI")) return false;
+            var type = blocks[1];
+            if(type.equals("row")){
+                customAIUITable.row();
+                return true;
+            }
+            if(blocks.length < 3) return false;
+            var targetName = blocks[2];
+            for(int i = 0; i < exec.vars.length; i++){
+                if(exec.var(i).name.equals(targetName)){
+                    int tgt = i;
+                    if(exec.var(tgt).isobj) return false;//Can't handle object right now
+                    if(customAIUITable.getChildren().size > 30) return false;//no too many uis
+                    switch(type){
+                        case "row" -> customAIUITable.row();
+                        case "button" -> customAIUITable.button(targetName, textbtoggle, () -> exec.setbool(tgt, !exec.bool(tgt))).update(tb -> tb.setChecked(exec.bool(tgt)));
+                        case "field" -> customAIUITable.field(String.valueOf(exec.num(tgt)), TextField.TextFieldFilter.floatsOnly, s -> exec.setnum(tgt, Strings.parseDouble(s, 0)));
+                    }
+                    return true;
+                }
+            }
             return false;
         }
     }
