@@ -119,7 +119,7 @@ public class MinimapMindow extends Mindow2{
                     });
                 }).right();
             };
-            t.add(new MCollapser(b, true).setCollapsed(true, () -> !hasMouse()).setDuration(0.2f).setDirection(true, false));
+            t.add(new MCollapser(b, true).setCollapsed(false, () -> minimized || !hasMouse()).setDuration(0.2f).setDirection(true, false));
 
             t.add().growX();
             t.table(l).right();
