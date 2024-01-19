@@ -145,12 +145,12 @@ public class MI2UI extends Mindow2{
                             }else{
                                 t.add(mode.btext).color(Color.sky).left();
                             }
-                            t.image().update(img -> img.setColor(mode.configUIExpand ? Color.royal : Color.darkGray)).grow().get().clicked(() -> {
+                            t.label(() -> mode.configUIExpand ? "-" : ">").grow().get().clicked(() -> {
                                 mode.configUIExpand = !mode.configUIExpand;
                             });
                         }).growX().minHeight(18f).padTop(8f);
                         p.row();
-                        p.add(new MCollapser(mode::buildConfig, true).setCollapsed(true, () -> !mode.configUIExpand)).growX();
+                        p.add(new MCollapser(mode::buildConfig, true).setCollapsed(false, () -> !mode.configUIExpand)).growX();
                         p.row();
                     }
                 }).growX().update(p -> {

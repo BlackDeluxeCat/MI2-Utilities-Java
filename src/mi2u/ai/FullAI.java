@@ -1,21 +1,25 @@
 package mi2u.ai;
 
 import arc.*;
+import arc.func.*;
 import arc.graphics.*;
 import arc.math.*;
 import arc.math.geom.*;
+import arc.scene.event.*;
 import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
-import arc.struct.Queue;
 import arc.util.*;
 import mi2u.*;
 import mi2u.game.*;
 import mi2u.input.*;
 import mi2u.io.*;
+import mi2u.ui.*;
+import mi2u.ui.elements.*;
 import mindustry.ai.types.*;
 import mindustry.content.*;
+import mindustry.ctype.*;
 import mindustry.entities.*;
 import mindustry.entities.units.*;
 import mindustry.game.*;
@@ -25,11 +29,10 @@ import mindustry.logic.*;
 import mindustry.logic.LExecutor.*;
 import mindustry.type.*;
 import mindustry.type.weapons.*;
+import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.*;
 import mindustry.world.meta.*;
-
-import java.util.*;
 
 import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
@@ -446,8 +449,10 @@ public class FullAI extends AIController{
     public class LogicMode extends Mode{
         public static final Seq<Class<? extends LInstruction>> bannedInstructions = new Seq<>();
         public static LogicMode logicMode;
+        public LogicModeCode code;
+        public Seq<LogicModeCode> codes;
+
         public LExecutor exec = new LExecutor();
-        public String code;
         public LogicAI ai = new LogicAI();
         public int instructionsPerTick = 100;
         MI2Utils.IntervalMillis timer = new MI2Utils.IntervalMillis();
@@ -456,33 +461,139 @@ public class FullAI extends AIController{
         public static StringBuffer log = new StringBuffer();
         Queue<BuildPlan> plans = new Queue<>();
 
-        public Table customAIUITable = new Table();
+        public PopupTable customAIUITable = new PopupTable();
+
+        public static PopupTable chooseContentTable = new PopupTable();
 
         //public int lastPathId = 0;
         //public float lastMoveX, lastMoveY;
 
         public LogicMode(){
             super();
-            Events.on(EventType.WorldLoadEvent.class, e -> readCode(code));
+            chooseContentTable.update(() -> chooseContentTable.keepInScreen());
+
+            Events.on(EventType.WorldLoadEvent.class, e -> readCode(code.value));
 
             logicMode = this;
             bannedInstructions.clear();
             bannedInstructions.addAll(ControlI.class, WriteI.class, StopI.class, SetBlockI.class, SpawnUnitI.class, ApplyEffectI.class, SetRuleI.class, SetRateI.class, ExplosionI.class, SetFlagI.class, SpawnWaveI.class, SetPropI.class);
             btext = Iconc.blockWorldProcessor + "";
             bimg = Core.atlas.drawable("mi2-utilities-java-ui-customai");
+
             Events.on(MI2UEvents.FinishSettingInitEvent.class, e -> {
-                code = MI2USettings.getStr("ai.logic.code.0");
-                readCode(code);
+                LogicMode.logicMode.codes = MI2USettings.getJson("ai.logic.codes", Seq.class, LogicModeCode.class, () -> Seq.with(new LogicModeCode("", "")));
+                //old version support
+                if(MI2USettings.getSetting("ai.logic.code.0") != null){
+                    MI2USettings.map.remove("ai.logic.code.0");
+                    var old = new LogicModeCode("old", MI2USettings.getStr("ai.logic.code.0"));
+                    codes.add(old);
+                    code = old;
+                }else{
+                    code = codes.first();
+                }
+                readCode(code.value);
             });
+
             Events.on(EventType.WorldLoadEvent.class, e-> {
                 if(logicMode != null){
-                    logicMode.readCode(logicMode.code);
+                    logicMode.readCode(logicMode.code.value);
                 }
             });
         }
 
         @Override
+        public void buildConfig(Table table){
+            table.clear();
+            super.buildConfig(table);
+            table.table(t -> {
+                t.table(this::buildChoose).growX();
+                t.button("" + Iconc.add, textb, () -> {
+                    var newCode = new LogicModeCode(String.valueOf(codes.size), "");
+                    codes.add(newCode);
+                    code = newCode;
+                    saveCodes();
+                    buildConfig(table);
+                }).size(32f);
+            }).growX();
+            table.row();
+            table.image().height(2f).growX().color(Color.white);
+            table.row();
+
+            table.table(t -> {
+                t.name = "cfg";
+                t.button("" + Iconc.edit, textb, () -> {
+                    ui.showTextInput("Edit Logic AI Name", "Edit Logic AI Name", code.name, s -> {
+                        if(!s.equals(code.name)){
+                            code.name = s;
+                            saveCodes();
+                        }
+                    });
+                }).size(32f);
+                t.label(() -> code.name).grow();
+                t.button("" + Iconc.blockWorldProcessor, textb, () -> {
+                    ui.logic.show(code.value, exec, true, s -> {
+                        code.value = s;
+                        this.readCode(code.value);
+                        saveCodes();
+                    });
+                }).size(32f);
+                t.button(Iconc.info + "", textb, () -> {
+                    ui.showText("", Core.bundle.get("fullAI.help"), Align.left);
+                }).size(32f);
+                t.button(Iconc.cancel + "", textb, () -> ui.showConfirm("Confirm Delete:" + code.name, () -> {
+                    int index = codes.indexOf(code) - 1;
+                    if(index < 0) index = 0;
+                    codes.remove(code);
+                    saveCodes();
+                    code = codes.get(index);
+                    buildConfig(table);
+                })).disabled(tb -> codes.size <= 1).size(32f).get().getLabel().setColor(Color.scarlet);
+            }).grow();
+            table.row();
+
+            table.table(t -> {
+                t.add("Message Log").left().color(Color.royal).growX();
+                t.button("@ai.config.logic.ui", textbtoggle, () -> {
+                    if(customAIUITable.shown){
+                        customAIUITable.hide();
+                    }else{
+                        customAIUITable.popup();
+                        customAIUITable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
+                    }
+                }).checked(tb -> customAIUITable.shown).size(80f, 32f);
+            }).growX();
+
+            table.row();
+            table.pane(t -> {
+                t.name = "log";
+                t.image().color(Color.royal).growY().width(2f);
+                t.labelWrap(() -> log).grow();
+            }).grow().maxHeight(200f);
+        }
+
+        public void buildChoose(Table table){
+            int i = 0;
+            for(var lmc : codes){
+                table.button(lmc.name.substring(0, Math.min(lmc.name.length(), 6)), textbtoggle, () -> {
+                    code = lmc;
+                    readCode(code.value);
+                }).with(funcSetTextb).width(60f).height(28f).margin(2f).with(tb -> {
+                    tb.getLabel().setFontScale(0.8f);
+                    tb.update(() -> {
+                        tb.setChecked(code == lmc);
+                        tb.setText(lmc.name);
+                    });
+                });
+                if(i++ > 2){
+                    i = 0;
+                    table.row();
+                }
+            }
+        }
+
+        @Override
         public void act(){
+            exec.vars[exec.iptIndex].numval = instructionsPerTick;
             var ctrl = unit.controller();
             unit.controller(ai);
 
@@ -536,35 +647,12 @@ public class FullAI extends AIController{
             }
         }
 
-        @Override
-        public void buildConfig(Table table){
-            super.buildConfig(table);
-            table.table(t -> {
-                t.name = "cfg";
-                t.button(Iconc.pencil + "" + Iconc.blockWorldProcessor, textb, () -> {
-                    ui.logic.show(code, exec, true, this::readCode);
-                }).grow().minWidth(40f);
-                t.add("ipt=");
-                t.field(String.valueOf(instructionsPerTick), TextField.TextFieldFilter.digitsOnly, str -> instructionsPerTick = Strings.parseInt(str)).growX();
-                t.button(Iconc.info + "", textb, () -> {
-                    ui.showText("", Core.bundle.get("fullAI.help"), Align.left);
-                }).size(32f);
-            }).grow();
-            table.row();
-            table.pane(customAIUITable).grow().maxHeight(200f);
-            table.row();
-            table.add("Print Log").left().color(Color.royal);
-            table.row();
-            table.pane(t -> {
-                t.name = "log";
-                t.image().color(Color.royal).growY().width(2f);
-                t.labelWrap(() -> log).grow();
-            }).grow().maxHeight(200f);
+        public void saveCodes(){
+            MI2USettings.putJson("ai.logic.codes", codes, Seq.class, LogicModeCode.class);
         }
 
         public void readCode(String str){
-            code = str;
-            MI2USettings.putStr("ai.logic.code.0", code);
+            code.value = str;
             LAssembler asm = LAssembler.assemble(str, true);
             asm.putConst("@mapw", world.width());
             asm.putConst("@maph", world.height());
@@ -573,6 +661,13 @@ public class FullAI extends AIController{
             exec.load(asm);
             exec.privileged = true;
             customAIUITable.clear();
+            customAIUITable.touchable = Touchable.enabled;
+            customAIUITable.margin(2f);
+            customAIUITable.background(Styles.black3);
+            customAIUITable.addDragMove();
+            customAIUITable.addCloseButton(20f);
+            customAIUITable.add("@ai.config.logic.ui").height(20f).row();
+            customAIUITable.update(() -> customAIUITable.keepInScreen());
             customAIUITable.defaults().size(80, 32);
         }
 
@@ -586,7 +681,10 @@ public class FullAI extends AIController{
         }
 
         public boolean tryRunOverwrite(LInstruction inst){
-            if(inst instanceof ControlI li){
+            if(inst instanceof SetRateI sr){
+                instructionsPerTick = exec.numi(sr.amount);
+                return true;
+            }else if(inst instanceof ControlI li){
                 if(!player.dead() && exec.obj(li.target) instanceof Building b && (isLocalSandbox() || b.team == exec.team)){
                     if(li.type == LAccess.config){
                         b.configured(player.unit(), exec.obj(li.p1));
@@ -673,8 +771,8 @@ public class FullAI extends AIController{
 
         public boolean printUI(PrintI inst){
             //format: UI.type(var)
-            var v = exec.var(inst.value);
-            var str = v.isobj && inst.value != 0 ? PrintI.toString(v.objval) : String.valueOf(v.numval);
+            var text = exec.var(inst.value);
+            var str = text.isobj && inst.value != 0 ? PrintI.toString(text.objval) : String.valueOf(text.numval);
             if(!str.endsWith(")")) return false;
             String[] blocks = str.substring(0, str.length() - 1).split("\\.|\\(", 3);
 
@@ -689,17 +787,90 @@ public class FullAI extends AIController{
             for(int i = 0; i < exec.vars.length; i++){
                 if(exec.var(i).name.equals(targetName)){
                     int tgt = i;
-                    if(exec.var(tgt).isobj) return false;//Can't handle object right now
-                    if(customAIUITable.getChildren().size > 30) return false;//no too many uis
+                    if(customAIUITable.getChildren().size > 60) return false;//no too many uis
                     switch(type){
-                        case "row" -> customAIUITable.row();
                         case "button" -> customAIUITable.button(targetName, textbtoggle, () -> exec.setbool(tgt, !exec.bool(tgt))).update(tb -> tb.setChecked(exec.bool(tgt)));
                         case "field" -> customAIUITable.field(String.valueOf(exec.num(tgt)), TextField.TextFieldFilter.floatsOnly, s -> exec.setnum(tgt, Strings.parseDouble(s, 0)));
+                        case "choose" -> {
+                            if(exec.var(tgt).isobj && !(exec.obj(tgt) instanceof MappableContent)) return false;
+                            customAIUITable.button(targetName, textb, () -> {
+                                chooseContentTable.clear();
+                                chooseContentTable.addDragMove();
+                                chooseContentTable.addCloseButton();
+                                chooseContentTable.visible(() -> state.isGame());
+                                buildTable(chooseContentTable, new Seq<UnlockableContent>().add(content.items()).add(content.liquids()).add(content.statusEffects()).add(content.blocks()).add(content.units()), () -> exec.obj(tgt) instanceof UnlockableContent uc ? uc : null, content -> exec.setobj(tgt, content), false, 8, 8);
+                                chooseContentTable.popup();
+                                chooseContentTable.snapTo(customAIUITable);
+                            });
+                        }
+                        case "info" -> {
+                            customAIUITable.button("", textbtoggle, () -> {}).fill().with(b -> {
+                                b.update(() -> {
+                                    b.setText(PrintI.toString(exec.obj(tgt)));
+                                    b.getLabel().setFontScale(0.7f);
+                                    if(b.hasMouse()) HoverTopTable.hoverInfo.setHovered(exec.obj(tgt));
+                                    if(b.isChecked()){
+                                        if(exec.obj(tgt) instanceof Posc posc && control.input instanceof InputOverwrite ipo){
+                                            ipo.pan(true, MI2UTmp.v1.set(posc));
+                                        }else{
+                                            b.setChecked(false);
+                                        }
+                                    }
+                                });
+                            });
+                        }
                     }
                     return true;
                 }
             }
             return false;
+        }
+
+        public static <T extends UnlockableContent> void buildTable(Table table, Seq<T> items, Prov<T> holder, Cons<T> consumer, boolean closeSelect, int rows, int columns){
+            ButtonGroup<ImageButton> group = new ButtonGroup<>();
+            group.setMinCheckCount(0);
+            Table cont = new Table().top();
+            cont.defaults().size(40);
+
+            Table main = new Table().background(Styles.black6);
+
+            Runnable rebuild = () -> {
+                group.clear();
+                cont.clearChildren();
+
+                int i = 0;
+                for(T item : items){
+                    ImageButton button = cont.button(Tex.whiteui, Styles.clearNoneTogglei, Mathf.clamp(item.selectionSize, 0f, 40f), () -> {
+                        if(closeSelect) control.input.config.hideConfig();
+                    }).tooltip(item.localizedName).group(group).get();
+                    button.changed(() -> consumer.get(button.isChecked() ? item : null));
+                    button.getStyle().imageUp = new TextureRegionDrawable(item.uiIcon);
+                    button.update(() -> button.setChecked(holder.get() == item));
+
+                    if(i++ % columns == (columns - 1)){
+                        cont.row();
+                    }
+                }
+            };
+
+            rebuild.run();
+
+            ScrollPane pane = new ScrollPane(cont, Styles.smallPane);
+            pane.setScrollingDisabled(true, false);
+
+            pane.setOverscroll(false, false);
+            main.add(pane).maxHeight(40 * rows);
+            table.top().add(main);
+        }
+
+        public static class LogicModeCode{
+            String name;
+            String value;
+            public LogicModeCode(){}
+            public LogicModeCode(String n, String v){
+                name = n;
+                value = v;
+            }
         }
     }
 }
