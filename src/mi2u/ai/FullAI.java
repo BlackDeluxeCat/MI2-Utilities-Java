@@ -804,16 +804,17 @@ public class FullAI extends AIController{
                             });
                         }
                         case "info" -> {
-                            customAIUITable.button("", textbtoggle, () -> {}).fill().with(b -> {
+
+                            customAIUITable.add("").fill().with(b -> {
+                                b.setFontScale(0.7f);
+                                b.clicked(() -> b.cullable = !b.cullable);
                                 b.update(() -> {
                                     b.setText(PrintI.toString(exec.obj(tgt)));
-                                    b.getLabel().setFontScale(0.7f);
+                                    b.setColor(b.cullable ? Color.cyan : Color.white);
                                     if(b.hasMouse()) HoverTopTable.hoverInfo.setHovered(exec.obj(tgt));
-                                    if(b.isChecked()){
+                                    if(b.cullable){
                                         if(exec.obj(tgt) instanceof Posc posc && control.input instanceof InputOverwrite ipo){
                                             ipo.pan(true, MI2UTmp.v1.set(posc));
-                                        }else{
-                                            b.setChecked(false);
                                         }
                                     }
                                 });
