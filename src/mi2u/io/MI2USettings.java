@@ -2,9 +2,7 @@ package mi2u.io;
 
 import arc.*;
 import arc.files.*;
-import arc.func.Boolp;
-import arc.func.Cons;
-import arc.func.Func;
+import arc.func.*;
 import arc.graphics.Color;
 import arc.math.Mathf;
 import arc.scene.ui.Button;
@@ -14,6 +12,7 @@ import arc.scene.ui.layout.Table;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.io.Writes;
+import arc.util.serialization.*;
 import mi2u.game.MI2UEvents;
 import mi2u.ui.elements.Mindow2;
 import mindustry.game.EventType.*;
@@ -24,13 +23,14 @@ import mindustry.Vars;
 import static mi2u.MI2UVars.*;
 
 public class MI2USettings{
-
     public static final OrderedMap<String, MI2USetting> map = new OrderedMap<>();
     private static Fi root, dir;
     public static boolean modified = false;
     private static final Interval timer = new Interval();
 
     public static Seq<SettingEntry> entries = new Seq<>();
+
+    public static Json json = new Json();
 
     public static void init(){
         Core.settings.setAppName(Vars.appName);
@@ -121,6 +121,23 @@ public class MI2USettings{
 
     public static boolean getBool(String name){
         return getBool(name, false);
+    }
+
+    public static MI2USetting putJson(String name, Object obj, Class knownClass, Class elementclass){
+        MI2USetting ss = map.get(name);
+        if(ss != null){
+            ss.value = json.toJson(obj, knownClass, elementclass);
+        }else{
+            ss = new MI2USetting(name, json.toJson(obj, knownClass, elementclass));
+        }
+        modified = true;
+        return ss;
+    }
+
+    public static <T> T getJson(String name, Class<T> clazz, Class elementClazz, Prov<T> def){
+        MI2USetting obj = map.get(name);
+        if(obj == null) return def.get();
+        return json.fromJson(clazz, elementClazz, obj.value);
     }
 
     public static boolean load(){
