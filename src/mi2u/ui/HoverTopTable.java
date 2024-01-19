@@ -46,9 +46,13 @@ public class HoverTopTable extends PopupTable{
     public HoverTopTable(){
         initChild();
         build();
+        visible(() -> Vars.state.isGame() && Vars.ui.hudfrag.shown && hasInfo());
+
+        Core.scene.root.hovered(this::cleanHover);
 
         Events.run(EventType.Trigger.update, () -> {
-            if(state.isGame()) hovered();
+            if(state.isGame() && !Core.scene.hasMouse()) hovered();
+            if(state.isMenu()) cleanHover();
         });
 
         //伤害事件不带伤害值，手算
@@ -195,7 +199,6 @@ public class HoverTopTable extends PopupTable{
 
     public void build(){
         clear();
-        visible(() -> Vars.state.isGame() && Vars.ui.hudfrag.shown && hasInfo());
         table(t -> {
             t.clear();
             t.background(Styles.black3);
@@ -209,8 +212,6 @@ public class HoverTopTable extends PopupTable{
             t.row();
 
             t.add(tilet);
-        }).update(t -> {
-            if(state.isMenu()) cleanHover();
         }).growX();
     }
 
@@ -302,14 +303,6 @@ public class HoverTopTable extends PopupTable{
     /** Returns the thing being hovered over. */
     @Nullable
     public void hovered(){
-        Vec2 v = this.stageToLocalCoordinates(Core.input.mouse());
-
-        //if the mouse intersects the table or the *touchable* UI has the mouse, no hovering can occur
-        if(Core.scene.hasMouse() || this.hit(v.x, v.y, true) != null){
-            cleanHover();
-            return;
-        }
-
         //check for a unit
         unit = Units.closestOverlap(null, Core.input.mouseWorldX(), Core.input.mouseWorldY(), 5f, u -> true);
 
@@ -336,5 +329,19 @@ public class HoverTopTable extends PopupTable{
 
     public boolean hasInfo(){
         return unit != null || tile != null || build != null;
+    }
+
+    public void setHovered(Object u){
+        if(u == null) return;
+        cleanHover();
+        if(u instanceof Unit uu){
+            unit = uu;
+        }
+        if(u instanceof Building bb){
+            build = bb;
+        }
+        if(u instanceof Tile tt){
+            tile = tt;
+        }
     }
 }
