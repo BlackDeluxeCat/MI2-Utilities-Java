@@ -27,12 +27,12 @@ void main(){
     vec4 mined = min(min(min(texture2D(u_texture, T + vec2(0, wide) * v), texture2D(u_texture, T + vec2(0, -wide) * v)), texture2D(u_texture, T + vec2(wide, 0) * v)), texture2D(u_texture, T + vec2(-wide, 0) * v));
 
     if(length(mined.rgb) < 0.0001 && length(color.rgb) > 0.01){
-        gl_FragColor = vec4(normalize(color.rgb), mod(coords.y / 2.0 + coords.x / 4.0 - u_time / 4.0, 32.0) / 24.0);
+        gl_FragColor = vec4(color.rgb, mod(coords.y / 2.0 + coords.x / 4.0 - u_time / 4.0, 32.0) / 24.0 + 0.5);
     }else{
         if(color.a >= 0.2 && color.a < 0.9){
             color.a = 0.2;
         }else if(color.a >= 0.9){
-            color.a = 0.3;
+            color.a = 0.4;
         }
         gl_FragColor = color;
     }

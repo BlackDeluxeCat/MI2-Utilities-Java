@@ -23,7 +23,7 @@ void main(){
 		gl_FragColor = vec4(maxed.rgb, maxed.a * 100.0);
     }else{
         if(color.a > 0.03){
-            color.a = (0.18 + (mod(coords.y / 2.0 + coords.x / 4.0 - u_time / 4.0, 32.0) > 25.0 && mod(coords.x / 3.0 + coords.y / 10.0 - u_time / 4.0, 24.0) > 18.0 ? 0.3 : 0.0));
+            color.a = (mod(coords.y / 2.0 + coords.x / 4.0 - u_time / 4.0, 28.0) > 24.0 && mod(coords.x / 3.0 + coords.y / 10.0 - u_time / 4.0, 20.0) > 17.0 ? max(0.4 * (sin(u_time * 0.012) + 1), 0.1) : 0.1);
         }
         gl_FragColor = color;
     }   
