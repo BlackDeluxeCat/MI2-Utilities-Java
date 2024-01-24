@@ -19,7 +19,7 @@ public class TurretZoneDrawer{
     public static void applyShader(){
         if(MI2UShaders.turretzone == null) return;
         teams.each(id -> {
-            if(time.check(id, Time.delta * 5f)) return;//shut down inactive team shader
+            if(time.check(id, Time.delta * 2f)) return;//shut down inactive team shader
             Draw.drawRange(quietGetLayer(id), 0.001f, () -> renderer.effectBuffer.begin(Color.clear), () -> {
                 renderer.effectBuffer.end();
                 renderer.effectBuffer.blit(MI2UShaders.turretzone);
@@ -30,8 +30,8 @@ public class TurretZoneDrawer{
     /** This method active the shader of this team.*/
     public static float getLayer(int id){
         teams.add(id);
-        time.reset(id, Time.delta);
-        return Layer.plans + 1f + id * 0.003f;
+        time.reset(id, 0);
+        return quietGetLayer(id);
     }
 
     public static float quietGetLayer(int id){

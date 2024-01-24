@@ -282,21 +282,13 @@ public class RendererExt{
 
                 Draw.color(unit.team.color);
                 Draw.z(TurretZoneDrawer.getLayer(unit.team.id));
-                if(animatedshields){
-                    Draw.alpha(0.05f);
-                    Fill.poly(unit.x, unit.y, (int)(range) / 4, range);
 
-                    Lines.stroke(2f);
-                    Draw.alpha(1f);
-                    Lines.circle(unit.x, unit.y, range);
-                }else{
-                    Draw.alpha(0.05f);
-                    Fill.poly(unit.x, unit.y, (int)(range) / 4, range);
+                Draw.alpha(0.05f);
+                Fill.poly(unit.x, unit.y, (int)(range) / 4, range);
 
-                    Lines.stroke(2f);
-                    Draw.alpha(0.5f);
-                    Lines.circle(unit.x, unit.y, range);
-                }
+                Lines.stroke(2f);
+                Draw.alpha(animatedshields ? 1f : 0.5f);
+                Lines.circle(unit.x, unit.y, range);
 
                 Draw.z(z);
                 Draw.color();
@@ -595,7 +587,7 @@ public class RendererExt{
         Draw.color(block.baseColor, block.phaseColor, odb.phaseHeat);
         Draw.mixcol(Color.black, 1f - odb.efficiency());
         Draw.z(91.1f);
-        Draw.alpha(animatedshields?0.6f:0.1f);
+        Draw.alpha(animatedshields?1f:0.1f);
         Fill.poly(odb.x, odb.y, (int)(block.range + odb.phaseHeat * block.phaseRangeBoost) / 4, block.range + odb.phaseHeat * block.phaseRangeBoost);
 
         Lines.stroke(2f);
@@ -641,21 +633,12 @@ public class RendererExt{
 
         Draw.color(btb.team.color);
         Draw.z(TurretZoneDrawer.getLayer(btb.team.id));
-        if(animatedshields){
-            Draw.alpha(0.05f);
-            Fill.poly(btb.x, btb.y, (int)(range) / 4, range);
+        Draw.alpha(0.05f);
+        Fill.poly(btb.x, btb.y, (int)(range) / 4, range);
 
-            Lines.stroke(2f);
-            Draw.alpha(1f);
-            Lines.circle(btb.x, btb.y, range);
-        }else{
-            Draw.alpha(0.05f);
-            Fill.poly(btb.x, btb.y, (int)(range) / 4, range);
-
-            Lines.stroke(2f);
-            Draw.alpha(0.5f);
-            Lines.circle(btb.x, btb.y, range);
-        }
+        Lines.stroke(2f);
+        Draw.alpha(animatedshields ? 1f : 0.5f);
+        Lines.circle(btb.x, btb.y, range);
 
         Draw.z(z);
         Draw.color();
