@@ -73,7 +73,7 @@ public class ModifyFuncs{
             if(block instanceof HeatCrafter hc){
                 addBarToBlock(block, "heat", (HeatCrafter.HeatCrafterBuild entity) ->
                         new Bar(() ->
-                                Core.bundle.format("bar.heatpercent", (int)entity.heat, (int)(entity.efficiencyScale() * 100)) + "/" + (int)hc.heatRequirement,
+                                Core.bundle.format("bar.heatpercent", (int)entity.heat, (int)(entity.efficiencyScale() * 100)) + "/" + (int)hc.heatRequirement + " x" + hc.maxEfficiency,
                                 () -> Pal.lightOrange,
                                 () -> entity.heat / hc.heatRequirement));
             }
@@ -85,7 +85,16 @@ public class ModifyFuncs{
                         Core.bundle.get("bar.power") + ":" + Strings.autoFixed((entity.status() == BlockStatus.active ? 1f : 0f) * entity.efficiency() * -entity.power.status * block.consPower.usage * 60f * (entity.canConsume()?entity.timeScale():0),2), () -> Pal.powerBar, () -> Mathf.zero(block.consPower.requestedPower(entity)) && entity.power.graph.getPowerProduced() + entity.power.graph.getBatteryStored() > 0f ? 1f : entity.power.status));
             }
 
-            if(block instanceof Turret) addBarToBlock(block, "logicTimer", (Turret.TurretBuild entity) -> new Bar(() -> "Logic Control: " + Strings.autoFixed(entity.logicControlTime, 1), () -> Pal.logicControl, () -> entity.logicControlTime / Turret.logicControlCooldown));
+            if(block instanceof Turret tu){
+                addBarToBlock(block, "logicTimer", (Turret.TurretBuild entity) -> new Bar(() -> "Logic Control: " + Strings.autoFixed(entity.logicControlTime, 1), () -> Pal.logicControl, () -> entity.logicControlTime / Turret.logicControlCooldown));
+                if(tu.heatRequirement > 0f){
+                    addBarToBlock(block, "heat", (Turret.TurretBuild entity) ->
+                            new Bar(() ->
+                                    Core.bundle.format("bar.heatpercent", (int)entity.heat, (int)(entity.efficiencyScale() * 100)) + "/" + (int)tu.heatRequirement + " x" + tu.maxHeatEfficiency,
+                                    () -> Pal.lightOrange,
+                                    () -> entity.heat / tu.heatRequirement));
+                }
+            }
         });
     }
 
