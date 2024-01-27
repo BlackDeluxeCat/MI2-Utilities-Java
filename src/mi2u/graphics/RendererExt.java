@@ -73,7 +73,7 @@ public class RendererExt{
     public static void updateSettings(){
         animatedshields = Core.settings.getBool("animatedshields");
 
-        unitHpBarStyle = MI2USettings.getStr("unitHpBarStyle", "1");
+        unitHpBarStyle = MI2USettings.getStr("unitHpBarStyle", "2");
 
         enPlayerCursor = MI2USettings.getBool("enPlayerCursor", false);
         enUnitHitbox = MI2USettings.getBool("enUnitHitbox");
