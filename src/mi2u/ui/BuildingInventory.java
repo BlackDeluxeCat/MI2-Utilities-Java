@@ -6,6 +6,7 @@ import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.scene.*;
 import arc.scene.event.*;
+import arc.scene.style.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
@@ -16,6 +17,7 @@ import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.ui.*;
+import mindustry.world.blocks.defense.turrets.*;
 import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.storage.*;
 
@@ -35,6 +37,7 @@ public class BuildingInventory extends Element{
     public static Font font = Fonts.outline;
     Building build;
     float scl, iconsize, size;
+    float lastCount = 0f;
 
     MI2Utils.IntervalMillis itemused = new MI2Utils.IntervalMillis(content.items().size), liquidused = new MI2Utils.IntervalMillis(content.liquids().size);
 
@@ -81,7 +84,9 @@ public class BuildingInventory extends Element{
     @Override
     public boolean remove(){
         if(build != null) used.remove(build.id);
+        itemused.clear();
         build = null;
+        lastCount = 0f;
         pool.free(this);
         return super.remove();
     }
@@ -96,19 +101,21 @@ public class BuildingInventory extends Element{
         fadeBackground.draw(x, y, width, height);
         iconsize = tilesize * scl;
 
+        Draw.alpha(lastCount < 1f ? 0f : 0.8f);
         int i = 0;
-        float count = content.items().count(ii -> !itemused.check(ii.id, 1000)) + content.liquids().count(ii -> !liquidused.check(ii.id, 1000));
-        int rows = Mathf.ceil(count / size);
+        int rows = Mathf.ceil(lastCount / size);
         float rowdy = Math.min(size / rows + 0.1f, 1);
 
-        setSize(iconsize * Math.min(count, size), rows * rowdy * iconsize);
+        setSize(iconsize * Math.min(lastCount, size), rows * rowdy * iconsize);
 
         float oldScaleX = font.getScaleX();
         float oldScaleY = font.getScaleY();
         font.getData().setScale(scl / 7f, scl / 7f);
-        font.setColor(Color.white);
+        font.setColor(MI2UTmp.c2.set(Color.white).a(0.9f));
         float amt, dx, dy;
         int amti;
+
+        float halfIconsize = iconsize / 2f, sq34Iconsize = iconsize * 0.75f;
 
         if(build.liquids != null){
             for(var item : content.liquids()){
@@ -118,9 +125,9 @@ public class BuildingInventory extends Element{
 
                 dx = Mathf.mod(i, size) * iconsize;
                 dy = rowdy * Mathf.floor(i / size) * iconsize;
-                Draw.rect(item.uiIcon, x + dx + iconsize / 2f, y + dy + iconsize / 2f, iconsize * 0.75f, iconsize * 0.75f);
+                Draw.rect(item.uiIcon, x + dx + halfIconsize, y + dy + halfIconsize, sq34Iconsize, sq34Iconsize);
 
-                font.draw(amt < 100f ? Strings.autoFixed(amt, 2) : UI.formatAmount((int)amt), x + dx, y + dy + iconsize / 2f);
+                font.draw(amt < 100f ? Strings.autoFixed(amt, 2) : UI.formatAmount((int)amt), x + dx, y + dy + halfIconsize);
 
                 i++;
             }
@@ -134,14 +141,31 @@ public class BuildingInventory extends Element{
 
                 dx = Mathf.mod(i, size) * iconsize;
                 dy = rowdy * Mathf.floor(i / size) * iconsize;
-                Draw.rect(item.uiIcon, x + dx + iconsize / 2f, y + dy + iconsize / 2f, iconsize * 0.75f, iconsize * 0.75f);
+                Draw.rect(item.uiIcon, x + dx + halfIconsize, y + dy + halfIconsize, sq34Iconsize, sq34Iconsize);
 
-                font.draw(UI.formatAmount(amti), x + dx, y + dy + iconsize / 2f);
+                font.draw(UI.formatAmount(amti), x + dx, y + dy + halfIconsize);
 
                 i++;
             }
         }
 
+        if(build instanceof ItemTurret.ItemTurretBuild ib){
+            for(var ammo : ib.ammo){
+                ItemTurret.ItemEntry item = (ItemTurret.ItemEntry)ammo;
+
+                dx = Mathf.mod(i, size) * iconsize;
+                dy = rowdy * Mathf.floor(i / size) * iconsize;
+                Draw.rect(item.item.uiIcon, x + dx + halfIconsize, y + dy + halfIconsize, sq34Iconsize, sq34Iconsize);
+                ammoIcon.draw(x + dx + (1f + 0.4f) * halfIconsize, y + dy + 0.4f * halfIconsize, iconsize / 4f, iconsize / 4f);
+                font.draw(UI.formatAmount(item.amount), x + dx, y + dy + halfIconsize);
+
+                i++;
+            }
+        }
+        lastCount = i;
+
         font.getData().setScale(oldScaleX, oldScaleY);
     }
+
+    public static Drawable ammoIcon = Core.atlas.getDrawable("mi2-utilities-java-ui-ammo");
 }
