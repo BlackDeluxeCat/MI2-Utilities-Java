@@ -230,6 +230,7 @@ public class LogicHelperMindow extends Mindow2{
             setupSearchMode(searchBaseTable);
             setupCutPasteMode(cutPasteBaseTable);
             setupBackupMode(backupTable);
+            split = MI2USettings.getStr(mindowName + ".split", ".");
         });
 
         titlePane.table(tt -> {
@@ -271,6 +272,8 @@ public class LogicHelperMindow extends Mindow2{
             if(b) autoFillVarTable.popup();
             else autoFillVarTable.hide();
         }));
+
+        settings.add(new MI2USettings.FieldEntry(mindowName + ".split", "@logicHelper.splitField.msg", "", null, null, s -> split = s));
     }
 
     public void setTargetDialog(LogicDialog ld){
@@ -561,9 +564,13 @@ public class LogicHelperMindow extends Mindow2{
             t.table(tt -> {
                 tt.field(split, Styles.nodeField, s -> {
                     split = s;
+                    MI2USettings.putStr(mindowName + ".split", s);
                     rebuildVars(varsTable);
                 }).growX().with(f -> {
                     f.setMessageText("@logicHelper.splitField.msg");
+                    f.update(() -> {
+                        if(!f.getText().equals(split)) f.setText(split);
+                    });
                 }).minWidth(48f);
 
                 tt.add(((MI2USettings.CheckEntry)MI2USettings.getEntry(mindowName + ".autocomplete")).newTextButton("@settings.logicHelper.autocomplete")).minSize(32f);
