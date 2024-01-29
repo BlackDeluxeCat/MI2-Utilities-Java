@@ -56,6 +56,9 @@ public class MI2UI extends Mindow2{
                         }
                     });
                 }
+
+                //RTS form table
+                if(control.input.commandMode) tabId = 2;
             }
         });
 
@@ -75,12 +78,8 @@ public class MI2UI extends Mindow2{
                 tabId = 1;
                 tabs.toggle(tabId);
             }).color(Color.cyan);
-            t.button("" + Iconc.units, textb, () -> {
-                tabId = 2;
-                tabs.toggle(tabId);
-            }).color(Color.salmon);
             t.button("" + Iconc.settings, textb, () -> {
-                tabId = 3;
+                tabId = 2;
                 tabs.toggle(tabId);
             }).color(Color.green);
         });
@@ -219,8 +218,18 @@ public class MI2UI extends Mindow2{
             });
         });
 
-        var team = new Table();
-        team.table(t -> {
+        tabs.queue(play, info, set);
+    }
+
+    @Override
+    public void setupCont(Table cont){
+        cont.clear();
+        cont.add(tabs);
+        tabs.toggle(tabId);
+
+        cont.row();
+
+        cont.add(new MCollapser(t -> {
             t.button("@main.buttons.createForm", textbtoggle, () -> {
                 RtsCommand.creatingFormation = !RtsCommand.creatingFormation;
             }).checked(b -> RtsCommand.creatingFormation).minSize(36f).growX().with(c -> {
@@ -253,16 +262,7 @@ public class MI2UI extends Mindow2{
                     button.addChild(label);
                 }
             }).growX();
-        }).growX();
-
-        tabs.queue(play, info, team, set);
-    }
-
-    @Override
-    public void setupCont(Table cont){
-        cont.clear();
-        cont.add(tabs);
-        tabs.toggle(tabId);
+        }, true).setDirection(false, true).setCollapsed(false, () -> !control.input.commandMode)).growX();
     }
 
     @Override

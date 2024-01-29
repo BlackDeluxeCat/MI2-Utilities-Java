@@ -5,14 +5,17 @@ import arc.struct.*;
 import arc.util.Time;
 import mi2u.*;
 import mi2u.io.MI2USettings;
+import mindustry.entities.*;
 import mindustry.game.EventType;
 import mindustry.gen.*;
 import mindustry.input.*;
+import mindustry.world.blocks.units.*;
+import mindustry.world.meta.*;
 
 import static mindustry.Vars.*;
 
 public class RtsCommand{
-    public static Seq<Unit>[] formations = new Seq[10];
+    public static Seq<Formation> formations = new Seq<>(10);
     public static boolean creatingFormation = false;
 
     public static long lastCallTime;
@@ -20,22 +23,23 @@ public class RtsCommand{
     public static long doubleTapInterval = MI2USettings.getInt("rtsFormDoubleTap", 300);
 
 
+    public static boolean lowHealthBack = true;
+
     public static void init(){
+        for(int i = 0; i < 10; i++){
+            formations.add(new Formation(i));
+        }
         Events.on(EventType.WorldLoadEvent.class, e -> {
-            for(var form : formations){
-                if(form == null) continue;
-                form.clear();
-            }
+            formations.each(Formation::clear);
+        });
+
+        Events.run(EventType.Trigger.update, () -> {
+            formations.each(Formation::update);
         });
     }
 
     public static void createFormation(Seq<Unit> formation, int id){
-        if(formations[id] == null){
-            formations[id] = new Seq<Unit>(formation);
-        }else{
-            formations[id].clear();
-            formations[id].add(formation);
-        }
+        formations.get(id).newFormation(formation);
     }
 
     /** @return whether it is a valid formation*/
@@ -44,30 +48,22 @@ public class RtsCommand{
     }
 
     public static int countFormation(int id){
-        updateFormation(id);
-        if(formations[id] == null) return 0;
-        if(formations[id].isEmpty()) return 0;
-        return formations[id].size;
-    }
-
-    public static void updateFormation(int id){
-        if(formations[id] == null) return;
-        if(formations[id].isEmpty()) return;
-        formations[id].removeAll(unit -> unit == null || !unit.isValid() || unit.team() != player.team() || !unit.isCommandable());
+        return formations.get(id).count();
     }
 
     public static void callFormation(int id){
         if(!checkFormation(id)) return;
+        var form = formations.get(id);
         if(lastCallId == id && Time.timeSinceMillis(lastCallTime) < doubleTapInterval){
             if(control.input instanceof InputOverwrite iow){
-                iow.pan(true, MI2UTmp.v1.set(formations[id].random()));
+                iow.pan(true, MI2UTmp.v1.set(form.all.random()));
             }else{
-                Core.camera.position.set(MI2UTmp.v1.set(formations[id].random()));
+                Core.camera.position.set(MI2UTmp.v1.set(form.all.random()));
             }
 
         }else{
             control.input.selectedUnits.clear();
-            control.input.selectedUnits.add(formations[id]);
+            control.input.selectedUnits.add(form.all.select(u -> !form.lowHps.contains(u)));
             lastCallId = id;
         }
         lastCallTime = Time.millis();
@@ -90,6 +86,78 @@ public class RtsCommand{
                         callFormation(ki);
                     }
                 }
+            }
+        }
+    }
+
+    public static class Formation{
+        private static Seq<Unit> tmplows = new Seq<>(), tmpselect;
+        public int id;
+        protected Seq<Unit> all = new Seq<>();
+        protected OrderedSet<Unit> lowHps = new OrderedSet<>();
+        protected MI2Utils.IntervalMillis timer = new MI2Utils.IntervalMillis();
+
+        public Formation(int id){
+            this.id = id;
+        }
+
+        public void newFormation(Seq<Unit> units){
+            clear();
+            all.add(units);
+        }
+
+        public void clear(){
+            all.clear();
+            lowHps.clear();
+        }
+
+        public int count(){
+            return all.size;
+        }
+
+        public void update(){
+            all.removeAll(unit -> {
+                boolean remove = unit == null || !unit.isValid() || unit.team() != player.team() || !unit.isCommandable();
+                if(!remove) return false;
+                lowHps.remove(unit);
+                return true;
+            });
+
+            if(lowHealthBack){
+                if(timer.get(500)){
+                    tmpselect = control.input.selectedUnits;
+                    tmplows.clear();
+
+                    //标记低血量
+                    all.each(unit -> {
+                        if(unit.health / unit.maxHealth > 0.99f){
+                            if(lowHps.remove(unit)) control.input.selectedUnits.add(unit);
+                        }
+                        if(unit.health / unit.maxHealth > 0.5f) return;
+                        if(!lowHps.add(unit)) return;
+                        tmplows.add(unit);
+                    });
+
+                    //低血量召回核心一次
+                    if(!tmplows.isEmpty()){
+                        control.input.selectedUnits = tmplows;
+
+                        var unit = tmplows.first();
+                        var build = Units.closestBuilding(unit.team, unit.x, unit.y, 800f, b -> b.block.flags.contains(BlockFlag.repair) || b.block instanceof RepairTower);
+                        if(build == null){
+                            build = indexer.findClosestFlag(unit.x, unit.y, unit.team(), BlockFlag.core);
+                        }
+                        if(build != null){
+                            Core.camera.project(MI2UTmp.v2.set(build.x, build.y));
+                            control.input.commandTap(MI2UTmp.v2.x, MI2UTmp.v2.y);
+
+                            tmpselect.remove(u -> tmplows.contains(u));
+                        }
+                        control.input.selectedUnits = tmpselect;
+                    }
+                }
+            }else{
+                lowHps.clear();
             }
         }
     }
