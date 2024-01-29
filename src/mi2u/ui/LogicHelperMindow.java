@@ -397,7 +397,7 @@ public class LogicHelperMindow extends Mindow2{
                     dragging = (LCanvas.StatementElem)stats.getChildren().get(cutEnd);
                     dragging.remove();
                     stats.addChildAt(pasteStart, dragging);
-                };
+                }
             }else if(cutStart < pasteStart){
                 if(copyCode){
                     dragging = (LCanvas.StatementElem)stats.getChildren().get(cutStart + ind);
@@ -412,7 +412,7 @@ public class LogicHelperMindow extends Mindow2{
                     dragging = (LCanvas.StatementElem)stats.getChildren().get(cutStart);
                     dragging.remove();
                     stats.addChildAt(pasteStart - 1, dragging);
-                };
+                }
             }
             stats.layout();
             if(dragging != null) blinkElement(dragging);
@@ -533,19 +533,21 @@ public class LogicHelperMindow extends Mindow2{
     }
 
     private void locateElement(Cons<Element> cons){
-        if(results.any() && targetLogicDialog != null){
+        if(targetLogicDialog != null){
             if(results.remove(rem -> !rem.isDescendantOf(targetLogicDialog))) doSearch();  //if remove works, probably lstatement is changed || lcanvas is rebuilt, so previous TextFields are invalid anymore.
-            if(index >= results.size) index = 0;
-            if(index < 0) index = results.size - 1;
-            Element e = results.get(index);
-            e.localToAscendantCoordinates(targetLogicDialog.canvas.pane.getWidget(), MI2UTmp.v2.setZero());
-            targetLogicDialog.canvas.pane.scrollTo(MI2UTmp.v2.x, MI2UTmp.v2.y, e.getWidth(), e.getHeight());
-            blinkElement(e);
-            if(e instanceof TextField tf) {
-                tf.requestKeyboard();
-                tf.selectAll();
-            };
-            if(cons != null) cons.get(e);
+            if(results.any()){
+                if(index >= results.size) index = 0;
+                if(index < 0) index = results.size - 1;
+                Element e = results.get(index);
+                e.localToAscendantCoordinates(targetLogicDialog.canvas.pane.getWidget(), MI2UTmp.v2.setZero());
+                targetLogicDialog.canvas.pane.scrollTo(MI2UTmp.v2.x, MI2UTmp.v2.y, e.getWidth(), e.getHeight());
+                blinkElement(e);
+                if(e instanceof TextField tf) {
+                    tf.requestKeyboard();
+                    tf.selectAll();
+                }
+                if(cons != null) cons.get(e);
+            }
         }
     }
 
