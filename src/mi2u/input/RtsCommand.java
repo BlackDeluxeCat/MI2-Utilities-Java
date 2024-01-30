@@ -23,7 +23,7 @@ public class RtsCommand{
     public static long doubleTapInterval = MI2USettings.getInt("rtsFormDoubleTap", 300);
 
 
-    public static boolean lowHealthBack = true;
+    public static boolean lowHealthBack = false;    //TODO formation auto control
 
     public static void init(){
         for(int i = 0; i < 10; i++){
