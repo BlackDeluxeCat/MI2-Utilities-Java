@@ -36,73 +36,68 @@ public class PowerGraphTable extends Table{
     //n x 6 Element array with icons and labels from generator, consumer, storage.
     static Element[][] blocksI = new Element[content.blocks().size][6];
 
-    private static Interval interval = new Interval(2);
-    private final Seq<PGInfo> pgInfos = new Seq<>();
-    private float totalCap = 0f, totalCons = 0f, totalGen = 0f;
+    static Interval interval = new Interval(3);
+    final Seq<PGInfo> pgInfos = new Seq<>();
+    float totalCap = 0f, totalCons = 0f, totalGen = 0f;
+
+    OrderedSet<PowerGraph> graphs = new OrderedSet<>();
 
     public PowerGraphTable(){
         super();
         detailTable.touchable = Touchable.disabled;
+        setBackground(Styles.black5);
+        add(diagram).growX();
     }
 
     @Override
     public void act(float delta){
         super.act(delta);
-        pgInfos.each(PGInfo::update);
+        if(interval.get(2, 10f)) pgInfos.each(PGInfo::update);
         if(interval.get(0, 60f)){
+            if(!state.isGame()) return;
+            if(team == null) return;
+            if(state.teams.get(team).buildings == null) return;
             pgInfos.each(PGInfo::updateG);
-            rebuild();
-        }
-    }
+            totalCap = 0f;
+            totalCons = 0f;
+            totalGen = 0f;
 
-    public void rebuild(){
-        clear();
-        if(!state.isGame()) return;
-        if(team == null) return;
-        if(state.teams.get(team).buildings == null) return;
-        totalCap = 0f;
-        totalCons = 0f;
-        totalGen = 0f;
-
-        OrderedSet<PowerGraph> graphs = new OrderedSet<>();
-        state.teams.get(team).buildings.each(b -> {
-            if(b.block.hasPower) graphs.add(b.power.graph);
-        });
-
-        //find and select presented graphs,
-        //also select and renew remained graphs. So recorder data is probably get kept.
-        //remove others.
-        pgInfos.removeAll(pi -> {
-            final PowerGraph[] used = new PowerGraph[1];
-            boolean remove = !graphs.orderedItems().contains(pgn -> {
-                if(pgn == pi.pg || (!pgn.batteries.isEmpty() && pi.pg.batteries.contains(pgn.batteries.find(Building::isValid)))){
-                    pi.renew(pgn);
-                    used[0] = pgn;
-                    return true;
-                }
-                return false;
+            graphs.clear();
+            state.teams.get(team).buildings.each(b -> {
+                if(b.block.hasPower) graphs.add(b.power.graph);
             });
-            if(used[0] != null) graphs.remove(used[0]);
-            if(remove){
-                diagram.removeChild(pi.barGen);
-                diagram.removeChild(pi.barStore);
-                diagram.removeChild(pi.barCons);
-                Pools.free(pi);
-            }
-            return remove;
-        });
 
-        graphs.orderedItems().each(p -> {
-            if(!pgInfos.contains(pp -> pp.pg == p)) pgInfos.add(Pools.obtain(PGInfo.class, PGInfo::new).renew(p));
-        });
+            //find and select presented graphs,
+            //also select and renew remained graphs. So recorder data is probably get kept.
+            //remove others.
+            pgInfos.removeAll(pi -> {
+                boolean remove = !graphs.orderedItems().contains(pgn -> {
+                    if(pgn == pi.pg || (!pgn.batteries.isEmpty() && pi.pg.batteries.contains(pgn.batteries.find(Building::isValid)))){
+                        pi.renew(pgn);
+                        graphs.remove(pgn);
+                        return true;
+                    }
+                    return false;
+                });
+                if(remove){
+                    diagram.removeChild(pi.barGen);
+                    diagram.removeChild(pi.barStore);
+                    diagram.removeChild(pi.barCons);
+                    Pools.free(pi);
+                }
+                return remove;
+            });
 
-        pgInfos.each(c -> {
-            totalCap += c.totalcap;
-            totalGen += c.totalgen;
-            totalCons += c.totalcons;
-        });
-        setBackground(Styles.black5);
-        add(diagram).growX();
+            graphs.orderedItems().each(p -> {
+                if(!pgInfos.contains(pp -> pp.pg == p)) pgInfos.add(Pools.obtain(PGInfo.class, PGInfo::new).renew(p));
+            });
+
+            pgInfos.each(c -> {
+                totalCap += c.totalcap;
+                totalGen += c.totalgen;
+                totalCons += c.totalcons;
+            });
+        }
     }
 
     public void showDetailFor(PGInfo info, MI2Bar bar){
@@ -123,47 +118,43 @@ public class PowerGraphTable extends Table{
 
     public static void buildInfo(Table table, PGInfo info){
         float ew = 150f;
-        table.add(new Element(){
-            @Override
-            public void draw(){
-                super.draw();
-                Floatc4 buildText = (min, max, w, color) -> {
-                    Font font = Fonts.outline;
-                    font.setColor(MI2UTmp.c1.argb8888((int)color));
-                    GlyphLayout lay = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
+        table.rect((x, y, width, height) -> {
+            Floatc4 buildText = (min, max, w, color) -> {
+                Font font = Fonts.outline;
+                font.setColor(MI2UTmp.c1.argb8888((int)color));
+                GlyphLayout lay = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
 
-                    String text = UI.formatAmount((long)min);
-                    lay.setText(font, text);
-                    font.getCache().clear();
-                    font.getCache().addText(text, this.x + w, this.y + lay.height);
-                    font.getCache().draw(parentAlpha);
+                String text = UI.formatAmount((long)min);
+                lay.setText(font, text);
+                font.getCache().clear();
+                font.getCache().addText(text, x + w, y + lay.height);
+                font.getCache().draw(1f);
 
-                    text = UI.formatAmount((long)max);
-                    lay.setText(font, text);
-                    font.getCache().clear();
-                    font.getCache().addText(text, this.x + w, this.y + this.getHeight());
-                    font.getCache().draw(parentAlpha);
+                text = UI.formatAmount((long)max);
+                lay.setText(font, text);
+                font.getCache().clear();
+                font.getCache().addText(text, x + w, y + height);
+                font.getCache().draw(1f);
 
-                    Pools.free(lay);
-                };
-                Draw.reset();
-
-                Lines.stroke(4f);
-                Draw.color(Pal.power, 0.75f);
-                info.stG.defaultDraw(x, y + 20f, width, height - 40f, false);
-                buildText.get(info.stG.min(), info.stG.max(), 100f, Pal.power.argb8888());
-
-                float min = Math.min(info.consG.min(), info.genG.min()), max = Math.max(info.consG.max(), info.genG.max());
-
-                Lines.stroke(2f);
-                Draw.color(Color.scarlet);
-                info.consG.defaultDraw(x, y + 40f, width, height - 80f, true, min, max);
-                Draw.color(Color.green);
-                info.genG.defaultDraw(x, y + 40f, width, height - 80f, true, min, max);
-                buildText.get(min, max, 0f, Color.gray.argb8888());
-
-                Draw.reset();
+                Pools.free(lay);
             };
+            Draw.reset();
+
+            Lines.stroke(4f);
+            Draw.color(Pal.power, 0.75f);
+            info.stG.defaultDraw(x, y + 20f, width, height - 40f, false);
+            buildText.get(info.stG.min(), info.stG.max(), 100f, Pal.power.argb8888());
+
+            float min = Math.min(info.consG.min(), info.genG.min()), max = Math.max(info.consG.max(), info.genG.max());
+
+            Lines.stroke(2f);
+            Draw.color(Color.scarlet);
+            info.consG.defaultDraw(x, y + 40f, width, height - 80f, true, min, max);
+            Draw.color(Color.green);
+            info.genG.defaultDraw(x, y + 40f, width, height - 80f, true, min, max);
+            buildText.get(min, max, 0f, Color.gray.argb8888());
+
+            Draw.reset();
         }).growX().height(200f).pad(4f);
 
         table.row();
