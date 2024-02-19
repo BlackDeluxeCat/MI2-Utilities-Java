@@ -184,7 +184,7 @@ public class MI2Utilities extends Mod{
 
                 this.pane(t -> {
                     introl = t.add(intro).align(Align.left).growX().get();  //drawing update discription possibly cause font color bug.
-                }).width(300f).maxHeight(600f);
+                }).width(300f).maxHeight(500f);
             }
             
         };

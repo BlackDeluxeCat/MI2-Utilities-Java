@@ -723,7 +723,7 @@ public class FullAI extends AIController{
             customAIUITable.touchable = Touchable.enabled;
             customAIUITable.margin(2f);
             customAIUITable.background(Styles.black3);
-            customAIUITable.addDragMove();
+            customAIUITable.addDragBar();
             customAIUITable.addCloseButton(20f);
             customAIUITable.add("@ai.config.logic.ui").height(20f).row();
             customAIUITable.update(() -> customAIUITable.keepInScreen());
