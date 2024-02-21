@@ -108,6 +108,10 @@ public class RendererExt{
 
         drawZoneShader();
 
+        Groups.player.each(p -> {
+            if(enPlayerCursor) drawPlayer(p);
+        });
+
         Groups.draw.each(d -> {
             //No-bug way.
             if(disableWreck && d instanceof Decal dd){
@@ -154,9 +158,10 @@ public class RendererExt{
         Draw.reset();
     }
 
-    public static void drawUnit(Unit unit){
+    public static void drawPlayer(Player player){
+        Unit unit = player.unit();
         //Draw aim point
-        if(unit.isPlayer() && enPlayerCursor && Mathf.len(unit.aimX - unit.x, unit.aimY - unit.y) < 4800f){
+        if(unit != null && Mathf.len(unit.aimX - unit.x, unit.aimY - unit.y) < 4800f){
             if(players.get(unit) != null){
                 players.get(unit).lerp(unit.aimX, unit.aimY, 0.4f);
             }else{
@@ -225,7 +230,9 @@ public class RendererExt{
             }
             Draw.reset();
         }
+    }
 
+    public static void drawUnit(Unit unit){
         if(Math.abs(unit.x - Core.camera.position.x) <= (Core.camera.width / 2) && Math.abs(unit.y - Core.camera.position.y) <= (Core.camera.height / 2)){
             //display healthbar by MI2
             Draw.z(Layer.shields + 6f);
