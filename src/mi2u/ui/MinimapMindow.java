@@ -47,7 +47,6 @@ public class MinimapMindow extends Mindow2{
                 finderTable.popup();
                 finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
             }
-            if(state.isGame()) WorldData.scanWorld(Mathf.clamp(MI2USettings.getInt("worldDataUpdate.tiles", 50), 10, 10000));
         });
 
         Events.on(EventType.TapEvent.class, e -> {
@@ -145,7 +144,6 @@ public class MinimapMindow extends Mindow2{
         settings.add(new FieldEntry(mindowName + ".size", "@settings.mindowMap.size", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 3200, s -> rebuild()));
         settings.add(new FieldEntry(mindowName + ".drawUnitColorDiff", "@settings.mindowMap.drawUnitColorDiff", String.valueOf(10), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 0 && Strings.parseInt(s) <= 100, s -> m.drawUnitColorDifference = MI2USettings.getInt(mindowName + ".drawUnitColorDiff", 90) / 100f));
         settings.add(new FieldEntry(mindowName + ".drawUnitOutline", "@settings.mindowMap.drawUnitOutline", String.valueOf(0), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 0 && Strings.parseInt(s) <= 100, s -> m.drawUnitOutline = MI2USettings.getInt(mindowName + ".drawUnitOutline", 90) / 100f));
-        settings.add(new FieldEntry("worldDataUpdate.tiles", "@settings.mindowMap.worldDataUpdate.tiles", String.valueOf(50), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 10 && Strings.parseInt(s) <= 10000, null));
     }
 
     @Override

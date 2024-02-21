@@ -290,4 +290,10 @@ public class WorldFinderTable extends PopupTable{
 
         selectTable.popup();
     }
+
+    @Override
+    public void popup(int align){
+        super.popup(align);
+        WorldData.scanWorld();
+    }
 }

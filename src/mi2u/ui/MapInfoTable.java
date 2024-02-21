@@ -45,8 +45,6 @@ public class MapInfoTable extends Table{
         super();
         Events.on(EventType.WorldLoadEvent.class, e -> {
             clearData();
-            WorldData.clear();
-            WorldData.scanWorld(world.tiles.height * world.tiles.width);
             WorldData.updateSpanwer();
             //reset hpbar pools
             hpBars.each(c -> {

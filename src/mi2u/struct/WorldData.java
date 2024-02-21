@@ -19,9 +19,8 @@ public class WorldData{
     /** block - team.id - building positions
      * key team.id == 256 is for blocks that block.hasBuilding() is false, or all positions ignoring team check.
      * */
-    public static ObjectMap<Block, IntSeq[]> tiles, tiles2;//尊贵的离屏更新模式
-    static ObjectMap<Block, IntSeq[]> backTiles1 = new ObjectMap<>(), backTiles2 = new ObjectMap<>();
-    private static ObjectSet<Building> scanned = new ObjectSet<>();
+    static ObjectMap<Block, IntSeq[]> tiles = new ObjectMap<>();
+    static IntSet scanned = new IntSet();
 
     public static IntSeq spawnPoints = new IntSeq();
     public static IntSeq groundSpawns = new IntSeq();
@@ -34,14 +33,7 @@ public class WorldData{
     public static void clear(){
         index = 0;
         scanned.clear();
-        tiles = backTiles1;
-        tiles2 = backTiles2;
         tiles.each((b, array) -> {
-            for(var intSeq : array){
-                if(intSeq != null) intSeq.clear();
-            }
-        });
-        tiles2.each((b, array) -> {
             for(var intSeq : array){
                 if(intSeq != null) intSeq.clear();
             }
@@ -63,27 +55,10 @@ public class WorldData{
         return seq == null ? 0 : seq.size;
     }
 
-    public static void scanWorld(int times){
-        for(int i = 0; i < times; i++){
-            scanTile(world.tiles.geti(index++));
-            if(index >= world.tiles.width * world.tiles.height){
-                 index = 0;
-                if(tiles == backTiles1){
-                    tiles = backTiles2;
-                    tiles2 = backTiles1;
-                }else{
-                    tiles = backTiles1;
-                    tiles2 = backTiles2;
-                }
-                scanned.clear();
-                tiles2.each((b, array) -> {
-                    for(var intSeq : array){
-                        if(intSeq != null) intSeq.clear();
-                    }
-                });
-                break;
-            }
-        }
+    //lazy scan
+    public static void scanWorld(){
+        clear();
+        world.tiles.eachTile(WorldData::scanTile);
     }
 
     public static void scanTile(Tile tile){
@@ -91,8 +66,7 @@ public class WorldData{
         if(tile.overlay() != tile.floor()) putBlock(tile.overlay(), tile.pos(), 256);
         if(tile.block() != tile.floor() && tile.block() != tile.overlay()){
             if(tile.build != null && tile.block().isMultiblock()){
-                if(scanned.contains(tile.build)) return;
-                scanned.add(tile.build);
+                if(!scanned.add(tile.build.id)) return;
             }
             putBlock(tile.block(), tile.pos(), 256);
             if(tile.build != null){
@@ -101,12 +75,11 @@ public class WorldData{
         }
     }
 
-    //null checks cost large amount of memory.
     private static void putBlock(Block block, int pos, int team){
         if(block == null) return;
-        if(tiles2.get(block) == null) tiles2.put(block, new IntSeq[257]);
-        if(tiles2.get(block)[team] == null) tiles2.get(block)[team] = new IntSeq();
-        tiles2.get(block)[team].add(pos);
+        if(tiles.get(block) == null) tiles.put(block, new IntSeq[257]);
+        if(tiles.get(block)[team] == null) tiles.get(block)[team] = new IntSeq();
+        tiles.get(block)[team].add(pos);
     }
 
     public static void updateSpanwer(){
