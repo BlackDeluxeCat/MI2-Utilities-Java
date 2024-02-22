@@ -5,7 +5,6 @@ import arc.math.geom.Geometry;
 import arc.struct.*;
 import arc.util.*;
 import mi2u.MI2UTmp;
-import mi2u.io.MI2USettings;
 import mindustry.content.*;
 import mindustry.core.World;
 import mindustry.game.*;
@@ -15,7 +14,6 @@ import mindustry.world.*;
 import static mindustry.Vars.*;
 
 public class WorldData{
-
     /** block - team.id - building positions
      * key team.id == 256 is for blocks that block.hasBuilding() is false, or all positions ignoring team check.
      * */
@@ -28,10 +26,8 @@ public class WorldData{
 
     //temp
     static boolean any = false;
-    static int index;
 
     public static void clear(){
-        index = 0;
         scanned.clear();
         tiles.each((b, array) -> {
             for(var intSeq : array){

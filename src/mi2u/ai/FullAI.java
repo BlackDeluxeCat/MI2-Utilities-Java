@@ -15,6 +15,7 @@ import mi2u.*;
 import mi2u.game.*;
 import mi2u.input.*;
 import mi2u.io.*;
+import mi2u.struct.*;
 import mi2u.ui.*;
 import mi2u.ui.elements.*;
 import mindustry.ai.types.*;
@@ -33,6 +34,7 @@ import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.*;
 import mindustry.world.blocks.defense.turrets.*;
+import mindustry.world.blocks.environment.*;
 import mindustry.world.meta.*;
 
 import static mi2u.MI2UVars.*;
@@ -40,7 +42,6 @@ import static mindustry.Vars.*;
 
 public class FullAI extends AIController{
     public Seq<Mode> modes = new Seq<>();
-    protected Interval timer = new Interval(9);
 
     public FullAI(){
         super();
@@ -99,6 +100,8 @@ public class FullAI extends AIController{
         public Drawable bimg;
 
         public boolean configUIExpand = true;
+        Interval timer = new Interval(10);
+
         public Mode(){
             btext = Iconc.units + "";
         }
@@ -123,13 +126,13 @@ public class FullAI extends AIController{
         public void act(){
             Building core = unit.closestCore();
             boostAction(true);
-            if(!(unit.canMine()) || !unit.type.mineFloor || core == null) return;
+            if(!(unit.canMine()) || core == null) return;
             if(unit.mineTile != null && !unit.mineTile.within(unit, unit.type.mineRange)){
                 unit.mineTile = null;
             }
             if(mining){
                 if(timer.get(0, 60 * 4) || targetItem == null){
-                    targetItem = list.min(i -> indexer.hasOre(i) && unit.canMine(i), i -> core.items.get(i));
+                    targetItem = list.min(i -> unit.canMine(i), i -> core.items.get(i));
                 }
                 //core full of the target item, do nothing
                 if(targetItem != null && core.acceptStack(targetItem, 1, unit) == 0){
@@ -141,20 +144,28 @@ public class FullAI extends AIController{
                 if(unit.stack.amount >= unit.type.itemCapacity || (targetItem != null && !unit.acceptsItem(targetItem))){
                     mining = false;
                 }else{
-                    if(timer.get(1, 60) && targetItem != null){
+                    if(timer.get(1, 120) && targetItem != null){
                         if(unit.type.mineWalls){
-                            //TODO wall ore
+                            if(ore != null && ore.wallDrop() != targetItem) ore = null;
+                            //it will be a bit laggy
+                            if(timer.get(6, 60 * 60)) WorldData.scanWorld();
+                            var seq = content.blocks().select(b -> (b.solid || (b instanceof Floor f && f.wallOre)) && b.itemDrop == targetItem);
+                            for(var block : seq){
+                                if(WorldData.countBlock(block, null) > 0){
+                                    WorldData.getSeq(block, null).each(pos -> {
+                                        if(ore != null && unit.within(ore, unit.type.mineRange)) return;
+                                        if((ore == null || MI2UTmp.v3.set(ore).sub(unit).len2() > MI2UTmp.v2.set(Point2.x(pos), Point2.y(pos)).scl(tilesize).sub(unit).len2()) && world.tile(pos).wallDrop()== targetItem) ore = world.tile(pos);
+                                    });
+                                }
+                            }
                         }else{
                             ore = indexer.findClosestOre(unit, targetItem);
                         }
                     }
                     if(ore != null){
                         moveAction(ore, 50f, false);
-                        if(ore.block() == Blocks.air && unit.within(ore, unit.type.mineRange)){
+                        if(unit.within(ore, unit.type.mineRange)){
                             unit.mineTile = ore;
-                        }
-                        if(ore.block() != Blocks.air){
-                            mining = false;
                         }
                     }
                 }
@@ -165,7 +176,7 @@ public class FullAI extends AIController{
                     return;
                 }
 
-                if(unit.within(core, itemTransferRange / 1.5f)){
+                if(unit.within(core, itemTransferRange / 1.1f)){
                     if(!timer.check(2, 120f)) shootAction(MI2UTmp.v1.set(core).lerpDelta(Mathf.range(-12f, 12f), Mathf.range(-8f, 8f), 0.1f), true);
                     if(timer.get(2, 120f)){
                         control.input.droppingItem = true;
@@ -215,7 +226,7 @@ public class FullAI extends AIController{
             if(!control.input.isBuilding) return;
             if(!unit.canBuild()) return;
             //help others building, catching the closest plan to co-op.
-            if(follow && timer.get(3, 15f) && (unit.plans().isEmpty() || (cobuildplan != null && unit.buildPlan().samePos(cobuildplan) && unit.buildPlan().block == cobuildplan.block && unit.buildPlan().breaking == cobuildplan.breaking))){
+            if(follow && timer.get(0, 15f) && (unit.plans().isEmpty() || (cobuildplan != null && unit.buildPlan().samePos(cobuildplan) && unit.buildPlan().block == cobuildplan.block && unit.buildPlan().breaking == cobuildplan.breaking))){
                 Point2 last = cobuildplan == null ? null : MI2UTmp.p1.set(cobuildplan.x, cobuildplan.y);
                 cobuildplan = null;
 
@@ -250,7 +261,7 @@ public class FullAI extends AIController{
 
             }
 
-            if(rebuild && timer.get(4, 30f) && unit.plans().isEmpty() && !unit.team.data().plans.isEmpty()){
+            if(rebuild && timer.get(1, 30f) && unit.plans().isEmpty() && !unit.team.data().plans.isEmpty()){
                 //rebuild
                 var block = unit.team.data().plans.first();
                 if(world.tile(block.x, block.y) != null && world.tile(block.x, block.y).block().id == block.block){
@@ -261,7 +272,7 @@ public class FullAI extends AIController{
 
             }
 
-            if(timer.get(5, 60f) && unit.buildPlan() != null && cobuildplan != null){
+            if(timer.get(2, 60f) && unit.buildPlan() != null && cobuildplan != null){
                 //cancel co-op plan that someone has conflicting idea or no player is building anymore
                 boolean cobuilding = false;
                 for(var player : Groups.player){
@@ -346,7 +357,7 @@ public class FullAI extends AIController{
         public void act(){
             if(Core.input.keyDown(Binding.select)) return;
 
-            if(timer.get(6, 30f)){
+            if(timer.get(0, 30f)){
                 target = null;
                 float range = unit.hasWeapons() ? unit.range() : unit instanceof BlockUnitUnit build ? build.tile() instanceof Turret.TurretBuild tb ? tb.range() : 0f : 0f;
                 if(attack) target = Units.closestTarget(unit.team, unit.x, unit.y, range, u -> u.checkTarget(unit.type.targetAir, unit.type.targetGround), u -> unit.type.targetGround);
@@ -395,7 +406,7 @@ public class FullAI extends AIController{
                 moveAction(core, itemTransferRange / 2f, false);
 
                 if(unit.within(core, itemTransferRange / 1.5f)){
-                    if(timer.get(8, 120f)){
+                    if(timer.get(0, 120f)){
                         if(unit.stack.item != null && unit.stack.item != targetItem && unit.stack.amount > 0){
                             control.input.droppingItem = true;
                             control.input.tryDropItems(core, unit.aimX, unit.aimY);
