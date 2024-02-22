@@ -698,7 +698,7 @@ public class FullAI extends AIController{
             if(!actionTimer.check(0, (int)LogicAI.logicControlTimeout / 60 * 1000)){
                 boostAction(ai.boost);
                 if(ai.control != LUnitControl.pathfind || unit.isFlying()){
-                    moveAction(ai.moveX, ai.moveY, Math.max(ai.moveRad, 1f), ai.control == LUnitControl.approach);
+                    moveAction(ai.moveX, ai.moveY, ai.control == LUnitControl.move ? 1f : Math.max(ai.moveRad, 1f), false);
                 }/*else{
                 if(!Mathf.equal(ai.moveX, lastMoveX, 0.1f) || !Mathf.equal(ai.moveY, lastMoveY, 0.1f)){
                     lastPathId ++;
@@ -735,7 +735,7 @@ public class FullAI extends AIController{
             customAIUITable.touchable = Touchable.enabled;
             customAIUITable.margin(2f);
             customAIUITable.background(Styles.black3);
-            customAIUITable.addDragBar();
+            customAIUITable.addDragMove();
             customAIUITable.addCloseButton(20f);
             customAIUITable.add("@ai.config.logic.ui").height(20f).row();
             customAIUITable.update(() -> customAIUITable.keepInScreen());
@@ -851,6 +851,11 @@ public class FullAI extends AIController{
             var type = blocks[1];
             if(type.equals("row")){
                 customAIUITable.row();
+                return true;
+            }else if(type.equals("clear")){
+                customAIUITable.clearChildren();
+                customAIUITable.addCloseButton(20f);
+                customAIUITable.add("@ai.config.logic.ui").height(20f).row();
                 return true;
             }
             if(blocks.length < 3) return false;
