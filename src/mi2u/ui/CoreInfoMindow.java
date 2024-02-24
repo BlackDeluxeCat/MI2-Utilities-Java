@@ -13,8 +13,6 @@ import arc.util.*;
 import arc.util.pooling.*;
 import mi2u.*;
 import mi2u.input.*;
-import mi2u.io.*;
-import mi2u.io.MI2USettings.*;
 import mi2u.struct.*;
 import mi2u.ui.elements.*;
 import mindustry.core.*;
@@ -148,7 +146,7 @@ public class CoreInfoMindow extends Mindow2{
         cont.clear();
 
         cont.table(ipt -> {
-            if(MI2USettings.getBool(mindowName + ".showCoreItems", true)){
+            if(settings.getBool("showCoreItems")){
                 ipt.pane(iut -> {
                     int i = 0;
 
@@ -184,7 +182,7 @@ public class CoreInfoMindow extends Mindow2{
                             iut.row();
                         }
                     }
-                }).minWidth(300f).maxHeight(MI2USettings.getInt(mindowName + ".itemsMaxHeight", 150)).update(p -> {
+                }).minWidth(300f).maxHeight(settings.getInt("itemsMaxHeight")).update(p -> {
                     Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
                     if(e != null && e.isDescendantOf(p)){
                         p.requestScroll();
@@ -194,7 +192,7 @@ public class CoreInfoMindow extends Mindow2{
                 }).with(c -> c.setFadeScrollBars(true));
             }
 
-            if(MI2USettings.getBool(mindowName + ".showPowerGraphs", true)){
+            if(settings.getBool("showPowerGraphs")){
                 ipt.row();
                 ipt.add(pg).growX().minWidth(300f);
             }
@@ -202,9 +200,9 @@ public class CoreInfoMindow extends Mindow2{
 
         //cont.row();
 
-        if(MI2USettings.getBool(mindowName + ".showUnits")){
+        if(settings.getBool("showUnits")){
             cont.pane(uut -> {
-                int i = 0, column = Mathf.clamp(usedUnits.size / Math.max(1, MI2USettings.getInt(mindowName + ".unitsMaxHeight", 200) / 24 - 2), 2, 8);
+                int i = 0, column = Mathf.clamp(usedUnits.size / Math.max(1, settings.getInt("unitsMaxHeight") / 24 - 2), 2, 8);
                 for(UnitType type : content.units()){
                     //if(type.isHidden()) continue;
                     if(!usedUnits.contains(type)) continue;
@@ -246,7 +244,7 @@ public class CoreInfoMindow extends Mindow2{
                         inp.pan(true, MI2UTmp.v1.set(b.x, b.y));
                     }
                 });
-            }).maxHeight(MI2USettings.getInt(mindowName + ".unitsMaxHeight", 200)).update(p -> {
+            }).maxHeight(settings.getInt(mindowName + ".unitsMaxHeight")).update(p -> {
                 Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
                 if(e != null && e.isDescendantOf(p)){
                     p.requestScroll();
@@ -354,11 +352,11 @@ public class CoreInfoMindow extends Mindow2{
     @Override
     public void initSettings(){
         super.initSettings();
-        settings.add(new CheckEntry(mindowName + ".showCoreItems", "@settings.coreInfo.showCoreItems", true, b -> rebuild()));
-        settings.add(new CheckEntry(mindowName + ".showUnits", "@settings.coreInfo.showUnits", true, b -> rebuild()));
-        settings.add(new CheckEntry(mindowName + ".showPowerGraphs", "@settings.coreInfo.showPowerGraphs", true, b -> rebuild()));
-        settings.add(new FieldEntry(mindowName + ".itemsMaxHeight", "@settings.coreInfo.itemsMaxHeight", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, s -> rebuild()));
-        settings.add(new FieldEntry(mindowName + ".unitsMaxHeight", "@settings.coreInfo.unitsMaxHeight", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, s -> rebuild()));
+        settings.checkPref("showCoreItems", true, b -> rebuild());
+        settings.checkPref("showUnits", true, b -> rebuild());
+        settings.checkPref("showPowerGraphs", true, b -> rebuild());
+        settings.textPref("itemsMaxHeight", String.valueOf(150), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, s -> rebuild());
+        settings.textPref("unitsMaxHeight", String.valueOf(200), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, s -> rebuild());
     }
 
     public @Nullable PopupTable getItemChart(Item item){

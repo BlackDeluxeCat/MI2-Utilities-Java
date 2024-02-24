@@ -74,7 +74,7 @@ public class LogicHelperMindow extends Mindow2{
                 Core.scene.addListener(new InputListener(){
                     @Override
                     public boolean keyDown(InputEvent event, KeyCode keycode){
-                        if(field != null && keycode == KeyCode.tab && MI2USettings.getBool(mindowName + ".autocomplete", true)){
+                        if(field != null && keycode == KeyCode.tab && settings.getBool("autocomplete")){
                             if(hasKey){
                                 field.setFocusTraversal(false);
                                 Core.scene.setKeyboardFocus(field);
@@ -218,7 +218,7 @@ public class LogicHelperMindow extends Mindow2{
                 });
             }
         };
-        if(MI2USettings.getBool(mindowName + ".autocomplete", true)) autoFillVarTable.popup(Align.topLeft);
+        if(settings.getBool("autocomplete")) autoFillVarTable.popup(Align.topLeft);
 
         varsBaseTable = new Table();
         varsTable = new Table();
@@ -230,7 +230,7 @@ public class LogicHelperMindow extends Mindow2{
             setupSearchMode(searchBaseTable);
             setupCutPasteMode(cutPasteBaseTable);
             setupBackupMode(backupTable);
-            split = MI2USettings.getStr(mindowName + ".split", ".");
+            split = settings.getStr("split");
         });
 
         titlePane.table(tt -> {
@@ -268,12 +268,11 @@ public class LogicHelperMindow extends Mindow2{
     @Override
     public void initSettings(){
         super.initSettings();
-        settings.add(new MI2USettings.CheckEntry(mindowName + ".autocomplete", "@settings.logicHelper.autocomplete", true, b -> {
+        settings.checkPref("autocomplete", true, b -> {
             if(b) autoFillVarTable.popup();
             else autoFillVarTable.hide();
-        }));
-
-        settings.add(new MI2USettings.FieldEntry(mindowName + ".split", "@logicHelper.splitField.msg", "", null, null, s -> split = s));
+        });
+        settings.textPref("split", "", s -> split = s);
     }
 
     public void setTargetDialog(LogicDialog ld){
@@ -566,7 +565,7 @@ public class LogicHelperMindow extends Mindow2{
             t.table(tt -> {
                 tt.field(split, Styles.nodeField, s -> {
                     split = s;
-                    MI2USettings.putStr(mindowName + ".split", s);
+                    settings.putString("split", s);
                     rebuildVars(varsTable);
                 }).growX().with(f -> {
                     f.setMessageText("@logicHelper.splitField.msg");
@@ -574,8 +573,9 @@ public class LogicHelperMindow extends Mindow2{
                         if(!f.getText().equals(split)) f.setText(split);
                     });
                 }).minWidth(48f);
-
-                tt.add(((MI2USettings.CheckEntry)MI2USettings.getEntry(mindowName + ".autocomplete")).newTextButton("@settings.logicHelper.autocomplete")).minSize(32f);
+                if(settings.getSetting("autocomplete") instanceof SettingHandler.CheckSetting cs){
+                    tt.add(cs.miniButton()).minSize(32f);
+                }
             });
 
             t.row();

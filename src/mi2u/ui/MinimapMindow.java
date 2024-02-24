@@ -9,27 +9,24 @@ import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.*;
 import arc.scene.event.*;
-import arc.scene.ui.TextField;
+import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.pooling.*;
 import mi2u.*;
-import mi2u.game.*;
-import mi2u.input.InputOverwrite;
+import mi2u.input.*;
 import mi2u.io.*;
-import mi2u.io.MI2USettings.*;
-import mi2u.struct.*;
 import mi2u.ui.elements.*;
 import mindustry.core.*;
-import mindustry.game.EventType;
+import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.input.*;
 import mindustry.ui.*;
-import mindustry.world.Tile;
+import mindustry.world.*;
 
-import static mi2u.MI2UVars.titleButtonSize;
+import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
 
 public class MinimapMindow extends Mindow2{
@@ -55,27 +52,25 @@ public class MinimapMindow extends Mindow2{
             BuildingStatsPopup.popNew(e.tile.build);
         });
 
+        m.drawLabel = settings.getBool("drawLabel");
+        m.drawSpawn = settings.getBool("drawSpawn");
+        m.drawFog = settings.getBool("drawFog");
+        m.drawIndicator = settings.getBool("drawIndicator");
+        m.drawObjective = settings.getBool("drawObjective");
+        m.drawUnitColorDifference = settings.getInt("drawUnitColorDiff") / 100f;
+        m.drawUnitOutline = settings.getInt("drawUnitOutline") / 100f;
+
         buttons = new PopupTable();
         buttons.update(() -> buttons.hideWithoutFocusOn(this, buttons));
+        buttons.defaults().height(32f).minWidth(100f).fillX();
+        buttons.touchable = Touchable.enabled;
 
-        //ewwww
-        Events.on(MI2UEvents.FinishSettingInitEvent.class, e -> {
-            m.drawLabel = MI2USettings.getBool(mindowName + ".drawLabel", false);
-            m.drawSpawn = MI2USettings.getBool(mindowName + ".drawSpawn", true);
-            m.drawFog = MI2USettings.getBool(mindowName + ".drawFog", true);
-            m.drawIndicator = MI2USettings.getBool(mindowName + ".drawIndicator", true);
-            m.drawObjective = MI2USettings.getBool(mindowName + ".drawObjective", true);
-            m.drawUnitColorDifference = MI2USettings.getInt(mindowName + ".drawUnitColorDiff", 90) / 100f;
-            m.drawUnitOutline = MI2USettings.getInt(mindowName + ".drawUnitOutline", 0) / 100f;
+        if(settings.getSetting("drawLabel") instanceof SettingHandler.CheckSetting ce) buttons.add(ce.miniButton()).row();
+        if(settings.getSetting("drawSpawn") instanceof SettingHandler.CheckSetting ce) buttons.add(ce.miniButton()).row();
+        if(settings.getSetting("drawFog") instanceof SettingHandler.CheckSetting ce) buttons.add(ce.miniButton()).row();
+        if(settings.getSetting("drawIndicator") instanceof SettingHandler.CheckSetting ce) buttons.add(ce.miniButton()).row();
+        if(settings.getSetting("drawObjective") instanceof SettingHandler.CheckSetting ce) buttons.add(ce.miniButton()).row();
 
-            buttons.defaults().height(32f).minWidth(100f).fillX();
-            if(MI2USettings.getEntry(mindowName + ".drawLabel") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawLabel")).row();
-            if(MI2USettings.getEntry(mindowName + ".drawSpawn") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawSpawn")).row();
-            if(MI2USettings.getEntry(mindowName + ".drawFog") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawFog")).row();
-            if(MI2USettings.getEntry(mindowName + ".drawIndicator") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawIndicator")).row();
-            if(MI2USettings.getEntry(mindowName + ".drawObjective") instanceof CheckEntry ce) buttons.add(ce.newTextButton("@settings.mindowMap.drawObjective")).row();
-            buttons.touchable = Touchable.enabled;
-        });
 
         Events.on(EventType.WorldLoadEvent.class, e -> {
             m.setZoom(m.zoom);
@@ -128,7 +123,7 @@ public class MinimapMindow extends Mindow2{
     @Override
     public void setupCont(Table cont){
         cont.clear();
-        int size = MI2USettings.getInt(mindowName + ".size", 140);
+        int size = settings.getInt("size");
         m.setMapSize(size);
         cont.add(m);
     }
@@ -136,20 +131,20 @@ public class MinimapMindow extends Mindow2{
     @Override
     public void initSettings(){
         super.initSettings();
-        settings.add(new CheckEntry(mindowName + ".drawLabel", "@settings.mindowMap.drawLabel", false, b -> m.drawLabel = b));
-        settings.add(new CheckEntry(mindowName + ".drawSpawn", "@settings.mindowMap.drawSpawn", true, b -> m.drawSpawn = b));
-        settings.add(new CheckEntry(mindowName + ".drawFog", "@settings.mindowMap.drawFog", true, b -> m.drawFog = b));
-        settings.add(new CheckEntry(mindowName + ".drawIndicator", "@settings.mindowMap.drawIndicator", true, b -> m.drawIndicator = b));
-        settings.add(new CheckEntry(mindowName + ".drawObjective", "@settings.mindowMap.drawObjective", true, b -> m.drawObjective = b));
-        settings.add(new FieldEntry(mindowName + ".size", "@settings.mindowMap.size", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 3200, s -> rebuild()));
-        settings.add(new FieldEntry(mindowName + ".drawUnitColorDiff", "@settings.mindowMap.drawUnitColorDiff", String.valueOf(10), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 0 && Strings.parseInt(s) <= 100, s -> m.drawUnitColorDifference = MI2USettings.getInt(mindowName + ".drawUnitColorDiff", 90) / 100f));
-        settings.add(new FieldEntry(mindowName + ".drawUnitOutline", "@settings.mindowMap.drawUnitOutline", String.valueOf(0), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 0 && Strings.parseInt(s) <= 100, s -> m.drawUnitOutline = MI2USettings.getInt(mindowName + ".drawUnitOutline", 90) / 100f));
+        settings.checkPref("drawLabel", false, b -> m.drawLabel = b);
+        settings.checkPref("drawSpawn", true, b -> m.drawSpawn = b);
+        settings.checkPref("drawFog", true, b -> m.drawFog = b);
+        settings.checkPref("drawIndicator", true, b -> m.drawIndicator = b);
+        settings.checkPref("drawObjective", true, b -> m.drawObjective = b);
+        settings.textPref("size", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 3200, s -> rebuild());
+        settings.textPref("drawUnitColorDiff", String.valueOf(10), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 0 && Strings.parseInt(s) <= 100, s -> m.drawUnitColorDifference = Strings.parseInt(s) / 100f);
+        settings.textPref("drawUnitOutline", String.valueOf(10), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 0 && Strings.parseInt(s) <= 100, s -> m.drawUnitOutline = Strings.parseInt(s) / 100f);
     }
 
     @Override
     public boolean loadUISettingsRaw(){
         if(!super.loadUISettingsRaw()) return false;
-        int size = MI2USettings.getInt(mindowName + ".size");
+        int size = settings.getInt("size");
         m.setMapSize(size);
         rebuild();
         return true;

@@ -10,12 +10,12 @@ import arc.util.*;
 import mi2u.*;
 import mi2u.game.*;
 import mi2u.input.*;
-import mi2u.io.*;
-import mi2u.io.MI2USettings.*;
+import mi2u.io.SettingHandler.*;
 import mi2u.ui.elements.*;
 import mindustry.*;
 import mindustry.game.*;
 import mindustry.gen.*;
+import mindustry.input.*;
 import mindustry.ui.*;
 import mindustry.world.blocks.*;
 
@@ -44,7 +44,7 @@ public class MI2UI extends Mindow2{
                 lastRealRun = Time.millis();
                 lastRunTime = Time.millis();
 
-                if(state.rules.mode() == Gamemode.sandbox && !net.active() && state.isGame() && !state.isPaused() && player.unit() != null && control.input.isBuilding && MI2USettings.getBool("instantBuild", true)){
+                if(state.rules.mode() == Gamemode.sandbox && !net.active() && state.isGame() && !state.isPaused() && player.unit() != null && control.input.isBuilding && settings.getBool("instantBuild")){
                     player.unit().plans.each(bp -> {
                         var tile = world.tiles.getc(bp.x, bp.y);
                         if(bp.breaking){
@@ -195,26 +195,26 @@ public class MI2UI extends Mindow2{
         Events.on(MI2UEvents.FinishSettingInitEvent.class, e -> {
             set.table(t -> {
                 t.defaults().minWidth(16f);
-                if(MI2USettings.getEntry("disableWreck") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.teamDerelict));
-                if(MI2USettings.getEntry("disableUnit") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.cancel + Iconc.unitGamma));
-                if(MI2USettings.getEntry("disableBullet") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.cancel + Iconc.unitScatheMissile));
-                if(MI2USettings.getEntry("disableBuilding") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.cancel + Iconc.blockDuo));
+                if(settings.getSetting("disableWreck") instanceof CheckSetting ce) t.add(ce.miniButton());
+                if(settings.getSetting("disableUnit") instanceof CheckSetting ce) t.add(ce.miniButton());
+                if(settings.getSetting("disableBullet") instanceof CheckSetting ce) t.add(ce.miniButton());
+                if(settings.getSetting("disableBuilding") instanceof CheckSetting ce) t.add(ce.miniButton());
                 t.row();
-                if(MI2USettings.getEntry("enUnitHpBar") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.defense + Iconc.unitDagger));
-                if(MI2USettings.getEntry("enBlockHpBar") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.defense + Iconc.blockDuo));
-                if(MI2USettings.getEntry("enUnitLogic") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.units + Iconc.blockLogicProcessor));
-                if(MI2USettings.getEntry("enUnitHitbox") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.units + Iconc.box));
-                if(MI2USettings.getEntry("enUnitPath") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.teamCrux + Iconc.planet));
+                if(settings.getSetting("enUnitHpBar") instanceof CheckSetting ce) t.add(ce.miniButton());
+                if(settings.getSetting("enBlockHpBar") instanceof CheckSetting ce) t.add(ce.miniButton());
+                if(settings.getSetting("enUnitLogic") instanceof CheckSetting ce) t.add(ce.miniButton());
+                if(settings.getSetting("enUnitHitbox") instanceof CheckSetting ce) t.add(ce.miniButton());
+                if(settings.getSetting("enUnitPath") instanceof CheckSetting ce) t.add(ce.miniButton());
             }).growX();
 
             set.row();
             set.table(t -> {
                 t.defaults().minSize(16f);
-                if(MI2USettings.getEntry("enDistributionReveal") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.zoom + Iconc.blockJunction));
-                if(MI2USettings.getEntry("drevealBridge") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.blockBridgeConveyor));
-                if(MI2USettings.getEntry("drevealJunction") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.blockJunction));
-                if(MI2USettings.getEntry("drevealUnloader") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.blockUnloader));
-                if(MI2USettings.getEntry("drevealInventory") instanceof CheckEntry ce) t.add(ce.newTextButton("" + Iconc.blockVault));
+                if(settings.getSetting("enDistributionReveal") instanceof CheckSetting ce) t.add(ce.miniButton());
+                if(settings.getSetting("drevealBridge") instanceof CheckSetting ce) t.add(ce.miniButton());
+                if(settings.getSetting("drevealJunction") instanceof CheckSetting ce) t.add(ce.miniButton());
+                if(settings.getSetting("drevealUnloader") instanceof CheckSetting ce) t.add(ce.miniButton());
+                if(settings.getSetting("drevealInventory") instanceof CheckSetting ce) t.add(ce.miniButton());
             });
         });
 
@@ -269,124 +269,80 @@ public class MI2UI extends Mindow2{
     public void initSettings(){
         super.initSettings();
 
-        settings.add(new CheckEntry("showEmojis", "@settings.main.emoji", false, b -> emojis.addTo(b?Core.scene.root:null)));
-        settings.add(new CheckEntry("showCoreInfo", "@settings.main.coreInfo", false, b -> coreInfo.addTo(b?Core.scene.root:null)));
-        settings.add(new CheckEntry("showMindowMap", "@settings.main.mindowMap", false, b -> mindowmap.addTo(b?Core.scene.root:null)));
-        settings.add(new CheckEntry("showLogicHelper", "@settings.main.logicHelper", true, b -> logicHelper.addTo(b?Vars.ui.logic:null)));
+        settings.title("graphics.ui");
 
-        settings.add(new CheckEntry("enPlayerCursor", "@settings.main.playerCursor", true, null));
-        settings.add(new CheckEntry("enOverdriveZone", "@settings.main.overdriveZone", false, null));
-        settings.add(new CheckEntry("enMenderZone", "@settings.main.menderZone", false, null));
-        settings.add(new CheckEntry("enSpawnZone", "@settings.main.spawnZone", true, null));
+        settings.checkPref("showEmojis", false, b -> emojis.addTo(b ? Core.scene.root:null));
+        settings.checkPref("showCoreInfo", false, b -> coreInfo.addTo(b ? Core.scene.root:null));
+        settings.checkPref("showMindowMap", false, b -> mindowmap.addTo(b ? Core.scene.root:null));
+        settings.checkPref("showLogicHelper", false, b -> logicHelper.addTo(b ? ui.logic:null));
 
-        settings.add(new CollapseGroupEntry("DistributionReveal", ""){
-            CheckEntry check1 = new CheckEntry("enDistributionReveal", "@settings.main.distributionReveal", true, null);
-            CheckEntry check2 = new CheckEntry("drevealBridge", "@settings.main.dreveal.bridge", true, null);
-            CheckEntry check3 = new CheckEntry("drevealJunction", "@settings.main.dreveal.junction", true, null);
-            CheckEntry check4 = new CheckEntry("drevealUnloader", "@settings.main.dreveal.unloader", true, null);
-            CheckEntry check5 = new CheckEntry("drevealInventory", "@settings.main.dreveal.inventory", true, null);
-            {
-                collapsep = () -> !check1.value;
-                headBuilder = t -> check1.build(t);
-                builder = t -> {
-                    check2.build(t);
-                    t.row();
-                    check3.build(t);
-                    t.row();
-                    check4.build(t);
-                    t.row();
-                    check5.build(t);
-                };
+        settings.title("graphics.zone");
+
+        settings.checkPref("enPlayerCursor", true);
+        settings.checkPref("enOverdriveZone", false).tag(false, false, true);
+        settings.checkPref("enMenderZone", false).tag(false, false, true);
+        settings.checkPref("enSpawnZone", true);
+        settings.checkPref("enTurretRangeZone", false);
+        settings.checkPref("enUnitRangeZone", false);
+
+        settings.title("graphics.distributionReveal");
+
+        settings.checkPref("enDistributionReveal", true);
+        settings.checkPref("drevealBridge", true);
+        settings.checkPref("drevealJunction", true);
+        settings.checkPref("drevealUnloader", true);
+        settings.checkPref("drevealInventory", false).tag(false, false, true);
+
+        settings.title("graphics.overlay");
+
+        settings.checkPref("enBlockHpBar", true).tag(false, false, true);
+        settings.checkPref("enUnitHpBar", true).tag(false, false, true);
+        settings.checkPref("unitHpBarDamagedOnly", true);
+        settings.sliderPref("unitHpBarStyle", 0, 0, 1, 1, s -> {
+            if(s == 0) return "x[accent][[i]";
+            return "三";
+        });
+        settings.checkPref("enUnitHitbox", false).tag(false, false, true);
+        settings.checkPref("enUnitLogic", false).tag(false, false, true);
+        settings.checkPref("enUnitPath", false).tag(false, false, true);
+        settings.textPref("enUnitPath.length", String.valueOf(60), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 10 && Strings.parseInt(s) <= 300, null).tag(false, false, true);
+
+        settings.title("graphics.drawGroups");
+        settings.checkPref("disableWreck", false);
+        settings.checkPref("disableUnit", false);
+        settings.checkPref("disableBullet", false);
+        settings.checkPref("disableBuilding", false);
+
+        settings.title("game.speedctrl");
+
+        settings.textPref("speedctrl.basefps", String.valueOf(60), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 10 && Strings.parseInt(s) <= 600, null);
+        settings.sliderPref("speedctrl.cutoff", 1, 0, 5, 1, s -> s + "fps");
+
+        settings.title("input");
+
+        settings.checkPref("instantBuild", false);
+        settings.sliderPref("rtsFormDoubleTap", 300, 25, 1000, 25, s -> s + "ms");
+        settings.checkPref("inputReplace", true, b -> {
+            if(b){
+                control.setInput(mobile ? MobileInputExt.mobileExt : DesktopInputExt.desktopExt);
+            }else{
+                control.setInput(mobile ? new MobileInput() : new DesktopInput());
             }
         });
+        settings.checkPref("forceTapTile", false);
+        settings.checkPref("edgePanning", false);
 
-        settings.add(new CheckEntry("enBlockHpBar", "@settings.main.blockHpBar", false, null));
-        settings.add(new CheckEntry("enTurretZone", "@settings.main.enTurretZone", false, null));
-        settings.add(new CheckEntry("enUnitHpBar", "@settings.main.unitHpBar", false, null));
-        settings.add(new ChooseEntry("unitHpBarStyle", "@settings.main.unitHpBarStyle", new String[]{"1", "2"}, str -> str.equals("1") ? "三" : "x[accent][[i]", null));
-        settings.add(new CheckEntry("enUnitHpBarDamagedOnly", "@settings.main.unitHpBarDamagedOnly", true, null));
-        settings.add(new CheckEntry("enUnitHitbox", "@settings.main.unitHitbox", false, null));
-        settings.add(new CheckEntry("enUnitLogic", "@settings.main.unitLogic", false, null));
-        settings.add(new CheckEntry("enUnitPath", "@settings.main.unitPath", false, null));
-        settings.add(new FieldEntry("enUnitPath.length", "@settings.main.enUnitPath.length", String.valueOf(40), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 10 && Strings.parseInt(s) <= 300, null));
-        settings.add(new CheckEntry("enUnitRangeZone", "@settings.main.enUnitRangeZone", false, null));
+        settings.title("modify");
 
-        settings.add(new CheckEntry("disableWreck", "@settings.main.disableWreck", false, null));
-        settings.add(new CheckEntry("disableUnit", "@settings.main.disableUnit", false, null));
-        settings.add(new CheckEntry("disableBullet", "@settings.main.disableBullet", false, null));
-        settings.add(new CheckEntry("disableBuilding", "@settings.main.disableBuilding", false, null));
+        settings.sliderPref("blockSelectTableHeight", 194, 94, 794, 4, s -> s == 194 ? "default":String.valueOf(s));
+        settings.checkPref("modifyBlockBars", false);
+        settings.checkPref("replaceTopTable", false);
+        settings.checkPref("modTopTableFollowMouse", false);
+        settings.sliderPref("maxSchematicSize", 64, 32, 1024, 16, s -> String.valueOf(s), s -> Vars.maxSchematicSize = s);
+        settings.textPref("maxSchematicSize", String.valueOf(64), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 16 && Strings.parseInt(s) <= 1919810, s -> Vars.maxSchematicSize = Strings.parseInt(s));
+        settings.textPref("maxZoom", String.valueOf(renderer.maxZoom), TextField.TextFieldFilter.floatsOnly, s -> Strings.parseFloat(s) > renderer.minZoom && Strings.parseFloat(s) <= 100, s -> renderer.maxZoom = Strings.parseFloat(s));
+        settings.textPref("minZoom", String.valueOf(renderer.minZoom), TextField.TextFieldFilter.floatsOnly, s -> Strings.parseFloat(s) < renderer.maxZoom && Strings.parseFloat(s) > 0.01f, s -> renderer.minZoom = Strings.parseFloat(s));
 
-        settings.add(new CollapseGroupEntry("SpeedController", ""){
-            FieldEntry field1 = new FieldEntry("speedctrl.basefps", "@settings.main.speedctrl.basefps", String.valueOf(60), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 10 && Strings.parseInt(s) <= 600, null);
-            ChooseEntry choose3 = new ChooseEntry("speedctrl.cutoff", "@settings.main.speedctrl.cutoff", new String[]{"25","50", "100", "200", "300"}, s -> String.valueOf(Strings.parseInt(s)/100f), null);
-            {
-                setDefaultHeader("@settings.main.speedctrl");
-                builder = t -> {
-                    field1.build(t);
-                    t.row();
-                    choose3.build(t);
-                };
-            }
-        });
-
-        settings.add(new CollapseGroupEntry("InputExtension", ""){
-            CheckEntry check1 = new CheckEntry("inputReplace", "@settings.main.inputReplace", false, b -> {
-                if(b){
-                    if(Vars.mobile){
-                        MobileInputExt.mobileExt.replaceInput();
-                    }else{
-                        DesktopInputExt.desktopExt.replaceInput();
-                    }
-                }
-            });
-            CheckEntry check2 = new CheckEntry("forceTapTile", "@settings.main.forceTapTile", false, null);
-            CheckEntry check3 = new CheckEntry("edgePanning", "@settings.main.edgePanning", true, null);
-            {
-                collapsep = () -> !check1.value;
-                headBuilder = t -> check1.build(t);
-                builder = t -> {
-                    check2.build(t);
-                    t.row();
-                    if(!Vars.mobile) check3.build(t);
-                };
-            }
-        });
-
-        settings.add(new CheckEntry("instantBuild", "@settings.main.instantBuild", true, null));
-
-        settings.add(new CollapseGroupEntry("BlockSelectTable", ""){
-            CheckEntry check1 = new CheckEntry("modifyBlockSelectTable", "@settings.main.modifyBlockSelectTable", false, null);
-            FieldEntry check2 = new FieldEntry("blockSelectTableHeight", "@settings.main.blockSelectTableHeight", String.valueOf(194), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 1000, null);
-            {
-                collapsep = () -> !check1.value;
-                headBuilder = t -> check1.build(t);
-                builder = t -> check2.build(t);
-            }
-        });
-
-        settings.add(new FieldEntry("rtsFormDoubleTap", "@settings.main.rtsFormDoubleTap", "300", TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) > 0, s -> RtsCommand.doubleTapInterval = Strings.parseInt(s)));
-
-        settings.add(new CheckEntry("modifyBlockBars", "@settings.main.modifyBlockBars", false, null));
-        settings.add(new CollapseGroupEntry("HoverTableExtension", ""){
-            CheckEntry check1 = new CheckEntry("modifyTopTable", "@settings.main.modifyTopTable", false, null);
-            CheckEntry check2 = new CheckEntry("topTableFollowMouse", "@settings.main.topTableFollowMouse", false, null);
-            {
-                collapsep = () -> !check1.value;
-                headBuilder = t -> check1.build(t);
-                builder = t -> check2.build(t);
-            }
-        });
-
-        settings.add(new CheckEntry("enableUpdate", "@settings.main.enableUpdate", true, b -> {
-            if(b) MI2Utilities.checkUpdate();
-        }));
-
-        settings.add(new FieldEntry("maxSchematicSize", "@settings.main.maxSchematicSize", String.valueOf(64), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 16 && Strings.parseInt(s) <= 1919810, s -> Vars.maxSchematicSize = Mathf.clamp(Strings.parseInt(s), 16, 1919810)));
-
-        //zoom in
-        settings.add(new FieldEntry("maxZoom", "@settings.main.maxZoom", String.valueOf(renderer.maxZoom), TextField.TextFieldFilter.floatsOnly, s -> Strings.parseFloat(s) > renderer.minZoom && Strings.parseFloat(s) <= 100, s -> renderer.maxZoom = Strings.parseFloat(s)));
-
-        //zoom out
-        settings.add(new FieldEntry("minZoom", "@settings.main.minZoom", String.valueOf(renderer.minZoom), TextField.TextFieldFilter.floatsOnly, s -> Strings.parseFloat(s) < renderer.maxZoom && Strings.parseFloat(s) > 0.01f, s -> renderer.minZoom = Strings.parseFloat(s)));
+        settings.checkPref("enableUpdate", true);
     }
 }
