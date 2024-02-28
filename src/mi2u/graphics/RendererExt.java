@@ -197,8 +197,7 @@ public class RendererExt{
             if(tmpRect.contains(v.x, v.y) && !tmpRect.contains(unit.x, unit.y)){
                 Draw.z(Layer.playerName);
 
-                if(!unit.getPlayer().isLocal()){
-                    Player p = unit.getPlayer();
+                if(!player.isLocal()){
                     Font font = Fonts.def;
                     GlyphLayout layout = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
                     final float nameHeight = 6f;
@@ -206,19 +205,19 @@ public class RendererExt{
                     boolean ints = font.usesIntegerPositions();
                     font.setUseIntegerPositions(false);
                     font.getData().setScale(0.25f / Scl.scl(1f));
-                    layout.setText(font, p.name);
+                    layout.setText(font, player.name);
 
                     Draw.color(unit.team.color, 0.3f);
                     Fill.rect(v.x, v.y + nameHeight - layout.height / 2, layout.width + 2, layout.height + 3);
                     Draw.color();
-                    font.setColor(p.color);
-                    font.draw(p.name, v.x, v.y + nameHeight, 0, Align.center, false);
+                    font.setColor(player.color);
+                    font.draw(player.name, v.x, v.y + nameHeight, 0, Align.center, false);
 
-                    if(p.admin){
+                    if(player.admin){
                         float s = 3f;
-                        Draw.color(p.color.r * 0.5f, p.color.g * 0.5f, p.color.b * 0.5f, 1f);
+                        Draw.color(player.color.r * 0.5f, player.color.g * 0.5f, player.color.b * 0.5f, 1f);
                         Draw.rect(Icon.adminSmall.getRegion(), v.x + layout.width / 2f + 2 + 1, v.y + nameHeight - 1.5f, s, s);
-                        Draw.color(p.color);
+                        Draw.color(player.color);
                         Draw.rect(Icon.adminSmall.getRegion(), v.x + layout.width / 2f + 2 + 1, v.y + nameHeight - 1f, s, s);
                     }
 
