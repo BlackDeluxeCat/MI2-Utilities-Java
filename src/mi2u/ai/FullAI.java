@@ -62,7 +62,7 @@ public class FullAI extends AIController{
 
     @Override
     public void updateUnit(){
-        if(!(control.input instanceof InputOverwrite) && MI2USettings.getBool("inputReplace", true)) {
+        if(!(control.input instanceof InputOverwrite) && mi2ui.settings.getBool("inputReplace")) {
             if(mobile){
                 MobileInputExt.mobileExt.replaceInput();
             }else{
@@ -493,7 +493,7 @@ public class FullAI extends AIController{
             bimg = Core.atlas.drawable("mi2-utilities-java-ui-customai");
 
             Events.on(MI2UEvents.FinishSettingInitEvent.class, e -> {
-                LogicMode.logicMode.codes = MI2USettings.getJson("ai.logic.codes", Seq.class, LogicModeCode.class, () -> Seq.with(new LogicModeCode("" + Iconc.edit + Iconc.map, "jump 26 strictEqual init 2\n" +
+                LogicMode.logicMode.codes = Core.settings.getJson("ai.logic.codes", Seq.class, LogicModeCode.class, () -> Seq.with(new LogicModeCode("" + Iconc.edit + Iconc.map, "jump 26 strictEqual init 2\n" +
                         "set brush.size 2\n" +
                         "set floor @air\n" +
                         "set ore @air\n" +
@@ -553,15 +553,7 @@ public class FullAI extends AIController{
                         "jump 47 lessThan y y.max\n" +
                         "setrate ipt\n" +
                         "jump 45 lessThan x x.max\n")));
-                //old version support
-                if(MI2USettings.getSetting("ai.logic.code.0") != null){
-                    MI2USettings.map.remove("ai.logic.code.0");
-                    var old = new LogicModeCode("old", MI2USettings.getStr("ai.logic.code.0"));
-                    codes.add(old);
-                    code = old;
-                }else{
-                    code = codes.first();
-                }
+                code = codes.first();
                 readCode(code.value);
             });
 
@@ -719,7 +711,7 @@ public class FullAI extends AIController{
         }
 
         public void saveCodes(){
-            MI2USettings.putJson("ai.logic.codes", codes, Seq.class, LogicModeCode.class);
+            Core.settings.putJson("ai.logic.codes", LogicModeCode.class, codes);
         }
 
         public void readCode(String str){

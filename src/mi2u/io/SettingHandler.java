@@ -34,7 +34,7 @@ public class SettingHandler{
     public void rebuild(Table table){
         table.clearChildren();
         list.each(setting -> {
-            table.table(setting::add);
+            table.table(setting::add).growX().margin(2f);
             table.table(t -> {
                 if(setting.description != null) t.button(Icon.infoSmall, () -> {}).size(32f);
                 if(setting.restart) t.add("RS").color(Color.orange);
@@ -168,7 +168,7 @@ public class SettingHandler{
 
         @Override
         public void add(Table table){
-            table.add(name).growX().color(Pal.accent).style(Styles.outlineLabel).row();
+            table.add(name).growX().color(Pal.accent).style(Styles.outlineLabel).padTop(12f).row();
             table.image().growX().height(2f).color(Pal.accent);
         }
     }
@@ -197,7 +197,7 @@ public class SettingHandler{
 
             box.left();
 
-            table.add(box).left().padTop(3f);
+            table.add(box).growX().left().padTop(3f);
         }
 
         public TextButton miniButton(){
@@ -250,7 +250,7 @@ public class SettingHandler{
 
             slider.change();
 
-            table.stack(slider, content).width(Math.min(Core.graphics.getWidth() / 1.2f, 460f)).left().padTop(4f);
+            table.stack(slider, content).growX().padTop(4f);
         }
     }
 
@@ -303,6 +303,7 @@ public class SettingHandler{
         Cons<String> changed;
         @Nullable TextField.TextFieldFilter filter;
         @Nullable TextField.TextFieldValidator validator;
+        Func<String, Object> parser;
 
         public TextFieldSetting(String name, String def, TextField.TextFieldFilter filter, TextField.TextFieldValidator validator, Cons<String> changed){
             super(name);
@@ -314,18 +315,25 @@ public class SettingHandler{
 
         @Override
         public void add(Table table){
-            table.field(settings.getString(name, def), Styles.nodeField, str -> {
+            table.add(title).growX();
+
+            table.field(String.valueOf(settings.get(name, def)), Styles.nodeField, str -> {
                 if(validator != null && !validator.valid(str)) return;
-                settings.put(name, str);
+                settings.put(name, parser != null ? parser.get(str) : str);
                 if(changed != null) changed.get(str);
             }).with(tf -> {
                 tf.setValidator(validator);
                 tf.setFilter(filter);
             }).width(150f).right().update(tf -> {
-                if(!tf.hasKeyboard()) tf.setText(settings.getString(name, def));
+                if(!tf.hasKeyboard()) tf.setText(String.valueOf(settings.get(name, def)));
             });
-
-            table.add(title).growX();
         }
+
+        public TextFieldSetting setParser(Func<String, Object> parser){
+            this.parser = parser;
+            return this;
+        }
+
+        public static Func<String, Object> intParser = Strings::parseInt, floatParser = Strings::parseFloat, boolParser = s -> s.equals("true");
     }
 }

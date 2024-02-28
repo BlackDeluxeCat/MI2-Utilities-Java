@@ -32,6 +32,7 @@ import mindustry.world.blocks.units.*;
 
 import java.lang.reflect.*;
 
+import static mi2u.MI2UVars.mi2ui;
 import static mindustry.Vars.*;
 
 /**
@@ -48,7 +49,7 @@ public class RendererExt{
             lexecTimer = MI2Utils.getField(LExecutor.class, "unitTimeouts");
 
     public static boolean animatedshields;
-    public static String unitHpBarStyle;
+    public static int unitHpBarStyle;
     public static boolean enPlayerCursor, enUnitHitbox, enUnitHpBar, enUnitHpBarDamagedOnly, enUnitRangeZone, enOverdriveZone, enMenderZone, enTurretZone, enBlockHpBar, enDistributionReveal, drevealBridge, drevealJunction, drevealUnloader, drevealInventory, enSpawnZone, disableWreck, disableUnit, disableBuilding, disableBullet, shadow;
 
     public static void initBase(){
@@ -66,35 +67,35 @@ public class RendererExt{
         });
 
         Events.run(EventType.Trigger.drawOver, () -> {
-            if(MI2USettings.getBool("forceTapTile", false)) forceDrawSelect();
+            if(mi2ui.settings.getBool("forceTapTile")) forceDrawSelect();
         });
     }
 
     public static void updateSettings(){
         animatedshields = Core.settings.getBool("animatedshields");
 
-        unitHpBarStyle = MI2USettings.getStr("unitHpBarStyle", "2");
+        unitHpBarStyle = mi2ui.settings.getInt("unitHpBarStyle");
 
-        enPlayerCursor = MI2USettings.getBool("enPlayerCursor", false);
-        enUnitHitbox = MI2USettings.getBool("enUnitHitbox");
-        enUnitHpBar = MI2USettings.getBool("enUnitHpBar");
-        enUnitHpBarDamagedOnly = MI2USettings.getBool("enUnitHpBarDamagedOnly");
-        enUnitRangeZone = MI2USettings.getBool("enUnitRangeZone", false);
-        enOverdriveZone = MI2USettings.getBool("enOverdriveZone", false);
-        enMenderZone = MI2USettings.getBool("enMenderZone", false);
-        enTurretZone = MI2USettings.getBool("enTurretZone", false);
-        enBlockHpBar = MI2USettings.getBool("enBlockHpBar", true);
-        enDistributionReveal = MI2USettings.getBool("enDistributionReveal", false);
-        drevealBridge = MI2USettings.getBool("drevealBridge", true);
-        drevealJunction = MI2USettings.getBool("drevealJunction", true);
-        drevealUnloader = MI2USettings.getBool("drevealUnloader", true);
-        drevealInventory = MI2USettings.getBool("drevealInventory", true);
-        enSpawnZone = MI2USettings.getBool("enSpawnZone", true);
-        disableWreck = MI2USettings.getBool("disableWreck", false);
-        disableUnit = MI2USettings.getBool("disableUnit", false);
-        disableBuilding = MI2USettings.getBool("disableBuilding", false);
-        disableBullet = MI2USettings.getBool("disableBullet", false);
-        shadow = MI2USettings.getBool("shadow", false);
+        enPlayerCursor = mi2ui.settings.getBool("enPlayerCursor");
+        enUnitHitbox = mi2ui.settings.getBool("enUnitHitbox");
+        enUnitHpBar = mi2ui.settings.getBool("enUnitHpBar");
+        enUnitHpBarDamagedOnly = mi2ui.settings.getBool("enUnitHpBarDamagedOnly");
+        enUnitRangeZone = mi2ui.settings.getBool("enUnitRangeZone");
+        enOverdriveZone = mi2ui.settings.getBool("enOverdriveZone");
+        enMenderZone = mi2ui.settings.getBool("enMenderZone");
+        enTurretZone = mi2ui.settings.getBool("enTurretRangeZone");
+        enBlockHpBar = mi2ui.settings.getBool("enBlockHpBar");
+        enDistributionReveal = mi2ui.settings.getBool("enDistributionReveal");
+        drevealBridge = mi2ui.settings.getBool("drevealBridge");
+        drevealJunction = mi2ui.settings.getBool("drevealJunction");
+        drevealUnloader = mi2ui.settings.getBool("drevealUnloader");
+        drevealInventory = mi2ui.settings.getBool("drevealInventory");
+        enSpawnZone = mi2ui.settings.getBool("enSpawnZone");
+        disableWreck = mi2ui.settings.getBool("disableWreck");
+        disableUnit = mi2ui.settings.getBool("disableUnit");
+        disableBuilding = mi2ui.settings.getBool("disableBuilding");
+        disableBullet = mi2ui.settings.getBool("disableBullet");
+        shadow = mi2ui.settings.getBool("shadow");
     }
 
     public static Field drawIndexUnit = MI2Utils.getField(Unit.class, "index__draw"), drawIndexDecal = MI2Utils.getField(Decal.class, "index__draw"), drawIndexBullet = MI2Utils.getField(Bullet.class, "index__draw");
@@ -255,7 +256,7 @@ public class RendererExt{
             //display logicAI info by MI2
             if(unit.controller() instanceof LogicAI logicai){
                 Draw.reset();
-                if(MI2USettings.getBool("enUnitLogic")){
+                if(mi2ui.settings.getBool("enUnitLogic")){
                     if(logicai.controller instanceof LogicBlock.LogicBuild lb && lb.executor != null){
                         Draw.color(0.2f, 1f, 0.6f, 0.3f);
                         Fill.arc(unit.x, unit.y, 6f, 1f - Mathf.clamp(logicai.controlTimer / LogicAI.logicControlTimeout), 90f, 20);
@@ -303,7 +304,7 @@ public class RendererExt{
             //v7 rts pathfind render, making your device a barbecue.
             //Pathfind Renderer
             //TODO line length limitation to prevent lagging
-            if(MI2USettings.getBool("enUnitPath")){
+            if(mi2ui.settings.getBool("enUnitPath")){
                 if(unit.isCommandable() && unit.controller() instanceof CommandAI ai && ai.targetPos != null){
                     Draw.reset();
                     Draw.z(Layer.power - 4f);
@@ -326,7 +327,7 @@ public class RendererExt{
                     Draw.reset();
                     Draw.z(Layer.power - 4f);
                     Tile tile = unit.tileOn();
-                    int max = MI2USettings.getInt("enUnitPath.length", 40);
+                    int max = mi2ui.settings.getInt("enUnitPath.length", 40);
                     for(int tileIndex = 1; tileIndex <= max; tileIndex++){
                         Tile nextTile = pathfinder.getTargetTile(tile, pathfinder.getField(unit.team, unit.pathType(), Pathfinder.fieldCore));
                         if(nextTile == null) break;
@@ -393,7 +394,7 @@ public class RendererExt{
             }
 
             if(unit.shield > 0){
-                if(unitHpBarStyle.equals("1")){
+                if(unitHpBarStyle == 1){
                     for(int didgt = 1; didgt <= Mathf.digits((int)(unit.shield / unit.maxHealth)) + 1; didgt++){
                         Draw.color(Pal.shield, 0.8f);
                         float barLength = Mathf.mod(unit.shield / unit.maxHealth, Mathf.pow(10f, (float)didgt - 1f)) / Mathf.pow(10f, (float)didgt - 1f);

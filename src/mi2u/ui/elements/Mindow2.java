@@ -44,7 +44,7 @@ public class Mindow2 extends Table{
     public String titleText, helpInfo = "", mindowName;
     protected Table titleBar = new Table(), titlePane = new Table(Styles.black6);
     protected Table cont = new Table();
-    protected SettingHandler settings;
+    public SettingHandler settings;
     protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(3);
     public int edgesnap = Align.center;
     @Nullable public Mindow2 tbSnap, lrSnap;
@@ -59,7 +59,10 @@ public class Mindow2 extends Table{
         initSettings();
         loadUISettings();
 
-        Events.on(ResizeEvent.class, e -> Time.run(60f, this::loadUISettings));
+        Events.on(ResizeEvent.class, e -> Time.run(60f, () -> {
+            this.loadUISettings();
+            this.rebuild();
+        }));
 
         titleText = title;
         Events.on(ClientLoadEvent.class, e -> {
@@ -413,7 +416,6 @@ public class Mindow2 extends Table{
 
     public void loadUISettings(){
         loadUISettingsRaw();
-        rebuild();
     }
 
     /**

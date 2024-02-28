@@ -5,6 +5,8 @@ import arc.math.Mathf;
 import arc.util.Time;
 import mi2u.io.*;
 
+import static mi2u.MI2UVars.mi2ui;
+
 public class SpeedController{
     public static float scl = 1f, rawScl = 1f, reference = 60f, min = 3f;
     public static boolean update = false, auto = true;
@@ -23,8 +25,8 @@ public class SpeedController{
         if(auto) auto();
         scl = Mathf.lerp(scl, rawScl, 0.2f);
         if(Math.abs(rawScl - scl) < 0.01f) scl = rawScl;
-        reference = Mathf.clamp(MI2USettings.getInt("speedctrl.basefps", 60), 10, 1000);
-        min = MI2USettings.getInt("speedctrl.cutoff", 300) / 100f / reference;
+        reference = Mathf.clamp(mi2ui.settings.getInt("speedctrl.basefps", 60), 10, 1000);
+        min = mi2ui.settings.getInt("speedctrl.cutoff") / reference;
         if(scl < min) scl = min;
     }
 

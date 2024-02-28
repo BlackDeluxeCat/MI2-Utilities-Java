@@ -25,6 +25,7 @@ import mindustry.world.blocks.*;
 import mindustry.world.blocks.storage.CoreBlock.*;
 
 import static mi2u.MI2UVars.*;
+import static mi2u.io.SettingHandler.TextFieldSetting.*;
 import static mindustry.Vars.*;
 
 public class CoreInfoMindow extends Mindow2{
@@ -355,8 +356,8 @@ public class CoreInfoMindow extends Mindow2{
         settings.checkPref("showCoreItems", true, b -> rebuild());
         settings.checkPref("showUnits", true, b -> rebuild());
         settings.checkPref("showPowerGraphs", true, b -> rebuild());
-        settings.textPref("itemsMaxHeight", String.valueOf(150), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, s -> rebuild());
-        settings.textPref("unitsMaxHeight", String.valueOf(200), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, s -> rebuild());
+        settings.textPref("itemsMaxHeight", String.valueOf(150), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, s -> rebuild()).setParser(intParser);
+        settings.textPref("unitsMaxHeight", String.valueOf(200), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, s -> rebuild()).setParser(intParser);
     }
 
     public @Nullable PopupTable getItemChart(Item item){

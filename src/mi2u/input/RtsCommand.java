@@ -4,7 +4,6 @@ import arc.*;
 import arc.struct.*;
 import arc.util.Time;
 import mi2u.*;
-import mi2u.io.MI2USettings;
 import mindustry.entities.*;
 import mindustry.game.EventType;
 import mindustry.gen.*;
@@ -12,6 +11,7 @@ import mindustry.input.*;
 import mindustry.world.blocks.units.*;
 import mindustry.world.meta.*;
 
+import static mi2u.MI2UVars.mi2ui;
 import static mindustry.Vars.*;
 
 public class RtsCommand{
@@ -20,7 +20,7 @@ public class RtsCommand{
 
     public static long lastCallTime;
     public static int lastCallId;
-    public static long doubleTapInterval = MI2USettings.getInt("rtsFormDoubleTap", 300);
+    public static long doubleTapInterval = mi2ui.settings.getInt("rtsFormDoubleTap", 300);
 
 
     public static boolean lowHealthBack = false;    //TODO formation auto control

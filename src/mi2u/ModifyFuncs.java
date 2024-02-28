@@ -40,7 +40,7 @@ public class ModifyFuncs{
     }
 
     public static void modifyVanillaBlockBars(){
-        if(!MI2USettings.getBool("modifyBlockBars")) return;
+        if(!mi2ui.settings.getBool("modifyBlockBars")) return;
         content.blocks().each(block -> {
             addBarToBlock(block, "health", e -> new Bar(() -> Core.bundle.format("stat.health") + ":" + Strings.autoFixed(e.health(), 3) + "(" + Strings.autoFixed(e.health * 100 / e.maxHealth, 2) + "%)", () -> Pal.health, e::healthf));
 
@@ -123,10 +123,10 @@ public class ModifyFuncs{
     }
 
     public static void betterTopTable(){
-        if(MI2USettings.getBool("modifyTopTable", false)){
+        if(mi2ui.settings.getBool("replaceTopTable")){
             Table topTable = Reflect.get(ui.hudfrag.blockfrag, "topTable");
             if(topTable == null){
-                Log.infoTag("MI2U-Modify", "failed to replace info top-table");
+                Log.infoTag("MI2U", "failed to replace info top-table");
                 return;
             }
 
@@ -134,7 +134,7 @@ public class ModifyFuncs{
             topTable.clearChildren();
 
             //HoverTopTable是完全和方块info共用table的，所以无法将原版info拆出来做浮窗。
-            if(!MI2USettings.getBool("topTableFollowMouse", false)){
+            if(!mi2ui.settings.getBool("modTopTableFollowMouse")){
                 topTable.add(HoverTopTable.hoverInfo).growX();
                 HoverTopTable.hoverInfo.touchable = Touchable.enabled;
             }else{
@@ -162,11 +162,12 @@ public class ModifyFuncs{
             });
         }
 
-        if(MI2USettings.getBool("modifyBlockSelectTable", false)){
+        int height = mi2ui.settings.getInt("blockSelectTableHeight", 194);
+        if(height != 194){
             Table blockCatTable = MI2Utils.getValue(ui.hudfrag.blockfrag, "blockCatTable");
 
-            ((Table)blockCatTable.getCells().first().get()).getCells().first().height(Mathf.clamp(MI2USettings.getInt("blockSelectTableHeight", 194), 50, 1000));
-            blockCatTable.getCells().get(1).height(Mathf.clamp(MI2USettings.getInt("blockSelectTableHeight", 194) + 52, 50, 1000));
+            ((Table)blockCatTable.getCells().first().get()).getCells().first().height(Mathf.clamp(mi2ui.settings.getInt("blockSelectTableHeight", 194), 50, 1000));
+            blockCatTable.getCells().get(1).height(Mathf.clamp(height + 52, 50, 1000));
         }
     }
 
