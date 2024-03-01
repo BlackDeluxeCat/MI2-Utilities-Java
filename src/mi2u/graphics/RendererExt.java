@@ -547,7 +547,7 @@ public class RendererExt{
     }
 
     public static boolean drawBlackboxBuilding(Building b){
-        if(drevealJunction && b instanceof Junction.JunctionBuild jb) drawJunciton(jb);
+        if(drevealJunction && b instanceof Junction.JunctionBuild jb) drawJunction(jb);
         else if(drevealBridge && b instanceof BufferedItemBridge.BufferedItemBridgeBuild bb) drawBufferedItemBridge(bb);
         else if(drevealBridge && b instanceof ItemBridge.ItemBridgeBuild ib) drawItemBridge(ib);
         else if(drevealUnloader && b instanceof Unloader.UnloaderBuild ub) drawUnloader(ub);
@@ -650,43 +650,16 @@ public class RendererExt{
         Draw.color();
     }
 
-    public static void drawJunciton(Junction.JunctionBuild jb){
-        try{
-            int cap = ((Junction)jb.block).capacity;
-            float speed = ((Junction)jb.block).speed;
-
-            //too much usage of new array.
-            Item[][] items = new Item[4][jb.buffer.buffers[0].length];
-            for(int i = 0; i < 4; i++){
-                for(int ii = 0; ii < jb.buffer.buffers[i].length; ii++){
-                    items[i][ii] = (ii < jb.buffer.indexes[i])? content.item(BufferItem.item(jb.buffer.buffers[i][ii])) : null;
-                }
+    public static void drawJunction(Junction.JunctionBuild jb){
+        float cap = ((Junction)jb.block).capacity;
+        float speed = ((Junction)jb.block).speed;
+        for(int rot = 0; rot < 4; rot++){
+            for(int i = 0; i < jb.buffer.indexes[rot]; i++){
+                Draw.alpha(0.9f);
+                var pos = MI2UTmp.v1.set(-0.25f + 0.75f * Math.min((Time.time - BufferItem.time(jb.buffer.buffers[rot][i])) * jb.timeScale() / speed, 1f - i / cap), 0.25f).rotate(90 * rot).scl(tilesize).add(jb);
+                Draw.rect(content.item(BufferItem.item(jb.buffer.buffers[rot][i])).fullIcon, pos.x, pos.y, 4f, 4f);
             }
-            float[][] times = new float[4][jb.buffer.buffers[0].length];
-            for(int i = 0; i < 4; i++){
-                for(int ii = 0; ii < jb.buffer.buffers[i].length; ii++){
-                    times[i][ii] = (ii < jb.buffer.indexes[i])? BufferItem.time(jb.buffer.buffers[i][ii]) : 9999999999999f;
-                }
-            }
-
-            float begx, begy;
-            for(int i = 0; i < 4; i++){
-                if(jb.buffer.indexes[i] > 0){
-                    begx = jb.x - Geometry.d4(i).x * tilesize / 4f + Geometry.d4((i + 1) % 4).x * tilesize / 4f;
-                    begy = jb.y - Geometry.d4(i).y * tilesize / 4f + Geometry.d4((i + 1) % 4).y * tilesize / 4f;
-
-                    for(int idi = 0; idi < jb.buffer.indexes[i]; idi++){
-                        if(items[i][idi] != null){
-                            Draw.alpha(0.9f);
-                            Draw.rect(items[i][idi].fullIcon,
-                            begx + (Geometry.d4(i).x * tilesize * 0.75f / cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale() / speed) * cap, cap - idi)),
-                            begy + (Geometry.d4(i).y * tilesize * 0.75f / cap * Math.min(((Time.time - times[i][idi]) * jb.timeScale() / speed) * cap, cap - idi)),
-                            4f, 4f);
-                        }
-                    }
-                }
-            }
-        }catch(Exception e){if(!interval.get(30)) return; Log.errTag("MI2U-RendererExt", e.toString());}
+        }
     }
 
     public static void drawDuctBridge(DuctBridge.DuctBridgeBuild ib){
@@ -831,7 +804,6 @@ public class RendererExt{
 
         Draw.color();
         Draw.z(Layer.block + 1f);
-        float x1 = 0f, x2 = 0f, y1 = 0f, y2 = 0f;
         if(tob != null){
             Vec2 off = MI2UTmp.v1, end = MI2UTmp.v2;
             //line length: sum of block sizes sub xy distance
