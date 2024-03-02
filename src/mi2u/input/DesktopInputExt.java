@@ -61,7 +61,7 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
         if(!panTimer.check(0, 400)){
             panning = true;
             Core.camera.position.lerpDelta(panXY, 0.3f);
-        }else if(state.isGame() && mi2ui.settings.getBool("edgePanning")){
+        }else if(state.isGame() && state.isPlaying() && mi2ui.settings.getBool("edgePanning")){
             float camSpeed = (!Core.input.keyDown(Binding.boost) ? this.panSpeed : this.panBoostSpeed) * Time.delta;
             float margin = Mathf.clamp(Math.min(Core.graphics.getWidth() * 0.5f, Core.graphics.getHeight() * 0.5f), 5f, 30f);
 
