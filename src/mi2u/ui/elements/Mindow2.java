@@ -349,7 +349,7 @@ public class Mindow2 extends Table{
     }
 
     public void showHelp(){
-        new BaseDialog("@mindow2.helpInfoTitle"){
+        new BaseDialog(""){
             {
                 addCloseButton();
                 this.cont.pane(t -> {
