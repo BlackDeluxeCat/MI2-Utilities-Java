@@ -1,11 +1,9 @@
 package mi2u.struct;
 
 import arc.func.*;
-import arc.graphics.g2d.Fill;
-import arc.graphics.g2d.Lines;
-import arc.math.Mathf;
-import arc.util.*;
-import mi2u.MI2UTmp;
+import arc.graphics.g2d.*;
+import arc.math.*;
+import mi2u.*;
 
 import java.util.*;
 

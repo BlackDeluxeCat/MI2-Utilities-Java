@@ -1,31 +1,23 @@
 package mi2u.ui;
 
 import arc.*;
-import arc.func.Boolf;
-import arc.func.Cons;
-import arc.graphics.Color;
+import arc.func.*;
+import arc.graphics.*;
 import arc.input.*;
-import arc.math.Interp;
-import arc.math.Mathf;
+import arc.math.*;
 import arc.scene.*;
-import arc.scene.actions.Actions;
-import arc.scene.actions.TemporalAction;
+import arc.scene.actions.*;
 import arc.scene.event.*;
 import arc.scene.ui.*;
-import arc.scene.ui.layout.Table;
+import arc.scene.ui.layout.*;
 import arc.struct.*;
-import arc.struct.Queue;
 import arc.util.*;
 import mi2u.*;
-import mi2u.game.*;
 import mi2u.io.*;
 import mi2u.ui.elements.*;
-import mindustry.gen.Iconc;
-import mindustry.logic.LCanvas;
-import mindustry.logic.LExecutor;
-import mindustry.logic.LStatements;
-import mindustry.logic.LogicDialog;
-import mindustry.ui.Styles;
+import mindustry.gen.*;
+import mindustry.logic.*;
+import mindustry.ui.*;
 
 import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
@@ -225,13 +217,11 @@ public class LogicHelperMindow extends Mindow2{
         searchBaseTable = new Table();
         cutPasteBaseTable = new Table();
         backupTable = new Table();
-        Events.on(MI2UEvents.FinishSettingInitEvent.class, e -> {
-            setupVarsMode(varsBaseTable);
-            setupSearchMode(searchBaseTable);
-            setupCutPasteMode(cutPasteBaseTable);
-            setupBackupMode(backupTable);
-            split = settings.getStr("split");
-        });
+        setupVarsMode(varsBaseTable);
+        setupSearchMode(searchBaseTable);
+        setupCutPasteMode(cutPasteBaseTable);
+        setupBackupMode(backupTable);
+        split = settings.getStr("split");
 
         titlePane.table(tt -> {
             tt.defaults().growX().minSize(32f);

@@ -6,11 +6,10 @@ import arc.math.*;
 import arc.math.geom.*;
 import arc.util.*;
 import mi2u.*;
-import mi2u.io.*;
 import mindustry.gen.*;
 import mindustry.input.*;
 
-import static mi2u.MI2UVars.mi2ui;
+import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
 
 public class MobileInputExt extends MobileInput implements InputOverwrite{

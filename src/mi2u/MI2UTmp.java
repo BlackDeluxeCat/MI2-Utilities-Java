@@ -1,9 +1,7 @@
 package mi2u;
 
-import arc.graphics.Color;
-import arc.math.geom.Point2;
-import arc.math.geom.Rect;
-import arc.math.geom.Vec2;
+import arc.graphics.*;
+import arc.math.geom.*;
 
 public class MI2UTmp{
     public static final Color c1 = new Color();

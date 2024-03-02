@@ -19,6 +19,7 @@ import mindustry.gen.*;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
 
+import static arc.Core.*;
 import static arc.util.Align.*;
 import static mi2u.MI2UVars.*;
 /**  
@@ -365,16 +366,25 @@ public class Mindow2 extends Table{
      * UISetting will be shown to, but not configurable
     */
     public void showSettings(){
-        new BaseDialog("@mindow2.settings.title"){
+        new BaseDialog("@settings.meta.dialogTitle"){
             {
                 addCloseButton();
                 this.cont.pane(t -> {
-                    t.add(mindowName != null && !mindowName.equals("") ? Core.bundle.format("mindow2.settings.curMindowName") + mindowName: "@mindow2.settings.noMindowNameWarning").fontScale(1.2f).get().setAlignment(Align.center);
+                    t.button("@settings.meta.mindowHelp", Icon.info, () -> showHelp()).width(300f).height(150f).get().setStyle(textb);
                     t.row();
-                    t.button("@mindow2.settings.help", Icon.info, () -> showHelp()).width(200f).get().setStyle(textb);
-                    t.row();
-                    t.table(tt -> settings.rebuild(tt)).width(Math.min(600, Core.graphics.getWidth()));
+                    t.table(tt -> settings.buildList(tt)).width(Math.min(600, Core.graphics.getWidth()));
                 }).grow();
+                this.cont.labelWrap("@settings.meta.oldVersion").fill();
+                this.cont.addChild(new Table(){
+                    {
+                        settings.buildDescription(this);
+                        touchable = Touchable.disabled;
+                        update(() -> {
+                            cont.stageToLocalCoordinates(MI2UTmp.v3.set(Core.input.mouse()));
+                            this.setPosition(MI2UTmp.v3.x, MI2UTmp.v3.y);
+                        });
+                    }
+                });
                 show();
             }
         };
@@ -383,8 +393,11 @@ public class Mindow2 extends Table{
     /** can be overrided, should use super.initSettings(), called in rebuild() */
     public void initSettings(){
         if(mindowName == null || mindowName.equals("")) return;
-        if(settings == null) settings = new SettingHandler(mindowName + ".");
+        if(settings == null) settings = new SettingHandler(mindowName);
         settings.list.clear();
+        var sScl = settings.sliderPref("scale", 100, 20, 400, 10, s -> s + "%", scl -> setScale(scl / 100f));
+        sScl.title = bundle.get("settings.mindow.scale");
+        sScl.description = bundle.getOrNull("settings.mindow.scale.description");
     }
 
     /** Override this method for custom UI settings load
@@ -396,7 +409,7 @@ public class Mindow2 extends Table{
         edgesnap = settings.getInt("edgesnap");
         curx = settings.getInt("curx");
         cury = settings.getInt("cury");
-        setScale(settings.getInt(".scale", 100) / 100f);
+        setScale(settings.getInt("scale", 100) / 100f);
         mindow2s.each(m -> {
             if(m == this) return;
             if(m.mindowName.equals(settings.getStr("LRsnap"))){

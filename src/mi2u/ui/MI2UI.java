@@ -191,30 +191,28 @@ public class MI2UI extends Mindow2{
         }).growX();
 
         var set = new Table();
-        Events.on(MI2UEvents.FinishSettingInitEvent.class, e -> {
-            set.table(t -> {
-                t.defaults().minWidth(16f);
-                if(settings.getSetting("disableWreck") instanceof CheckSetting ce) t.add(ce.miniButton());
-                if(settings.getSetting("disableUnit") instanceof CheckSetting ce) t.add(ce.miniButton());
-                if(settings.getSetting("disableBullet") instanceof CheckSetting ce) t.add(ce.miniButton());
-                if(settings.getSetting("disableBuilding") instanceof CheckSetting ce) t.add(ce.miniButton());
-                t.row();
-                if(settings.getSetting("enUnitHpBar") instanceof CheckSetting ce) t.add(ce.miniButton());
-                if(settings.getSetting("enBlockHpBar") instanceof CheckSetting ce) t.add(ce.miniButton());
-                if(settings.getSetting("enUnitLogic") instanceof CheckSetting ce) t.add(ce.miniButton());
-                if(settings.getSetting("enUnitHitbox") instanceof CheckSetting ce) t.add(ce.miniButton());
-                if(settings.getSetting("enUnitPath") instanceof CheckSetting ce) t.add(ce.miniButton());
-            }).growX();
+        set.table(t -> {
+            t.defaults().minWidth(16f);
+            if(settings.getSetting("disableWreck") instanceof CheckSetting ce) t.add(ce.miniButton());
+            if(settings.getSetting("disableUnit") instanceof CheckSetting ce) t.add(ce.miniButton());
+            if(settings.getSetting("disableBullet") instanceof CheckSetting ce) t.add(ce.miniButton());
+            if(settings.getSetting("disableBuilding") instanceof CheckSetting ce) t.add(ce.miniButton());
+            t.row();
+            if(settings.getSetting("enUnitHpBar") instanceof CheckSetting ce) t.add(ce.miniButton());
+            if(settings.getSetting("enBlockHpBar") instanceof CheckSetting ce) t.add(ce.miniButton());
+            if(settings.getSetting("enUnitLogic") instanceof CheckSetting ce) t.add(ce.miniButton());
+            if(settings.getSetting("enUnitHitbox") instanceof CheckSetting ce) t.add(ce.miniButton());
+            if(settings.getSetting("enUnitPath") instanceof CheckSetting ce) t.add(ce.miniButton());
+        }).growX();
 
-            set.row();
-            set.table(t -> {
-                t.defaults().minSize(16f);
-                if(settings.getSetting("enDistributionReveal") instanceof CheckSetting ce) t.add(ce.miniButton());
-                if(settings.getSetting("drevealBridge") instanceof CheckSetting ce) t.add(ce.miniButton());
-                if(settings.getSetting("drevealJunction") instanceof CheckSetting ce) t.add(ce.miniButton());
-                if(settings.getSetting("drevealUnloader") instanceof CheckSetting ce) t.add(ce.miniButton());
-                if(settings.getSetting("drevealInventory") instanceof CheckSetting ce) t.add(ce.miniButton());
-            });
+        set.row();
+        set.table(t -> {
+            t.defaults().minSize(16f);
+            if(settings.getSetting("enDistributionReveal") instanceof CheckSetting ce) t.add(ce.miniButton());
+            if(settings.getSetting("drevealBridge") instanceof CheckSetting ce) t.add(ce.miniButton());
+            if(settings.getSetting("drevealJunction") instanceof CheckSetting ce) t.add(ce.miniButton());
+            if(settings.getSetting("drevealUnloader") instanceof CheckSetting ce) t.add(ce.miniButton());
+            if(settings.getSetting("drevealInventory") instanceof CheckSetting ce) t.add(ce.miniButton());
         });
 
         tabs.queue(play, info, set);
@@ -304,7 +302,7 @@ public class MI2UI extends Mindow2{
         settings.checkPref("enUnitHitbox", false).tag(false, false, true);
         settings.checkPref("enUnitLogic", false).tag(false, false, true);
         settings.checkPref("enUnitPath", false).tag(false, false, true);
-        settings.textPref("enUnitPath.length", String.valueOf(60), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 10 && Strings.parseInt(s) <= 300, null).setParser(intParser).tag(false, false, true);
+        settings.textPref("enUnitPath.length", String.valueOf(60), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 10 && Strings.parseInt(s) <= 300, null, intParser).tag(false, false, true);
 
         settings.title("graphics.drawGroups");
 
@@ -315,13 +313,11 @@ public class MI2UI extends Mindow2{
 
         settings.title("game.speedctrl");
 
-        settings.textPref("speedctrl.basefps", String.valueOf(60), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 10 && Strings.parseInt(s) <= 600, null).setParser(intParser);
+        settings.textPref("speedctrl.basefps", String.valueOf(60), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 10 && Strings.parseInt(s) <= 600, null, intParser);
         settings.sliderPref("speedctrl.cutoff", 1, 0, 5, 1, s -> s + "fps");
 
         settings.title("input");
 
-        settings.checkPref("instantBuild", false);
-        settings.sliderPref("rtsFormDoubleTap", 300, 25, 1000, 25, s -> s + "ms");
         settings.checkPref("inputReplace", true, b -> {
             if(b){
                 control.setInput(mobile ? MobileInputExt.mobileExt : DesktopInputExt.desktopExt);
@@ -329,18 +325,20 @@ public class MI2UI extends Mindow2{
                 control.setInput(mobile ? new MobileInput() : new DesktopInput());
             }
         }).tag(true, false, false);
+        settings.checkPref("instantBuild", false);
+        settings.sliderPref("rtsFormDoubleTap", 300, 25, 1000, 25, s -> s + "ms");
         settings.checkPref("forceTapTile", false);
         settings.checkPref("edgePanning", false);
 
         settings.title("modify");
 
-        settings.textPref("blockSelectTableHeight", String.valueOf(194), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 60 && Strings.parseInt(s) <= 810, null).setParser(intParser).tag(false, true, false);
+        settings.textPref("blockSelectTableHeight", String.valueOf(194), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 60 && Strings.parseInt(s) <= 810, null, intParser).tag(false, true, false);
         settings.checkPref("modifyBlockBars", false).tag(false, true, false);
         settings.checkPref("replaceTopTable", false).tag(false, true, false);
         settings.checkPref("modTopTableFollowMouse", false).tag(false, true, false);
         settings.sliderPref("maxSchematicSize", 64, 32, 1024, 16, s -> String.valueOf(s), s -> Vars.maxSchematicSize = s);
-        settings.textPref("maxZoom", String.valueOf(renderer.maxZoom), TextField.TextFieldFilter.floatsOnly, s -> Strings.parseFloat(s) > renderer.minZoom && Strings.parseFloat(s) <= 100, s -> renderer.maxZoom = Strings.parseFloat(s)).setParser(floatParser);
-        settings.textPref("minZoom", String.valueOf(renderer.minZoom), TextField.TextFieldFilter.floatsOnly, s -> Strings.parseFloat(s) < renderer.maxZoom && Strings.parseFloat(s) > 0.01f, s -> renderer.minZoom = Strings.parseFloat(s)).setParser(floatParser);;
+        settings.textPref("maxZoom", String.valueOf(renderer.maxZoom), TextField.TextFieldFilter.floatsOnly, s -> Strings.parseFloat(s) > renderer.minZoom && Strings.parseFloat(s) <= 100, s -> renderer.maxZoom = Strings.parseFloat(s), floatParser);
+        settings.textPref("minZoom", String.valueOf(renderer.minZoom), TextField.TextFieldFilter.floatsOnly, s -> Strings.parseFloat(s) < renderer.maxZoom && Strings.parseFloat(s) > 0.01f, s -> renderer.minZoom = Strings.parseFloat(s), floatParser);
 
         settings.checkPref("enableUpdate", true);
     }

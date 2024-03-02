@@ -21,8 +21,8 @@ import mindustry.world.blocks.defense.turrets.*;
 import mindustry.world.blocks.distribution.*;
 import mindustry.world.blocks.storage.*;
 
-import static arc.Core.graphics;
-import static mi2u.MI2UVars.fadeBackground;
+import static arc.Core.*;
+import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
 
 public class BuildingInventory extends Element{

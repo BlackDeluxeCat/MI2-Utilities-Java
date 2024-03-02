@@ -7,13 +7,12 @@ import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.*;
 import mi2u.graphics.*;
-import mi2u.io.*;
 import mindustry.gen.*;
 import mindustry.input.*;
 import mindustry.world.blocks.*;
 
 import static arc.Core.*;
-import static mi2u.MI2UVars.mi2ui;
+import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
 
 /**

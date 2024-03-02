@@ -12,9 +12,9 @@ import mi2u.ui.elements.*;
 import mindustry.gen.*;
 import mindustry.ui.*;
 
-import static mi2u.MI2UVars.*;
-
 import java.lang.reflect.*;
+
+import static mi2u.MI2UVars.*;
 
 public class EmojiMindow extends Mindow2{
     public static TextButtonStyle textbStyle = Styles.nonet;

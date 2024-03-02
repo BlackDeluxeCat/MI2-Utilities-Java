@@ -27,7 +27,7 @@ import mindustry.ui.*;
 import mindustry.world.*;
 
 import static mi2u.MI2UVars.*;
-import static mi2u.io.SettingHandler.TextFieldSetting.intParser;
+import static mi2u.io.SettingHandler.TextFieldSetting.*;
 import static mindustry.Vars.*;
 
 public class MinimapMindow extends Mindow2{
@@ -124,7 +124,7 @@ public class MinimapMindow extends Mindow2{
     @Override
     public void setupCont(Table cont){
         cont.clear();
-        int size = settings.getInt("size");
+        int size = 140;//settings.getInt("size");
         m.setMapSize(size);
         cont.add(m);
     }
@@ -137,15 +137,15 @@ public class MinimapMindow extends Mindow2{
         settings.checkPref("drawFog", true, b -> m.drawFog = b);
         settings.checkPref("drawIndicator", true, b -> m.drawIndicator = b);
         settings.checkPref("drawObjective", true, b -> m.drawObjective = b);
-        settings.textPref("size", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 3200, s -> rebuild()).setParser(intParser);
-        settings.textPref("drawUnitColorDiff", String.valueOf(10), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 0 && Strings.parseInt(s) <= 100, s -> m.drawUnitColorDifference = Strings.parseInt(s) / 100f).setParser(intParser);
-        settings.textPref("drawUnitOutline", String.valueOf(10), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 0 && Strings.parseInt(s) <= 100, s -> m.drawUnitOutline = Strings.parseInt(s) / 100f).setParser(intParser);
+        settings.textPref("size", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 3200, s -> rebuild(), intParser);
+        settings.textPref("drawUnitColorDiff", String.valueOf(10), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 0 && Strings.parseInt(s) <= 100, s -> m.drawUnitColorDifference = Strings.parseInt(s) / 100f, intParser);
+        settings.textPref("drawUnitOutline", String.valueOf(10), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 0 && Strings.parseInt(s) <= 100, s -> m.drawUnitOutline = Strings.parseInt(s) / 100f, intParser);
     }
 
     @Override
     public boolean loadUISettingsRaw(){
         if(!super.loadUISettingsRaw()) return false;
-        int size = settings.getInt("size");
+        int size = 140;//settings.getInt("size");
         m.setMapSize(size);
         rebuild();
         return true;

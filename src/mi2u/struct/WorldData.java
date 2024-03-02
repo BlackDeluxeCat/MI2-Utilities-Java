@@ -1,12 +1,12 @@
 package mi2u.struct;
 
-import arc.math.Mathf;
-import arc.math.geom.Geometry;
+import arc.math.*;
+import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.*;
-import mi2u.MI2UTmp;
+import mi2u.*;
 import mindustry.content.*;
-import mindustry.core.World;
+import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.world.*;

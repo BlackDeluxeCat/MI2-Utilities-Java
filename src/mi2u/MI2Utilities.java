@@ -59,8 +59,8 @@ public class MI2Utilities extends Mod{
             maxSchematicSize = Math.max(maxSchematicSize, mi2ui.settings.getInt("maxSchematicSize", 64));
             mi2ui.settings.putInt("maxSchematicSize", maxSchematicSize);
 
-            renderer.maxZoom = Strings.parseFloat(mi2ui.settings.getStr("maxZoom"));
-            renderer.minZoom = Strings.parseFloat(mi2ui.settings.getStr("minZoom"));
+            renderer.maxZoom = mi2ui.settings.getFloat("maxZoom");
+            renderer.minZoom = mi2ui.settings.getFloat("minZoom");
 
             Time.runTask(40f, () -> {
                 mi2ui.addTo(Core.scene.root);

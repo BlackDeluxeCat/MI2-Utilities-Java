@@ -172,47 +172,50 @@ public class ModifyFuncs{
     }
 
     public static void settingsMenuDialog(){
-        ui.settings.addCategory("@mindow2.settings.title", new TextureRegionDrawable(new TextureRegion(MI2Utilities.MOD.iconTexture)), st ->{
-            st.add("@mindow2.settings.allIntro");
-            st.row();
-            st.pane(t -> {
-                t.name = "Mindow Help";
-                for(var m : mindow2s){
-                    if(!m.mindowName.equals("")) t.button(Iconc.infoCircle + Core.bundle.get(m.titleText.substring(1)), textb, m::showHelp).with(funcSetTextb).pad(4f);
-                }
-            }).with(p -> {
-                p.setForceScroll(true, false);
-            }).growX();
-            st.row();
-            st.table(t -> {
-                int index = 0;
-                for(var entry : MI2USettings.entries){
-                    t.add("" + ++index).size(32f).color(Color.gray);
-                    t.table(entry::build).growX();
-                    t.row();
-                }
-            });
-            st.row();
-            st.button("@mi2u.settings.cleanUp", textb, () -> {
-                var dialog = new BaseDialog("@mi2u.settings.cleanUp");
-                dialog.addCloseButton();
-                dialog.buttons.button("@clear", Icon.refresh, () -> ui.showConfirm("@mi2u.settings.removeAllConf", MI2USettings.map::clear));
-                dialog.cont.pane(t -> {
-                    MI2USettings.map.each((name, setting) -> {
-                        t.button("" + Iconc.cancel, textb, null).size(24f).with(b -> {
-                            b.clicked(() -> ui.showConfirm(Core.bundle.get("mi2u.settings.removeConf") + name, () -> {
-                                MI2USettings.map.remove(name);
-                                MI2USettings.modified = true;
-                                b.setDisabled(true);
-                            }));
+        ui.settings.addCategory("@settings.meta.category", new TextureRegionDrawable(new TextureRegion(MI2Utilities.MOD.iconTexture)), st ->{
+            Table cont = new Table();
+            mi2ui.settings.buildList(cont);
+            st.table(buttons -> {
+                buttons.defaults().uniform().height(64f).grow();
+                mindow2s.each(m -> buttons.button(m.titleText, () -> m.settings.buildList(cont)));
+                buttons.button("@settings.meta.oldVersionButton", () -> {
+                    var dialog = new BaseDialog("@settings.meta.oldVersionButton");
+                    dialog.addCloseButton();
+                    dialog.cont.pane(bp -> {
+                        MI2USettings.map.each((name, setting) -> {
+                            bp.button(b -> {
+                                b.add(name).growX().row();
+                                b.labelWrap(setting.get().substring(0, Math.min(200, setting.get().length()))).maxHeight(100f).growX();
+                            }, () -> Core.app.setClipboardText(setting.get())).growX();
+                            bp.row();
                         });
-                        t.labelWrap(name).width(200f);
-                        t.add(setting.get()).width(200f);
-                        t.row();
-                    });
-                }).growY();
-                dialog.show();
-            }).growX().height(64f);
+                    }).growY().minWidth(600f).row();
+                    dialog.cont.labelWrap("@settings.meta.oldVersion.tip").minWidth(600f).pad(4f).color(Color.acid);
+                    dialog.show();
+                });
+            }).width(600f);
+
+            st.row();
+
+            st.image().height(2f).growX().color(Pal.accent).padBottom(8f).padTop(8f);
+
+            st.row();
+
+            st.add(cont).growX();
+
+            mindow2s.each(m -> {
+                st.addChild(new Table(){
+                    {
+                        m.settings.buildDescription(this);
+                        touchable = Touchable.disabled;
+                        update(() -> {
+                            st.stageToLocalCoordinates(MI2UTmp.v3.set(Core.input.mouse()));
+                            this.setPosition(MI2UTmp.v3.x, MI2UTmp.v3.y);
+                        });
+                    }
+                });
+            });
+
         });
     }
 }

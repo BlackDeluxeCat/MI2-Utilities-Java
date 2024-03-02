@@ -14,14 +14,15 @@ import mindustry.graphics.*;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.SettingsMenuDialog.*;
 
-import static arc.Core.bundle;
-import static arc.Core.settings;
-import static mi2u.MI2UVars.funcSetTextb;
-import static mi2u.MI2UVars.textbtoggle;
+import static arc.Core.*;
+import static mi2u.MI2UVars.*;
 
 public class SettingHandler{
+    public static boolean debug;
     public String prefix;
     public Seq<Setting> list = new Seq<>();
+
+    @Nullable Setting hovered;
 
     public SettingHandler(String prefix){
         this.prefix = prefix;
@@ -31,58 +32,94 @@ public class SettingHandler{
         list.add(setting);
     }
 
-    public void rebuild(Table table){
-        table.clearChildren();
+    public String prefix(String name){
+        return prefix + "." + name;
+    }
+
+    public void buildList(Table p){
+        p.clearChildren();
         list.each(setting -> {
-            table.table(setting::add).growX().margin(2f);
-            table.table(t -> {
-                if(setting.description != null) t.button(Icon.infoSmall, () -> {}).size(32f);
-                if(setting.restart) t.add("RS").color(Color.orange);
-                t.row();
-                if(setting.reloadWorld) t.add("RW").color(Color.cyan);
+            p.table(setting::add).growX().margin(2f);
+            p.table(t -> {
+                t.touchable = Touchable.enabled;
+                t.hovered(() -> hovered = setting);
+                t.exited(() -> hovered = null);
+                t.fill(Tex.button, i -> i.image(Icon.info).color(setting.description != null ? Color.gray : Color.clear));
                 if(setting.performance) t.add("PF").color(Color.scarlet);
-            }).row();
+                t.row();
+                if(setting.restart) t.add("RS").color(Color.orange);
+                if(setting.reloadWorld) t.add("RW").color(Color.cyan);
+            }).size(40f).pad(2f).row();
         });
     }
 
+    public void buildDescription(Table shell){
+        shell.visible(() -> hovered != null);
+        shell.table(t -> {
+            t.setBackground(Tex.buttonTrans);
+
+            t.label(() -> hovered == null ? "" : hovered.title).fontScale(1.25f).color(Pal.accent).growX().row();
+
+            t.label(() -> hovered == null ? "" : hovered.name).color(Color.cyan).growX().row();
+
+            t.labelWrap(() -> hovered == null ? "" : hovered.description).padTop(8f).padBottom(8f).minWidth(300f).growX().row();
+
+            t.table(tagt -> {
+                tagt.defaults().pad(2f);
+                tagt.label(() -> hovered == null ? "" : hovered.restart ? "RS" : "").color(Color.orange);
+                tagt.label(() -> hovered == null ? "" : hovered.restart ? "@settings.tags.restart" : "").padRight(8f);
+                tagt.label(() -> hovered == null ? "" : hovered.reloadWorld ? "RW" : "").color(Color.cyan);
+                tagt.label(() -> hovered == null ? "" : hovered.reloadWorld ? "@settings.tags.reloadWorld" : "").padRight(8f);
+                tagt.label(() -> hovered == null ? "" : hovered.performance ? "PF" : "").color(Color.scarlet);
+                tagt.label(() -> hovered == null ? "" : hovered.performance ? "@settings.tags.performance" : "").padRight(8f);
+            }).growX().left().bottom();
+        }).growX().maxWidth(500f);
+    }
+
     public Setting getSetting(String name){
-        return list.find(s -> s.name.equals(prefix + "." + name));
+        return list.find(s -> s.name.equals(prefix(name)));
     }
 
     public boolean getBool(String name){
-        return settings.getBool(prefix + "." + name);
+        return settings.getBool(prefix(name));
     }
 
     public int getInt(String name){
-        return settings.getInt(prefix + "." + name);
+        return settings.getInt(prefix(name));
     }
 
     public int getInt(String name, int def){
-        return settings.getInt(prefix + "." + name, def);
+        if(!debug){
+            return settings.getInt(prefix(name), def);
+        }
+        return Strings.parseInt(settings.get(prefix(name), def).toString());
     }
 
     public float getFloat(String name){
-        return settings.getFloat(prefix + "." + name);
+        if(!debug){
+            return settings.getFloat(prefix(name));
+        }
+        return Strings.parseFloat(settings.get(prefix(name), "1f").toString());
     }
 
     public String getStr(String name){
-        return settings.getString(prefix + "." + name);
+        return settings.getString(prefix(name));
     }
 
     public Object get(String name, Object def){
-        return settings.get(prefix + "." + name, def);
+        return settings.get(prefix(name), def);
     }
 
     public void putInt(String name, int v){
-        settings.put(prefix + "." + name, v);
+        settings.put(prefix(name), v);
     }
 
     public void putString(String name, String v){
-        settings.put(prefix + "." + name, v);
+        settings.put(prefix(name), v);
     }
 
     public void putBool(String name, boolean v){
-        settings.put(prefix + "." + name, v);
+        settings.put(prefix(name), v);
     }
 
     public Title title(String pureName){
@@ -98,7 +135,6 @@ public class SettingHandler{
     public CheckSetting checkPref(String name, boolean def, Boolc changed){
         var s = new CheckSetting(name, def, changed);
         list.add(s);
-        settings.defaults(name, def);
         return s;
     }
 
@@ -114,7 +150,7 @@ public class SettingHandler{
     public SliderSetting sliderPref(String name, int def, int min, int max, int step, StringProcessor s, Intc changed){
         SliderSetting res;
         list.add(res = new SliderSetting(name, def, min, max, step, s, changed));
-        settings.defaults(name, def);
+        settings.defaults(prefix(name), def);
         return res;
     }
 
@@ -127,9 +163,12 @@ public class SettingHandler{
     }
 
     public TextFieldSetting textPref(String name, String def, TextField.TextFieldFilter filter, TextField.TextFieldValidator validator, Cons<String> changed){
-        var s = new TextFieldSetting(name, def, filter, validator, changed);
+        return textPref(name, def, filter, validator, changed, null);
+    }
+
+    public TextFieldSetting textPref(String name, String def, TextField.TextFieldFilter filter, TextField.TextFieldValidator validator, Cons<String> changed, Func<String, Object> parser){
+        var s = new TextFieldSetting(name, def, filter, validator, changed, parser);
         list.add(s);
-        settings.defaults(name, def);
         return s;
     }
 
@@ -144,7 +183,7 @@ public class SettingHandler{
         public Setting(){}
 
         public Setting(String name){
-            this.name = prefix + "." + name;
+            this.name = prefix(name);
             title = bundle.get("settings." + this.name, name);
             description = bundle.getOrNull("settings." + this.name + ".description");
         }
@@ -168,7 +207,7 @@ public class SettingHandler{
 
         @Override
         public void add(Table table){
-            table.add(name).growX().color(Pal.accent).style(Styles.outlineLabel).padTop(12f).row();
+            table.add(title).growX().color(Pal.accent).style(Styles.outlineLabel).padTop(12f).row();
             table.image().growX().height(2f).color(Pal.accent);
         }
     }
@@ -180,6 +219,7 @@ public class SettingHandler{
             super(name);
             this.def = def;
             this.changed = changed;
+            settings.defaults(this.name, def);
         }
 
         @Override
@@ -227,6 +267,7 @@ public class SettingHandler{
             this.step = step;
             this.sp = s;
             this.changed = changed;
+            settings.defaults(this.name, def);
         }
 
         @Override
@@ -303,14 +344,16 @@ public class SettingHandler{
         Cons<String> changed;
         @Nullable TextField.TextFieldFilter filter;
         @Nullable TextField.TextFieldValidator validator;
-        Func<String, Object> parser;
+        @Nullable Func<String, Object> parser;
 
-        public TextFieldSetting(String name, String def, TextField.TextFieldFilter filter, TextField.TextFieldValidator validator, Cons<String> changed){
+        public TextFieldSetting(String name, String def, TextField.TextFieldFilter filter, TextField.TextFieldValidator validator, Cons<String> changed, Func<String, Object> parser){
             super(name);
             this.def = def;
             this.filter = filter;
             this.validator = validator;
             this.changed = changed;
+            this.parser = parser;
+            settings.defaults(this.name, parser != null ? parser.get(def) : def);
         }
 
         @Override
@@ -327,11 +370,6 @@ public class SettingHandler{
             }).width(150f).right().update(tf -> {
                 if(!tf.hasKeyboard()) tf.setText(String.valueOf(settings.get(name, def)));
             });
-        }
-
-        public TextFieldSetting setParser(Func<String, Object> parser){
-            this.parser = parser;
-            return this;
         }
 
         public static Func<String, Object> intParser = Strings::parseInt, floatParser = Strings::parseFloat, boolParser = s -> s.equals("true");

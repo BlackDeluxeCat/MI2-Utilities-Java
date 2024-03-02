@@ -10,7 +10,6 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.pooling.*;
 import mi2u.*;
-import mi2u.io.*;
 import mi2u.ui.*;
 import mindustry.ai.*;
 import mindustry.ai.types.*;
@@ -32,7 +31,7 @@ import mindustry.world.blocks.units.*;
 
 import java.lang.reflect.*;
 
-import static mi2u.MI2UVars.mi2ui;
+import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
 
 /**

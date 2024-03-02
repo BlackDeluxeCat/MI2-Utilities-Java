@@ -12,9 +12,7 @@ import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import mi2u.*;
-import mi2u.game.*;
 import mi2u.input.*;
-import mi2u.io.*;
 import mi2u.struct.*;
 import mi2u.ui.*;
 import mi2u.ui.elements.*;
@@ -492,70 +490,68 @@ public class FullAI extends AIController{
             btext = Iconc.blockWorldProcessor + "";
             bimg = Core.atlas.drawable("mi2-utilities-java-ui-customai");
 
-            Events.on(MI2UEvents.FinishSettingInitEvent.class, e -> {
-                LogicMode.logicMode.codes = Core.settings.getJson("ai.logic.codes", Seq.class, LogicModeCode.class, () -> Seq.with(new LogicModeCode("" + Iconc.edit + Iconc.map, "jump 26 strictEqual init 2\n" +
-                        "set brush.size 2\n" +
-                        "set floor @air\n" +
-                        "set ore @air\n" +
-                        "set block @air\n" +
-                        "set title \"TerraEditor\"\n" +
-                        "set text.ipt \"Ipt\"\n" +
-                        "set ipt 50\n" +
-                        "print \"UI.info(title)\"\n" +
-                        "print \"UI.row()\"\n" +
-                        "print \"UI.info(text.ipt)\"\n" +
-                        "print \"UI.field(ipt)\"\n" +
-                        "print \"UI.row()\"\n" +
-                        "print \"UI.choose(floor)\"\n" +
-                        "print \"UI.info(floor)\"\n" +
-                        "print \"UI.row()\"\n" +
-                        "print \"UI.choose(ore)\"\n" +
-                        "print \"UI.info(ore)\"\n" +
-                        "print \"UI.row()\"\n" +
-                        "print \"UI.info(brush.name)\"\n" +
-                        "print \"UI.button(brush.type)\"\n" +
-                        "print \"UI.row()\"\n" +
-                        "print \"UI.info(brush.size.name)\"\n" +
-                        "print \"UI.field(brush.size)\"\n" +
-                        "set init 2\n" +
-                        "set brush.size.name \"Radius\"\n" +
-                        "sensor en @unit @shooting\n" +
-                        "set brush.name \"suqare\"\n" +
-                        "jump 30 equal brush.type 0\n" +
-                        "set brush.name \"circle\"\n" +
-                        "sensor tx @unit @shootX\n" +
-                        "op add tx tx 0.5\n" +
-                        "op idiv tx tx 1\n" +
-                        "sensor ty @unit @shootY\n" +
-                        "op add ty ty 0.5\n" +
-                        "op idiv ty ty 1\n" +
-                        "op sub x.min tx brush.size\n" +
-                        "op idiv x.min x.min 1\n" +
-                        "op add x.max x.min brush.size\n" +
-                        "op add x.max x.max brush.size\n" +
-                        "op sub y.min ty brush.size\n" +
-                        "op idiv y.min y.min 1\n" +
-                        "op add y.max y.min brush.size\n" +
-                        "op add y.max y.max brush.size\n" +
-                        "set x x.min\n" +
-                        "op add x x 1\n" +
-                        "set y y.min\n" +
-                        "op add y y 1\n" +
-                        "jump 53 equal brush.type 0\n" +
-                        "op sub dx x tx\n" +
-                        "op sub dy y ty\n" +
-                        "op len d dx dy\n" +
-                        "jump 57 greaterThan d brush.size\n" +
-                        "effect lightBlock x y 0.5 %ffbd530f \n" +
-                        "jump 57 notEqual en 1\n" +
-                        "setblock floor floor x y @derelict 0\n" +
-                        "setblock ore ore x y @derelict 0\n" +
-                        "jump 47 lessThan y y.max\n" +
-                        "setrate ipt\n" +
-                        "jump 45 lessThan x x.max\n")));
-                code = codes.first();
-                readCode(code.value);
-            });
+            LogicMode.logicMode.codes = Core.settings.getJson("ai.logic.codes", Seq.class, LogicModeCode.class, () -> Seq.with(new LogicModeCode("" + Iconc.edit + Iconc.map, "jump 26 strictEqual init 2\n" +
+                    "set brush.size 2\n" +
+                    "set floor @air\n" +
+                    "set ore @air\n" +
+                    "set block @air\n" +
+                    "set title \"TerraEditor\"\n" +
+                    "set text.ipt \"Ipt\"\n" +
+                    "set ipt 50\n" +
+                    "print \"UI.info(title)\"\n" +
+                    "print \"UI.row()\"\n" +
+                    "print \"UI.info(text.ipt)\"\n" +
+                    "print \"UI.field(ipt)\"\n" +
+                    "print \"UI.row()\"\n" +
+                    "print \"UI.choose(floor)\"\n" +
+                    "print \"UI.info(floor)\"\n" +
+                    "print \"UI.row()\"\n" +
+                    "print \"UI.choose(ore)\"\n" +
+                    "print \"UI.info(ore)\"\n" +
+                    "print \"UI.row()\"\n" +
+                    "print \"UI.info(brush.name)\"\n" +
+                    "print \"UI.button(brush.type)\"\n" +
+                    "print \"UI.row()\"\n" +
+                    "print \"UI.info(brush.size.name)\"\n" +
+                    "print \"UI.field(brush.size)\"\n" +
+                    "set init 2\n" +
+                    "set brush.size.name \"Radius\"\n" +
+                    "sensor en @unit @shooting\n" +
+                    "set brush.name \"suqare\"\n" +
+                    "jump 30 equal brush.type 0\n" +
+                    "set brush.name \"circle\"\n" +
+                    "sensor tx @unit @shootX\n" +
+                    "op add tx tx 0.5\n" +
+                    "op idiv tx tx 1\n" +
+                    "sensor ty @unit @shootY\n" +
+                    "op add ty ty 0.5\n" +
+                    "op idiv ty ty 1\n" +
+                    "op sub x.min tx brush.size\n" +
+                    "op idiv x.min x.min 1\n" +
+                    "op add x.max x.min brush.size\n" +
+                    "op add x.max x.max brush.size\n" +
+                    "op sub y.min ty brush.size\n" +
+                    "op idiv y.min y.min 1\n" +
+                    "op add y.max y.min brush.size\n" +
+                    "op add y.max y.max brush.size\n" +
+                    "set x x.min\n" +
+                    "op add x x 1\n" +
+                    "set y y.min\n" +
+                    "op add y y 1\n" +
+                    "jump 53 equal brush.type 0\n" +
+                    "op sub dx x tx\n" +
+                    "op sub dy y ty\n" +
+                    "op len d dx dy\n" +
+                    "jump 57 greaterThan d brush.size\n" +
+                    "effect lightBlock x y 0.5 %ffbd530f \n" +
+                    "jump 57 notEqual en 1\n" +
+                    "setblock floor floor x y @derelict 0\n" +
+                    "setblock ore ore x y @derelict 0\n" +
+                    "jump 47 lessThan y y.max\n" +
+                    "setrate ipt\n" +
+                    "jump 45 lessThan x x.max\n")));
+            code = codes.first();
+            readCode(code.value);
 
             Events.on(EventType.WorldLoadEvent.class, e-> {
                 if(logicMode != null){

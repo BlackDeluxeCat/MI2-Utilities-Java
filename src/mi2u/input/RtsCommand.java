@@ -2,16 +2,16 @@ package mi2u.input;
 
 import arc.*;
 import arc.struct.*;
-import arc.util.Time;
+import arc.util.*;
 import mi2u.*;
 import mindustry.entities.*;
-import mindustry.game.EventType;
+import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.input.*;
 import mindustry.world.blocks.units.*;
 import mindustry.world.meta.*;
 
-import static mi2u.MI2UVars.mi2ui;
+import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
 
 public class RtsCommand{

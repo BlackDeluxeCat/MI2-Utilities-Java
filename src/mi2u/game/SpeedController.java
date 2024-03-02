@@ -1,11 +1,10 @@
 package mi2u.game;
 
-import arc.Core;
-import arc.math.Mathf;
-import arc.util.Time;
-import mi2u.io.*;
+import arc.*;
+import arc.math.*;
+import arc.util.*;
 
-import static mi2u.MI2UVars.mi2ui;
+import static mi2u.MI2UVars.*;
 
 public class SpeedController{
     public static float scl = 1f, rawScl = 1f, reference = 60f, min = 3f;

@@ -1,9 +1,9 @@
 package mi2u;
 
-import arc.struct.ObjectMap;
+import arc.struct.*;
 import arc.util.*;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.*;
 import java.util.*;
 
 public class MI2Utils{

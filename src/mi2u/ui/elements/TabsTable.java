@@ -3,7 +3,6 @@ package mi2u.ui.elements;
 import arc.math.*;
 import arc.scene.*;
 import arc.scene.ui.layout.*;
-import arc.struct.*;
 
 public class TabsTable extends Table{
     Element expand = null;
