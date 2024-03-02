@@ -124,7 +124,7 @@ public class MinimapMindow extends Mindow2{
     @Override
     public void setupCont(Table cont){
         cont.clear();
-        int size = 140;//settings.getInt("size");
+        int size = settings.getInt("size");
         m.setMapSize(size);
         cont.add(m);
     }
@@ -145,7 +145,7 @@ public class MinimapMindow extends Mindow2{
     @Override
     public boolean loadUISettingsRaw(){
         if(!super.loadUISettingsRaw()) return false;
-        int size = 140;//settings.getInt("size");
+        int size = settings.getInt("size");
         m.setMapSize(size);
         rebuild();
         return true;
