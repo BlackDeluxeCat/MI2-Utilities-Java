@@ -111,7 +111,7 @@ public class MCollapser extends WidgetGroup{
     public void draw(){
         if(currentHeight > 1 && currentWidth > 1){
             Draw.flush();
-            if(clipBegin(x, y, horizontal ? currentWidth : getWidth(), vertical ? currentHeight : getHeight())){
+            if(clipBegin(x, y, width, height)){
                 super.draw();
                 Draw.flush();
                 clipEnd();

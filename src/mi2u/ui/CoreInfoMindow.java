@@ -46,7 +46,7 @@ public class CoreInfoMindow extends Mindow2{
     public Prov<String> rollingTitle;
 
     public CoreInfoMindow(){
-        super("CoreInfo", "@coreInfo.MI2U", "@coreInfo.help");
+        super("CoreInfo", "coreInfo.MI2U", "@coreInfo.help");
         usedItems = new ObjectSet<>();
         usedUnits = new ObjectSet<>();
 

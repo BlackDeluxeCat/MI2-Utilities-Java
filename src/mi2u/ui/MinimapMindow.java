@@ -37,7 +37,7 @@ public class MinimapMindow extends Mindow2{
 
     public boolean catching = false;
     public MinimapMindow(){
-        super("MindowMap", "@minimap.MI2U", "");
+        super("MindowMap", "minimap.MI2U", "");
 
         update(() -> {
             if(control.input instanceof InputOverwrite && control.input.block != null && Core.input.keyDown(KeyCode.controlLeft) && Core.input.keyDown(KeyCode.f)){

@@ -49,7 +49,25 @@ public class RendererExt{
 
     public static boolean animatedshields;
     public static int unitHpBarStyle;
-    public static boolean enPlayerCursor, enUnitHitbox, enUnitHpBar, enUnitHpBarDamagedOnly, enUnitRangeZone, enOverdriveZone, enMenderZone, enTurretZone, enBlockHpBar, enDistributionReveal, drevealBridge, drevealJunction, drevealUnloader, drevealInventory, enSpawnZone, disableWreck, disableUnit, disableBuilding, disableBullet, shadow;
+    public static boolean enPlayerCursor;
+    public static boolean enUnitHitbox;
+    public static boolean enUnitHpBar;
+    public static boolean enUnitHpBarDamagedOnly;
+    public static boolean enUnitRangeZone;
+    public static boolean enOverdriveZone;
+    public static boolean enMenderZone;
+    public static boolean enTurretZone;
+    public static boolean enBlockHpBar;
+    public static boolean enDistributionReveal;
+    public static boolean drevealBridge;
+    public static boolean drevealJunction;
+    public static boolean drevealUnloader;
+    public static boolean drevealInventory;
+    public static boolean enSpawnZone;
+    public static boolean disableWreck;
+    public static boolean disableUnit;
+    public static boolean disableBuilding;
+    public static boolean disableBullet;
 
     public static void initBase(){
         BuildingInventory.init();
@@ -78,7 +96,7 @@ public class RendererExt{
         enPlayerCursor = mi2ui.settings.getBool("enPlayerCursor");
         enUnitHitbox = mi2ui.settings.getBool("enUnitHitbox");
         enUnitHpBar = mi2ui.settings.getBool("enUnitHpBar");
-        enUnitHpBarDamagedOnly = mi2ui.settings.getBool("enUnitHpBarDamagedOnly");
+        enUnitHpBarDamagedOnly = mi2ui.settings.getBool("unitHpBarDamagedOnly");
         enUnitRangeZone = mi2ui.settings.getBool("enUnitRangeZone");
         enOverdriveZone = mi2ui.settings.getBool("enOverdriveZone");
         enMenderZone = mi2ui.settings.getBool("enMenderZone");
@@ -94,7 +112,6 @@ public class RendererExt{
         disableUnit = mi2ui.settings.getBool("disableUnit");
         disableBuilding = mi2ui.settings.getBool("disableBuilding");
         disableBullet = mi2ui.settings.getBool("disableBullet");
-        shadow = mi2ui.settings.getBool("shadow");
     }
 
     public static Field drawIndexUnit = MI2Utils.getField(Unit.class, "index__draw"), drawIndexDecal = MI2Utils.getField(Decal.class, "index__draw"), drawIndexBullet = MI2Utils.getField(Bullet.class, "index__draw");

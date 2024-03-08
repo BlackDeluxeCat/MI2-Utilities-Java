@@ -38,10 +38,9 @@ import static mi2u.MI2UVars.*;
 public class Mindow2 extends Table{
     public static Drawable titleBarbgNormal, titleBarbgSnapped, white, gray2;
 
-    public float fromx = 0, fromy = 0, curx = 0, cury = 0, curw = 100f, curh = 100f;
-    boolean dragging = false, resizing = false;
+    public float fromx = 0, fromy = 0, curx = 0, cury = 0;
+    boolean dragging = false;
     public boolean minimized = false;
-    boolean titleCfg = false;
     public String titleText, helpInfo = "", mindowName;
     protected Table titleBar = new Table(), titlePane = new Table(Styles.black6);
     protected Table cont = new Table();
@@ -99,71 +98,53 @@ public class Mindow2 extends Table{
 
     public void setupTitle(){
         titlePane.touchable = Touchable.enabled;
-        titleBar.add(new MCollapser(titlePane, false).setCollapsed(() -> minimized)).growX().get().hovered(() -> titleCfg = false);
+        titleBar.add(new MCollapser(titlePane, false).setDirection(true, false).setCollapsed(() -> minimized)).growX();
         titleBar.image().width(2f).growY().color(Color.white);
 
         var toast = new Table();
-        toast.add(titleText).color(MI2UTmp.c1.set(0.8f,0.9f,1f,1f));
-        toast.button("-", textbtoggle, () -> {
-            minimized = !minimized;
-            cury += (minimized ? 1f : -1f) * cont.getHeight() * scaleY;
-            saveUISettings();
-            minimize();
-        }).size(titleButtonSize).update(b -> b.setChecked(minimized));
         toast.button("" + Iconc.settings, textb, this::showSettings).size(titleButtonSize);
-        /*toast.button(b -> b.label(() -> "" + (resizing ? Iconc.move : Iconc.resize)), textb, () -> {
-            resizing = !resizing;
-            titleCfg = false;
-        }).size(titleButtonSize);*/
         toast.setBackground(titleBarbgNormal);
 
-        titleBar.add(new MCollapser(toast, true).setCollapsed(true, () -> {
-            if(titleCfg && interval.check(0, 5000)) titleCfg = false;
-            return !titleCfg && !minimized;
-        }).setDirection(true, true).setDuration(0.2f));
+        titleBar.add(new MCollapser(toast, true).setCollapsed(true, () -> minimized).setDirection(true, true).setDuration(0.2f));
 
-        titleBar.update(() -> {
-            titleBar.invalidate();
-            titleBar.layout();
-        });
+        titleBar.table(t -> {
+            t.label(() -> minimized ? bundle.get(titleText) : "");
+            t.label(() -> dragging ? Iconc.move + "" : "-").size(titleButtonSize).labelAlign(center);
+        }).get().addListener(new InputListener(){
+            Vec2 tmpv = new Vec2();
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
+                fromx = x;
+                fromy = y;
+                tmpv.set(curx, cury);
+                return true;
+            }
 
-        titleBar.button(b -> b.label(() -> "" + (resizing ? Iconc.resize : Iconc.move)), textb, () -> {
-            titleCfg = !titleCfg;
-            interval.get(0,0);
-        }).size(titleButtonSize).with(b -> {
-            b.addListener(new InputListener(){
-                Vec2 tmpv = new Vec2();
-                @Override
-                public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
-                    fromx = x;
-                    fromy = y;
-                    tmpv.set(curx, cury);
-                    return true;
-                }
+            @Override
+            public void touchDragged(InputEvent event, float x, float y, int pointer){
+                Vec2 v = localToStageCoordinates(MI2UTmp.v1.set(x, y)).sub(fromx, fromy);
+                dragging = MI2UTmp.v2.set(v).sub(tmpv).len() > 5f;
+                curx = v.x;
+                cury = v.y;
+                setSnap(v.x, v.y);
+            }
 
-                @Override
-                public void touchDragged(InputEvent event, float x, float y, int pointer){
-                    Vec2 v = localToStageCoordinates(MI2UTmp.v1.set(x, y)).sub(fromx, fromy);
-                    dragging = MI2UTmp.v2.set(v).sub(tmpv).len() > 5f;
-                    if(resizing){
-                        curw = Mathf.clamp(v.x - getX(left), 50f, 800f);
-                        curh = Mathf.clamp(v.y - getY(bottom), 50f, 800f);
-                    }else{
-                        curx = v.x;
-                        cury = v.y;
-                        setSnap(v.x, v.y);
-                    }
-                }
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, KeyCode button){
+                super.touchUp(event, x, y, pointer, button);
 
-                @Override
-                public void touchUp(InputEvent event, float x, float y, int pointer, KeyCode button){
-                    super.touchUp(event, x, y, pointer, button);
-                    if(!dragging) interval.get(0, 0);
-                    dragging = false;
+                if(dragging){
                     Mindow2.this.toFront();
-                    saveUISettings();
+                    interval.get(0, 0);
+                    dragging = false;
+                }else{
+                    minimized = !minimized;
+                    cury += (minimized ? 1f : -1f) * cont.getHeight() * scaleY;
+                    minimize();
                 }
-            });
+
+                saveUISettings();
+            }
         });
     }
 
@@ -182,8 +163,6 @@ public class Mindow2 extends Table{
         }else{
             setPosition(curx, cury);
         }
-        //Log.info(width + "," + height);
-        //setSize(curw, curh);
         keepInStage();
         invalidateHierarchy();
         pack();

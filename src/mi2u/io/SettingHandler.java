@@ -38,21 +38,10 @@ public class SettingHandler{
 
     public void buildList(Table p){
         p.clearChildren();
-        list.each(setting -> {
-            p.table(setting::add).growX().margin(2f);
-            p.table(t -> {
-                t.touchable = Touchable.enabled;
-                t.hovered(() -> hovered = setting);
-                t.exited(() -> hovered = null);
-                t.fill(Tex.button, i -> i.image(Icon.info).color(setting.description != null ? Color.gray : Color.clear));
-                if(setting.performance) t.add("PF").color(Color.scarlet);
-                t.row();
-                if(setting.restart) t.add("RS").color(Color.orange);
-                if(setting.reloadWorld) t.add("RW").color(Color.cyan);
-            }).size(40f).pad(2f).row();
-        });
+        list.each(setting -> p.table(setting::rebuild).growX().margin(2f).row());
     }
 
+    /** 在Dialog中fill一个Table，然后调用该方法构建一个悬浮显示的帮助信息栏。 */
     public void buildDescription(Table shell){
         shell.visible(() -> hovered != null);
         shell.table(t -> {
@@ -172,17 +161,14 @@ public class SettingHandler{
         return s;
     }
 
-    public abstract class Setting{
-        /** 调用设置项的字符串，接上prefix */
-        public String name;
-        /** 从bundle读标题的字符串 */
-        public String title;
-        /** 从bundle读描述的字符串 */
-        public @Nullable String description;
+    public abstract class Setting extends SettingsTable.Setting{
         public boolean restart, reloadWorld, performance;
-        public Setting(){}
+        public Setting(){
+            super("");
+        }
 
         public Setting(String name){
+            super("");
             this.name = prefix(name);
             title = bundle.get("settings." + this.name, name);
             description = bundle.getOrNull("settings." + this.name + ".description");
@@ -195,7 +181,26 @@ public class SettingHandler{
             return this;
         }
 
-        public abstract void add(Table table);
+        @Override
+        public void add(SettingsTable table){
+            table.table(this::rebuild);
+        }
+
+        public void rebuild(Table table){
+            table.table(this::build).growX();
+            table.table(t -> {
+                t.touchable = Touchable.enabled;
+                t.hovered(() -> hovered = this);
+                t.exited(() -> hovered = null);
+                t.fill(Tex.button, i -> i.image(Icon.info).color(description != null ? Color.gray : Color.clear));
+                if(performance) t.add("PF").color(Color.scarlet);
+                t.row();
+                if(restart) t.add("RS").color(Color.orange);
+                if(reloadWorld) t.add("RW").color(Color.cyan);
+            }).size(40f).pad(2f);
+        }
+
+        public abstract void build(Table table);
     }
 
     public class Title extends Setting{
@@ -206,7 +211,7 @@ public class SettingHandler{
         }
 
         @Override
-        public void add(Table table){
+        public void build(Table table){
             table.add(title).growX().color(Pal.accent).style(Styles.outlineLabel).padTop(12f).row();
             table.image().growX().height(2f).color(Pal.accent);
         }
@@ -223,7 +228,7 @@ public class SettingHandler{
         }
 
         @Override
-        public void add(Table table){
+        public void build(Table table){
             CheckBox box = new CheckBox(title);
 
             box.update(() -> box.setChecked(settings.getBool(name)));
@@ -271,7 +276,7 @@ public class SettingHandler{
         }
 
         @Override
-        public void add(Table table){
+        public void build(Table table){
             Slider slider = new Slider(min, max, step, false);
 
             slider.setValue(settings.getInt(name, def));
@@ -310,7 +315,7 @@ public class SettingHandler{
         }
 
         @Override
-        public void add(Table table){
+        public void build(Table table){
             if(values != null){
                 ButtonGroup<Button> group = new ButtonGroup<>();
 
@@ -357,7 +362,7 @@ public class SettingHandler{
         }
 
         @Override
-        public void add(Table table){
+        public void build(Table table){
             table.add(title).growX();
 
             table.field(String.valueOf(settings.get(name, def)), Styles.nodeField, str -> {

@@ -177,7 +177,7 @@ public class ModifyFuncs{
             mi2ui.settings.buildList(cont);
             st.table(buttons -> {
                 buttons.defaults().uniform().height(64f).grow();
-                mindow2s.each(m -> buttons.button(m.titleText, () -> m.settings.buildList(cont)));
+                mindow2s.each(m -> buttons.button("@" + m.titleText, () -> m.settings.buildList(cont)));
                 buttons.button("@settings.meta.oldVersionButton", () -> {
                     var dialog = new BaseDialog("@settings.meta.oldVersionButton");
                     dialog.addCloseButton();

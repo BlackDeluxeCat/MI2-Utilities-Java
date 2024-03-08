@@ -50,7 +50,7 @@ public class LogicHelperMindow extends Mindow2{
     public Queue<String> backups = new Queue<>(30);
 
     public LogicHelperMindow(){
-        super("LogicHelper", "@logicHelper.MI2U", "@logicHelper.help");
+        super("LogicHelper", "logicHelper.MI2U", "@logicHelper.help");
         mode = Mode.vars;
         setTargetDialog(ui.logic);
 

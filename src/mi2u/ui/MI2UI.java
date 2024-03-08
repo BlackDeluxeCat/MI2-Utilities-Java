@@ -33,7 +33,7 @@ public class MI2UI extends Mindow2{
     public int tabId;
 
     public MI2UI(){
-        super("MI2UI", "@main.MI2U", "@main.help");
+        super("MI2UI", "main.MI2U", "@main.help");
 
         Events.run(EventType.Trigger.update, () -> {
             if(state.isGame()){
