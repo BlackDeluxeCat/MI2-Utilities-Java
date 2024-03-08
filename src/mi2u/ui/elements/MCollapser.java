@@ -111,7 +111,7 @@ public class MCollapser extends WidgetGroup{
     public void draw(){
         if(currentHeight > 1 && currentWidth > 1){
             Draw.flush();
-            if(clipBegin(x, y, width, height)){
+            if(clipBegin(x, y, getWidth(), getHeight())){
                 super.draw();
                 Draw.flush();
                 clipEnd();
@@ -214,13 +214,8 @@ public class MCollapser extends WidgetGroup{
                 }
             }
 
-            if(vertical){
-                currentHeight = interpolationVertical.apply(progress) * table.getPrefHeight();
-            }
-
-            if(horizontal){
-                currentWidth = interpolationHorizontal.apply(progress) * table.getPrefWidth();
-            }
+            currentHeight = (vertical ? interpolationVertical.apply(progress) : 1f) * table.getPrefHeight();
+            currentWidth = (horizontal ? interpolationVertical.apply(progress) : 1f) * table.getPrefWidth();
 
             invalidateHierarchy();
             return !actionRunning;

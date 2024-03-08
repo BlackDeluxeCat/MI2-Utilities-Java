@@ -64,6 +64,8 @@ public class Mindow2 extends Table{
             this.rebuild();
         }));
 
+        setupTitle();
+
         titleText = title;
         Events.on(ClientLoadEvent.class, e -> {
             rebuild();
@@ -77,8 +79,6 @@ public class Mindow2 extends Table{
         cont.setBackground(Styles.black3);
         cont.touchable = Touchable.enabled;
         setupCont(cont);
-        titleBar.clear();
-        setupTitle();
 
         add(titleBar).growX();
         row();
@@ -98,16 +98,15 @@ public class Mindow2 extends Table{
 
     public void setupTitle(){
         titlePane.touchable = Touchable.enabled;
-        titleBar.add(new MCollapser(titlePane, false).setDirection(true, false).setCollapsed(() -> minimized)).growX();
-        titleBar.image().width(2f).growY().color(Color.white);
+        titleBar.add(new MCollapser(titlePane, false).setDirection(true, false).setCollapsed(true, () -> minimized).setDuration(0.1f)).growX();
 
         var toast = new Table();
         toast.button("" + Iconc.settings, textb, this::showSettings).size(titleButtonSize);
-        toast.setBackground(titleBarbgNormal);
 
-        titleBar.add(new MCollapser(toast, true).setCollapsed(true, () -> minimized).setDirection(true, true).setDuration(0.2f));
+        titleBar.add(new MCollapser(toast, true).setCollapsed(true, () -> minimized).setDirection(true, false).setDuration(0.2f));
 
         titleBar.table(t -> {
+            t.setBackground(titleBarbgNormal);
             t.label(() -> minimized ? bundle.get(titleText) : "");
             t.label(() -> dragging ? Iconc.move + "" : "-").size(titleButtonSize).labelAlign(center);
         }).get().addListener(new InputListener(){
@@ -140,6 +139,7 @@ public class Mindow2 extends Table{
                 }else{
                     minimized = !minimized;
                     cury += (minimized ? 1f : -1f) * cont.getHeight() * scaleY;
+                    curx += (minimized ? 1f : -1f) * cont.getWidth() * scaleX;
                     minimize();
                 }
 

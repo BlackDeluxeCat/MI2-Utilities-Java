@@ -33,6 +33,14 @@ public class MI2Utilities extends Mod{
         Events.on(ClientLoadEvent.class, e -> {
             MOD = mods.getMod(MI2Utilities.class);
             MOD.meta.subtitle = MOD.meta.version;
+            MI2USettings.init();
+            InputUtils.init();
+
+            var whiteui = (TextureRegionDrawable)Tex.whiteui;
+            Mindow2.titleBarbgNormal = whiteui.tint(1f, 0.1f, 0.2f, 0.3f);
+            Mindow2.titleBarbgSnapped = whiteui.tint(1f, 0.1f, 0.2f, 0.2f);
+            Mindow2.white = whiteui.tint(1f, 1f, 1f, 1f);
+            Mindow2.gray2 = whiteui.tint(0.2f, 0.2f, 0.2f, 1f);
             titleButtonSize = 32f;
 
             Pixmap fade = new Pixmap(128, 128);
@@ -46,14 +54,6 @@ public class MI2Utilities extends Mod{
             }
             Core.atlas.addRegion("fadeBackground", new TextureRegion(new Texture(fade)));
             fadeBackground = new TextureRegionDrawable(Core.atlas.find("fadeBackground"));
-
-            var whiteui = (TextureRegionDrawable)Tex.whiteui;
-            Mindow2.titleBarbgNormal = whiteui.tint(1f, 0.1f, 0.2f, 0.3f);
-            Mindow2.titleBarbgSnapped = whiteui.tint(1f, 0.1f, 0.2f, 0.2f);
-            Mindow2.white = whiteui.tint(1f, 1f, 1f, 1f);
-            Mindow2.gray2 = whiteui.tint(0.2f, 0.2f, 0.2f, 1f);
-            MI2USettings.init();
-            InputUtils.init();
 
             //anyone need max size < vanilla size, open an issue on Github
             maxSchematicSize = Math.max(maxSchematicSize, mi2ui.settings.getInt("maxSchematicSize", 64));
