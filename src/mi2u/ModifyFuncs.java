@@ -204,6 +204,7 @@ public class ModifyFuncs{
             st.add(cont).growX();
 
             mindow2s.each(m -> {
+                st.getSettings().add(m.settings.list);//foo's support.
                 st.addChild(new Table(){
                     {
                         m.settings.buildDescription(this);
