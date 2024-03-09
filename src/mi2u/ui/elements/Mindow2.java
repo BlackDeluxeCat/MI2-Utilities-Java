@@ -98,7 +98,7 @@ public class Mindow2 extends Table{
 
     public void setupTitle(){
         titlePane.touchable = Touchable.enabled;
-        titleBar.add(new MCollapser(titlePane, false).setDirection(true, false).setCollapsed(true, () -> minimized).setDuration(0.1f)).growX();
+        titleBar.add(new MCollapser(titlePane, false).setDirection(true, false).setCollapsed(true, () -> minimized).setDuration(0.2f)).growX();
 
         var toast = new Table();
         toast.button("" + Iconc.settings, textb, this::showSettings).size(titleButtonSize);
@@ -139,7 +139,6 @@ public class Mindow2 extends Table{
                 }else{
                     minimized = !minimized;
                     cury += (minimized ? 1f : -1f) * cont.getHeight() * scaleY;
-                    curx += (minimized ? 1f : -1f) * cont.getWidth() * scaleX;
                     minimize();
                 }
 
@@ -151,14 +150,14 @@ public class Mindow2 extends Table{
     @Override
     public void act(float delta){
         super.act(delta);
-        if(interval.get(1, 300)){
+        if(interval.get(1, 120)){
             boolean slideAnime = edgeSnap(edgesnap);
             slideAnime = slideAnime | elementSnap(tbSnap, tbSnapAlign, lrSnap == null && !Align.isLeft(edgesnap) && !Align.isRight(edgesnap));
             slideAnime = slideAnime | elementSnap(lrSnap, lrSnapAlign, tbSnap == null && !Align.isBottom(edgesnap) && !Align.isTop(edgesnap));
             if(slideAnime && MI2UTmp.v1.set(curx, cury).sub(x, y).len() >= 3f) interval.reset(2, 0);
         }
 
-        if(!interval.check(2, 400)){
+        if(!interval.check(2, 130)){
             setPosition(Mathf.lerp(x, curx, 0.4f), Mathf.lerp(y, cury, 0.4f));
         }else{
             setPosition(curx, cury);

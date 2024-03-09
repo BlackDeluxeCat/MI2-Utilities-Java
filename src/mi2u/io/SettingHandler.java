@@ -294,8 +294,6 @@ public class SettingHandler{
                 value.setText(sp.get((int)slider.getValue()));
             });
 
-            slider.change();
-
             table.stack(slider, content).growX().padTop(4f);
         }
     }

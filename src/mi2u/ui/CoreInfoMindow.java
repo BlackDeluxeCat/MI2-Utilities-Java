@@ -6,6 +6,7 @@ import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.scene.*;
+import arc.scene.event.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
@@ -15,6 +16,7 @@ import mi2u.*;
 import mi2u.input.*;
 import mi2u.struct.*;
 import mi2u.ui.elements.*;
+import mindustry.content.*;
 import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.game.Teams.*;
@@ -43,18 +45,12 @@ public class CoreInfoMindow extends Mindow2{
     public PopupTable[] itemCharts;
     public int itemTimerInt = 1;
 
-    public Prov<String> rollingTitle;
-
     public CoreInfoMindow(){
         super("CoreInfo", "coreInfo.MI2U", "@coreInfo.help");
         usedItems = new ObjectSet<>();
         usedUnits = new ObjectSet<>();
 
         titlePane.table(teamt -> {
-            teamt.add(new MCollapser(t -> {
-                t.label(() -> rollingTitle == null ? "" : rollingTitle.get()).minWidth(80f);
-                t.image().width(2f).growY().color(Color.white);
-            }, true).setCollapsed(true, () -> rollingTitle == null).setDirection(true, false));
             teamt.button(itemTimerInt + "s", textb, null).size(titleButtonSize).with(b -> {
                 b.clicked(() -> {
                     switch(itemTimerInt){
@@ -84,7 +80,7 @@ public class CoreInfoMindow extends Mindow2{
         itemRecoders = new FloatDataRecorder[content.items().size];
         itemCharts = new PopupTable[content.items().size];
         content.items().each(item -> {
-            itemRecoders[item.id] = new FloatDataRecorder(60);
+            itemRecoders[item.id] = new FloatDataRecorder(120);
             itemRecoders[item.id].getter = () -> core == null ? 0 : core.items.get(item);
             itemRecoders[item.id].titleGetter = () -> item.localizedName + ": ";
             itemCharts[item.id] = getItemChart(item);
@@ -145,107 +141,43 @@ public class CoreInfoMindow extends Mindow2{
     @Override
     public void setupCont(Table cont){
         cont.clear();
+        cont.defaults().minWidth(150f);
 
-        cont.table(ipt -> {
-            if(settings.getBool("showCoreItems")){
-                ipt.pane(iut -> {
-                    int i = 0;
+        Func3<Table, TextureRegion, Prov<CharSequence>, Cell<Stack>> func = (ut, icon, prov) -> ut.stack(new Image(icon){{color.set(1.0f, 1.0f, 1.0f, 0.8f);}}.setScaling(Scaling.fit), new Table(t -> t.label(prov).fontScale(0.83f)).right().bottom());
 
-                    for(Item item : content.items()){
-                        if(!usedItems.contains(item)) continue;
+        if(settings.getBool("showCoreItems")){
+            cont.pane(iut -> {
+                int i = 0;
+                int columns = settings.getInt("coreItemColumns", 4);
 
-                        var ir = itemRecoders[item.id];
+                for(Item item : content.items()){
+                    if(!usedItems.contains(item)) continue;
 
-                        var l = new Label(() -> core == null ? "" : (ir.get(0) - ir.get(itemTimerInt) >= 0 ? "[green]+" : "[coral]-") + Strings.autoFixed(Math.abs(ir.get(0) - ir.get(itemTimerInt))/(float)Math.min(itemTimerInt, ir.size()) , 1));
-                        l.setAlignment(Align.bottomRight);
-                        l.setFontScale(0.7f);
-                        l.setFillParent(true);
-                        l.setColor(1f,1f,1f,0.7f);
+                    var ir = itemRecoders[item.id];
 
-                        iut.stack(new Table(t -> {
-                                t.image(item.uiIcon).size(iconSmall);
-                                t.label(() -> core == null ? "0" : UI.formatAmount(core.items.get(item))).padRight(3).minWidth(52f).left();
-                        }), l).padLeft(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(item.localizedName).style(Styles.outlineLabel)).with(s -> {
-                            s.clicked(() -> {
-                                var chart = getItemChart(item);
-                                if(chart != null){
-                                    chart.setPositionInScreen(this.x - chart.getPrefWidth(), this.y);
-                                    chart.popup();
-                                }else{
-                                    Log.infoTag("MI2U", "Item Chart error. Contact the develop.");
-                                }
-                            });
-                            s.hovered(() -> rollingTitle = () -> item.localizedName + (core == null ? "" : ": " + core.items.get(item)));
-                            s.exited(() -> rollingTitle = null);
-                        });
+                    var l = new Label(() -> core == null ? "" : (ir.get(0) - ir.get(itemTimerInt) >= 0 ? "[green]+" : "[coral]-") + Strings.autoFixed(Math.abs(ir.get(0) - ir.get(itemTimerInt))/(float)Math.min(itemTimerInt, ir.size()) , 1));
+                    l.setStyle(Styles.outlineLabel);
+                    l.setAlignment(Align.bottomRight);
+                    l.setFontScale(0.8f);
+                    l.setFillParent(true);
+                    l.setColor(1f,1f,1f,0.7f);
 
-                        if(++i % 4 == 0){
-                            iut.row();
-                        }
-                    }
-                }).minWidth(300f).maxHeight(settings.getInt("itemsMaxHeight")).update(p -> {
-                    Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-                    if(e != null && e.isDescendantOf(p)){
-                        p.requestScroll();
-                    }else if(p.hasScroll()){
-                        Core.scene.setScrollFocus(null);
-                    }
-                }).with(c -> c.setFadeScrollBars(true));
-            }
-
-            if(settings.getBool("showPowerGraphs")){
-                ipt.row();
-                ipt.add(pg).growX().minWidth(300f);
-            }
-        }).grow();
-
-        //cont.row();
-
-        if(settings.getBool("showUnits")){
-            cont.pane(uut -> {
-                int i = 0, column = Mathf.clamp(usedUnits.size / Math.max(1, settings.getInt("unitsMaxHeight") / 24 - 2), 2, 8);
-                for(UnitType type : content.units()){
-                    //if(type.isHidden()) continue;
-                    if(!usedUnits.contains(type)) continue;
-                    uut.stack(new Image(type.uiIcon){{this.setColor(1f,1f,1f,0.8f);}},
-                        new Table(t -> t.label(() -> team.data().countType(type) > 0 ? UI.formatAmount(team.data().countType(type)) : "").get().setFontScale(0.7f)).right().bottom()
-                        ).size(iconSmall).padRight(3).tooltip(t -> t.background(Styles.black6).margin(4f).add(type.localizedName).style(Styles.outlineLabel)).get().clicked(() -> {
-                            //click to glance unit
-                            if(control.input instanceof InputOverwrite inp){
-                                if(team.data().unitCache(type) == null || team.data().unitCache(type).isEmpty()) return;
-                                unitIndex[type.id]++;
-                                if(unitIndex[type.id] >= team.data().unitCache(type).size) unitIndex[type.id] = 0;
-                                inp.pan(true, MI2UTmp.v1.set(team.data().unitCache(type).get(unitIndex[type.id]).x(), team.data().unitCache(type).get(unitIndex[type.id]).y()));
+                    iut.stack(new Table(t -> {
+                            t.image(item.uiIcon).size(iconSmall).scaling(Scaling.fit);
+                            t.label(() -> core == null ? "0" : UI.formatAmount(core.items.get(item))).minWidth(52f).padBottom(6f).left();
+                    }), l).tooltip(t -> t.background(Styles.black6).add(item.localizedName).style(Styles.outlineLabel)).with(s -> {
+                        s.clicked(() -> {
+                            var chart = getItemChart(item);
+                            if(chart != null){
+                                chart.setPositionInScreen(this.x - chart.getPrefWidth(), this.y);
+                                chart.popup();
                             }
                         });
-
-                    if(++i % column == 0){
-                        uut.row();
-                    }
-                }
-                uut.row();
-                uut.stack(new Image(Icon.unitsSmall){{this.setColor(1,0.6f,0,0.5f);}},
-                new Label(""){{
-                    this.setFillParent(true);
-                    this.setAlignment(Align.bottomRight);
-                    this.setFontScale(0.7f);
-                    this.update(() -> {
-                        //this.setFontScale(team.data().unitCount <= 1000 ? 0.65f : 0.5f);
-                        this.setText(core != null && team.data().unitCount > 0 ?
-                            (team.data().unitCount>1000 ? (team.data().unitCount/1000) + "\n":"") +
-                            Mathf.mod(team.data().unitCount, 1000) + "" : "");
                     });
-                }}
-                ).size(iconSmall).padRight(3);
-                uut.stack(new Label("" + Iconc.blockCoreNucleus){{this.setColor(1,0.6f,0,0.5f);}},
-                new Table(t -> t.label(() -> core != null && team.data().cores.size > 0 ? UI.formatAmount(team.data().cores.size) : "").get().setFontScale(0.7f)).right().bottom()
-                ).size(iconSmall).padRight(3).get().clicked(() -> {
-                    if(control.input instanceof InputOverwrite inp && team.cores() != null && !team.cores().isEmpty()){
-                        Building b = team.cores().random();
-                        inp.pan(true, MI2UTmp.v1.set(b.x, b.y));
-                    }
-                });
-            }).maxHeight(settings.getInt(mindowName + ".unitsMaxHeight")).update(p -> {
+
+                    if(++i % columns == 0) iut.row();
+                }
+            }).minWidth(100f).maxHeight(settings.getInt("itemsMaxHeight")).update(p -> {
                 Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
                 if(e != null && e.isDescendantOf(p)){
                     p.requestScroll();
@@ -255,8 +187,70 @@ public class CoreInfoMindow extends Mindow2{
             }).with(c -> c.setFadeScrollBars(true));
         }
 
+        if(settings.getBool("showPowerGraphs")){
+            cont.row();
+            cont.add(pg).fill();
+        }
+
+        if(settings.getBool("showUnits")){
+            cont.row();
+            cont.pane(uut -> {
+                uut.defaults().padRight(4f).size(iconMed);
+                int columns = Mathf.floor(cont.getPrefWidth() / (4f + iconMed));
+                int ind = 0;
+
+                for(UnitType type : content.units()){
+                    //if(type.isHidden()) continue;
+                    if(!usedUnits.contains(type)) continue;
+                    func.get(uut, type.uiIcon, () -> team.data().countType(type) > 0 ? UI.formatAmount(team.data().countType(type)) : "").tooltip(t -> t.background(Styles.black6).margin(4f).add(type.localizedName).style(Styles.outlineLabel)).get().clicked(() -> {
+                        //click to glance unit
+                        if(control.input instanceof InputOverwrite inp){
+                            if(team.data().unitCache(type) == null || team.data().unitCache(type).isEmpty()) return;
+                            unitIndex[type.id]++;
+                            if(unitIndex[type.id] >= team.data().unitCache(type).size) unitIndex[type.id] = 0;
+                            inp.pan(true, MI2UTmp.v1.set(team.data().unitCache(type).get(unitIndex[type.id]).x(), team.data().unitCache(type).get(unitIndex[type.id]).y()));
+                        }
+                    });
+                    if(++ind % columns == 0) uut.row();
+                }
+
+                func.get(uut, Icon.unitsSmall.getRegion(), () -> core != null ? team.data().unitCount + "" : "");
+                if(++ind % columns == 0) uut.row();
+
+                func.get(uut, Blocks.coreNucleus.uiIcon, () -> core != null && team.data().cores.size > 0 ? UI.formatAmount(team.data().cores.size) : "").get().clicked(() -> {
+                    if(control.input instanceof InputOverwrite inp && team.cores() != null && !team.cores().isEmpty()){
+                        Building b = team.cores().random();
+                        inp.pan(true, MI2UTmp.v1.set(b.x, b.y));
+                    }
+                });
+
+                uut.update(() -> {
+                    if(interval.get(1, 180f)){
+                        var children = uut.getChildren().copy();
+                        uut.clear();
+                        uut.setWidth(0f);
+                        cont.setWidth(cont.getPrefWidth());
+                        int col = Mathf.floor((cont.getPrefWidth() - 10f) / Scl.scl(4f + iconMed));
+                        int i = 0;
+                        for(var e : children){
+                            uut.add(e);
+                            if(++i % col == 0) uut.row();
+                        }
+                    }
+                });
+            }).growX().maxHeight(settings.getInt(".unitsMaxHeight")).update(p -> {
+                Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
+                if(e != null && e.isDescendantOf(p)){
+                    p.requestScroll();
+                }else if(p.hasScroll()){
+                    Core.scene.setScrollFocus(null);
+                }
+            }).with(c -> c.setFadeScrollBars(true));;
+        }
+
         //buildplan popup table
         if(buildPlanTable == null) buildPlanTable = new PopupTable();
+        buildPlanTable.visible(() -> ui.hudfrag.shown);
         buildPlanTable.setBackground(Styles.black6);
         buildPlanTable.update(() -> {
             buildPlanTable.setPositionInScreen(this.x, this.y - buildPlanTable.getPrefHeight());
@@ -354,6 +348,7 @@ public class CoreInfoMindow extends Mindow2{
     public void initSettings(){
         super.initSettings();
         settings.checkPref("showCoreItems", true, b -> rebuild());
+        settings.sliderPref("coreItemColumns", 4, 2, 16, 1, i -> "" + i, i -> rebuild());
         settings.checkPref("showUnits", true, b -> rebuild());
         settings.checkPref("showPowerGraphs", true, b -> rebuild());
         settings.textPref("itemsMaxHeight", String.valueOf(150), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, s -> rebuild(), intParser);
@@ -402,6 +397,8 @@ public class CoreInfoMindow extends Mindow2{
                     };
                     this.add(ch).fill().size(200f,120f);
                     this.row();
+                    this.label(() -> itemRecoders[item.id].titleGetter.get() + (core == null ? 0 : core.items.get(item))).growX();
+                    this.row();
                     this.label(() -> {
                         var chart = itemRecoders[item.id];
                         if(chart != null && chart.size() > 0){
@@ -411,7 +408,7 @@ public class CoreInfoMindow extends Mindow2{
                             }else{
                                 delta = (chart.get(0) - chart.get(9))/10f;
                             }
-                            return chart.titleGetter.get() + (delta > 0 ? "[green]+":"[red]") + Strings.autoFixed(delta, 2) + "/s(10s)";
+                            return (delta > 0 ? "[green]+":"[red]") + Strings.autoFixed(delta, 2) + "/s(10s)";
                         }
                         return (chart != null ? chart.titleGetter.get():"") + "No Data";
                     }).growX();
@@ -425,7 +422,7 @@ public class CoreInfoMindow extends Mindow2{
                             }else{
                                 delta = (chart.get(0) - chart.get(chart.size() - 1))/(float)chart.size();
                             }
-                            return chart.titleGetter.get() + (delta > 0 ? "[green]+":"[red]") + Strings.autoFixed(delta, 2) + "/s(60s)";
+                            return (delta > 0 ? "[green]+":"[red]") + Strings.autoFixed(delta, 2) + "/s(60s)";
                         }
                         return (chart != null ? chart.titleGetter.get():"") + "No Data";
                     }).growX();
