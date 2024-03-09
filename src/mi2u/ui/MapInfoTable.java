@@ -73,13 +73,12 @@ public class MapInfoTable extends Table{
         });
 
         //ui on MI2U
-        button("@mapInfo.buttons.allAttrs", textb , () -> mapAttsDialog.show()).with(funcSetTextb).growX();
-        row();
-        button("@mapInfo.buttons.allWaves", textb, () -> {
+        button(Iconc.map + "", textb , () -> mapAttsDialog.show()).with(funcSetTextb).size(titleButtonSize);
+        button(Iconc.waves + "", textb, () -> {
             wavesPopup.popup(Align.top);
             wavesPopup.snapTo(this);
             wavesPopup.keepInScreen();
-        }).with(funcSetTextb).growX();
+        }).with(funcSetTextb).size(titleButtonSize);
 
         //map attributes
         mapAttsDialog = new BaseDialog("@mapInfo.buttons.allAttrs");

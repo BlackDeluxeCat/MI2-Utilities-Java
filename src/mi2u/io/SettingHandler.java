@@ -246,7 +246,11 @@ public class SettingHandler{
         }
 
         public TextButton miniButton(){
-            var b = new TextButton(title);
+            return miniButton(title);
+        }
+
+        public TextButton miniButton(String text){
+            var b = new TextButton(text);
             b.setStyle(textbtoggle);
             funcSetTextb.get(b);
             b.clicked(() -> {

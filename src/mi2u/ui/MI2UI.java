@@ -25,12 +25,11 @@ import static mindustry.Vars.*;
 
 public class MI2UI extends Mindow2{
     public static PopupTable popup = new PopupTable();
-    public MapInfoTable mapinfo =  new MapInfoTable();
+    public MapInfoTable mapinfo;
 
     private long runTime = 0, lastRunTime = 0, realRunTime = 0, lastRealRun = 0;
 
-    protected TabsTable tabs = new TabsTable(true);;
-    public int tabId;
+    public boolean showQuickSettings;
 
     public MI2UI(){
         super("MI2UI", "main.MI2U", "@main.help");
@@ -57,9 +56,6 @@ public class MI2UI extends Mindow2{
                         }
                     });
                 }
-
-                //RTS form table
-                if(control.input.commandMode) tabId = 2;
             }
         });
 
@@ -69,160 +65,114 @@ public class MI2UI extends Mindow2{
         });
 
         titlePane.clear();
-        titlePane.table(t -> {
-            t.defaults().size(titleButtonSize);
-            t.button("" + Iconc.play, textb, () -> {
-                tabId = 0;
-                tabs.toggle(tabId);
-            }).color(Color.yellow);
-            t.button("" + Iconc.info, textb, () -> {
-                tabId = 1;
-                tabs.toggle(tabId);
-            }).color(Color.cyan);
-            t.button("" + Iconc.settings, textb, () -> {
-                tabId = 2;
-                tabs.toggle(tabId);
-            }).color(Color.green);
-        });
-
-        var play = new Table();
-        play.table(t -> {
-            t.button("" + Iconc.refresh, textb, () -> {
-                Call.sendChatMessage("/sync");
-            }).minSize(36f).with(funcSetTextb);
-
-            t.button("@main.buttons.rebuild", textb, MI2UFuncs::unitRebuildBlocks).minSize(36f).with(funcSetTextb);
-
-            //The update rate is based on button.update(), and affected by lagging
-            t.button("Speeding", textbtoggle, SpeedController::switchUpdate).update(b -> {
-                b.setChecked(SpeedController.update);
-                b.setText(Core.bundle.get("main.buttons.speeding") + "x" + Strings.autoFixed(SpeedController.scl, 2));
-                SpeedController.update();
-                b.getLabel().setFontScale(1f);
-                b.getLabel().layout();
-                b.getLabel().setFontScale(Mathf.clamp((b.getWidth()- 8f - 16f - 8f) / b.getLabel().getGlyphLayout().width, 0.01f, 1f));
-            }).with(funcSetTextb).with(b -> {
-                b.margin(4f);
-                b.table(bii -> {
-                    bii.image(Core.atlas.find("mi2-utilities-java-ui-speed")).size(24f).update(img -> {
-                        img.setOrigin(Align.center);
-                        if(SpeedController.update) img.setRotation(Mathf.log2(SpeedController.scl) * 45f);
-                        else img.setRotation(0f);
-                    });
-                    bii.add().grow();
-                }).grow();
-                b.getLabelCell().expand(false, false).fill(false).width(0.5f);
-                b.getLabel().setAlignment(Align.right);
-                b.getCells().swap(0,1);
-            }).grow();
-        }).growX();
-        play.row();
-        play.table(tt -> {
-            tt.button(b -> {
-                b.image(Core.atlas.drawable("mi2-utilities-java-ui-aicfg")).size(24f).scaling(Scaling.fit);
-            }, textb, () -> {
-                popup.clear();
-                popup.addCloseButton();
-                popup.addDragBar();
-                popup.addInGameVisible();
-                popup.setSize(300f, 200f);
-                popup.margin(4f).setBackground(Styles.black8);
-                popup.image().color(Color.cyan).growX().height(8f);
-                popup.row();
-                popup.pane(p -> {
-                    for(var mode : fullAI.modes){
-                        p.table(t -> {
-                            t.setBackground(Mindow2.gray2);
-                            t.button(b -> {
-                                b.image().grow().update(img -> img.setColor(mode.enable ? Color.acid : Color.red));
-                            }, textb, () -> {
-                                mode.enable = !mode.enable;
-                            }).size(16f);
-                            if(mode.bimg != null){
-                                t.image(mode.bimg).size(18f).scaling(Scaling.fit);
-                            }else{
-                                t.add(mode.btext).color(Color.sky).left();
-                            }
-                            t.label(() -> mode.configUIExpand ? "-" : ">").grow().get().clicked(() -> {
-                                mode.configUIExpand = !mode.configUIExpand;
-                            });
-                        }).growX().minHeight(18f).padTop(8f);
-                        p.row();
-                        p.add(new MCollapser(mode::buildConfig, true).setCollapsed(false, () -> !mode.configUIExpand)).growX();
-                        p.row();
-                    }
-                }).growX().update(p -> {
-                    Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-                    if(e != null && e.isDescendantOf(p)) {
-                        p.requestScroll();
-                    }else if(p.hasScroll()){
-                        Core.scene.setScrollFocus(null);
-                    }
-                }).maxHeight(Core.graphics.getHeight()*0.6f/Scl.scl());
-                popup.popup();
-                popup.update(popup::keepInScreen);
-                popup.setPositionInScreen(Core.graphics.getWidth()/2f, Core.graphics.getHeight()/2f);
-            }).grow();
-            tt.table(ttt -> {
-                fullAI.modes.each(mode -> {
-                    ttt.button(bbb -> {
-                        if(mode.bimg != null){
-                            bbb.image(mode.bimg).size(24f).scaling(Scaling.fit).pad(4f);
-                        }else{
-                            bbb.add(mode.btext).align(Align.center);
-                        }
-                    }, textbtoggle, () -> {
-                        mode.enable = !mode.enable;
-                    }).checked(b -> mode.enable).minSize(32f).grow();
-                });
-            }).grow();
-        });
-
-        var info = new Table();
-        info.table(t -> {
-            t.table(timet -> {
-                timet.label(() -> Iconc.save + Strings.formatMillis(control.saves.getTotalPlaytime())).minWidth(40f).padRight(8f);
-                timet.row();
-                timet.label(() -> Iconc.play + Strings.formatMillis(runTime)).minWidth(40f).padRight(8f).get();
-                timet.row();
-                timet.label(() -> Iconc.pause + Strings.formatMillis(realRunTime)).minWidth(40f).get();
-            });
-            t.add(mapinfo).growX();
-        }).growX();
-
-        var set = new Table();
-        set.table(t -> {
-            t.defaults().minWidth(16f);
-            if(settings.getSetting("disableWreck") instanceof CheckSetting ce) t.add(ce.miniButton());
-            if(settings.getSetting("disableUnit") instanceof CheckSetting ce) t.add(ce.miniButton());
-            if(settings.getSetting("disableBullet") instanceof CheckSetting ce) t.add(ce.miniButton());
-            if(settings.getSetting("disableBuilding") instanceof CheckSetting ce) t.add(ce.miniButton());
-            t.row();
-            if(settings.getSetting("enUnitHpBar") instanceof CheckSetting ce) t.add(ce.miniButton());
-            if(settings.getSetting("enBlockHpBar") instanceof CheckSetting ce) t.add(ce.miniButton());
-            if(settings.getSetting("enUnitLogic") instanceof CheckSetting ce) t.add(ce.miniButton());
-            if(settings.getSetting("enUnitHitbox") instanceof CheckSetting ce) t.add(ce.miniButton());
-            if(settings.getSetting("enUnitPath") instanceof CheckSetting ce) t.add(ce.miniButton());
-        }).growX();
-
-        set.row();
-        set.table(t -> {
-            t.defaults().minSize(16f);
-            if(settings.getSetting("enDistributionReveal") instanceof CheckSetting ce) t.add(ce.miniButton());
-            if(settings.getSetting("drevealBridge") instanceof CheckSetting ce) t.add(ce.miniButton());
-            if(settings.getSetting("drevealJunction") instanceof CheckSetting ce) t.add(ce.miniButton());
-            if(settings.getSetting("drevealUnloader") instanceof CheckSetting ce) t.add(ce.miniButton());
-            if(settings.getSetting("drevealInventory") instanceof CheckSetting ce) t.add(ce.miniButton());
-        });
-
-        tabs.queue(play, info, set);
+        titlePane.add(mapinfo = new MapInfoTable()).height(titleButtonSize);
+        titlePane.button("" + Iconc.settings, textb, () -> {
+            showQuickSettings = !showQuickSettings;
+        }).color(Color.green).size(titleButtonSize);
+        titlePane.image().growY().width(2f);
     }
 
     @Override
     public void setupCont(Table cont){
         cont.clear();
-        cont.add(tabs);
-        tabs.toggle(tabId);
+        cont.table(play -> {
+            play.table(t -> {
+                t.button("" + Iconc.refresh, textb, () -> Call.sendChatMessage("/sync")).minSize(36f).with(funcSetTextb);
+
+                t.button("@main.buttons.rebuild", textb, MI2UFuncs::unitRebuildBlocks).minSize(36f).with(funcSetTextb);
+
+                //The update rate is based on button.update(), and affected by lagging
+                t.button("Speeding", textbtoggle, SpeedController::switchUpdate).update(b -> {
+                    b.setChecked(SpeedController.update);
+                    b.setText(Core.bundle.get("main.buttons.speeding") + "x" + Strings.autoFixed(SpeedController.scl, 2));
+                    SpeedController.update();
+                    b.getLabel().setFontScale(1f);
+                    b.getLabel().layout();
+                    b.getLabel().setFontScale(Mathf.clamp((b.getWidth()- 8f - 16f - 8f) / b.getLabel().getGlyphLayout().width, 0.01f, 1f));
+                }).with(funcSetTextb).with(b -> {
+                    b.margin(4f);
+                    b.table(bii -> {
+                        bii.image(Core.atlas.find("mi2-utilities-java-ui-speed")).size(24f).update(img -> {
+                            img.setOrigin(Align.center);
+                            if(SpeedController.update) img.setRotation(Mathf.log2(SpeedController.scl) * 45f);
+                            else img.setRotation(0f);
+                        });
+                        bii.add().grow();
+                    }).grow();
+                    b.getLabelCell().expand(false, false).fill(false).width(0.5f);
+                    b.getLabel().setAlignment(Align.right);
+                    b.getCells().swap(0,1);
+                }).grow();
+            }).growX();
+            play.row();
+            play.table(tt -> {
+                tt.button(b -> {
+                    b.image(Core.atlas.drawable("mi2-utilities-java-ui-aicfg")).size(24f).scaling(Scaling.fit);
+                }, textb, () -> {
+                    popup.clear();
+                    popup.addCloseButton();
+                    popup.addDragBar();
+                    popup.addInGameVisible();
+                    popup.setSize(300f, 200f);
+                    popup.margin(4f).setBackground(Styles.black8);
+                    popup.image().color(Color.cyan).growX().height(8f);
+                    popup.row();
+                    popup.pane(p -> {
+                        for(var mode : fullAI.modes){
+                            p.table(t -> {
+                                t.setBackground(Mindow2.gray2);
+                                t.button(b -> {
+                                    b.image().grow().update(img -> img.setColor(mode.enable ? Color.acid : Color.red));
+                                }, textb, () -> {
+                                    mode.enable = !mode.enable;
+                                }).size(16f);
+                                if(mode.bimg != null){
+                                    t.image(mode.bimg).size(18f).scaling(Scaling.fit);
+                                }else{
+                                    t.add(mode.btext).color(Color.sky).left();
+                                }
+                                t.label(() -> mode.configUIExpand ? "-" : ">").grow().get().clicked(() -> {
+                                    mode.configUIExpand = !mode.configUIExpand;
+                                });
+                            }).growX().minHeight(18f).padTop(8f);
+                            p.row();
+                            p.add(new MCollapser(mode::buildConfig, true).setCollapsed(false, () -> !mode.configUIExpand)).growX();
+                            p.row();
+                        }
+                    }).growX().update(p -> {
+                        Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
+                        if(e != null && e.isDescendantOf(p)) {
+                            p.requestScroll();
+                        }else if(p.hasScroll()){
+                            Core.scene.setScrollFocus(null);
+                        }
+                    }).maxHeight(Core.graphics.getHeight()*0.6f/Scl.scl());
+                    popup.popup();
+                    popup.update(popup::keepInScreen);
+                    popup.setPositionInScreen(Core.graphics.getWidth()/2f, Core.graphics.getHeight()/2f);
+                }).grow();
+                tt.table(ttt -> {
+                    fullAI.modes.each(mode -> {
+                        ttt.button(bbb -> {
+                            if(mode.bimg != null){
+                                bbb.image(mode.bimg).size(24f).scaling(Scaling.fit).pad(4f);
+                            }else{
+                                bbb.add(mode.btext).align(Align.center);
+                            }
+                        }, textbtoggle, () -> {
+                            mode.enable = !mode.enable;
+                        }).checked(b -> mode.enable).minSize(32f).grow();
+                    });
+                }).grow();
+            });
+            play.row();
+            play.table(timet -> {
+                timet.defaults().pad(2f).growX().minWidth(40f);
+                timet.label(() -> Iconc.save + Strings.formatMillis(control.saves.getTotalPlaytime())).fontScale(0.7f);
+                timet.label(() -> Iconc.play + Strings.formatMillis(runTime)).fontScale(0.7f);
+                timet.label(() -> Iconc.pause + Strings.formatMillis(realRunTime)).fontScale(0.7f);
+            }).growX();
+        });
 
         cont.row();
 
@@ -260,6 +210,33 @@ public class MI2UI extends Mindow2{
                 }
             }).growX();
         }, true).setDirection(false, true).setCollapsed(false, () -> !control.input.commandMode)).growX();
+
+        cont.row();
+
+        cont.add(new MCollapser(m -> {
+            m.defaults().growX();
+            m.table(t -> {
+                if(settings.getSetting("disableWreck") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.eyeOff + Iconc.teamDerelict));
+                if(settings.getSetting("disableUnit") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.eyeOff + Iconc.alphaaaa));
+                if(settings.getSetting("disableBullet") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.eyeOff + Iconc.unitAnthicusMissile));
+                if(settings.getSetting("disableBuilding") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.eyeOff + Iconc.blockMechanicalDrill));
+            }).row();
+
+            m.table(t -> {
+                if(settings.getSetting("enUnitHpBar") instanceof CheckSetting ce) t.add(ce.miniButton("HP" + Iconc.unitDagger));
+                if(settings.getSetting("enBlockHpBar") instanceof CheckSetting ce) t.add(ce.miniButton("HP" + Iconc.teamDerelict));
+                if(settings.getSetting("enUnitLogic") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.blockMicroProcessor + Iconc.unitDagger));
+                if(settings.getSetting("enUnitPath") instanceof CheckSetting ce) t.add(ce.miniButton("Path" + Iconc.planet + Iconc.unitDagger));
+            }).row();
+
+            m.table(t -> {
+                if(settings.getSetting("enDistributionReveal") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.zoom + Iconc.distribution));
+                if(settings.getSetting("drevealBridge") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.blockBridgeConveyor));
+                if(settings.getSetting("drevealJunction") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.blockJunction));
+                if(settings.getSetting("drevealUnloader") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.blockUnloader));
+                if(settings.getSetting("drevealInventory") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.blockVault));
+            }).row();
+        }, true).setDirection(true, true).setCollapsed(true, () -> !showQuickSettings)).growX();
     }
 
     @Override
