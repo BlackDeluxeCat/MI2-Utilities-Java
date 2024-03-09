@@ -1,9 +1,15 @@
 package mi2u;
 
+import arc.*;
 import arc.math.*;
 import arc.math.geom.*;
+import arc.struct.*;
+import arc.util.*;
+import mindustry.core.*;
 import mindustry.entities.units.*;
 import mindustry.game.Teams.*;
+import mindustry.gen.*;
+import mindustry.input.*;
 
 import static mindustry.Vars.*;
 
@@ -11,15 +17,35 @@ import static mindustry.Vars.*;
 public class MI2UFuncs{
     public static Vec2 tmp1 = new Vec2(), tmp2 = new Vec2(), tmp3 = new Vec2(), tmp4 = new Vec2();
     public static void unitRebuildBlocks(){
-        if(!state.isGame() || !player.unit().canBuild()) return;
+        if(!state.isGame() || player.unit() == null || !player.unit().canBuild()) return;
         int p = 0;
-        for(BlockPlan block : state.teams.get(player.team()).plans){
-            if(world.tile(block.x, block.y) != null && world.tile(block.x, block.y).block().id == block.block) state.teams.get(player.team()).plans.remove(block);
-            if(Mathf.len(block.x - player.tileX(), block.y - player.tileY()) >= 200) continue;
-            p++;
-            if(p > 511) break;
-            player.unit().addBuild(new BuildPlan(block.x, block.y, block.rotation, content.block(block.block), block.config));
+        for(BlockPlan plan : state.teams.get(player.team()).plans){
+            if(world.tile(plan.x, plan.y) != null && world.tile(plan.x, plan.y).block().id == plan.block) state.teams.get(player.team()).plans.remove(plan);
+            if(Mathf.len(plan.x - player.tileX(), plan.y - player.tileY()) >= 200) continue;
+            if(p++ > 511) break;
+            player.unit().addBuild(new BuildPlan(plan.x, plan.y, plan.rotation, content.block(plan.block), plan.config));
         }
+    }
+
+    public static int lastTouches = 0;
+    /**删除指定区域并转化为待放置的蓝图*/
+    public static void deleteToScheme(){
+        if(!state.isGame() || player.unit() == null || !player.unit().canBuild() || !control.input.selectPlans.isEmpty()) return;
+
+        boolean touchUp = lastTouches != 0 && ((lastTouches = Core.input.getTouches()) == 0);
+
+        if((control.input instanceof DesktopInput di && Core.input.keyRelease(Binding.break_block))){
+            int rawCursorX = World.toTile(Core.input.mouseWorld().x), rawCursorY = World.toTile(Core.input.mouseWorld().y);
+            control.input.lastSchematic = schematics.create(di.schemX, di.schemY, rawCursorX, rawCursorY);
+            control.input.selectPlans.add(schematics.toPlans(control.input.lastSchematic, rawCursorX, rawCursorY));
+        }else if(control.input instanceof MobileInput mi && mi.isBreaking() && touchUp){
+            control.input.selectPlans.add(schematics.toPlans(schematics.create(mi.lineStartX, mi.lineStartY, mi.lastLineX, mi.lastLineY), player.tileX(), player.tileY()));
+        }
+    }
+
+    public static void cleanGhostBlock(){
+        if(!state.isGame()) return;
+        Call.deletePlans(player, Seq.with(state.teams.get(player.team()).plans).mapInt(plan -> Point2.pack(plan.x, plan.y)).toArray());
     }
 
     //判断两条线段是否有交点，如果有，交点坐标输出到out

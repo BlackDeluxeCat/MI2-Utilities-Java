@@ -65,10 +65,17 @@ public class MI2UI extends Mindow2{
         });
 
         titlePane.clear();
+        titlePane.button("Sy\nnc", textb, () -> {
+            Call.sendChatMessage("/sync");
+        }).color(Color.green).size(titleButtonSize).with(tb -> {
+            tb.getLabel().setFontScale(0.8f);
+        });
         titlePane.add(mapinfo = new MapInfoTable()).height(titleButtonSize);
-        titlePane.button("" + Iconc.settings, textb, () -> {
+        titlePane.button("" + Iconc.settings, textbtoggle, () -> {
             showQuickSettings = !showQuickSettings;
-        }).color(Color.green).size(titleButtonSize);
+        }).size(titleButtonSize).checked(tb -> showQuickSettings).with(tb -> {
+            tb.getLabel().setColor(Color.gold);
+        });
         titlePane.image().growY().width(2f);
     }
 
@@ -77,9 +84,28 @@ public class MI2UI extends Mindow2{
         cont.clear();
         cont.table(play -> {
             play.table(t -> {
-                t.button("" + Iconc.refresh, textb, () -> Call.sendChatMessage("/sync")).minSize(36f).with(funcSetTextb);
+                t.button("DG", textb, MI2UFuncs::cleanGhostBlock).minSize(36f).with(funcSetTextb).disabled(b -> player.team().data().plans.isEmpty()).with(tb -> {
+                    var tool = Tooltip.Tooltips.getInstance().create("@main.buttons.cleanGhost");
+                    tool.allowMobile = true;
+                    tb.addListener(tool);
+                });
 
-                t.button("@main.buttons.rebuild", textb, MI2UFuncs::unitRebuildBlocks).minSize(36f).with(funcSetTextb);
+                t.button("RB", textb, MI2UFuncs::unitRebuildBlocks).minSize(36f).with(funcSetTextb).with(tb -> {
+                    var tool = Tooltip.Tooltips.getInstance().create("@main.buttons.rebuild");
+                    tool.allowMobile = true;
+                    tb.addListener(tool);
+                });
+
+                /*
+                t.button("DS", textbtoggle, () -> {}).minSize(36f).with(funcSetTextb).with(tb -> {
+                    var tool = Tooltip.Tooltips.getInstance().create("@main.buttons.deleteToScheme");
+                    tool.allowMobile = true;
+                    tb.addListener(tool);
+                    tb.update(() -> {
+                        if(tb.isChecked()) MI2UFuncs.deleteToScheme();
+                    });
+                });
+                 */
 
                 //The update rate is based on button.update(), and affected by lagging
                 t.button("Speeding", textbtoggle, SpeedController::switchUpdate).update(b -> {
