@@ -183,7 +183,7 @@ public class SettingHandler{
 
         @Override
         public void add(SettingsTable table){
-            table.table(this::rebuild);
+            table.table(this::rebuild).growX().row();
         }
 
         public void rebuild(Table table){
