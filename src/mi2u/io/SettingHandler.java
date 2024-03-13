@@ -283,9 +283,11 @@ public class SettingHandler{
         public void build(Table table){
             Slider slider = new Slider(min, max, step, false);
 
-            slider.setValue(settings.getInt(name, def));
+            int i = settings.getInt(name, def);
 
-            Label value = new Label("", Styles.outlineLabel);
+            slider.setValue(i);
+
+            Label value = new Label(sp.get(i), Styles.outlineLabel);
             Table content = new Table();
             content.add(title, Styles.outlineLabel).left().growX().wrap();
             content.add(value).padLeft(10f).right();
