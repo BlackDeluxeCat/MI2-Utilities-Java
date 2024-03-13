@@ -143,7 +143,7 @@ public class CoreInfoMindow extends Mindow2{
         cont.clear();
         cont.defaults().minWidth(150f);
 
-        Func3<Table, TextureRegion, Prov<CharSequence>, Cell<Stack>> func = (ut, icon, prov) -> ut.stack(new Image(icon){{color.set(1.0f, 1.0f, 1.0f, 0.8f);}}.setScaling(Scaling.fit), new Table(t -> t.label(prov).fontScale(0.83f)).right().bottom());
+        Func3<Table, TextureRegion, Prov<CharSequence>, Cell<Stack>> func = (ut, icon, prov) -> ut.stack(new Image(icon){{color.set(1.0f, 1.0f, 1.0f, 0.8f);}}.setScaling(Scaling.fit), new Table(t -> t.label(prov).fontScale(0.72f).style(Styles.outlineLabel)).right().bottom());
 
         if(settings.getBool("showCoreItems")){
             cont.pane(iut -> {
@@ -193,10 +193,12 @@ public class CoreInfoMindow extends Mindow2{
         }
 
         if(settings.getBool("showUnits")){
+            int iconSize = settings.getInt("unitIconSize");
+
             cont.row();
             cont.pane(uut -> {
-                uut.defaults().padRight(4f).size(iconMed);
-                int columns = Mathf.floor(cont.getPrefWidth() / (4f + iconMed));
+                uut.defaults().padRight(4f).size(iconSize);
+                int columns = Mathf.floor(cont.getPrefWidth() / (4f + iconSize));
                 int ind = 0;
 
                 for(UnitType type : content.units()){
@@ -225,12 +227,12 @@ public class CoreInfoMindow extends Mindow2{
                 });
 
                 uut.update(() -> {
-                    if(interval.get(1, 180f)){
+                    if(interval.get(1, 120f)){
                         var children = uut.getChildren().copy();
                         uut.clear();
                         uut.setWidth(0f);
                         cont.setWidth(cont.getPrefWidth());
-                        int col = Mathf.floor((cont.getPrefWidth() - 10f) / Scl.scl(4f + iconMed));
+                        int col = Mathf.floor((cont.getPrefWidth() - 10f) / Scl.scl(4f + iconSize));
                         int i = 0;
                         for(var e : children){
                             uut.add(e);
@@ -350,6 +352,7 @@ public class CoreInfoMindow extends Mindow2{
         settings.checkPref("showCoreItems", true, b -> rebuild());
         settings.sliderPref("coreItemColumns", 4, 2, 16, 1, i -> "" + i, i -> rebuild());
         settings.checkPref("showUnits", true, b -> rebuild());
+        settings.sliderPref("unitIconSize", 28, 12, 64, 4, i -> "" + i, i -> rebuild());
         settings.checkPref("showPowerGraphs", true, b -> rebuild());
         settings.textPref("itemsMaxHeight", String.valueOf(150), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, s -> rebuild(), intParser);
         settings.textPref("unitsMaxHeight", String.valueOf(200), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 50 && Strings.parseInt(s) <= 500, s -> rebuild(), intParser);
