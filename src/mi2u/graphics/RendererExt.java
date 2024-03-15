@@ -57,6 +57,8 @@ public class RendererExt{
     public static boolean enOverdriveZone;
     public static boolean enMenderZone;
     public static boolean enTurretZone;
+    public static boolean turretZoneBlockColor;
+    public static boolean turretZoneAAColor;
     public static boolean enBlockHpBar;
     public static boolean enDistributionReveal;
     public static boolean drevealBridge;
@@ -71,6 +73,24 @@ public class RendererExt{
 
     public static void initBase(){
         BuildingInventory.init();
+
+        TurretZoneDrawer.turretColorMap = new int[content.blocks().size];
+        content.blocks().each(b -> {
+            var region = Core.atlas.getPixmap(b.fullIcon);
+            var color = MI2UTmp.c2;
+            float s = 0f;
+            for(int x = 0; x < region.width; x++){
+                for(int y = 0; y < region.height; y++){
+                    color.set(region.get(x, y));
+                    if(color.saturation() * color.value() > s){
+                        s = color.saturation() * color.value();
+                        MI2UTmp.c1.set(color);
+                    }
+                }
+            }
+            TurretZoneDrawer.turretColorMap[b.id] = MI2UTmp.c1.saturation(1f).rgba8888();
+        });
+
         Events.on(EventType.WorldLoadEvent.class, e -> {
             players.clear();
             hiddenUnit.clear();
@@ -101,6 +121,8 @@ public class RendererExt{
         enOverdriveZone = mi2ui.settings.getBool("enOverdriveZone");
         enMenderZone = mi2ui.settings.getBool("enMenderZone");
         enTurretZone = mi2ui.settings.getBool("enTurretRangeZone");
+        turretZoneBlockColor = mi2ui.settings.getInt("turretZoneColorStyle") == 2;
+        turretZoneAAColor = mi2ui.settings.getInt("turretZoneColorStyle") == 1;
         enBlockHpBar = mi2ui.settings.getBool("enBlockHpBar");
         enDistributionReveal = mi2ui.settings.getBool("enDistributionReveal");
         drevealBridge = mi2ui.settings.getBool("drevealBridge");
@@ -654,14 +676,16 @@ public class RendererExt{
         float z = Draw.z();
         float range = btb.range();
 
-        Draw.color(btb.team.color);
         Draw.z(TurretZoneDrawer.getLayer(btb.team.id));
-        Draw.alpha(0.05f);
-        Fill.poly(btb.x, btb.y, (int)(range) / 4, range);
 
-        Lines.stroke(2f);
+        Lines.stroke(3f);
+        Draw.color(btb.team.color);
         Draw.alpha(animatedshields ? 1f : 0.5f);
-        Lines.circle(btb.x, btb.y, range);
+        Lines.circle(btb.x, btb.y, range + 1);
+
+        Draw.color(turretZoneAAColor ? (((Turret)btb.block).targetAir ? Color.cyan : Color.darkGray) : turretZoneBlockColor ? MI2UTmp.c1.set(TurretZoneDrawer.blockColor(btb.block.id)) : btb.team.color);
+        Draw.alpha(animatedshields ? 0.3f : 0.08f);
+        Fill.poly(btb.x, btb.y, (int)(range) / 3, range);
 
         Draw.z(z);
         Draw.color();

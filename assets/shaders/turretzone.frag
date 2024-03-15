@@ -1,5 +1,5 @@
 #define HIGHP
-#define wide 2.0
+#define wide 3.0
 uniform sampler2D u_texture;
 uniform vec2 u_texsize;
 uniform vec2 u_invsize;
@@ -29,10 +29,10 @@ void main(){
     if(length(mined.rgb) < 0.0001 && length(color.rgb) > 0.01){
         gl_FragColor = vec4(color.rgb, mod(coords.y / 2.0 + coords.x / 4.0 - u_time / 4.0, 32.0) / 24.0 + 0.5);
     }else{
-        if(color.a >= 0.2 && color.a < 0.9){
-            color.a = 0.2;
-        }else if(color.a >= 0.9){
-            color.a = 0.4;
+        if(color.a >= 0.2 && color.a < 0.99){
+            color.a = 0.25;
+        }else if(color.a >= 0.99){
+            color.a = 0.3;
         }
         gl_FragColor = color;
     }
