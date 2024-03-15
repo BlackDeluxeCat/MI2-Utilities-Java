@@ -10,6 +10,7 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.pooling.*;
 import mi2u.*;
+import mi2u.Pathfinder;
 import mi2u.ui.*;
 import mindustry.ai.*;
 import mindustry.ai.types.*;
@@ -41,6 +42,7 @@ public class RendererExt{
     protected static Interval interval = new Interval();
     protected static ObjectMap<Unit, Vec2> players = new ObjectMap<>();
     protected static Seq<Unit> hiddenUnit = new Seq<>();
+    protected static Pathfinder pathfinder = new Pathfinder();
 
     public static Field itemBridgeBuffer = MI2Utils.getField(BufferedItemBridge.BufferedItemBridgeBuild.class, "buffer"),
             itemBridgeBufferBuffer = MI2Utils.getField(ItemBuffer.class, "buffer"), itemBridgeBufferIndex = MI2Utils.getField(ItemBuffer.class, "index"),
@@ -86,6 +88,8 @@ public class RendererExt{
         Events.run(EventType.Trigger.drawOver, () -> {
             if(mi2ui.settings.getBool("forceTapTile")) forceDrawSelect();
         });
+
+        
     }
 
     public static void updateSettings(){
