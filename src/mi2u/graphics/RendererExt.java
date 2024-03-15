@@ -42,13 +42,13 @@ public class RendererExt{
     protected static Interval interval = new Interval();
     protected static ObjectMap<Unit, Vec2> players = new ObjectMap<>();
     protected static Seq<Unit> hiddenUnit = new Seq<>();
-    protected static Pathfinder pathfinder = new Pathfinder();
 
     public static Field itemBridgeBuffer = MI2Utils.getField(BufferedItemBridge.BufferedItemBridgeBuild.class, "buffer"),
             itemBridgeBufferBuffer = MI2Utils.getField(ItemBuffer.class, "buffer"), itemBridgeBufferIndex = MI2Utils.getField(ItemBuffer.class, "index"),
             unloaderBuilding = MI2Utils.getField(Unloader.ContainerStat.class, "building"),
             lexecTimer = MI2Utils.getField(LExecutor.class, "unitTimeouts");
 
+    public static Pathfinder pathfinder = new Pathfinder();
     public static boolean animatedshields;
     public static int unitHpBarStyle;
     public static boolean enPlayerCursor;

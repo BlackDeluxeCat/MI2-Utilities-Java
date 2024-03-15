@@ -13,6 +13,7 @@ import arc.util.Log;
 import arc.util.Nullable;
 import arc.util.TaskQueue;
 import arc.util.Time;
+import mi2u.graphics.RendererExt;
 import mindustry.core.World;
 import mindustry.game.EventType;
 import mindustry.game.Team;
@@ -528,8 +529,7 @@ public class Pathfinder implements Runnable{
         }
 
         protected boolean passable(int pos){
-            // return cost.getCost(team.id, SVars.pathfinder.tiles[pos]) != impassable;
-            return true;
+            return cost.getCost(team.id, RendererExt.pathfinder.tiles[pos]) != impassable;
         }
 
         /** Gets targets to pathfind towards. This must run on the main thread. */
