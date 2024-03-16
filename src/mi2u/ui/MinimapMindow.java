@@ -101,7 +101,7 @@ public class MinimapMindow extends Mindow2{
                         if(fullscreenTransparent){
                             ui.hudGroup.addChild(m);
                             m.validate();
-                            m.color.a(0.4f);
+                            m.color.a(0.2f);
                         }
                         setupCont(cont);
                     }).width(32f).growY();
@@ -163,7 +163,7 @@ public class MinimapMindow extends Mindow2{
     public static class Minimap2 extends Element{
         public Rect rect = new Rect();
         private static final float baseSize = 16f;
-        public float zoom = 4;
+        public float zoom = 8f;
 
         public boolean drawLabel = false, drawSpawn = true, drawFog = true, drawIndicator = true, drawObjective = true;
         public float drawUnitOutline = 0f;
@@ -320,6 +320,7 @@ public class MinimapMindow extends Mindow2{
                     Core.graphics.getWidth() / rect.width * w / renderer.getScale() ,
                     Core.graphics.getHeight() / rect.height * h / renderer.getScale());
             Draw.color();
+            Draw.alpha(color.a);
 
             //just render unit group
             Groups.unit.each(unit -> {
@@ -336,7 +337,7 @@ public class MinimapMindow extends Mindow2{
                 //color difference between block and unit in setting
                 Draw.mixcol(MI2UTmp.c1.set(unit.team().color).mul(Mathf.clamp(1f - drawUnitColorDifference)), 1f);
                 Draw.rect(region, x + rx, y + ry, scale, scale * (float)region.height / region.width, unit.rotation() - 90);
-                Draw.reset();
+                Draw.mixcol();
             });
 
             //display labels
@@ -364,7 +365,7 @@ public class MinimapMindow extends Mindow2{
                 Tmp.tr1.set(dynamicTex);
                 Tmp.tr1.set(region.u, 1f - region.v, region.u2, 1f - region.v2);
 
-                Draw.color(state.rules.dynamicColor);
+                Draw.color(state.rules.dynamicColor, state.rules.dynamicColor.a * color.a);
                 Draw.rect(Tmp.tr1, x + w/2f, y + h/2f, w, h);
 
                 if(state.rules.staticFog){
@@ -403,7 +404,7 @@ public class MinimapMindow extends Mindow2{
                     Vec2 v = transform(Tmp.v1.set((ix + 0.5f + offset) * tilesize, (iy + 0.5f + offset) * tilesize));
                     //v.sub(getMarginBottom(), getMarginBottom());
 
-                    Draw.color(Color.orange, Color.scarlet, Mathf.clamp(time / 70f));
+                    Draw.color(Color.orange, Color.scarlet, Mathf.clamp(time / 70f) * color.a);
                     Lines.square(x + v.x, y + v.y, rad);
                 }
 
@@ -429,7 +430,7 @@ public class MinimapMindow extends Mindow2{
 
             Lines.stroke(Scl.scl(1f));
 
-            Draw.color(state.rules.waveTeam.color, Tmp.c2.set(state.rules.waveTeam.color).value(1.2f), Mathf.absin(Time.time, 16f, 1f));
+            Draw.color(state.rules.waveTeam.color, Tmp.c2.set(state.rules.waveTeam.color).value(1.2f), Mathf.absin(Time.time, 16f, 1f) * color.a);
 
             float curve = Mathf.curve(Time.time % 240f, 120f, 240f);
 
@@ -475,9 +476,8 @@ public class MinimapMindow extends Mindow2{
             float yOffset = 20f;
             float margin = 3f;
 
-            Draw.color(0f, 0f, 0f, 0.2f);
+            Draw.color(0f, 0f, 0f, 0.2f * this.color.a);
             Fill.rect(x, y + yOffset - l.height/2f, l.width + margin, l.height + margin);
-            Draw.color();
             font.setColor(color);
             font.draw(text, x - l.width/2f, y + yOffset, 90f, Align.left, true);
             font.setUseIntegerPositions(ints);

@@ -683,7 +683,7 @@ public class RendererExt{
         Draw.alpha(animatedshields ? 1f : 0.5f);
         Lines.circle(btb.x, btb.y, range + 1);
 
-        Draw.color(turretZoneAAColor ? (((Turret)btb.block).targetAir ? Color.cyan : Color.darkGray) : turretZoneBlockColor ? MI2UTmp.c1.set(TurretZoneDrawer.blockColor(btb.block.id)) : btb.team.color);
+        Draw.color(turretZoneAAColor && btb.block instanceof Turret tu ? (tu.targetAir ? Color.cyan : Color.darkGray) : turretZoneBlockColor ? MI2UTmp.c1.set(TurretZoneDrawer.blockColor(btb.block.id)) : btb.team.color);
         Draw.alpha(animatedshields ? 0.3f : 0.08f);
         Fill.poly(btb.x, btb.y, (int)(range) / 3, range);
 
