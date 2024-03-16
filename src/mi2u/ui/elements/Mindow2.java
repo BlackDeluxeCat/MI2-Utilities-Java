@@ -351,8 +351,7 @@ public class Mindow2 extends Table{
                     t.button("@settings.meta.mindowHelp", Icon.info, () -> showHelp()).width(300f).height(150f).get().setStyle(textb);
                     t.row();
                     t.table(tt -> settings.buildList(tt)).width(Math.min(600, Core.graphics.getWidth()));
-                }).grow();
-                this.cont.labelWrap("@settings.meta.oldVersion").fill();
+                }).grow().row();
                 this.cont.addChild(new Table(){
                     {
                         settings.buildDescription(this);

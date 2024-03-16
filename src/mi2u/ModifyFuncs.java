@@ -203,6 +203,9 @@ public class ModifyFuncs{
 
             st.add(cont).growX();
 
+            st.row();
+
+            st.labelWrap("@settings.meta.oldVersion").width(600f);
             mindow2s.each(m -> {
                 st.getSettings().add(m.settings.list);//foo's support.
                 st.addChild(new Table(){
