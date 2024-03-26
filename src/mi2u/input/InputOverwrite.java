@@ -47,6 +47,4 @@ public interface InputOverwrite{
     }
 
     default void clear(){};
-
-    void replaceInput();
 }

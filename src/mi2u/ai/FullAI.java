@@ -60,13 +60,10 @@ public class FullAI extends AIController{
 
     @Override
     public void updateUnit(){
-        if(!(control.input instanceof InputOverwrite) && mi2ui.settings.getBool("inputReplace")) {
-            if(mobile){
-                MobileInputExt.mobileExt.replaceInput();
-            }else{
-                DesktopInputExt.desktopExt.replaceInput();
-            }
+        if(!(control.input instanceof InputOverwrite) && mi2ui.settings.getBool("inputReplace")){
+            control.setInput(mobile ? MobileInputExt.mobileExt : DesktopInputExt.desktopExt);
         }
+
         if(control.input instanceof InputOverwrite inp){
             inp.clear();
             modes.each(mode -> {

@@ -333,6 +333,7 @@ public class MI2UI extends Mindow2{
                 control.setInput(mobile ? new MobileInput() : new DesktopInput());
             }
         }).tag(true, false, false);
+        settings.checkPref("drawSelectionSize", true);
         settings.checkPref("instantBuild", false);
         settings.sliderPref("rtsFormDoubleTap", 300, 25, 1000, 25, s -> s + "ms");
         settings.checkPref("forceTapTile", false);

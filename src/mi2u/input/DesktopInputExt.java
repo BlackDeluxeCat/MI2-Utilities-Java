@@ -136,11 +136,6 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
         shootXY.setZero();
     }
 
-    @Override
-    public void replaceInput(){
-        control.setInput(this);
-    }
-
     public static Binding[] numKey = {
             Binding.block_select_01,
             Binding.block_select_02,
@@ -184,6 +179,7 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
     @Override
     protected void drawSelection(int x1, int y1, int x2, int y2, int maxLength){
         super.drawSelection(x1, y1, x2, y2, maxLength);
+        if(!mi2ui.settings.getBool("drawSelectionSize")) return;
         Placement.NormalizeDrawResult result = Placement.normalizeDrawArea(Blocks.air, x1, y1, x2, y2, false, maxLength, 1f);
         Font font = Fonts.outline;
         float oldScaleX = font.getScaleX();
