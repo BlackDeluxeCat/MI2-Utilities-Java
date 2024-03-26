@@ -18,7 +18,7 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
     public boolean ctrlBoost = false, boost = false;
     public Vec2 panXY = new Vec2();
     /** A timer for panning. Check returning true means moving camera.*/
-    public Interval panTimer = new Interval();
+    public MI2Utils.IntervalMillis panTimer = new MI2Utils.IntervalMillis();
     public boolean ctrlShoot = false, shoot = false; Vec2 shootXY = new Vec2();
     public boolean ctrlMove = false; Vec2 move = new Vec2();
 
@@ -37,7 +37,7 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
             }
         }
         //camera moving, shouldn't consider unit follow movement
-        if(!panTimer.check(0, 30f)){
+        if(!panTimer.check(0, 400)){
             Core.camera.position.lerpDelta(panXY, 0.3f);
         }
 
@@ -70,7 +70,7 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
 
     @Override
     public void pan(boolean ctrl, Vec2 panXY){
-        if(ctrl) panTimer.reset(0,0f);  //set a timer for extended smooth panning
+        if(ctrl) panTimer.reset(0,0);  //set a timer for extended smooth panning
         this.panXY.set(panXY);
     }
 
