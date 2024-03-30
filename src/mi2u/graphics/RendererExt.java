@@ -3,6 +3,7 @@ package mi2u.graphics;
 import arc.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
+import arc.graphics.gl.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.ui.layout.*;
@@ -11,6 +12,7 @@ import arc.util.*;
 import arc.util.pooling.*;
 import mi2u.*;
 import mi2u.ui.*;
+import mi2u.ui.elements.*;
 import mindustry.ai.*;
 import mindustry.ai.types.*;
 import mindustry.content.*;
@@ -76,19 +78,21 @@ public class RendererExt{
 
         TurretZoneDrawer.turretColorMap = new int[content.blocks().size];
         content.blocks().each(b -> {
-            var region = Core.atlas.getPixmap(b.fullIcon);
-            var color = MI2UTmp.c2;
-            float s = 0f;
-            for(int x = 0; x < region.width; x++){
-                for(int y = 0; y < region.height; y++){
-                    color.set(region.get(x, y));
-                    if(color.saturation() * color.value() > s){
-                        s = color.saturation() * color.value();
-                        MI2UTmp.c1.set(color);
+            if(b.fullIcon instanceof TextureAtlas.AtlasRegion reg){
+                var region = Core.atlas.getPixmap(reg);
+                var color = MI2UTmp.c2;
+                float s = 0f;
+                for(int x = 0; x < region.width; x++){
+                    for(int y = 0; y < region.height; y++){
+                        color.set(region.get(x, y));
+                        if(color.saturation() * color.value() > s){
+                            s = color.saturation() * color.value();
+                            MI2UTmp.c1.set(color);
+                        }
                     }
                 }
+                TurretZoneDrawer.turretColorMap[b.id] = MI2UTmp.c1.saturation(1f).rgba8888();
             }
-            TurretZoneDrawer.turretColorMap[b.id] = MI2UTmp.c1.saturation(1f).rgba8888();
         });
 
         Events.on(EventType.WorldLoadEvent.class, e -> {
@@ -683,7 +687,7 @@ public class RendererExt{
         Draw.alpha(animatedshields ? 1f : 0.5f);
         Lines.circle(btb.x, btb.y, range + 1);
 
-        Draw.color(turretZoneAAColor && btb.block instanceof Turret tu ? (tu.targetAir ? Color.cyan : Color.darkGray) : turretZoneBlockColor ? MI2UTmp.c1.set(TurretZoneDrawer.blockColor(btb.block.id)) : btb.team.color);
+        Draw.color(turretZoneAAColor && btb.block instanceof Turret tu ? (tu.targetAir ? Color.cyan : Color.darkGray) : (turretZoneBlockColor && TurretZoneDrawer.blockColor(btb.block.id) != 0) ? MI2UTmp.c1.set(TurretZoneDrawer.blockColor(btb.block.id)) : btb.team.color);
         Draw.alpha(animatedshields ? 0.3f : 0.08f);
         Fill.poly(btb.x, btb.y, (int)(range) / 3, range);
 
