@@ -275,9 +275,8 @@ public class MI2UI extends Mindow2{
         settings.checkPref("enMenderZone", false).tag(false, false, true);
         settings.checkPref("enSpawnZone", true);
         settings.checkPref("enTurretRangeZone", false);
-        settings.sliderPref("turretZoneColorStyle", 0, 0, 2, 1, s -> {
+        settings.sliderPref("turretZoneColorStyle", 0, 0, 1, 1, s -> {
             if(s == 1) return "Anti Air";
-            if(s == 2) return "Block Color";
             return "-";
         });
         settings.checkPref("enUnitRangeZone", false);

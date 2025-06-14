@@ -12,14 +12,8 @@ public class TurretZoneDrawer{
     public static IntSet teams = new IntSet();
     public static Interval time = new Interval(256);
 
-    public static int[] turretColorMap;
-
     public static void clear(){
         teams.clear();
-    }
-
-    public static int blockColor(int id){
-        return turretColorMap[id];
     }
 
     public static void applyShader(){
