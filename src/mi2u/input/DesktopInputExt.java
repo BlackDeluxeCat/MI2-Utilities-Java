@@ -1,19 +1,14 @@
 package mi2u.input;
 
 import arc.*;
-import arc.graphics.g2d.*;
 import arc.input.*;
 import arc.math.*;
 import arc.math.geom.*;
-import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.*;
 import mi2u.graphics.*;
-import mindustry.content.*;
 import mindustry.gen.*;
-import mindustry.graphics.*;
 import mindustry.input.*;
-import mindustry.ui.*;
 import mindustry.world.blocks.*;
 
 import static arc.Core.*;
@@ -39,7 +34,6 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
     @Override
     public void update(){
         super.update();
-        postPMFrag();
         tryCtrlBuildUnderUnit();
 
         Unit unit = player.unit();
@@ -157,36 +151,5 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
                 }
             }
         }
-    }
-
-    /**
-     * Post Placement fragment to your mouse.
-     */
-    public void postPMFrag(){
-        Table fullT = MI2Utils.getValue(ui.hudfrag.blockfrag, "toggler");
-        if(fullT == null) return;
-        if(Core.input.keyDown(Binding.control) && Core.input.keyTap(Binding.pick)){
-            fullT.margin(0f, 0f,
-                    (Core.input.mouseY() + 15f) / Scl.scl(),
-                    Mathf.maxZero(Core.graphics.getWidth() - Core.input.mouseX() - fullT.getChildren().first().getWidth() - 15f) / Scl.scl());
-            fullT.layout();
-        }else if(Core.input.keyTap(Binding.control)){
-            fullT.margin(0f);
-            fullT.layout();
-        }
-    }
-
-    @Override
-    protected void drawSelection(int x1, int y1, int x2, int y2, int maxLength){
-        super.drawSelection(x1, y1, x2, y2, maxLength);
-        if(!mi2ui.settings.getBool("drawSelectionSize")) return;
-        Placement.NormalizeDrawResult result = Placement.normalizeDrawArea(Blocks.air, x1, y1, x2, y2, false, maxLength, 1f);
-        Font font = Fonts.outline;
-        float oldScaleX = font.getScaleX();
-        float oldScaleY = font.getScaleY();
-        font.getData().setScale(4f / Scl.scl(1f) * camera.width / graphics.getWidth());
-        font.getCache().setColor(MI2UTmp.c1.set(Pal.accent).a(0.7f));
-        font.draw((int)(result.x2 - result.x) / 8 + "x" + (int)(result.y2 - result.y) / 8, result.x2, result.y, Align.right);
-        font.getData().setScale(oldScaleX, oldScaleY);
     }
 }

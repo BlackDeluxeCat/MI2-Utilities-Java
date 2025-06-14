@@ -73,7 +73,6 @@ public class MI2Utilities extends Mod{
 
                 RendererExt.initBase();
                 ModifyFuncs.modifyVanilla();
-                RtsCommand.init();
                 BuildingStatsPopup.init();
             });
 

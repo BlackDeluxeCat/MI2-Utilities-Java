@@ -36,7 +36,7 @@ public class MI2UI extends Mindow2{
 
         Events.run(EventType.Trigger.update, () -> {
             if(state.isGame()){
-                RtsCommand.desktopFormation();//Independent from inputoverwrite, may bug
+                //RtsCommand.desktopFormation();//Independent from inputoverwrite, may bug
                 if(!state.isPaused()){
                     realRunTime += Time.timeSinceMillis(lastRealRun);
                 }
@@ -202,24 +202,14 @@ public class MI2UI extends Mindow2{
 
         cont.row();
 
+        /*
         cont.add(new MCollapser(t -> {
-            t.button("@main.buttons.createForm", textbtoggle, () -> {
-                RtsCommand.creatingFormation = !RtsCommand.creatingFormation;
-            }).checked(b -> RtsCommand.creatingFormation).minSize(36f).growX().with(c -> {
-                c.getLabel().setAlignment(Align.center);
-            });
-            t.row();
             t.table(tt -> {
                 for(int i = 0; i < 10; i++){
                     int ii = i;
                     if(i == 5) tt.row();
 
                     var button = tt.button("" + Mathf.mod(ii + 1, 10), textb, () -> {
-                        if(RtsCommand.creatingFormation){
-                            RtsCommand.createFormation(Vars.control.input.selectedUnits, ii);
-                        }else{
-                            RtsCommand.callFormation(ii);
-                        }
                     }).disabled(b -> !RtsCommand.creatingFormation && !RtsCommand.checkFormation(ii)).update(b -> {
                         boolean check = RtsCommand.checkFormation(ii);
                         b.setDisabled(!RtsCommand.creatingFormation && !check);
@@ -238,6 +228,8 @@ public class MI2UI extends Mindow2{
         }, true).setDirection(false, true).setCollapsed(false, () -> !control.input.commandMode)).growX();
 
         cont.row();
+
+         */
 
         cont.add(new MCollapser(m -> {
             m.defaults().growX();
@@ -333,9 +325,7 @@ public class MI2UI extends Mindow2{
                 control.setInput(mobile ? new MobileInput() : new DesktopInput());
             }
         }).tag(true, false, false);
-        settings.checkPref("drawSelectionSize", true);
         settings.checkPref("instantBuild", false);
-        settings.sliderPref("rtsFormDoubleTap", 300, 25, 1000, 25, s -> s + "ms");
         settings.checkPref("forceTapTile", false);
         settings.checkPref("edgePanning", false);
 
