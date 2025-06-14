@@ -4,7 +4,6 @@ import arc.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.struct.*;
-import arc.util.*;
 import mindustry.core.*;
 import mindustry.entities.units.*;
 import mindustry.game.Teams.*;
@@ -20,10 +19,10 @@ public class MI2UFuncs{
         if(!state.isGame() || player.unit() == null || !player.unit().canBuild()) return;
         int p = 0;
         for(BlockPlan plan : state.teams.get(player.team()).plans){
-            if(world.tile(plan.x, plan.y) != null && world.tile(plan.x, plan.y).block().id == plan.block) state.teams.get(player.team()).plans.remove(plan);
+            if(world.tile(plan.x, plan.y) != null && world.tile(plan.x, plan.y).block().id == plan.block.id) state.teams.get(player.team()).plans.remove(plan);
             if(Mathf.len(plan.x - player.tileX(), plan.y - player.tileY()) >= 200) continue;
             if(p++ > 511) break;
-            player.unit().addBuild(new BuildPlan(plan.x, plan.y, plan.rotation, content.block(plan.block), plan.config));
+            player.unit().addBuild(new BuildPlan(plan.x, plan.y, plan.rotation, plan.block, plan.config));
         }
     }
 
@@ -34,7 +33,7 @@ public class MI2UFuncs{
 
         boolean touchUp = lastTouches != 0 && ((lastTouches = Core.input.getTouches()) == 0);
 
-        if((control.input instanceof DesktopInput di && Core.input.keyRelease(Binding.break_block))){
+        if((control.input instanceof DesktopInput di && Core.input.keyRelease(Binding.breakBlock))){
             int rawCursorX = World.toTile(Core.input.mouseWorld().x), rawCursorY = World.toTile(Core.input.mouseWorld().y);
             control.input.lastSchematic = schematics.create(di.schemX, di.schemY, rawCursorX, rawCursorY);
             control.input.selectPlans.add(schematics.toPlans(control.input.lastSchematic, rawCursorX, rawCursorY));

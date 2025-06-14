@@ -179,7 +179,7 @@ public class WorldFinderTable extends PopupTable{
                     for(var block : content.blocks()){
                         if(WorldData.countBlock(block, null) <= 0) continue;
                         if(withName){
-                            t.button("" + block.localizedName, new TextureRegionDrawable(block.uiIcon), textb, 24f,() -> {
+                            t.button(block.localizedName, new TextureRegionDrawable(block.uiIcon), textb, 24f,() -> {
                                 find = block;
                                 finder.findTarget = find;
                                 finder.findIndex = 0;
@@ -233,7 +233,7 @@ public class WorldFinderTable extends PopupTable{
                         if(!block.canReplace(find) && block != Blocks.air) continue;
                         //if(block.isHidden() && (!state.rules.infiniteResources || !state.isEditor())) continue;
                         if(withName){
-                            t.button("" + block.localizedName, new TextureRegionDrawable(block.uiIcon), textb, 24f,() -> {
+                            t.button(block.localizedName, new TextureRegionDrawable(block.uiIcon), textb, 24f,() -> {
                                 replace = block;
                             }).with(funcSetTextb);
                         }else{

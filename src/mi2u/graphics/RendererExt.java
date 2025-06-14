@@ -3,7 +3,6 @@ package mi2u.graphics;
 import arc.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
-import arc.graphics.gl.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.ui.layout.*;
@@ -12,7 +11,6 @@ import arc.util.*;
 import arc.util.pooling.*;
 import mi2u.*;
 import mi2u.ui.*;
-import mi2u.ui.elements.*;
 import mindustry.ai.*;
 import mindustry.ai.types.*;
 import mindustry.content.*;
@@ -172,7 +170,7 @@ public class RendererExt{
             }
             if(disableBullet && d instanceof Bullet b){
                 Groups.draw.removeIndex(b, MI2Utils.getValue(drawIndexBullet, b));
-                ((Bullet)d).setIndex__draw(-1);
+                b.setIndex__draw(-1);
             }
         });
 
@@ -371,7 +369,7 @@ public class RendererExt{
                     Tile tile = unit.tileOn();
                     int max = mi2ui.settings.getInt("enUnitPath.length", 40);
                     for(int tileIndex = 1; tileIndex <= max; tileIndex++){
-                        Tile nextTile = pathfinder.getTargetTile(tile, pathfinder.getField(unit.team, unit.pathType(), Pathfinder.fieldCore));
+                        Tile nextTile = pathfinder.getTargetTile(tile, pathfinder.getField(unit.team, Pathfinder.costGround, Pathfinder.fieldCore));
                         if(nextTile == null) break;
                         if(nextTile == tile) break;
                         Lines.stroke(1.5f);
@@ -405,10 +403,12 @@ public class RendererExt{
                 tile = nextTile;
             }
         }catch(Exception ignore){
+            /*
             boolean move = controlPath.getPathPosition(unit, pathId, destination, MI2UTmp.v1);
             if(move){
                 Lines.dashLine(unit.x, unit.y, MI2UTmp.v1.x, MI2UTmp.v1.y, (int)(Mathf.len(MI2UTmp.v1.x - unit.x, MI2UTmp.v1.y - unit.y) / 4f));
             }
+            */
         }
 
     }
@@ -632,9 +632,9 @@ public class RendererExt{
     }
 
     public static void drawOverDriver(OverdriveProjector.OverdriveBuild odb){
-        OverdriveProjector block = (OverdriveProjector)odb.block();
+        OverdriveProjector block = (OverdriveProjector)odb.block;
         Draw.color(block.baseColor, block.phaseColor, odb.phaseHeat);
-        Draw.mixcol(Color.black, 1f - odb.efficiency());
+        Draw.mixcol(Color.black, 1f - odb.efficiency);
         Draw.z(91.1f);
         Draw.alpha(animatedshields?1f:0.1f);
         Fill.poly(odb.x, odb.y, (int)(block.range + odb.phaseHeat * block.phaseRangeBoost) / 4, block.range + odb.phaseHeat * block.phaseRangeBoost);
@@ -645,7 +645,7 @@ public class RendererExt{
     }
 
     public static void drawMender(MendProjector.MendBuild mb){
-        if(mb.efficiency() <= 0f) return;
+        if(mb.efficiency <= 0f) return;
         MendProjector block = (MendProjector)mb.block;
         float pulse = Mathf.pow(1f - (mb.charge / block.reload), 5);
         Draw.z(91.2f);
@@ -668,11 +668,11 @@ public class RendererExt{
         RegenProjector block = (RegenProjector)rb.block;
         Draw.z(91.3f);
         Draw.color(block.baseColor);
-        Draw.alpha((animatedshields ? 0.4f : 0.1f) * (rb.efficiency() <= 0f ? 0.6f : 1f));
+        Draw.alpha((animatedshields ? 0.4f : 0.1f) * (rb.efficiency <= 0f ? 0.6f : 1f));
         Fill.rect(rb.x, rb.y, block.range * tilesize, block.range * tilesize);
 
         Lines.stroke(2f);
-        Draw.alpha(rb.efficiency() <= 0f ? 0.5f : 1f);
+        Draw.alpha(rb.efficiency <= 0f ? 0.5f : 1f);
         Lines.rect(rb.x - block.range * tilesize / 2f, rb.y - block.range * tilesize / 2f, block.range * tilesize, block.range * tilesize);
     }
 

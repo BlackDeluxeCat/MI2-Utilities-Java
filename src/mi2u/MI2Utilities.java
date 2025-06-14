@@ -10,7 +10,6 @@ import arc.scene.ui.*;
 import arc.util.*;
 import mi2u.graphics.*;
 import mi2u.input.*;
-import mi2u.io.*;
 import mi2u.ui.*;
 import mi2u.ui.elements.*;
 import mindustry.game.EventType.*;
@@ -33,7 +32,6 @@ public class MI2Utilities extends Mod{
         Events.on(ClientLoadEvent.class, e -> {
             MOD = mods.getMod(MI2Utilities.class);
             MOD.meta.subtitle = MOD.meta.version;
-            MI2USettings.init();
             InputUtils.init();
 
             var whiteui = (TextureRegionDrawable)Tex.whiteui;
@@ -91,7 +89,7 @@ public class MI2Utilities extends Mod{
     public static void checkUpdate(){
         new PopupTable(){
             int sign = 0;
-            Interval in = new Interval();
+            final Interval in = new Interval();
             String intro = "", version = "" + Iconc.cancel;
             Label introl;
             float delay = 900f;

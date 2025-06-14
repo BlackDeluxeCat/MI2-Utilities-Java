@@ -334,7 +334,7 @@ public class MapInfoTable extends Table{
 
                     addBoolString(() -> state.rules.waves, "@rules.waves", tt);
                     tt.row();
-                    tt.label(() -> Core.bundle.get("mapInfo.winWave") + ": " + state.rules.winWave).pad(2f).get().setColor(state.rules.waves ? Color.white : Color.darkGray);;
+                    tt.label(() -> Core.bundle.get("mapInfo.winWave") + ": " + state.rules.winWave).pad(2f).get().setColor(state.rules.waves ? Color.white : Color.darkGray);
                     tt.row();
                     addBoolString(() -> state.rules.waveTimer, "@rules.wavetimer", tt);
                     tt.row();
@@ -342,9 +342,9 @@ public class MapInfoTable extends Table{
                     tt.row();
                     addBoolString(() -> state.rules.waveSending, "@rules.wavesending", tt);
                     tt.row();
-                    tt.label(() -> Core.bundle.get("rules.wavespacing") + ": " + Strings.fixed(state.rules.waveSpacing / 60, 1) + "s").pad(2f).get().setColor(state.rules.waves && state.rules.waveTimer ? Color.white : Color.darkGray);;
+                    tt.label(() -> Core.bundle.get("rules.wavespacing") + ": " + Strings.fixed(state.rules.waveSpacing / 60, 1) + "s").pad(2f).get().setColor(state.rules.waves && state.rules.waveTimer ? Color.white : Color.darkGray);
                     tt.row();
-                    tt.label(() -> Core.bundle.get("rules.initialwavespacing") + ": " + Strings.fixed(state.rules.initialWaveSpacing / 60, 1) + "s").pad(2f).get().setColor(state.rules.waves && state.rules.waveTimer ? Color.white : Color.darkGray);;
+                    tt.label(() -> Core.bundle.get("rules.initialwavespacing") + ": " + Strings.fixed(state.rules.initialWaveSpacing / 60, 1) + "s").pad(2f).get().setColor(state.rules.waves && state.rules.waveTimer ? Color.white : Color.darkGray);
                     tt.row();
                     tt.label(() -> Core.bundle.get("rules.dropzoneradius") + ": " + Strings.fixed(state.rules.dropZoneRadius / tilesize, 1)).pad(2f);
                     tt.row();
@@ -413,12 +413,6 @@ public class MapInfoTable extends Table{
                     });
                 }).with(funcSetTextb).disabled(b -> state.rules.bannedUnits.isEmpty());
 
-                tt.button("@mapInfo.buttons.hiddenBuildItems", textb, () -> {
-                    showIterable("@mapInfo.buttons.hiddenBuildItems", state.rules.hiddenBuildItems, null, (item, table) -> {
-                        table.image(item.uiIcon).size(32f);
-                    });
-                }).with(funcSetTextb).disabled(b -> state.rules.hiddenBuildItems.isEmpty());
-
                 tt.row();
 
                 tt.button("@mapInfo.buttons.revealedBlocks", textb, () -> {
@@ -434,10 +428,11 @@ public class MapInfoTable extends Table{
                 }).with(funcSetTextb).disabled(b -> state.rules.objectiveFlags.isEmpty());
 
                 tt.button("@mapInfo.buttons.mapTags", textb, () -> {
-                    showIterable("@mapInfo.buttons.mapTags", state.rules.objectiveFlags, null, (str, table) -> {
-                        table.add(str).size(48f);
+                    showIterable("@mapInfo.buttons.mapTags", state.rules.tags, null, (str, table) -> {
+                        table.add(str.key).size(64f);
+                        table.add(str.value).size(128f);
                     });
-                }).with(funcSetTextb).disabled(b -> state.rules.objectiveFlags.isEmpty());
+                }).with(funcSetTextb).disabled(b -> state.rules.tags.isEmpty());
             });
 
             t.row();

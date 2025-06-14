@@ -2,7 +2,6 @@ package mi2u.ui.elements;
 
 import arc.*;
 import arc.func.*;
-import arc.graphics.*;
 import arc.input.*;
 import arc.math.*;
 import arc.math.geom.*;
@@ -110,7 +109,7 @@ public class Mindow2 extends Table{
             t.label(() -> minimized ? bundle.get(titleText) : "");
             t.label(() -> dragging ? Iconc.move + "" : "-").size(titleButtonSize).labelAlign(center);
         }).get().addListener(new InputListener(){
-            Vec2 tmpv = new Vec2();
+            final Vec2 tmpv = new Vec2();
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
                 fromx = x;
@@ -264,7 +263,7 @@ public class Mindow2 extends Table{
                 lrSnap = m;
                 lrSnapAlign = Align.left;
                 lrBottomOff = mindowY - m.y;
-            };
+            }
 
             dst = Math.abs(m.getX(Align.right) - mindowX);
             if(dst < 32f && dst <= dst1 && between.get(mindowY, m.y - getHeight() * scaleY, m.y + m.getHeight() * m.scaleY)){
@@ -272,7 +271,7 @@ public class Mindow2 extends Table{
                 lrSnap = m;
                 lrSnapAlign = Align.right;
                 lrBottomOff = mindowY - m.y;
-            };
+            }
 
             dst = Math.abs(m.getY(Align.bottom) - (mindowY + getHeight() * scaleY));
             if(dst < 32f && dst <= dst2 && between.get(mindowX, m.x - getWidth() * scaleX, m.x + m.getWidth() * m.scaleX)){
@@ -280,7 +279,7 @@ public class Mindow2 extends Table{
                 tbSnap = m;
                 tbSnapAlign = Align.bottom;
                 tbLeftOff = mindowX - m.x;
-            };
+            }
 
             dst = Math.abs(m.getY(Align.top) - mindowY);
             if(dst < 32f && dst <= dst2 && between.get(mindowX, m.x - getWidth() * scaleX, m.x + m.getWidth() * m.scaleX)){
@@ -288,7 +287,7 @@ public class Mindow2 extends Table{
                 tbSnap = m;
                 tbSnapAlign = Align.top;
                 tbLeftOff = mindowX - m.x;
-            };
+            }
         }
         testSnaps();
         interval.reset(1, 10000);

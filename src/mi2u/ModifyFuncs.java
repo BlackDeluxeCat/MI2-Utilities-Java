@@ -10,7 +10,6 @@ import arc.scene.event.*;
 import arc.scene.style.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
-import mi2u.io.*;
 import mi2u.ui.*;
 import mindustry.core.*;
 import mindustry.game.*;
@@ -18,7 +17,6 @@ import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.ui.*;
-import mindustry.ui.dialogs.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.turrets.*;
 import mindustry.world.blocks.power.*;
@@ -82,7 +80,7 @@ public class ModifyFuncs{
                 //do nothing
             }else if(block.hasPower && block.consumesPower && block.consPower != null){
                 addBarToBlock(block, "power", entity -> new Bar(() -> block.consPower.buffered ? Core.bundle.format("bar.poweramount", Float.isNaN(entity.power.status * block.consPower.capacity) ? "<ERROR>" : UI.formatAmount((int)(entity.power.status * block.consPower.capacity))) :
-                        Core.bundle.get("bar.power") + ":" + Strings.autoFixed((entity.status() == BlockStatus.active ? 1f : 0f) * entity.efficiency() * -entity.power.status * block.consPower.usage * 60f * (entity.canConsume()?entity.timeScale():0),2), () -> Pal.powerBar, () -> Mathf.zero(block.consPower.requestedPower(entity)) && entity.power.graph.getPowerProduced() + entity.power.graph.getBatteryStored() > 0f ? 1f : entity.power.status));
+                        Core.bundle.get("bar.power") + ":" + Strings.autoFixed((entity.status() == BlockStatus.active ? 1f : 0f) * entity.efficiency * -entity.power.status * block.consPower.usage * 60f * (entity.canConsume()?entity.timeScale():0),2), () -> Pal.powerBar, () -> Mathf.zero(block.consPower.requestedPower(entity)) && entity.power.graph.getPowerProduced() + entity.power.graph.getBatteryStored() > 0f ? 1f : entity.power.status));
             }
 
             if(block instanceof Turret tu){
@@ -178,21 +176,6 @@ public class ModifyFuncs{
             st.table(buttons -> {
                 buttons.defaults().uniform().height(64f).grow();
                 mindow2s.each(m -> buttons.button("@" + m.titleText, () -> m.settings.buildList(cont)));
-                buttons.button("@settings.meta.oldVersionButton", () -> {
-                    var dialog = new BaseDialog("@settings.meta.oldVersionButton");
-                    dialog.addCloseButton();
-                    dialog.cont.pane(bp -> {
-                        MI2USettings.map.each((name, setting) -> {
-                            bp.button(b -> {
-                                b.add(name).growX().row();
-                                b.labelWrap(setting.get().substring(0, Math.min(200, setting.get().length()))).maxHeight(100f).growX();
-                            }, () -> Core.app.setClipboardText(setting.get())).growX();
-                            bp.row();
-                        });
-                    }).growY().minWidth(600f).row();
-                    dialog.cont.labelWrap("@settings.meta.oldVersion.tip").minWidth(600f).pad(4f).color(Color.acid);
-                    dialog.show();
-                });
             }).width(600f);
 
             st.row();

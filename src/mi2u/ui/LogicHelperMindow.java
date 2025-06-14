@@ -59,7 +59,7 @@ public class LogicHelperMindow extends Mindow2{
             String last = "";
             Table buttons;
             ScrollPane pane;
-            MI2Utils.IntervalMillis timer = new MI2Utils.IntervalMillis(3);
+            final MI2Utils.IntervalMillis timer = new MI2Utils.IntervalMillis(3);
             int tabIndex = 0;
             boolean hasKey = false, hasMouse = false;
             {
@@ -320,7 +320,7 @@ public class LogicHelperMindow extends Mindow2{
     }
 
     public void backup(String str){
-        backups.add(str + "");
+        backups.add(str);
         shouldRebuildBackups = true;
     }
 
@@ -348,11 +348,11 @@ public class LogicHelperMindow extends Mindow2{
 
         cont.table(t -> {
             t.defaults().growX();
-            t.button("" + Iconc.copy + Core.bundle.get("logicHelper.cutPaste.copyMode"), textbtoggle, () -> {
+            t.button(Iconc.copy + Core.bundle.get("logicHelper.cutPaste.copyMode"), textbtoggle, () -> {
                 copyCode = !copyCode;
             }).update(b -> b.setChecked(copyCode)).with(funcSetTextb).height(36f);
 
-            t.button("" + Iconc.move + Core.bundle.get("logicHelper.cutPaste.transJump"), textbtoggle, () -> {
+            t.button(Iconc.move + Core.bundle.get("logicHelper.cutPaste.transJump"), textbtoggle, () -> {
                 transJump = !transJump;
             }).update(b -> b.setChecked(transJump)).with(funcSetTextb).height(36f).disabled(tb -> !copyCode);
 
@@ -439,12 +439,12 @@ public class LogicHelperMindow extends Mindow2{
         cont.row();
 
         cont.table(tt -> {
-            tt.label(() -> "" + (results.isEmpty()?"NaN/0":(index+1)+"/"+results.size)).growX().get().setColor(Color.gray);
-            tt.button("" + Iconc.up + Core.bundle.get("logicHelper.search.prev"), textb, () -> {
+            tt.label(() -> results.isEmpty() ? "NaN/0" : (index + 1) + "/" + results.size).growX().get().setColor(Color.gray);
+            tt.button(Iconc.up + Core.bundle.get("logicHelper.search.prev"), textb, () -> {
                 index--;
                 locateElement(null);
             }).with(funcSetTextb).height(36f);
-            tt.button("" + Iconc.down + Core.bundle.get("logicHelper.search.next"), textb, () -> {
+            tt.button(Iconc.down + Core.bundle.get("logicHelper.search.next"), textb, () -> {
                 index++;
                 locateElement(null);
             }).with(funcSetTextb).height(36f);

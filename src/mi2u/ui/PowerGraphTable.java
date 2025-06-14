@@ -456,8 +456,8 @@ public class PowerGraphTable extends Table{
 
             pg.all.each(b -> blocks[b.block.id] += 1);
             pg.batteries.each(b -> bstore[b.block.id] += b.block.consPower.capacity);
-            pg.consumers.each(b -> bcons[b.block.id] += Mathf.zero(b.block.consPower.requestedPower(b)) ? 0f : b.block.consPower.usage * (b.shouldConsume() ? b.efficiency() * b.timeScale() : 0f) * 60f);
-            pg.producers.each(b -> bgen[b.block.id] += b.getPowerProduction() * 60f * b.efficiency() * b.timeScale());
+            pg.consumers.each(b -> bcons[b.block.id] += Mathf.zero(b.block.consPower.requestedPower(b)) ? 0f : b.block.consPower.usage * (b.shouldConsume() ? b.efficiency * b.timeScale() : 0f) * 60f);
+            pg.producers.each(b -> bgen[b.block.id] += b.getPowerProduction() * 60f * b.efficiency * b.timeScale());
 
             for(int i = 0; i < blocks.length; i++){
                 totalcap += bstore[i];

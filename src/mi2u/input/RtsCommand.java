@@ -91,7 +91,8 @@ public class RtsCommand{
     }
 
     public static class Formation{
-        private static Seq<Unit> tmplows = new Seq<>(), tmpselect;
+        private static final Seq<Unit> tmplows = new Seq<>();
+        private static Seq<Unit> tmpselect;
         public int id;
         protected Seq<Unit> all = new Seq<>();
         protected OrderedSet<Unit> lowHps = new OrderedSet<>();

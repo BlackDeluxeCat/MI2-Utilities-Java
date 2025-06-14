@@ -22,7 +22,7 @@ public class UnitsData{
         }
     };
 
-    private static Pool<UnitData> poolUnit = new Pool<>(){
+    private static final Pool<UnitData> poolUnit = new Pool<>(){
         @Override
         protected UnitData newObject(){
             return new UnitData();

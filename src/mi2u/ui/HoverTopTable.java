@@ -141,7 +141,7 @@ public class HoverTopTable extends PopupTable{
             floort = new Table(tt -> {
                 tt.add(new Image(){
                     Block last;
-                    TextureRegionDrawable icon = new TextureRegionDrawable();
+                    final TextureRegionDrawable icon = new TextureRegionDrawable();
                     {
                         update(() -> {
                             if(tile != null && tile.floor() != last) last = tile.floor();
@@ -155,7 +155,7 @@ public class HoverTopTable extends PopupTable{
             oret = new Table(tt -> {
                 tt.add(new Image(){
                     Block last;
-                    TextureRegionDrawable icon = new TextureRegionDrawable();
+                    final TextureRegionDrawable icon = new TextureRegionDrawable();
                     {
                         update(() -> {
                             if(tile != null && tile.overlay() != last) last = tile.overlay();
@@ -169,7 +169,7 @@ public class HoverTopTable extends PopupTable{
             blockt = new Table(tt -> {
                 tt.add(new Image(){
                     Block last;
-                    TextureRegionDrawable icon = new TextureRegionDrawable();
+                    final TextureRegionDrawable icon = new TextureRegionDrawable();
                     {
                         update(() -> {
                             if(tile != null && tile.block() != last) last = tile.block();

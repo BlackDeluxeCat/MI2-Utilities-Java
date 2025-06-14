@@ -14,8 +14,7 @@ import mindustry.graphics.*;
 import mindustry.input.*;
 import mindustry.ui.*;
 
-import static arc.Core.camera;
-import static arc.Core.graphics;
+import static arc.Core.*;
 import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
 

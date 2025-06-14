@@ -412,6 +412,7 @@ public class MinimapMindow extends Mindow2{
             }
 
             //could be buggy
+            /*
             if(drawObjective){
                 state.rules.objectives.eachRunning(obj -> {
                     for(var marker : obj.markers){
@@ -419,6 +420,8 @@ public class MinimapMindow extends Mindow2{
                     }
                 });
             }
+
+             */
 
             Draw.reset();
         }

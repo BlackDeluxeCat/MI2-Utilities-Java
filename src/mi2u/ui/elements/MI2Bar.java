@@ -14,7 +14,8 @@ public class MI2Bar extends Element{
     private Floatp fraction;
     private CharSequence name = "";
     private float value, lastValue, blink, outlineRadius, fontScaleX = 1, fontScaleY = 1;
-    private Color blinkColor = new Color(), outlineColor = new Color();
+    private final Color blinkColor = new Color();
+    private final Color outlineColor = new Color();
 
     public MI2Bar(String name, Color color, Floatp fraction){
         this.fraction = fraction;
