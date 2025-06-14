@@ -32,7 +32,7 @@ public class MI2UI extends Mindow2{
     public boolean showQuickSettings;
 
     public MI2UI(){
-        super("MI2UI", "main.MI2U", "@main.help");
+        super("MI2UI");
 
         Events.run(EventType.Trigger.update, () -> {
             if(state.isGame()){
@@ -85,20 +85,20 @@ public class MI2UI extends Mindow2{
         cont.table(play -> {
             play.table(t -> {
                 t.button("DG", textb, MI2UFuncs::cleanGhostBlock).minSize(36f).with(funcSetTextb).disabled(b -> player.team().data().plans.isEmpty()).with(tb -> {
-                    var tool = Tooltip.Tooltips.getInstance().create("@main.buttons.cleanGhost");
+                    var tool = Tooltip.Tooltips.getInstance().create("@mi2ui.buttons.cleanGhost");
                     tool.allowMobile = true;
                     tb.addListener(tool);
                 });
 
                 t.button("RB", textb, MI2UFuncs::unitRebuildBlocks).minSize(36f).with(funcSetTextb).with(tb -> {
-                    var tool = Tooltip.Tooltips.getInstance().create("@main.buttons.rebuild");
+                    var tool = Tooltip.Tooltips.getInstance().create("@mi2ui.buttons.rebuild");
                     tool.allowMobile = true;
                     tb.addListener(tool);
                 });
 
                 /*
                 t.button("DS", textbtoggle, () -> {}).minSize(36f).with(funcSetTextb).with(tb -> {
-                    var tool = Tooltip.Tooltips.getInstance().create("@main.buttons.deleteToScheme");
+                    var tool = Tooltip.Tooltips.getInstance().create("@mi2ui.buttons.deleteToScheme");
                     tool.allowMobile = true;
                     tb.addListener(tool);
                     tb.update(() -> {
@@ -110,7 +110,7 @@ public class MI2UI extends Mindow2{
                 //The update rate is based on button.update(), and affected by lagging
                 t.button("Speeding", textbtoggle, SpeedController::switchUpdate).update(b -> {
                     b.setChecked(SpeedController.update);
-                    b.setText(Core.bundle.get("main.buttons.speeding") + "x" + Strings.autoFixed(SpeedController.scl, 2));
+                    b.setText(Core.bundle.get("mi2ui.buttons.speeding") + "x" + Strings.autoFixed(SpeedController.scl, 2));
                     SpeedController.update();
                     b.getLabel().setFontScale(1f);
                     b.getLabel().layout();
@@ -265,7 +265,7 @@ public class MI2UI extends Mindow2{
 
         settings.checkPref("showEmojis", false, b -> emojis.addTo(b ? Core.scene.root:null));
         settings.checkPref("showCoreInfo", false, b -> coreInfo.addTo(b ? Core.scene.root:null));
-        settings.checkPref("showMindowMap", false, b -> mindowmap.addTo(b ? Core.scene.root:null));
+        settings.checkPref("showMinimap", false, b -> mindowmap.addTo(b ? Core.scene.root:null));
         settings.checkPref("showLogicHelper", false, b -> logicHelper.addTo(b ? ui.logic:null));
 
         settings.title("graphics.zone");

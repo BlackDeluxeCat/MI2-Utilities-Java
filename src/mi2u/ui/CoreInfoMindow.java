@@ -46,7 +46,7 @@ public class CoreInfoMindow extends Mindow2{
     public int itemTimerIndex = 0;
 
     public CoreInfoMindow(){
-        super("CoreInfo", "coreInfo.MI2U", "@coreInfo.help");
+        super("CoreInfo");
         usedItems = new ObjectSet<>();
         usedUnits = new ObjectSet<>();
 
@@ -63,7 +63,7 @@ public class CoreInfoMindow extends Mindow2{
                 teamSelect.popup();
                 teamSelect.snapTo(this);
             }).grow().minWidth(32f).update(b -> {
-                b.setText(team.localized() + (select == null ? Core.bundle.get("coreInfo.selectButton.playerteam"):""));
+                b.setText(team.localized() + (select == null ? Core.bundle.get("CoreInfo.selectButton.playerteam"):""));
                 b.getLabel().setColor(team == null ? Color.white:team.color);
                 b.getLabel().setFontScale(0.8f);
             });

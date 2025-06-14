@@ -22,10 +22,7 @@ import static arc.Core.*;
 import static arc.util.Align.*;
 import static mi2u.MI2UVars.*;
 /**  
- * Mindow2 is a dragable Table that partly works like a window. 
- * titleText is text shown on titleBar, set in constructor.
- * mindowName is inner name, used for window-specific settings, set in overrided constructor.
- * helpInfo is text shown in window-specific help dialog, set in constructor.
+ * Mindow2 is a dragable Table that partly works like a window.
  * cont is a container for user items.
  * settings is a SettingEntry seq.
  * <p>
@@ -40,7 +37,6 @@ public class Mindow2 extends Table{
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
     boolean dragging = false;
     public boolean minimized = false;
-    public String titleText, helpInfo = "", mindowName;
     protected Table titleBar = new Table(), titlePane = new Table(Styles.black6);
     protected Table cont = new Table();
     public SettingHandler settings;
@@ -50,38 +46,33 @@ public class Mindow2 extends Table{
     public int tbSnapAlign, lrSnapAlign;
     public float tbLeftOff, lrBottomOff;
 
-    public Mindow2(String name, String title, String help){
-        init();
-        mindowName = name;
-        helpInfo = help;
-        registerName();
+    public Mindow2(String name){
+        this.name = name;
+        registerToGlobal();
         initSettings();
         loadUISettings();
 
         Events.on(ResizeEvent.class, e -> Time.run(60f, () -> {
-            this.loadUISettings();
-            this.rebuild();
+            loadUISettings();
+            rebuild();
         }));
 
-        setupTitle();
-
-        titleText = title;
         Events.on(ClientLoadEvent.class, e -> {
             rebuild();
         });
     }
 
-    public void init(){}
-
     public void rebuild(){
         clear();
-        cont.setBackground(Styles.black3);
-        cont.touchable = Touchable.enabled;
-        setupCont(cont);
 
+        setupTitle();
         add(titleBar).growX();
         row();
+
         if(!minimized){
+            cont.setBackground(Styles.black3);
+            cont.touchable = Touchable.enabled;
+            setupCont(cont);
             add(cont).growX();
         }
         setTransform(true);
@@ -96,17 +87,16 @@ public class Mindow2 extends Table{
     }
 
     public void setupTitle(){
-        titlePane.touchable = Touchable.enabled;
-        titleBar.add(new MCollapser(titlePane, false).setDirection(true, false).setCollapsed(true, () -> minimized).setDuration(0.2f)).growX();
-
-        var toast = new Table();
-        toast.button("" + Iconc.settings, textb, this::showSettings).size(titleButtonSize);
-
-        titleBar.add(new MCollapser(toast, true).setCollapsed(true, () -> minimized).setDirection(true, false).setDuration(0.2f));
+        titleBar.clear();
+        if(!minimized){
+            titlePane.touchable = Touchable.enabled;
+            titleBar.add(titlePane).growX();
+            titleBar.button("" + Iconc.settings, textb, this::showSettings).size(titleButtonSize);
+        }
 
         titleBar.table(t -> {
             t.setBackground(titleBarbgNormal);
-            t.label(() -> minimized ? bundle.get(titleText) : "");
+            if(minimized) t.add(bundle.get(name + ".MI2U"));
             t.label(() -> dragging ? Iconc.move + "" : "-").size(titleButtonSize).labelAlign(center);
         }).get().addListener(new InputListener(){
             final Vec2 tmpv = new Vec2();
@@ -150,9 +140,7 @@ public class Mindow2 extends Table{
     public void act(float delta){
         super.act(delta);
         if(interval.get(1, 120)){
-            boolean slideAnime = edgeSnap(edgesnap);
-            slideAnime = slideAnime | elementSnap(tbSnap, tbSnapAlign, lrSnap == null && !Align.isLeft(edgesnap) && !Align.isRight(edgesnap));
-            slideAnime = slideAnime | elementSnap(lrSnap, lrSnapAlign, tbSnap == null && !Align.isBottom(edgesnap) && !Align.isTop(edgesnap));
+            boolean slideAnime = edgeSnap(edgesnap) | elementSnap(tbSnap, tbSnapAlign, lrSnap == null && !Align.isLeft(edgesnap) && !Align.isRight(edgesnap)) | elementSnap(lrSnap, lrSnapAlign, tbSnap == null && !Align.isBottom(edgesnap) && !Align.isTop(edgesnap));
             if(slideAnime && MI2UTmp.v1.set(curx, cury).sub(x, y).len() >= 3f) interval.reset(2, 0);
         }
 
@@ -162,7 +150,7 @@ public class Mindow2 extends Table{
             setPosition(curx, cury);
         }
         keepInStage();
-        invalidateHierarchy();
+        invalidate();
         pack();
     }
 
@@ -242,8 +230,8 @@ public class Mindow2 extends Table{
         return top | left | right | bottom;
     }
 
-    public void setSnap(float mindowX, float mindowY){
-        edgesnap = computeEdgeSnap(mindowX, mindowY, 32f);
+    public void setSnap(float x, float y){
+        edgesnap = computeEdgeSnap(x, y, 32f);
         if(edgesnap == 0) edgesnap = Align.center;
 
         Func3<Float, Float, Float, Boolean> between = (v, min, max) -> max >= min && v <= max && v >= min;
@@ -253,40 +241,40 @@ public class Mindow2 extends Table{
 
         float dst1 = Float.MAX_VALUE, dst2 = Float.MAX_VALUE, dst;
         for(Mindow2 m : mindow2s){
-            if(m == this || m.mindowName.equals("")) continue;
+            if(m == this || m.name.equals("")) continue;
             if(m.lrSnap == this || m.tbSnap == this) continue;
             if(!m.visible || !m.hasParent()) continue;
 
-            dst = Math.abs(m.getX(Align.left) - (mindowX + getWidth() * scaleX));
-            if(dst < 32f && dst <= dst1 && between.get(mindowY, m.y - getHeight() * scaleY, m.y + m.getHeight() * m.scaleY)){
+            dst = Math.abs(m.getX(Align.left) - (x + getWidth() * scaleX));
+            if(dst < 32f && dst <= dst1 && between.get(y, m.y - getHeight() * scaleY, m.y + m.getHeight() * m.scaleY)){
                 dst1 = dst;
                 lrSnap = m;
                 lrSnapAlign = Align.left;
-                lrBottomOff = mindowY - m.y;
+                lrBottomOff = y - m.y;
             }
 
-            dst = Math.abs(m.getX(Align.right) - mindowX);
-            if(dst < 32f && dst <= dst1 && between.get(mindowY, m.y - getHeight() * scaleY, m.y + m.getHeight() * m.scaleY)){
+            dst = Math.abs(m.getX(Align.right) - x);
+            if(dst < 32f && dst <= dst1 && between.get(y, m.y - getHeight() * scaleY, m.y + m.getHeight() * m.scaleY)){
                 dst1 = dst;
                 lrSnap = m;
                 lrSnapAlign = Align.right;
-                lrBottomOff = mindowY - m.y;
+                lrBottomOff = y - m.y;
             }
 
-            dst = Math.abs(m.getY(Align.bottom) - (mindowY + getHeight() * scaleY));
-            if(dst < 32f && dst <= dst2 && between.get(mindowX, m.x - getWidth() * scaleX, m.x + m.getWidth() * m.scaleX)){
+            dst = Math.abs(m.getY(Align.bottom) - (y + getHeight() * scaleY));
+            if(dst < 32f && dst <= dst2 && between.get(x, m.x - getWidth() * scaleX, m.x + m.getWidth() * m.scaleX)){
                 dst2 = dst;
                 tbSnap = m;
                 tbSnapAlign = Align.bottom;
-                tbLeftOff = mindowX - m.x;
+                tbLeftOff = x - m.x;
             }
 
-            dst = Math.abs(m.getY(Align.top) - mindowY);
-            if(dst < 32f && dst <= dst2 && between.get(mindowX, m.x - getWidth() * scaleX, m.x + m.getWidth() * m.scaleX)){
+            dst = Math.abs(m.getY(Align.top) - y);
+            if(dst < 32f && dst <= dst2 && between.get(x, m.x - getWidth() * scaleX, m.x + m.getWidth() * m.scaleX)){
                 dst2 = dst;
                 tbSnap = m;
                 tbSnapAlign = Align.top;
-                tbLeftOff = mindowX - m.x;
+                tbLeftOff = x - m.x;
             }
         }
         testSnaps();
@@ -316,38 +304,29 @@ public class Mindow2 extends Table{
         return (lrSnap == null || lrSnap.testSnap(set)) && (tbSnap == null || tbSnap.testSnap(set));
     }
 
-    public boolean addTo(Group newParent){
+    public void addTo(Group newParent){
         if(newParent == null){
-            return !this.remove();
+            this.remove();
+            return;
         }
-        this.remove();
         newParent.addChild(this);
-        return true;
     }
 
-    public void showHelp(){
-        new BaseDialog(""){
-            {
-                addCloseButton();
-                this.cont.pane(t -> {
-                    t.add(helpInfo).padBottom(60f).left().width(Core.graphics.getWidth() / 1.5f).get().setWrap(true);
-                    t.row();
-                    t.add("@mindow2.uiHelp").left().width(Core.graphics.getWidth() / 1.5f).get().setWrap(true);
-                });
-                show();
-            }
-        };
-    }
-
-    /** Settings shoulded be set in Seq: settings, will be shown and configurable in SettingsDialog
-     * UISetting will be shown to, but not configurable
+    /**
+     * Settings shoulded be set in Seq: settings, will be shown and configurable in SettingsDialog
     */
     public void showSettings(){
         new BaseDialog("@settings.meta.dialogTitle"){
             {
                 addCloseButton();
                 this.cont.pane(t -> {
-                    t.button("@settings.meta.mindowHelp", Icon.info, () -> showHelp()).width(300f).height(150f).get().setStyle(textb);
+                    t.button("@settings.meta.mindowHelp", Icon.info, () -> new BaseDialog(""){
+                        {
+                            addCloseButton();
+                            this.cont.pane(t1 -> t1.add("@" + name + ".help").padBottom(60f).left().width(graphics.getWidth() / 1.5f).get().setWrap(true));
+                            show();
+                        }
+                    }).width(300f).height(150f).get().setStyle(textb);
                     t.row();
                     t.table(tt -> settings.buildList(tt)).width(Math.min(600, Core.graphics.getWidth()));
                 }).grow().row();
@@ -368,19 +347,16 @@ public class Mindow2 extends Table{
 
     /** can be overrided, should use super.initSettings(), called in rebuild() */
     public void initSettings(){
-        if(mindowName == null || mindowName.equals("")) return;
-        if(settings == null) settings = new SettingHandler(mindowName);
+        if(name == null || name.isEmpty()) return;
+        if(settings == null) settings = new SettingHandler(name);
         settings.list.clear();
         var sScl = settings.sliderPref("scale", 100, 20, 400, 10, s -> s + "%", scl -> setScale(scl / 100f));
         sScl.title = bundle.get("settings.mindow.scale");
         sScl.description = bundle.getOrNull("settings.mindow.scale.description");
     }
 
-    /** Override this method for custom UI settings load
-     * rebuild() called once finished loading
-     */
-    public boolean loadUISettingsRaw(){
-        if(mindowName == null || mindowName.equals("")) return false;
+    public void loadUISettings(){
+        if(name == null || name.isEmpty()) return;
         minimized = settings.getBool("minimized");
         edgesnap = settings.getInt("edgesnap");
         curx = settings.getInt("curx");
@@ -388,10 +364,10 @@ public class Mindow2 extends Table{
         setScale(settings.getInt("scale", 100) / 100f);
         mindow2s.each(m -> {
             if(m == this) return;
-            if(m.mindowName.equals(settings.getStr("LRsnap"))){
+            if(m.name.equals(settings.getStr("LRsnap"))){
                 lrSnap = m;
             }
-            if(m.mindowName.equals(settings.getStr("TBsnap"))){
+            if(m.name.equals(settings.getStr("TBsnap"))){
                 tbSnap = m;
             }
         });
@@ -400,19 +376,14 @@ public class Mindow2 extends Table{
         tbSnapAlign = settings.getInt("TBsnapAlign");
         tbLeftOff = settings.getInt("TBsnapOff");
         testSnaps();
-        return true;
-    }
-
-    public void loadUISettings(){
-        loadUISettingsRaw();
     }
 
     /**
      * Override this method for custom UI settings save
      */
     public void saveUISettings(){
-        //it is a not-named mindow2, no settings can be saved.
-        if(mindowName == null || mindowName.equals("")) return;
+        if(name == null || name.equals("")) return;
+
         settings.putBool("minimized", minimized);
         settings.putInt("edgesnap", edgesnap);
         //edgesnap will disable curx / cury changes, so they shouldn't be saved when edgesnapping.
@@ -424,16 +395,16 @@ public class Mindow2 extends Table{
         }
         settings.putInt("scale", (int)(scaleX * 100));
 
-        settings.putString("LRsnap", lrSnap == null ? "" : lrSnap.mindowName);
+        settings.putString("LRsnap", lrSnap == null ? "" : lrSnap.name);
         settings.putInt("LRsnapAlign", lrSnapAlign);
         settings.putInt("LRsnapOff", (int)lrBottomOff);
-        settings.putString("TBsnap", tbSnap == null ? "" : tbSnap.mindowName);
+        settings.putString("TBsnap", tbSnap == null ? "" : tbSnap.name);
         settings.putInt("TBsnapAlign", tbSnapAlign);
         settings.putInt("TBsnapOff", (int)tbLeftOff);
     }
 
-    public void registerName(){
-        if(mindowName != null && !mindowName.equals("") && !mindow2s.contains(m -> m.mindowName.equals(this.mindowName))){
+    public void registerToGlobal(){
+        if(name != null && !name.isEmpty() && !mindow2s.contains(m -> m.name.equals(this.name))){
             mindow2s.add(this);
         }
     }

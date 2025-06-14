@@ -175,7 +175,7 @@ public class ModifyFuncs{
             mi2ui.settings.buildList(cont);
             st.table(buttons -> {
                 buttons.defaults().uniform().height(64f).grow();
-                mindow2s.each(m -> buttons.button("@" + m.titleText, () -> m.settings.buildList(cont)));
+                mindow2s.each(m -> buttons.button("@" + m.name + ".MI2U", () -> m.settings.buildList(cont)));
             }).width(600f);
 
             st.row();
