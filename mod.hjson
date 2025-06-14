@@ -5,7 +5,7 @@ displayName: "MI2-Utilities Java"
 name: "mi2-utilities-java"
 
 #the mod version
-version: 1.6.2
+version: 1.7.0-alpha
 
 #the minimum game build required to run this mod
 minGameVersion: 149
@@ -28,72 +28,3 @@ description: "# MI2-Utilities Java
 - [English](README.md) | [中文](README_zh.md)
 
 QOL Mod, powerful assists to vanilla gameplay. For destined Mindustry players.
-
-### Install
-
-- Method 1: \"Import from github\", with \"BlackDeluxeCat/MI2-Utilities-Java\". This makes reinstall available. (recommended)
-- Method 2: Get the latest release, download \"MI2-Utilities Java.jar\". Then \"Import from a file\" with the file.
-
-QQ Group(中文zh_cn) number: 875035496
-
-### Contribution
-- PRs: l10n, bug fix, new feature.
-- Issues: bug report, suggestion.
-
----
-
-## Features(1.2.3c)
-
-#### MI2UI
-- Functions: one-click planning rebuild, distribution building reveal.
-- Logical FPS simulation.
-- AI-assist: auto mining, auto construct plans, auto self-repair, auto aiming.
-- Most of the map rules.
-- Wave info, force skipwave, wave health bars.
-- RTS Formation creating and selecting.
-- Most of MI2U's options.
-
-#### Core Info
-- Vanilla core info ++, charts of resource changes.
-- Unit counter.
-- Power net bars & net building analyse.
-- Switch to view other teams.
-
-#### MindowMap
-- Renderer based on vanilla.
-- Sensible zoomed to full map.
-- Player labels.
-- Clicking pans camera.
-- Space Scan world finder.
-- Logic Building Stats
-
-#### Map Info
-
-
-#### Logic Helper
-- Sort and fast typing var names, using delimiter.
-- Search & Replace.
-- Cut or Copy, and Paste.
-
-#### Emoji
-- Emoji book.
-
-#### Mindow2
-Draggable window for this mod. On the auto-hidden title bar, you can open settings dialog, minimize it, or tap the title to drag. For details, open settings and see the help pages of each Mindow2.
-
-Position, snap, etc. can be saved through settings.
-
-#### Others
-- Smooth multiplayer cursors.
-- Block/Unit hp bar, logic lines, pathfind lines.
-- Disable wrecks, units, bullets rendering.
-- Distribution buildings interior reveal.
-- Modify block stat bars, make it following cursor.
-- 99.5% of changes can be turned off with options.
-- The settings stored at $Mindustry/mods/MI2U_Settings/.
-
----
-
-Early JS version: [BlackDeluxeCat/MI2-Utilities](https://github.com/BlackDeluxeCat/MI2-Utilities)
-
-My friend did a lot of other functions, see [MinerTools](https://github.com/RlCCJ/MinerTools)."
