@@ -42,7 +42,8 @@ public class CoreInfoMindow extends Mindow2{
     protected ObjectSet<Item> usedItems;
     protected FloatDataRecorder[] itemRecoders;
     public PopupTable[] itemCharts;
-    public int itemTimerInt = 1;
+    public IntSeq itemTimerInts = new IntSeq(new int[]{1, 10, 30, 60});
+    public int itemTimerIndex = 0;
 
     public CoreInfoMindow(){
         super("CoreInfo", "coreInfo.MI2U", "@coreInfo.help");
@@ -50,15 +51,11 @@ public class CoreInfoMindow extends Mindow2{
         usedUnits = new ObjectSet<>();
 
         titlePane.table(teamt -> {
-            teamt.button(itemTimerInt + "s", textb, null).size(titleButtonSize).with(b -> {
+            teamt.button(itemTimerInts.get(itemTimerIndex) + "s", textb, null).size(titleButtonSize).with(b -> {
                 b.clicked(() -> {
-                    switch(itemTimerInt){
-                        case 1 -> itemTimerInt = 10;
-                        case 10 -> itemTimerInt = 30;
-                        case 30 -> itemTimerInt = 60;
-                        default -> itemTimerInt = 1;
-                    }
-                    b.setText(itemTimerInt + "s");
+                    itemTimerIndex += 1;
+                    itemTimerIndex = Mathf.mod(itemTimerIndex, itemTimerInts.size);
+                    b.setText(itemTimerInts.get(itemTimerIndex) + "s");
                 });
             });
             teamt.button("Select", textb, () -> {
@@ -154,7 +151,7 @@ public class CoreInfoMindow extends Mindow2{
 
                     var ir = itemRecoders[item.id];
 
-                    var l = new Label(() -> core == null ? "" : (ir.get(0) - ir.get(itemTimerInt) >= 0 ? "[green]+" : "[coral]-") + Strings.autoFixed(Math.abs(ir.get(0) - ir.get(itemTimerInt))/(float)Math.min(itemTimerInt, ir.size()) , 1));
+                    var l = new Label(() -> core == null ? "" : (ir.get(0) - ir.get(itemTimerInts.get(itemTimerIndex)) >= 0 ? "[green]+" : "[coral]-") + Strings.autoFixed(Math.abs(ir.get(0) - ir.get(itemTimerInts.get(itemTimerIndex)))/(float)Math.min(itemTimerInts.get(itemTimerIndex), ir.size()) , 1));
                     l.setStyle(Styles.outlineLabel);
                     l.setAlignment(Align.bottomRight);
                     l.setFontScale(0.8f);
@@ -201,7 +198,6 @@ public class CoreInfoMindow extends Mindow2{
                 int ind = 0;
 
                 for(UnitType type : content.units()){
-                    //if(type.isHidden()) continue;
                     if(!usedUnits.contains(type)) continue;
                     func.get(uut, type.uiIcon, () -> team.data().countType(type) > 0 ? UI.formatAmount(team.data().countType(type)) : "").tooltip(t -> t.background(Styles.black6).margin(4f).add(type.localizedName).style(Styles.outlineLabel)).get().clicked(() -> {
                         //click to glance unit
