@@ -10,6 +10,7 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.pooling.*;
 import mi2u.*;
+import mi2u.Pathfinder;
 import mi2u.ui.*;
 import mindustry.ai.*;
 import mindustry.ai.types.*;
@@ -47,6 +48,7 @@ public class RendererExt{
             unloaderBuilding = MI2Utils.getField(Unloader.ContainerStat.class, "building"),
             lexecTimer = MI2Utils.getField(LExecutor.class, "unitTimeouts");
 
+    public static Pathfinder pathfinder = new Pathfinder();
     public static boolean animatedshields;
     public static int unitHpBarStyle;
     public static boolean enPlayerCursor;
@@ -89,6 +91,8 @@ public class RendererExt{
         Events.run(EventType.Trigger.drawOver, () -> {
             if(mi2ui.settings.getBool("forceTapTile")) forceDrawSelect();
         });
+
+        
     }
 
     public static void updateSettings(){
