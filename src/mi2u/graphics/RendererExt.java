@@ -32,6 +32,7 @@ import mindustry.world.blocks.units.*;
 import java.lang.reflect.*;
 
 import static mi2u.MI2UVars.*;
+import static mi2u.graphics.HitboxBarDrawer.barDrawer;
 import static mindustry.Vars.*;
 
 /**
@@ -48,7 +49,6 @@ public class RendererExt{
             lexecTimer = MI2Utils.getField(LExecutor.class, "unitTimeouts");
 
     public static boolean animatedshields;
-    public static int unitHpBarStyle;
     public static boolean enPlayerCursor;
     public static boolean enUnitHitbox;
     public static boolean enUnitHpBar;
@@ -57,7 +57,6 @@ public class RendererExt{
     public static boolean enOverdriveZone;
     public static boolean enMenderZone;
     public static boolean enTurretZone;
-    public static boolean turretZoneBlockColor;
     public static boolean turretZoneAAColor;
     public static boolean enBlockHpBar;
     public static boolean enDistributionReveal;
@@ -94,8 +93,6 @@ public class RendererExt{
     public static void updateSettings(){
         animatedshields = Core.settings.getBool("animatedshields");
 
-        unitHpBarStyle = mi2ui.settings.getInt("unitHpBarStyle");
-
         enPlayerCursor = mi2ui.settings.getBool("enPlayerCursor");
         enUnitHitbox = mi2ui.settings.getBool("enUnitHitbox");
         enUnitHpBar = mi2ui.settings.getBool("enUnitHpBar");
@@ -119,6 +116,7 @@ public class RendererExt{
     }
 
     public static Field drawIndexUnit = MI2Utils.getField(Unit.class, "index__draw"), drawIndexDecal = MI2Utils.getField(Decal.class, "index__draw"), drawIndexBullet = MI2Utils.getField(Bullet.class, "index__draw");
+
     public static void drawBase(){
         if(!state.isGame()) return;
         if(!disableUnit){
@@ -129,9 +127,9 @@ public class RendererExt{
 
         drawZoneShader();
 
-        Groups.player.each(p -> {
-            if(enPlayerCursor) drawPlayer(p);
-        });
+        if(enPlayerCursor){
+            Groups.player.each(RendererExt::drawPlayer);
+        }
 
         Groups.draw.each(d -> {
             //No-bug way.
@@ -253,9 +251,11 @@ public class RendererExt{
     }
 
     public static void drawUnit(Unit unit){
-        if(Math.abs(unit.x - Core.camera.position.x) <= (Core.camera.width / 2) && Math.abs(unit.y - Core.camera.position.y) <= (Core.camera.height / 2)){
-            //display healthbar by MI2
+        barDrawer.reset().set(unit.x, unit.y, unit.hitSize, unit.hitSize);
+
+        if(Core.camera.bounds(MI2UTmp.r1).overlaps(barDrawer.box)){
             Draw.z(Layer.shields + 6f);
+
             if(enUnitHpBar){
                 drawUnitHpBar(unit);
             }
@@ -291,7 +291,7 @@ public class RendererExt{
                         if(logicai.control == LUnitControl.pathfind && !unit.isFlying()){
                             Draw.color(Color.blue, Color.gray, Mathf.absin(Time.time, 8f, 1f));
                             Draw.alpha(0.8f);
-                            drawUnitPath(unit, MI2Utils.getValue(logicai, "lastPathId"), MI2UTmp.v2.set(logicai.moveX, logicai.moveY));
+                            //drawUnitPath(unit, MI2Utils.getValue(logicai, "lastPathId"), MI2UTmp.v2.set(logicai.moveX, logicai.moveY));
                         }else{
                             Draw.color(Color.blue, 0.8f);
                             Lines.dashLine(unit.x, unit.y, logicai.moveX, logicai.moveY, (int) (Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) / 8));
@@ -394,59 +394,33 @@ public class RendererExt{
     }
 
     public static void drawUnitHpBar(Unit unit){
-        float width = 1.2f, hhitsize = unit.hitSize / 2f;
-        float uwidth = unit.hitSize * width, uhwidth = uwidth / 2f;
+        float lenMul = 1.2f, hhitsize = unit.hitSize / 2f;
+        float uwidth = unit.hitSize * lenMul, uhwidth = uwidth / 2f;
         if(unit.shield > Math.min(0.5f * unit.maxHealth, 100f) || !enUnitHpBarDamagedOnly || unit.damaged() || unit.drownTime > 0f){
-            Lines.stroke(4f);
-            Draw.color(MI2UTmp.c1.set(unit.team.color).lerp(Color.white, Mathf.clamp(unit.hitTime)), Mathf.lerp(0.5f, 1f, Mathf.clamp(unit.hitTime)));
-            Lines.line(unit.x - uhwidth, unit.y + hhitsize, unit.x + uhwidth, unit.y + hhitsize);
+            Draw.color(MI2UTmp.c1.set(unit.team.color).lerp(Color.white, Mathf.clamp(unit.hitTime)).a(Mathf.lerp(0.5f, 1f, Mathf.clamp(unit.hitTime))));
+            barDrawer.fill(Align.top, 1f, lenMul, 4f);
 
-            Draw.color((unit.health > 0 ? Pal.health:Color.gray), 0.8f);
-            Lines.stroke(2);
-            Lines.line(
-                    unit.x - uhwidth, unit.y + hhitsize,
-                    unit.x - uhwidth + uwidth * (unit.health > 0 ? unit.health : Mathf.maxZero(unit.maxHealth + unit.health)) / unit.maxHealth, unit.y + hhitsize);
+            if(unit.health > 0){
+                Draw.color(Pal.health, 0.8f);
+                barDrawer.fill(Align.top, Mathf.clamp(unit.health / unit.maxHealth), lenMul, 2f);
+            }else{
+                Draw.color(Color.gray, 0.8f);
+                barDrawer.fill(Align.top, Mathf.clamp(-unit.health / unit.maxHealth), lenMul, 2f);
+            }
 
             if(unit.drownTime > 0f){
                 Draw.color(Color.royal, 0.5f);
-                Lines.stroke(2);
-                Lines.line(
-                        unit.x - uhwidth, unit.y + hhitsize,
-                        unit.x - uhwidth + uwidth * unit.drownTime, unit.y + hhitsize);
+                barDrawer.fill(Align.top, 1, unit.drownTime, lenMul, 2f);
             }
 
             if(unit.shield > 0){
-                if(unitHpBarStyle == 1){
-                    for(int didgt = 1; didgt <= Mathf.digits((int)(unit.shield / unit.maxHealth)) + 1; didgt++){
-                        Draw.color(Pal.shield, 0.8f);
-                        float barLength = Mathf.mod(unit.shield / unit.maxHealth, Mathf.pow(10f, (float)didgt - 1f)) / Mathf.pow(10f, (float)didgt - 1f);
-                        if(didgt > 1){
-                            float y = unit.y + hhitsize + didgt * 2f;
-                            float h = 2f;
-                            int counts = Mathf.floor(barLength * 10f);
-                            for(float i = 1; i <= counts; i++){
-                                Fill.rect(unit.x - 0.55f * unit.hitSize + (i - 1f) * 0.12f * unit.hitSize, y, 0.1f * unit.hitSize, h);
-                            }
-                        }else{
-                            float x = unit.x - (1f - barLength) * uhwidth;
-                            float y = unit.y + hhitsize + didgt * 2f;
-                            float h = 2f;
-                            float w = uwidth * barLength;
-                            Fill.rect(x, y, w, h);
-                        }
-                    }
-                }else{
-                    Draw.color(Pal.shield, 0.8f);
-                    Lines.stroke(2);
-                    Lines.line(
-                            unit.x - uhwidth, unit.y + hhitsize,
-                            unit.x - uhwidth + uwidth * Mathf.mod(unit.shield / unit.maxHealth, 1f), unit.y + hhitsize);
-                    if(unit.shield > unit.maxHealth) drawText("x" + Mathf.floor(unit.shield / unit.maxHealth), unit.x + uhwidth - 4f, unit.y + hhitsize, Pal.shield, 1f, Align.left);
-                }
+                Draw.color(Pal.shield, 0.8f);
+                barDrawer.fill(Align.top, 1, Mathf.mod(unit.shield / unit.maxHealth, 1f), lenMul, 2f);
+                if(unit.shield > unit.maxHealth) drawText("x" + Mathf.floor(unit.shield / unit.maxHealth), unit.x + lenMul * unit.hitSize / 2f - 4f, barDrawer.getBarCenterY(Align.top), Pal.shield, 1f, Align.left);
             }
-
-            Draw.reset();
         }
+
+        Draw.reset();
 
         float index = 0f;
         int columns = Mathf.floor(uwidth / 4f);
@@ -479,87 +453,50 @@ public class RendererExt{
 
     //TODO set a Runnable list.
     public static void drawBlockHpBar(Building build){
+        final float lenMul = 0.8f;
         Draw.z(Layer.shields + 3f);
-        float width = 0.8f, halfwidth = width / 2f;
-        float offy = -build.hitSize() * 0.4f;
-        float barLength, x, y, h, w;
+        barDrawer.reset().set(build.x, build.y, build.hitSize() * 0.8f, build.hitSize() * 0.8f);
 
         if(build.health < build.maxHealth){
             if(build instanceof Wall.WallBuild wb && ((Wall)wb.block).flashHit){
                 float hitTime = wb.hit;
                 if(hitTime > 0f){
-                    Lines.stroke(2f + Mathf.lerp(0f, 2f, Mathf.clamp(hitTime)));
                     Draw.color(Color.white, Mathf.lerp(0.1f, 1f, Mathf.clamp(hitTime)));
-                    Lines.line(build.x - build.hitSize() * halfwidth, build.y + offy, build.x + build.hitSize() * halfwidth, build.y + offy);
+                    barDrawer.fill(Align.top, 1f, lenMul, 2f + Mathf.lerp(0f, 2f, Mathf.clamp(hitTime)));
                 }
             }
 
-            Draw.color((build.health > 0 ? Pal.health:Color.gray), 0.8f);
-
-            barLength = Mathf.clamp(build.health / build.maxHealth);
-            x = build.x - (1f - barLength) * halfwidth * build.hitSize();
-            y = build.y + offy;
-            h = 2f;
-            w = width * barLength * build.hitSize();
-            Fill.rect(x, y, w, h);
-            offy += 2f;
+            Draw.color((build.health > 0 ? Pal.health:Color.gray), lenMul);
+            barDrawer.fill(Align.top, Mathf.clamp(build.health / build.maxHealth), lenMul, 2f).addPad(Align.top, 2f);
         }
 
-        if(build instanceof ShieldWall.ShieldWallBuild sw && sw.shield > 0f){
+        if(build instanceof ShieldWall.ShieldWallBuild sw && !sw.broken()){
             Draw.color(Pal.shield, 0.8f);
-            barLength = Mathf.clamp(sw.shield / ((ShieldWall)sw.block).shieldHealth);
-
-            x = sw.x - (1f - barLength) * halfwidth * sw.hitSize();
-            y = sw.y + offy;
-            h = 2f;
-            w = width * barLength * sw.hitSize();
-            Fill.rect(x, y, w, h);
-            offy += 2f;
+            barDrawer.fill(Align.top, Mathf.clamp(sw.shield / ((ShieldWall)sw.block).shieldHealth), lenMul, 2f).addPad(Align.top, 2f);
         }
 
         if(build instanceof UnitFactory.UnitFactoryBuild uf){
             Draw.color(Pal.accent, 0.8f);
-            barLength = uf.fraction();
+            barDrawer.fill(Align.bottom, uf.fraction(), lenMul, 2f).addPad(Align.bottom, 2f);
 
-            x = uf.x - (1f - barLength) * halfwidth * uf.hitSize();
-            y = uf.y + offy;
-            h = 2f;
-            w = width * barLength * uf.hitSize();
-            Fill.rect(x, y, w, h);
-            offy += 2f;
-
-            drawText((uf.currentPlan == -1 ? "":((UnitFactory)uf.block).plans.get(uf.currentPlan).unit.emoji()) + (Strings.autoFixed(uf.fraction() * 100f, 1) + "% | " + (uf.currentPlan == -1 ? Core.bundle.get("none") : Strings.autoFixed((((UnitFactory)uf.block).plans.get(uf.currentPlan).time - uf.progress) / (60f * state.rules.unitBuildSpeed(uf.team) * uf.timeScale()), 1))), uf.x, uf.y + offy, Pal.accent, uf.block.size > 3 ? 1.0f : 0.8f, Align.center);
-            offy += 2f;
+            drawText((uf.currentPlan == -1 ? "":((UnitFactory)uf.block).plans.get(uf.currentPlan).unit.emoji()) + (Strings.autoFixed(uf.fraction() * 100f, 1) + "% | " + (uf.currentPlan == -1 ? Core.bundle.get("none") : Strings.autoFixed((((UnitFactory)uf.block).plans.get(uf.currentPlan).time - uf.progress) / (60f * state.rules.unitBuildSpeed(uf.team) * uf.timeScale()), 1))), uf.x, barDrawer.getBarCenterY(Align.bottom), Pal.accent, uf.block.size > 3 ? 1.0f : 0.8f, Align.center);
+            barDrawer.addPad(Align.bottom, 2f);
         }
 
         if(build instanceof Reconstructor.ReconstructorBuild uf){
             Draw.color(Pal.accent, 0.8f);
-            barLength = uf.fraction();
+            barDrawer.fill(Align.bottom, uf.fraction(), lenMul, 2f).addPad(Align.bottom, 2f);
 
-            x = uf.x - (1f - barLength) * halfwidth * uf.hitSize();
-            y = uf.y + offy;
-            h = 2f;
-            w = width * barLength * uf.hitSize();
-            Fill.rect(x, y, w, h);
-            offy += 2f;
-
-            drawText((uf.unit() == null ? "":uf.unit().emoji()) + (Strings.autoFixed(uf.fraction() * 100f, 1) + "% | " + Strings.autoFixed((((Reconstructor)uf.block).constructTime - uf.progress) / (60f * state.rules.unitBuildSpeed(uf.team) * uf.timeScale()), 1)), uf.x, uf.y + offy, Pal.accent, uf.block.size > 3 ? 1.0f : 0.8f, Align.center);
-            offy += 2f;
+            drawText((uf.unit() == null ? "":uf.unit().emoji()) + (Strings.autoFixed(uf.fraction() * 100f, 1) + "% | " + Strings.autoFixed((((Reconstructor)uf.block).constructTime - uf.progress) / (60f * state.rules.unitBuildSpeed(uf.team) * uf.timeScale()), 1)), uf.x, barDrawer.getBarCenterY(Align.bottom), Pal.accent, uf.block.size > 3 ? 1.0f : 0.8f, Align.center);
+            barDrawer.addPad(Align.bottom, 2f);
         }
 
         if(build instanceof UnitAssembler.UnitAssemblerBuild uf){
             Draw.color(Pal.accent, 0.8f);
-            barLength = uf.progress;
+            barDrawer.fill(Align.bottom, uf.progress, lenMul, 2f).addPad(Align.bottom, 2f);
 
-            x = uf.x - (1f - barLength) * halfwidth * uf.hitSize();
-            y = uf.y + offy;
-            h = 2f;
-            w = width * barLength * uf.hitSize();
-            Fill.rect(x, y, w, h);
-            offy += 2f;
-
-            drawText((uf.unit() == null ? "":uf.unit().emoji()) + (Strings.autoFixed(barLength * 100f, 1) + "% | " + Strings.autoFixed(uf.plan().time * (1 - uf.progress) / (60f * state.rules.unitBuildSpeed(uf.team) * uf.timeScale()), 1)), uf.x, uf.y + offy, Pal.accent, uf.block.size > 3 ? 1.0f : 0.8f, Align.center);
-            offy += 2f;
+            drawText((uf.unit() == null ? "":uf.unit().emoji()) + (Strings.autoFixed(uf.plan().time * (1 - uf.progress) / (60f * state.rules.unitBuildSpeed(uf.team) * uf.timeScale()), 1) + "% | " + Strings.autoFixed(uf.plan().time * (1 - uf.progress) / (60f * state.rules.unitBuildSpeed(uf.team) * uf.timeScale()), 1)), uf.x, barDrawer.getBarCenterY(Align.bottom), Pal.accent, uf.block.size > 3 ? 1.0f : 0.8f, Align.center);
+            barDrawer.addPad(Align.bottom, 2f);
         }
 
         Draw.color();

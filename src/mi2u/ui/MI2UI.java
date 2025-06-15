@@ -294,10 +294,6 @@ public class MI2UI extends Mindow2{
         settings.checkPref("enBlockHpBar", true).tag(false, false, true);
         settings.checkPref("enUnitHpBar", true).tag(false, false, true);
         settings.checkPref("unitHpBarDamagedOnly", true);
-        settings.sliderPref("unitHpBarStyle", 0, 0, 1, 1, s -> {
-            if(s == 0) return "x[accent][[i]";
-            return "三";
-        });
         settings.checkPref("enUnitHitbox", false).tag(false, false, true);
         settings.checkPref("enUnitLogic", false).tag(false, false, true);
         settings.checkPref("enUnitPath", false).tag(false, false, true);
