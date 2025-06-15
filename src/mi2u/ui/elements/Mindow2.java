@@ -57,9 +57,7 @@ public class Mindow2 extends Table{
             rebuild();
         }));
 
-        Events.on(ClientLoadEvent.class, e -> {
-            rebuild();
-        });
+        Events.on(ClientLoadEvent.class, e -> rebuild());
     }
 
     public void rebuild(){
@@ -241,7 +239,7 @@ public class Mindow2 extends Table{
 
         float dst1 = Float.MAX_VALUE, dst2 = Float.MAX_VALUE, dst;
         for(Mindow2 m : mindow2s){
-            if(m == this || m.name.equals("")) continue;
+            if(m == this || m.name.isEmpty()) continue;
             if(m.lrSnap == this || m.tbSnap == this) continue;
             if(!m.visible || !m.hasParent()) continue;
 
@@ -382,7 +380,7 @@ public class Mindow2 extends Table{
      * Override this method for custom UI settings save
      */
     public void saveUISettings(){
-        if(name == null || name.equals("")) return;
+        if(name == null || name.isEmpty()) return;
 
         settings.putBool("minimized", minimized);
         settings.putInt("edgesnap", edgesnap);

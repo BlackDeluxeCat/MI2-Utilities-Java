@@ -42,7 +42,6 @@ public class HitboxBarDrawer{
      * @param fraction 属性条填充的百分比，范围从0到1。
      * @param lenMul   长度乘数，用于调整属性条的长度。
      * @param stroke   属性条的描边宽度。
-     * @return
      */
     public HitboxBarDrawer fill(int alignTgt, int alignBar, float fraction, float lenMul, float stroke){
         float fx = getBarCenterX(alignTgt), fy = getBarCenterY(alignTgt);

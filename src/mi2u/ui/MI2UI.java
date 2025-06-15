@@ -330,7 +330,7 @@ public class MI2UI extends Mindow2{
         settings.checkPref("modifyBlockBars", false).tag(false, true, false);
         settings.checkPref("replaceTopTable", false).tag(false, true, false);
         settings.checkPref("modTopTableFollowMouse", false).tag(false, true, false);
-        settings.sliderPref("maxSchematicSize", 64, 32, 1024, 16, s -> String.valueOf(s), s -> Vars.maxSchematicSize = s);
+        settings.sliderPref("maxSchematicSize", 64, 32, 1024, 16, String::valueOf, s -> Vars.maxSchematicSize = s);
         settings.textPref("maxZoom", String.valueOf(renderer.maxZoom), TextField.TextFieldFilter.floatsOnly, s -> Strings.parseFloat(s) > renderer.minZoom && Strings.parseFloat(s) <= 100, s -> renderer.maxZoom = Strings.parseFloat(s), floatParser);
         settings.textPref("minZoom", String.valueOf(renderer.minZoom), TextField.TextFieldFilter.floatsOnly, s -> Strings.parseFloat(s) < renderer.maxZoom && Strings.parseFloat(s) > 0.01f, s -> renderer.minZoom = Strings.parseFloat(s), floatParser);
 
