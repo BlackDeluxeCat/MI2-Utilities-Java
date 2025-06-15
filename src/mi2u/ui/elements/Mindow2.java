@@ -326,7 +326,7 @@ public class Mindow2 extends Table{
                             this.cont.pane(t1 -> t1.add("@" + name + ".help").padBottom(60f).left().width(graphics.getWidth() / 1.5f).get().setWrap(true));
                             show();
                         }
-                    }).width(300f).height(150f).get().setStyle(textb);
+                    }).disabled(!bundle.has(name + ".help")).width(300f).height(150f).get().setStyle(textb);
                     t.row();
                     t.table(tt -> settings.buildList(tt)).width(Math.min(600, Core.graphics.getWidth()));
                 }).grow().row();

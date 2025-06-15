@@ -66,7 +66,7 @@ public class WorldFinderTable extends PopupTable{
                 showSubTableID = 2;
                 setupSelect();
             }).minSize(size*2f, size).update(b -> {
-                b.setText(Core.bundle.get("coreInfo.selectButton.team") + (team == null ? Iconc.map : team.localized()));
+                b.setText(Core.bundle.get("CoreInfo.selectButton.team") + (team == null ? Iconc.map : team.localized()));
                 b.getLabel().setColor(team == null ? Color.white:team.color);
             }).with(funcSetTextb);
         });
