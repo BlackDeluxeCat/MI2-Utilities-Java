@@ -36,7 +36,6 @@ public class MI2UI extends Mindow2{
 
         Events.run(EventType.Trigger.update, () -> {
             if(state.isGame()){
-                //RtsCommand.desktopFormation();//Independent from inputoverwrite, may bug
                 if(!state.isPaused()){
                     realRunTime += Time.timeSinceMillis(lastRealRun);
                 }
@@ -201,35 +200,6 @@ public class MI2UI extends Mindow2{
         });
 
         cont.row();
-
-        /*
-        cont.add(new MCollapser(t -> {
-            t.table(tt -> {
-                for(int i = 0; i < 10; i++){
-                    int ii = i;
-                    if(i == 5) tt.row();
-
-                    var button = tt.button("" + Mathf.mod(ii + 1, 10), textb, () -> {
-                    }).disabled(b -> !RtsCommand.creatingFormation && !RtsCommand.checkFormation(ii)).update(b -> {
-                        boolean check = RtsCommand.checkFormation(ii);
-                        b.setDisabled(!RtsCommand.creatingFormation && !check);
-                        b.getLabel().setColor(RtsCommand.creatingFormation ? check ? Color.cyan : Color.acid : Color.white);
-                    }).minSize(36f).with(c -> {
-                        c.getLabel().setAlignment(Align.center);
-                    }).get();
-
-                    var label = new Label(() -> "" + RtsCommand.countFormation(ii));
-                    label.setFontScale(0.65f);
-                    label.setFillParent(true);
-                    label.setAlignment(Align.bottomRight);
-                    button.addChild(label);
-                }
-            }).growX();
-        }, true).setDirection(false, true).setCollapsed(false, () -> !control.input.commandMode)).growX();
-
-        cont.row();
-
-         */
 
         cont.add(new MCollapser(m -> {
             m.defaults().growX();

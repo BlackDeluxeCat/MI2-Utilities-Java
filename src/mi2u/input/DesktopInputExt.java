@@ -1,7 +1,6 @@
 package mi2u.input;
 
 import arc.*;
-import arc.input.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.util.*;
@@ -129,18 +128,6 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
         move.setZero();
         shootXY.setZero();
     }
-
-    public static KeyBind[] numKey = {
-            Binding.blockSelect01,
-            Binding.blockSelect02,
-            Binding.blockSelect03,
-            Binding.blockSelect04,
-            Binding.blockSelect05,
-            Binding.blockSelect06,
-            Binding.blockSelect07,
-            Binding.blockSelect08,
-            Binding.blockSelect09,
-            Binding.blockSelect10};
 
     public void tryCtrlBuildUnderUnit(){
         if(!scene.hasMouse() && !locked() && state.rules.possessionAllowed){

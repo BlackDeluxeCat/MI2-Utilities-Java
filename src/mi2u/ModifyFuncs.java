@@ -194,7 +194,7 @@ public class ModifyFuncs{
                         touchable = Touchable.disabled;
                         update(() -> {
                             st.stageToLocalCoordinates(MI2UTmp.v3.set(Core.input.mouse()));
-                            this.setPosition(MI2UTmp.v3.x, MI2UTmp.v3.y);
+                            this.setPosition(MI2UTmp.v3.x, MI2UTmp.v3.y + 100);
                         });
                     }
                 });
