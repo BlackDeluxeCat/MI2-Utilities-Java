@@ -40,16 +40,19 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
         if(!panTimer.check(0, 400)){
             Core.camera.position.lerpDelta(panXY, 0.3f);
         }
+    }
 
-        //unit move will let camera position disassociates with unit position
+    @Override
+    protected void updateMovement(Unit unit){
+        //介入原方法的targetPos来调整目标位置
+        //TODO 未经测试的方法
         if(ctrlMove && unit != null){
-            //camera-centered movement offset
-            movement.set(player).sub(targetPos).limit(unit.speed());
-            if(player.within(targetPos, 15f)) movement.setZero();
-            unit.movePref(movement);
-            if(unit.type.omniMovement && MI2UTmp.v1.set(unit.x, unit.y).sub(move).len() < 4f) unit.vel.approachDelta(Vec2.ZERO, unit.speed() * unit.type.accel / 4f);
-            //control move
-            unit.movePref(move);
+            float x = Core.camera.position.x, y = Core.camera.position.y;
+            Core.camera.position.set(move);
+            super.updateMovement(unit);
+            Core.camera.position.set(x, y);
+        }else{
+            super.updateMovement(unit);
         }
     }
 
