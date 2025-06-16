@@ -1,9 +1,13 @@
 package mi2u.input;
 
+import arc.*;
 import arc.func.*;
+import arc.math.geom.*;
 import arc.struct.*;
 import arc.util.*;
+import mi2u.*;
 import mindustry.gen.*;
+import mindustry.input.*;
 import mindustry.world.*;
 import mindustry.world.blocks.logic.*;
 
@@ -18,6 +22,7 @@ public class InputUtils{
             if(b instanceof LogicBlock lb) tapAccess.put(lb, build -> lb.accessible());
         }
     }
+
     public static void forceTap(@Nullable Building build, boolean includeSelfTeam){
         if(build == null) return;
         if(!includeSelfTeam && (build.interactable(player.team()) && (!tapAccess.containsKey(build.block) || tapAccess.get(build.block).get(build)))) return;//handled by vanilla
@@ -55,5 +60,22 @@ public class InputUtils{
         }
 
         state.playtestingMap = ptm;
+    }
+
+    public static void panStable(float x, float y){
+        if(control.input instanceof InputOverwrite ipo){
+            ipo.pan(true, x, y);
+        }else{
+            if(control.input instanceof DesktopInput inp) inp.panning = true;
+            Core.camera.position.set(x, y);
+        }
+    }
+
+    public static void panStable(Position position){
+        panStable(position.getX(), position.getY());
+    }
+
+    public static void panStable(int pos){
+        panStable(Point2.x(pos) * tilesize, Point2.y(pos) * tilesize);
     }
 }

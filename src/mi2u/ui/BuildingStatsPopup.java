@@ -83,7 +83,7 @@ public class BuildingStatsPopup<B extends Building> extends PopupTable{
             t.background(Styles.black8);
             imageBlock = t.image(build.block.uiIcon).size(24f).get();
             imageBlock.clicked(() -> {
-                if(control.input instanceof InputOverwrite io) io.pan(true, MI2UTmp.v1.set(build));
+                InputUtils.panStable(build);
                 imageBlock.actions(Actions.color(Color.acid), Actions.color(Color.white, 0.2f));
             });
             labelPos = t.label(() -> Iconc.left + Strings.autoFixed(build.x / tilesize, 1) + ", "+ Strings.autoFixed(build.y / tilesize, 1)).get();

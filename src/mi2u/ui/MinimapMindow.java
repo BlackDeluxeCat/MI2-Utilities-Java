@@ -216,17 +216,8 @@ public class MinimapMindow extends Mindow2{
                 public void clicked(InputEvent event, float x, float y){
                     setRect();
                     untransform(MI2UTmp.v1.set(x, y));
-                    if(control.input instanceof DesktopInput || control.input instanceof InputOverwrite){
-                        try{
-                            if(control.input instanceof InputOverwrite ino){
-                                ino.pan(true, MI2UTmp.v1);
-                            }else if(control.input instanceof DesktopInput inp){
-                                inp.panning = true;
-                                Core.camera.position.set(MI2UTmp.v1);
-                            }
-                        }catch(Exception e){
-                            Log.err("Minimap", e);
-                        }
+                    if(!mobile){
+                        InputUtils.panStable(MI2UTmp.v1);
                     }else{
                         ui.minimapfrag.toggle();
                     }

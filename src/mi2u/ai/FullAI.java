@@ -875,11 +875,7 @@ public class FullAI extends AIController{
                             b.setText(PrintI.toString(target.obj()));
                             b.setColor(b.cullable ? Color.cyan : Color.white);
                             if(b.hasMouse()) HoverTopTable.hoverInfo.setHovered(target.obj());
-                            if(b.cullable){
-                                if(target.obj() instanceof Posc posc && control.input instanceof InputOverwrite ipo){
-                                    ipo.pan(true, MI2UTmp.v1.set(posc));
-                                }
-                            }
+                            if(b.cullable && (target.obj() instanceof Posc posc)) InputUtils.panStable(posc);
                         });
                     });
                 }

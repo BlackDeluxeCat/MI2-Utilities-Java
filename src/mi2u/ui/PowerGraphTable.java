@@ -413,9 +413,7 @@ public class PowerGraphTable extends Table{
             consG.getter = () -> totalcons;
             genG.getter = () -> totalgen;
 
-            Runnable clicked = () -> {
-                if(control.input instanceof InputOverwrite iow) iow.pan(true, MI2UTmp.v1.set(pg.all.random()));
-            };
+            Runnable clicked = () -> InputUtils.panStable(pg.all.random());
 
             barStore = new MI2Bar().blink(Color.white).outline(MI2UTmp.c2.set(0.3f, 0.3f, 0.6f, 0.3f), 2f);
             barStore.clicked(clicked);

@@ -102,10 +102,10 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
 
     /** set ctrl to false to cancel control*/
     @Override
-    public void pan(boolean ctrl, Vec2 panXY){
+    public void pan(boolean ctrl, float x, float y){
         if(ctrl) panTimer.reset(0,0);  //set a timer for extended smooth panning
         panning = ctrl;
-        this.panXY.set(panXY);
+        this.panXY.set(x, y);
     }
 
     @Override

@@ -19,7 +19,7 @@ public interface InputOverwrite{
 
     default void boost(boolean boost){}
 
-    default void pan(boolean ctrl, Vec2 panXY){}
+    default void pan(boolean ctrl, float x, float y){}
 
     default void shoot(Vec2 vec, boolean shoot, boolean ctrl){}
 

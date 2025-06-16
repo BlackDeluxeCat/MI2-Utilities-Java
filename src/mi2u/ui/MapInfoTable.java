@@ -582,7 +582,7 @@ public class MapInfoTable extends Table{
                             }}).size(12f);
                             if(group.payloads != null && !group.payloads.isEmpty()) eip.add("" + Iconc.units).get().setFontScale(0.7f);
                             if(group.spawn != -1) eip.add(Iconc.blockSpawn + "").get().clicked(() -> {
-                                if(control.input instanceof InputOverwrite iow) iow.pan(true, MI2UTmp.v1.set(Point2.unpack(group.spawn).x, Point2.unpack(group.spawn).y).scl(tilesize));
+                                InputUtils.panStable(group.spawn);
                             });
                         });
                     }).pad(2f);

@@ -78,19 +78,19 @@ public class WorldFinderTable extends PopupTable{
                 finder.team = team;
                 finder.findTarget = find;
                 int pos = finder.findNext();
-                if(pos != -1 && control.input instanceof InputOverwrite ipo) ipo.pan(true, MI2UTmp.v1.set(Point2.x(pos), Point2.y(pos)).scl(tilesize));
+                if(pos != -1)  InputUtils.panStable(pos);
             }).height(size).with(funcSetTextb);
             t.button("+20", textb, () -> {
                 finder.team = team;
                 finder.findTarget = find;
                 int pos = finder.findNext(20);
-                if(pos != -1 && control.input instanceof InputOverwrite ipo) ipo.pan(true, MI2UTmp.v1.set(Point2.x(pos), Point2.y(pos)).scl(tilesize));
+                if(pos != -1) InputUtils.panStable(pos);
             }).height(size).with(funcSetTextb);
             t.button("+2%", textb, () -> {
                 finder.team = team;
                 finder.findTarget = find;
                 int pos = finder.findNext(Mathf.floor(WorldData.countBlock(find, team) * 0.01f));
-                if(pos != -1 && control.input instanceof InputOverwrite ipo) ipo.pan(true, MI2UTmp.v1.set(Point2.x(pos), Point2.y(pos)).scl(tilesize));
+                if(pos != -1) InputUtils.panStable(pos);
             }).height(size).with(funcSetTextb);
             t.label(() -> finder.findIndex + "/" + WorldData.countBlock(find, team) + (finder.lastPos == -1 ? "" : Point2.unpack(finder.lastPos).toString()));
         }).grow().padBottom(8f);

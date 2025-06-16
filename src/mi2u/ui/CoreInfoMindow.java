@@ -201,12 +201,10 @@ public class CoreInfoMindow extends Mindow2{
                     if(!usedUnits.contains(type)) continue;
                     func.get(uut, type.uiIcon, () -> team.data().countType(type) > 0 ? UI.formatAmount(team.data().countType(type)) : "").tooltip(t -> t.background(Styles.black6).margin(4f).add(type.localizedName).style(Styles.outlineLabel)).get().clicked(() -> {
                         //click to glance unit
-                        if(control.input instanceof InputOverwrite inp){
-                            if(team.data().unitCache(type) == null || team.data().unitCache(type).isEmpty()) return;
-                            unitIndex[type.id]++;
-                            if(unitIndex[type.id] >= team.data().unitCache(type).size) unitIndex[type.id] = 0;
-                            inp.pan(true, MI2UTmp.v1.set(team.data().unitCache(type).get(unitIndex[type.id]).x(), team.data().unitCache(type).get(unitIndex[type.id]).y()));
-                        }
+                        if(team.data().unitCache(type) == null || team.data().unitCache(type).isEmpty()) return;
+                        unitIndex[type.id]++;
+                        if(unitIndex[type.id] >= team.data().unitCache(type).size) unitIndex[type.id] = 0;
+                        InputUtils.panStable(team.data().unitCache(type).get(unitIndex[type.id]));
                     });
                     if(++ind % columns == 0) uut.row();
                 }
@@ -215,9 +213,9 @@ public class CoreInfoMindow extends Mindow2{
                 if(++ind % columns == 0) uut.row();
 
                 func.get(uut, Blocks.coreNucleus.uiIcon, () -> core != null && team.data().cores.size > 0 ? UI.formatAmount(team.data().cores.size) : "").get().clicked(() -> {
-                    if(control.input instanceof InputOverwrite inp && team.cores() != null && !team.cores().isEmpty()){
+                    if(team.cores() != null && !team.cores().isEmpty()){
                         Building b = team.cores().random();
-                        inp.pan(true, MI2UTmp.v1.set(b.x, b.y));
+                        InputUtils.panStable(b);
                     }
                 });
 

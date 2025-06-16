@@ -72,9 +72,9 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
     }
 
     @Override
-    public void pan(boolean ctrl, Vec2 panXY){
+    public void pan(boolean ctrl, float x, float y){
         if(ctrl) panTimer.reset(0,0);  //set a timer for extended smooth panning
-        this.panXY.set(panXY);
+        this.panXY.set(x, y);
     }
 
     @Override
