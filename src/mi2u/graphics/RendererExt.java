@@ -273,6 +273,22 @@ public class RendererExt{
                 Lines.endLine();
             }
 
+            if(enUnitRangeZone){
+                float range = unit.range();
+
+                Draw.color(unit.team.color);
+                Draw.z(TurretZoneDrawer.getLayer(unit.team.id));
+
+                Draw.alpha(0.05f);
+                Fill.poly(unit.x, unit.y, (int)(range) / 4, range);
+
+                Lines.stroke(2f);
+                Draw.alpha(animatedshields ? 1f : 0.5f);
+                Lines.circle(unit.x, unit.y, range);
+
+                Draw.color();
+            }
+
             //display logicAI info by MI2
             if(unit.controller() instanceof LogicAI logicai){
                 Draw.reset();
@@ -291,7 +307,7 @@ public class RendererExt{
                         if(logicai.control == LUnitControl.pathfind && !unit.isFlying()){
                             Draw.color(Color.blue, Color.gray, Mathf.absin(Time.time, 8f, 1f));
                             Draw.alpha(0.8f);
-                            //drawUnitPath(unit, MI2Utils.getValue(logicai, "lastPathId"), MI2UTmp.v2.set(logicai.moveX, logicai.moveY));
+                            drawUnitPath(unit);
                         }else{
                             Draw.color(Color.blue, 0.8f);
                             Lines.dashLine(unit.x, unit.y, logicai.moveX, logicai.moveY, (int) (Mathf.len(logicai.moveX - unit.x, logicai.moveY - unit.y) / 8));
@@ -303,36 +319,18 @@ public class RendererExt{
                 }
             }
 
-            if(enUnitRangeZone){
-                float z = Draw.z();
-                float range = unit.range();
-
-                Draw.color(unit.team.color);
-                Draw.z(TurretZoneDrawer.getLayer(unit.team.id));
-
-                Draw.alpha(0.05f);
-                Fill.poly(unit.x, unit.y, (int)(range) / 4, range);
-
-                Lines.stroke(2f);
-                Draw.alpha(animatedshields ? 1f : 0.5f);
-                Lines.circle(unit.x, unit.y, range);
-
-                Draw.z(z);
-                Draw.color();
-            }
-
             //v7 rts pathfind render, making your device a barbecue.
             //Pathfind Renderer
             //TODO line length limitation to prevent lagging
             if(mi2ui.settings.getBool("enUnitPath")){
-                if(unit.isCommandable() && unit.controller() instanceof CommandAI ai && ai.targetPos != null){
+                if(unit.isCommandable() && unit.controller() instanceof CommandAI ai){
                     Draw.reset();
                     Draw.z(Layer.power - 4f);
                     Lines.stroke(1.5f);
 
                     if(unit.isGrounded()){
                         Draw.color(unit.team.color, Color.lightGray, Mathf.absin(Time.time, 8f, 1f));
-                        drawUnitPath(unit, MI2Utils.getValue(ai, "pathId"), ai.targetPos);
+                        drawUnitPath(unit);
                     }
 
                     if(ai.targetPos != null){
@@ -349,7 +347,7 @@ public class RendererExt{
                     Tile tile = unit.tileOn();
                     int max = mi2ui.settings.getInt("enUnitPath.length", 40);
                     for(int tileIndex = 1; tileIndex <= max; tileIndex++){
-                        Tile nextTile = pathfinder.getTargetTile(tile, pathfinder.getField(unit.team, Pathfinder.costGround, Pathfinder.fieldCore));
+                        Tile nextTile = pathfinder.getTargetTile(tile, pathfinder.getField(unit.team, unit.type.flowfieldPathType, Pathfinder.fieldCore));
                         if(nextTile == null) break;
                         if(nextTile == tile) break;
                         Lines.stroke(1.5f);
@@ -364,33 +362,13 @@ public class RendererExt{
         }
     }
 
-    public static void drawUnitPath(Unit unit, int pathId, Vec2 destination){
-        try{
+    public static void drawUnitPath(Unit unit){
             Tile tile = unit.tileOn();
-            ObjectMap requests = MI2Utils.getValue(controlPath, "requests");
-            Object req = requests.get(unit);
-            IntSeq result = MI2Utils.getValue(req, "result");
-            int start = MI2Utils.getValue(req, "rayPathIndex");
-            for(int tileIndex = start; tileIndex < result.size; tileIndex++){
-                Tile nextTile = world.tiles.geti(result.get(tileIndex));
-                if(nextTile == null) break;
-                if(!Core.camera.bounds(MI2UTmp.r1).contains(tile.worldx(), tile.worldy()) && !Core.camera.bounds(MI2UTmp.r1).contains(nextTile.worldx(), nextTile.worldy())) continue;  //Skip paths outside screen
-                if(nextTile == tile) break;
-                if(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) > 4000f) break;
-
-                Lines.dashLine(tile.worldx(), tile.worldy(), nextTile.worldx(), nextTile.worldy(), (int)(Mathf.len(nextTile.worldx() - tile.worldx(), nextTile.worldy() - tile.worldy()) / 4f));
-
-                tile = nextTile;
-            }
-        }catch(Exception ignore){
-            /*
-            boolean move = controlPath.getPathPosition(unit, pathId, destination, MI2UTmp.v1);
-            if(move){
-                Lines.dashLine(unit.x, unit.y, MI2UTmp.v1.x, MI2UTmp.v1.y, (int)(Mathf.len(MI2UTmp.v1.x - unit.x, MI2UTmp.v1.y - unit.y) / 4f));
-            }
-            */
-        }
-
+            ObjectMap<Unit, ?> unitRequests = MI2Utils.getValue(controlPath, "unitRequests");
+            if(unitRequests == null) return;
+            Tile targetTile = MI2Utils.getValue(unitRequests.get(unit), "lastTargetTile");
+            if(targetTile != null) Lines.dashLine(tile.worldx(), tile.worldy(), targetTile.worldx(), targetTile.worldy(), (int)(MI2UTmp.v1.set(targetTile).sub(tile).len() / tilesize));
+            //The HPA* no longer supports precomputation for long-distance pathfinding. Sad:(
     }
 
     public static void drawUnitHpBar(Unit unit){

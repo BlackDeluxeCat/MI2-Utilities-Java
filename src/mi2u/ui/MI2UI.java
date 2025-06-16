@@ -297,7 +297,7 @@ public class MI2UI extends Mindow2{
         settings.checkPref("enUnitHitbox", false).tag(false, false, true);
         settings.checkPref("enUnitLogic", false).tag(false, false, true);
         settings.checkPref("enUnitPath", false).tag(false, false, true);
-        settings.textPref("enUnitPath.length", String.valueOf(60), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 10 && Strings.parseInt(s) <= 300, null, intParser).tag(false, false, true);
+        settings.sliderPref("enUnitPath.length", 60, 5, 300, String::valueOf).tag(false, false, true);
 
         settings.title("graphics.drawGroups");
 
