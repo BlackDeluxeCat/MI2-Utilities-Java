@@ -120,7 +120,7 @@ public class HoverTopTable extends PopupTable{
             if(build != null){
                 buildt.table(t -> {
                     t.add(build.team.localized()).left().color(build.team.color);
-                    t.add("(" + World.conv(build.x) + "," + World.conv(build.y) + ")").left();
+                    t.add("(" + World.toTile(build.x) + "," + World.toTile(build.y) + ")").left();
                 });
                 buildt.row();
                 var team = build.team;
