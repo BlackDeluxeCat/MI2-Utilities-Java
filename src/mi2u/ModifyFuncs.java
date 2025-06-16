@@ -19,6 +19,7 @@ import mindustry.type.*;
 import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.defense.turrets.*;
+import mindustry.world.blocks.heat.*;
 import mindustry.world.blocks.power.*;
 import mindustry.world.blocks.production.*;
 import mindustry.world.consumers.*;
@@ -70,10 +71,18 @@ public class ModifyFuncs{
 
             if(block instanceof HeatCrafter hc){
                 addBarToBlock(block, "heat", (HeatCrafter.HeatCrafterBuild entity) ->
-                        new Bar(() ->
-                                Core.bundle.format("bar.heatpercent", (int)entity.heat, (int)(entity.efficiencyScale() * 100)) + "/" + (int)hc.heatRequirement + " x" + hc.maxEfficiency,
-                                () -> Pal.lightOrange,
-                                () -> entity.heat / hc.heatRequirement));
+                    new Bar(() ->
+                            Core.bundle.format("bar.heatpercent", (int)entity.heat, (int)(entity.efficiencyScale() * 100)) + "/" + (int)hc.heatRequirement + " x" + hc.maxEfficiency,
+                            () -> Pal.lightOrange,
+                            () -> entity.heat / hc.heatRequirement));
+            }
+
+            if(block instanceof HeatProducer hc){
+                addBarToBlock(block, "heat", (HeatProducer.HeatProducerBuild entity) ->
+                     new Bar(() ->
+                                 Core.bundle.format("bar.heatamount", (int)entity.heat),
+                         () -> Pal.lightOrange,
+                         () -> entity.heat / hc.heatOutput));
             }
 
             if(block instanceof ImpactReactor || block instanceof BeamNode){
@@ -88,9 +97,9 @@ public class ModifyFuncs{
                 if(tu.heatRequirement > 0f){
                     addBarToBlock(block, "heat", (Turret.TurretBuild entity) ->
                             new Bar(() ->
-                                    Core.bundle.format("bar.heatpercent", (int)entity.heat, (int)(entity.efficiencyScale() * 100)) + "/" + (int)tu.heatRequirement + " x" + tu.maxHeatEfficiency,
+                                    Core.bundle.format("bar.heatpercent", (int)entity.heatReq, (int)(entity.efficiencyScale() * 100)) + "/" + (int)tu.heatRequirement + " x" + tu.maxHeatEfficiency,
                                     () -> Pal.lightOrange,
-                                    () -> entity.heat / tu.heatRequirement));
+                                    () -> entity.heatReq / tu.heatRequirement));
                 }
             }
         });

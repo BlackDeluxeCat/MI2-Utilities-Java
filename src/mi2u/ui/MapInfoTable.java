@@ -306,14 +306,6 @@ public class MapInfoTable extends Table{
         t.add(icon).update(l -> l.color.set(p.get() ? Color.white : Color.darkGray)).pad(1f);
     }
 
-    public void addFloatAttr(Prov<CharSequence> p, String name, Table t){
-        t.table(tt -> {
-            tt.add(name).get().setFontScale(1f);
-            tt.row();
-            tt.label(p).get().setFontScale(1f);
-        }).pad(2);
-    }
-
     public void setupDetailAttsInfo(){
         mapAttsDialog.cont.clear();
         mapAttsDialog.cont.pane(t -> {
@@ -350,6 +342,10 @@ public class MapInfoTable extends Table{
                     tt.row();
                     addBoolString(() -> state.rules.showSpawns, "@mapInfo.showSpawns", tt);
                     tt.row();
+                    addBoolString(() -> state.rules.randomWaveAI, "@rules.randomwaveai", tt);
+                    tt.row();
+                    addBoolString(() -> state.rules.airUseSpawns, "@rules.airUseSpawns", tt);
+                    tt.row();
 
                     tt.label(() -> Core.bundle.get("rules.fog") + ": " + state.rules.dynamicColor.toString()).pad(2f).get().setColor(state.rules.fog ? Color.white : Color.darkGray);
                     tt.row();
@@ -369,6 +365,8 @@ public class MapInfoTable extends Table{
                     addBoolString(() -> state.rules.logicUnitBuild, "@mapInfo.logicUnitBuild", tt);
                     tt.row();
                     addBoolString(() -> state.rules.disableWorldProcessors, "@rules.disableworldprocessors", tt);
+                    tt.row();
+                    addBoolString(() -> state.rules.allowEditWorldProcessors, "@rules.alloweditworldprocessors", tt);
                     tt.row();
                     addBoolString(() -> state.rules.schematicsAllowed, "@rules.schematic", tt);
                     tt.row();
@@ -392,7 +390,7 @@ public class MapInfoTable extends Table{
                     tt.row();
                     addBoolString(() -> state.rules.placeRangeCheck , "@rules.placerangecheck", tt);
                     tt.row();
-                    tt.label(() -> Core.bundle.get("rules.unitcap") + ": " + state.rules.unitCap + (state.rules.unitCapVariable ? "+"+Iconc.blockCoreShard:"")).pad(2f);
+                    tt.label(() -> Core.bundle.get("rules.unitcap") + ": " + (state.rules.disableUnitCap ? Iconc.cancel : (state.rules.unitCap + (state.rules.unitCapVariable ? "+"+Iconc.blockCoreShard:"")))).pad(2f);
                 });
             });
 
@@ -438,55 +436,70 @@ public class MapInfoTable extends Table{
             t.row();
 
             t.table(tt -> {
-                tt.defaults().left();
-                addFloatAttr(() -> Strings.fixed(state.rules.buildCostMultiplier, 2), "@mapInfo.buildCostMulti", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.blockHealthMultiplier, 2), "@mapInfo.buildingHpMulti", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.blockDamageMultiplier, 2), "@mapInfo.buildingDamageMulti", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.buildSpeedMultiplier, 2), "@mapInfo.buildSpeedMulti", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.unitBuildSpeedMultiplier, 2), "@mapInfo.unitConstructSpeedMulti", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.unitCostMultiplier, 2), "@mapInfo.unitCostMulti", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.unitHealthMultiplier, 2), "@mapInfo.unitHealthMultiplier", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.unitDamageMultiplier, 2), "@mapInfo.unitDamageMulti", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.unitCrashDamageMultiplier, 2), "@mapInfo.unitCrashDamageMultiplier", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.deconstructRefundMultiplier, 2), "@mapInfo.buildRefundMulti", tt);
-                addFloatAttr(() -> Strings.fixed(state.rules.solarMultiplier, 2), "@mapInfo.solarMulti", tt);
-            });
+                    tt.defaults().left().pad(5f);
+                    tt.add("@rules.buildcostmultiplier");
+                    tt.label(() -> Strings.fixed(state.rules.buildCostMultiplier, 2));
+                    tt.add("@rules.deconstructrefundmultiplier");
+                    tt.label(() -> Strings.fixed(state.rules.deconstructRefundMultiplier, 2));
+                    tt.add("@rules.solarmultiplier");
+                    tt.label(() -> Strings.fixed(state.rules.solarMultiplier, 2));
+                });
 
             t.row();
 
-            t.table(teamt -> {
-                teamt.add("@mapInfo.team").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.buildingHpMulti").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.buildingDamageMulti").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.buildSpeedMulti").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.unitConstructSpeedMulti").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.unitCostMulti").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.unitHealthMultiplier").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.unitDamageMulti").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.unitCrashDamageMultiplier").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.infAmmo").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.infRes").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.cheat").padLeft(5).padRight(5);
-                teamt.add("@mapInfo.rtsAI").padLeft(5).padRight(5);
+            t.pane(teamt -> {
+                teamt.defaults().pad(5f).width(60f);
+                teamt.add("@mapInfo.team").labelAlign(Align.right);
+                teamt.labelWrap("@rules.blockhealthmultiplier");
+                teamt.labelWrap("@rules.blockdamagemultiplier");
+                teamt.labelWrap("@rules.buildspeedmultiplier");
+                teamt.labelWrap("@rules.unitbuildspeedmultiplier");
+                teamt.labelWrap("@rules.unitcostmultiplier");
+                teamt.labelWrap("@rules.unitminespeedmultiplier");
+                teamt.labelWrap("@rules.unithealthmultiplier");
+                teamt.labelWrap("@rules.unitdamagemultiplier");
+                teamt.labelWrap("@rules.unitcrashdamagemultiplier");
+                teamt.labelWrap("@rules.infiniteresources");
+                teamt.labelWrap("@mapInfo.infAmmo");
+                teamt.labelWrap("@mapInfo.cheat");
+                teamt.labelWrap("@mapInfo.rtsAI");
+
+                teamt.row();
+
+                teamt.add("" + Iconc.planet).labelAlign(Align.right);
+                teamt.add(String.valueOf(state.rules.blockHealthMultiplier));
+                teamt.add(String.valueOf(state.rules.blockDamageMultiplier));
+                teamt.add(String.valueOf(state.rules.buildSpeedMultiplier));
+                teamt.add(String.valueOf(state.rules.unitBuildSpeedMultiplier));
+                teamt.add(String.valueOf(state.rules.unitCostMultiplier));
+                teamt.add(String.valueOf(state.rules.unitMineSpeedMultiplier));
+                teamt.add(String.valueOf(state.rules.unitHealthMultiplier));
+                teamt.add(String.valueOf(state.rules.unitDamageMultiplier));
+                teamt.add(String.valueOf(state.rules.unitCrashDamageMultiplier));
+                teamt.add(state.rules.infiniteResources ? "" + Iconc.ok:"");
+                teamt.add("-");
+                teamt.add("-");
 
                 for(Teams.TeamData teamData : state.teams.present){
                     teamt.row();
                     var teamRule = state.rules.teams.get(teamData.team);
-                    teamt.add("[#" + teamData.team.color + "]" + teamData.team.localized());
-                    teamt.add(String.valueOf(teamRule.blockHealthMultiplier)).color(teamData.team.color);
-                    teamt.add(String.valueOf(teamRule.blockDamageMultiplier)).color(teamData.team.color);
-                    teamt.add(String.valueOf(teamRule.buildSpeedMultiplier)).color(teamData.team.color);
-                    teamt.add(String.valueOf(teamRule.unitBuildSpeedMultiplier)).color(teamData.team.color);
-                    teamt.add(String.valueOf(teamRule.unitCostMultiplier)).color(teamData.team.color);
-                    teamt.add(String.valueOf(teamRule.unitHealthMultiplier)).color(teamData.team.color);
-                    teamt.add(String.valueOf(teamRule.unitDamageMultiplier)).color(teamData.team.color);
-                    teamt.add(String.valueOf(teamRule.unitCrashDamageMultiplier)).color(teamData.team.color);
-                    teamt.add(String.valueOf(teamRule.infiniteAmmo)).color(teamData.team.color);
-                    teamt.add(String.valueOf(teamRule.infiniteResources)).color(teamData.team.color);
-                    teamt.add(String.valueOf(teamRule.cheat)).color(teamData.team.color);
-                    teamt.add(teamRule.rtsAi ? teamRule.rtsMinWeight + "[" + teamRule.rtsMinSquad + "~" + teamRule.rtsMaxSquad + "]" + (teamRule.aiCoreSpawn ? Core.bundle.format("mapInfo.aiCoreSpawn") : "") : "").color(teamData.team.color);
+                    teamt.add("[#" + teamData.team.color + "]" + teamData.team.localized()).labelAlign(Align.right).wrap();
+                    teamt.add((Mathf.equal(teamRule.blockHealthMultiplier, 1f) ? "[gray]" : "[#" + teamData.team.color + "]") + teamRule.blockHealthMultiplier);
+                    teamt.add((Mathf.equal(teamRule.blockDamageMultiplier, 1f) ? "[gray]" : "[#" + teamData.team.color + "]") + teamRule.blockDamageMultiplier);
+                    teamt.add((Mathf.equal(teamRule.buildSpeedMultiplier, 1f) ? "[gray]" : "[#" + teamData.team.color + "]") + teamRule.buildSpeedMultiplier);
+                    teamt.add((Mathf.equal(teamRule.unitBuildSpeedMultiplier, 1f) ? "[gray]" : "[#" + teamData.team.color + "]") + teamRule.unitBuildSpeedMultiplier);
+                    teamt.add((Mathf.equal(teamRule.unitCostMultiplier, 1f) ? "[gray]" : "[#" + teamData.team.color + "]") + teamRule.unitCostMultiplier);
+                    teamt.add((Mathf.equal(teamRule.unitMineSpeedMultiplier, 1f) ? "[gray]" : "[#" + teamData.team.color + "]") + teamRule.unitMineSpeedMultiplier);
+                    teamt.add((Mathf.equal(teamRule.unitHealthMultiplier, 1f) ? "[gray]" : "[#" + teamData.team.color + "]") + teamRule.unitHealthMultiplier);
+                    teamt.add((Mathf.equal(teamRule.unitDamageMultiplier, 1f) ? "[gray]" : "[#" + teamData.team.color + "]") + teamRule.unitDamageMultiplier);
+                    teamt.add((Mathf.equal(teamRule.unitCrashDamageMultiplier, 1f) ? "[gray]" : "[#" + teamData.team.color + "]") + teamRule.unitCrashDamageMultiplier);
+
+                    teamt.add(teamRule.infiniteResources ? "✔" + Iconc.ok:"");
+                    //teamt.add(teamRule.infiniteAmmo ? "✔" + Iconc.ok:"");
+                    teamt.add(teamRule.cheat ? "✔" + Iconc.ok:"");
+                    teamt.add(teamRule.rtsAi ? teamRule.rtsMinWeight + "[" + teamRule.rtsMinSquad + "~" + teamRule.rtsMaxSquad + "]" + (teamRule.aiCoreSpawn ? Core.bundle.format("mapInfo.aiCoreSpawn") : "") : "");
                 }
-            });
+            }).grow();
 
         });
     }

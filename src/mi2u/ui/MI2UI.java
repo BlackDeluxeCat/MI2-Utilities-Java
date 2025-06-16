@@ -97,17 +97,6 @@ public class MI2UI extends Mindow2{
                     tb.addListener(tool);
                 });
 
-                /*
-                t.button("DS", textbtoggle, () -> {}).minSize(36f).with(funcSetTextb).with(tb -> {
-                    var tool = Tooltip.Tooltips.getInstance().create("@mi2ui.buttons.deleteToScheme");
-                    tool.allowMobile = true;
-                    tb.addListener(tool);
-                    tb.update(() -> {
-                        if(tb.isChecked()) MI2UFuncs.deleteToScheme();
-                    });
-                });
-                 */
-
                 //The update rate is based on button.update(), and affected by lagging
                 t.button("", textbtoggle, FpsController::toggle).update(b -> {
                     b.setChecked(FpsController.update);
@@ -297,7 +286,7 @@ public class MI2UI extends Mindow2{
         settings.title("modify");
 
         settings.textPref("blockSelectTableHeight", String.valueOf(194), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 60 && Strings.parseInt(s) <= 810, null, intParser).tag(false, true, false);
-        settings.checkPref("modifyBlockBars", false).tag(false, true, false);
+        settings.checkPref("modifyBlockBars", false).tag(true, false, false);
         settings.checkPref("replaceTopTable", false).tag(false, true, false);
         settings.checkPref("modTopTableFollowMouse", false).tag(false, true, false);
         settings.sliderPref("maxSchematicSize", 64, 32, 1024, 16, String::valueOf, s -> Vars.maxSchematicSize = s);
