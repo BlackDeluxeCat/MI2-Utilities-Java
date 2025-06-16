@@ -34,6 +34,8 @@ public class MI2UI extends Mindow2{
     public MI2UI(){
         super("MI2UI");
 
+        Events.run(EventType.Trigger.draw, FpsController::update);
+
         Events.run(EventType.Trigger.update, () -> {
             if(state.isGame()){
                 if(!state.isPaused()){
@@ -107,10 +109,9 @@ public class MI2UI extends Mindow2{
                  */
 
                 //The update rate is based on button.update(), and affected by lagging
-                t.button("Speeding", textbtoggle, SpeedController::switchUpdate).update(b -> {
-                    b.setChecked(SpeedController.update);
-                    b.setText(Core.bundle.get("mi2ui.buttons.speeding") + "x" + Strings.autoFixed(SpeedController.scl, 2));
-                    SpeedController.update();
+                t.button("", textbtoggle, FpsController::toggle).update(b -> {
+                    b.setChecked(FpsController.update);
+                    b.setText(Core.bundle.get("mi2ui.buttons.fpsCtrl") + "x" + Strings.autoFixed(FpsController.scl, 2));
                     b.getLabel().setFontScale(1f);
                     b.getLabel().layout();
                     b.getLabel().setFontScale(Mathf.clamp((b.getWidth()- 8f - 16f - 8f) / b.getLabel().getGlyphLayout().width, 0.01f, 1f));
@@ -119,7 +120,7 @@ public class MI2UI extends Mindow2{
                     b.table(bii -> {
                         bii.image(Core.atlas.find("mi2-utilities-java-ui-speed")).size(24f).update(img -> {
                             img.setOrigin(Align.center);
-                            if(SpeedController.update) img.setRotation(Mathf.log2(SpeedController.scl) * 45f);
+                            if(FpsController.update) img.setRotation(Mathf.log2(FpsController.scl) * 45f);
                             else img.setRotation(0f);
                         });
                         bii.add().grow();
@@ -276,10 +277,9 @@ public class MI2UI extends Mindow2{
         settings.checkPref("disableBullet", false);
         settings.checkPref("disableBuilding", false);
 
-        settings.title("game.speedctrl");
+        settings.title("game.fpsCtrl");
 
-        settings.textPref("speedctrl.basefps", String.valueOf(60), TextField.TextFieldFilter.digitsOnly, s -> Strings.parseInt(s) >= 10 && Strings.parseInt(s) <= 600, null, intParser);
-        settings.sliderPref("speedctrl.cutoff", 1, 0, 5, 1, s -> s + "fps");
+        settings.sliderPref("fpsCtrl.cutoff", 1, 0, 5, 1, s -> s + "fps");
 
         settings.title("input");
 
