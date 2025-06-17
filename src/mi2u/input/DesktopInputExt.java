@@ -37,7 +37,7 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
 
         Unit unit = player.unit();
         if(ctrlBoost) player.boosting = boost;
-        if(ctrlShoot){
+        if(ctrlShoot && unit != null){
             boolean boosted = unit instanceof Mechc && unit.isFlying();
             player.shooting = shoot && !boosted;
             if(player.shooting){

@@ -13,7 +13,6 @@ import arc.struct.*;
 import arc.util.*;
 import mi2u.*;
 import mi2u.input.*;
-import mi2u.struct.*;
 import mi2u.ui.*;
 import mi2u.ui.elements.*;
 import mindustry.ai.types.*;
@@ -32,7 +31,6 @@ import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.*;
 import mindustry.world.blocks.defense.turrets.*;
-import mindustry.world.blocks.environment.*;
 import mindustry.world.meta.*;
 
 import static mi2u.MI2UVars.*;
@@ -92,7 +90,7 @@ public class FullAI extends AIController{
         public Drawable bimg;
 
         public boolean configUIExpand = true;
-        Interval timer = new Interval(10);
+        Interval timer = new Interval(4);
 
         public Mode(){
             btext = Iconc.units + "";
@@ -104,6 +102,8 @@ public class FullAI extends AIController{
     }
 
     public class BaseMineMode extends Mode{
+        /** 提升可读性，下同 */
+        static short timerTargetItem = 0, timerFindOre = 1, timerTransferItem = 2;
         public Seq<Item> list = new Seq<>();
         boolean mining;
         Item targetItem;
@@ -123,7 +123,7 @@ public class FullAI extends AIController{
                 unit.mineTile = null;
             }
             if(mining){
-                if(timer.get(0, 60 * 4) || targetItem == null){
+                if(timer.get(timerTargetItem, 60 * 4) || targetItem == null){
                     targetItem = list.min(i -> unit.canMine(i), i -> core.items.get(i));
                 }
                 //core full of the target item, do nothing
@@ -133,29 +133,18 @@ public class FullAI extends AIController{
                     return;
                 }
                 //if inventory is full, drop it off.
-                if(unit.stack.amount >= unit.type.itemCapacity || (targetItem != null && !unit.acceptsItem(targetItem))){
-                    mining = false;
-                }else{
-                    if(timer.get(1, 120) && targetItem != null){
-                        if(unit.type.mineWalls){
-                            if(ore != null && ore.wallDrop() != targetItem) ore = null;
-                            //it will be a bit laggy
-                            if(timer.get(6, 60 * 60)) WorldData.scanWorld();
-                            var seq = content.blocks().select(b -> (b.solid || (b instanceof Floor f && f.wallOre)) && b.itemDrop == targetItem);
-                            for(var block : seq){
-                                if(WorldData.countBlock(block, null) > 0){
-                                    WorldData.getSeq(block, null).each(pos -> {
-                                        if(ore != null && unit.within(ore, unit.type.mineRange)) return;
-                                        if((ore == null || MI2UTmp.v3.set(ore).sub(unit).len2() > MI2UTmp.v2.set(Point2.x(pos), Point2.y(pos)).scl(tilesize).sub(unit).len2()) && world.tile(pos).wallDrop()== targetItem) ore = world.tile(pos);
-                                    });
-                                }
-                            }
-                        }else{
-                            ore = indexer.findClosestOre(unit, targetItem);
-                        }
+                if(targetItem != null){
+                    if(!unit.acceptsItem(targetItem)){
+                        mining = false;
                     }
+
+                    if(timer.get(timerFindOre, 120f)){
+                        //Anuke终于做一回人了
+                        ore = unit.type.mineWalls ? indexer.findClosestWallOre(unit, targetItem) : indexer.findClosestOre(unit, targetItem);
+                    }
+
                     if(ore != null){
-                        moveAction(ore, 50f, false);
+                        moveAction(ore, 40f, true);
                         if(unit.within(ore, unit.type.mineRange)){
                             unit.mineTile = ore;
                         }
@@ -163,20 +152,22 @@ public class FullAI extends AIController{
                 }
             }else{
                 unit.mineTile = null;
-                if(unit.stack.amount == 0){
+                if(!unit.hasItem()){
                     mining = true;
                     return;
                 }
 
                 if(unit.within(core, itemTransferRange / 1.1f)){
-                    if(!timer.check(2, 120f)) shootAction(MI2UTmp.v1.set(core).lerpDelta(Mathf.range(-12f, 12f), Mathf.range(-8f, 8f), 0.1f), true);
-                    if(timer.get(2, 120f)){
+                    if(timer.get(timerTransferItem, 120f)){
                         control.input.droppingItem = true;
                         control.input.tryDropItems(core, unit.aimX, unit.aimY);
+                    }else{
+                        shootAction(MI2UTmp.v1.set(core).lerpDelta(Mathf.range(-12f, 12f), Mathf.range(-8f, 8f), 0.1f), true);
                     }
                     mining = true;
                 }
-                moveAction(core, itemTransferRange / 2f, false);
+
+                moveAction(core, itemTransferRange / 2f, true);
             }
         }
 
@@ -187,18 +178,23 @@ public class FullAI extends AIController{
                 int i = 0;
                 for(var item : content.items()){
                     if(!content.blocks().contains(b -> b.itemDrop == item)) continue;
+                    boolean floor = indexer.hasOre(item), wall = indexer.hasWallOre(item);
                     p.button(b -> {
-                        b.image(item.uiIcon).size(24f);
-                        b.margin(4f);
-                        }, textbtoggle, () -> {
+                        var icon = new Image(item.uiIcon);
+                        icon.setFillParent(true);
+                        var label = new Label(() -> ((floor ? "F" : "") + (wall ? "w" : "")));
+                        label.setAlignment(Align.bottomRight);
+                        label.setFontScale(0.7f);
+                        b.stack(icon, label);
+                    }, textbtoggle, () -> {
                         if(list.contains(item)){
                             list.remove(item);
                         }else {
                             list.add(item);
                         }
-                    }).fill().update(b -> b.setChecked(list.contains(item)));
+                    }).fill().margin(4f).disabled(!floor && !wall).update(b -> b.setChecked(list.contains(item)));
                     i++;
-                    if(i >= 7){
+                    if(i >= 8){
                         i = 0;
                         p.row();
                     }
@@ -208,98 +204,85 @@ public class FullAI extends AIController{
     }
 
     public class AutoBuildMode extends Mode{
+        short timerCobuild = 0, timerRebuild = 1, timerCheck = 2;
         public boolean rebuild = false, follow = true;
-        private BuildPlan cobuildplan;
+        final BuildPlan autoPlan = new BuildPlan();
+
         public AutoBuildMode(){
             btext = Iconc.unitPoly + "";
         }
+
         @Override
         public void act(){
             if(!control.input.isBuilding) return;
             if(!unit.canBuild()) return;
             //help others building, catching the closest plan to co-op.
-            if(follow && timer.get(0, 15f) && (unit.plans().isEmpty() || (cobuildplan != null && unit.buildPlan().samePos(cobuildplan) && unit.buildPlan().block == cobuildplan.block && unit.buildPlan().breaking == cobuildplan.breaking))){
-                Point2 last = cobuildplan == null ? null : MI2UTmp.p1.set(cobuildplan.x, cobuildplan.y);
-                cobuildplan = null;
-
+            if(follow && timer.get(timerCobuild, 15f) && (unit.plans().isEmpty() || unit.buildPlan().samePos(autoPlan))){
+                if(autoPlan.isDone()) unit.validatePlans();
+                //搜寻其他玩家的建造计划
                 for(var player : Groups.player){
                     if(player.unit() == null || player.team() != unit.team) continue;
 
-                    var u = player.unit();
-                    if(u.canBuild() && u != unit && u.activelyBuilding() && u.buildPlan() != null){
-                        BuildPlan plan = u.buildPlan();
-                        if(world.build(plan.x, plan.y) instanceof ConstructBlock.ConstructBuild cons){
-                            float dist = Math.min(cons.dst(unit) - buildingRange, 0);
-
-                            //make sure you can reach the request in time
-                            if(dist / unit.speed() < cons.buildCost * 0.9f && (cobuildplan == null || MI2UTmp.v1.set(plan).dst(unit) < MI2UTmp.v2.set(cobuildplan).dst(unit))){
-                                boolean itemreq = true;
-                                for(var item : plan.block.requirements){
-                                    if(player.team().core() != null && !player.team().core().items.has(item.item)){
-                                        itemreq = false;
+                    var other = player.unit();
+                    if(other != unit && other.canBuild() && other.activelyBuilding() && other.buildPlan() != null){
+                        BuildPlan plan = other.buildPlan();
+                        //潜在目标只能是已经在建的建筑
+                        if(other.buildPlan().build() instanceof ConstructBlock.ConstructBuild c){
+                            //判断能否准时赶到；是否离当前目标更近
+                            if(((c.dst(unit) - buildingRange) / (unit.type.speed * 60) < c.buildCost * (1f - c.progress()) * 0.9f) || (unit.buildPlan() != null && unit.dst(c) < unit.dst(unit.buildPlan()))){
+                                //检查核心资源
+                                boolean req = true;
+                                for(var itemStack : plan.block.requirements){
+                                    if(player.team().core() != null && !player.team().core().items.has(itemStack.item)){
+                                        req = false;
                                         break;
                                     }
                                 }
-                                if(itemreq) cobuildplan = plan;
+
+                                if(req){
+                                    autoPlan.config = plan.config;
+                                    unit.plans.addFirst(autoPlan.set(plan.x, plan.y, plan.rotation, plan.block));
+                                }
                             }
+                        }
+
+                        //发现其他玩家有矛盾意见时，移除该目标
+                        if(unit.buildPlan() != null && plan != null && plan.breaking != unit.buildPlan().breaking && plan.samePos(unit.buildPlan())){
+                            unit.plans.removeFirst();
                         }
                     }
                 }
-
-                if(cobuildplan != null){
-                    if(last != null) unit.plans.remove(bp -> bp.x == last.x && bp.y == last.y);
-                    unit.plans.addFirst(cobuildplan);
-                }
-
             }
 
-            if(rebuild && timer.get(1, 30f) && unit.plans().isEmpty() && !unit.team.data().plans.isEmpty()){
-                //rebuild
-                var block = unit.team.data().plans.first();
-                if(world.tile(block.x, block.y) != null && world.tile(block.x, block.y).block() == block.block){
-                    state.teams.get(player.team()).plans.remove(block);
+            if(rebuild && unit.plans().isEmpty() && timer.get(timerRebuild, 45f) && !unit.team.data().plans.isEmpty()){
+                float minDst = Float.MAX_VALUE;
+                Teams.BlockPlan plan = null;
+                for(var p : unit.team.data().plans){
+                    if(unit.dst(p.x * tilesize, p.y * tilesize) < minDst){
+                        minDst = unit.dst(p.x * tilesize, p.y * tilesize);
+                        plan = p;
+                    }
+                }
+
+                if(plan != null && world.tile(plan.x, plan.y).block() == plan.block){
+                    state.teams.get(player.team()).plans.remove(plan);
                 }else{
-                    unit.addBuild(new BuildPlan(block.x, block.y, block.rotation, block.block, block.config));
-                }
-
-            }
-
-            if(timer.get(2, 60f) && unit.buildPlan() != null && cobuildplan != null){
-                //cancel co-op plan that someone has conflicting idea or no player is building anymore
-                boolean cobuilding = false;
-                for(var player : Groups.player){
-                    if(player.unit() == null || player.team() != unit.team) continue;
-                    var u = player.unit();
-                    if(u.canBuild() && u != unit && u.activelyBuilding() && u.buildPlan() != null){
-                        BuildPlan plan = u.buildPlan();
-                        if(plan.samePos(cobuildplan) && plan.block == cobuildplan.block){
-                            if(plan.breaking != cobuildplan.breaking){
-                                cobuilding = false;
-                                break;
-                            }else{
-                                cobuilding = true;
-                            }
-                        }
-                    }
-                }
-                //cancel co-build plan that no other unit is building.
-                if(!cobuilding){
-                    unit.plans.remove(bp -> bp.samePos(cobuildplan) && bp.breaking == cobuildplan.breaking);
-                    cobuildplan = null;
+                    unit.plans.addFirst(new BuildPlan(plan.x, plan.y, plan.rotation, plan.block, plan.config));
                 }
             }
 
             if(unit.plans().isEmpty()) return;
             boostAction(true);
-            float mindst = Float.MAX_VALUE, tmp;
+            float minDst = Float.MAX_VALUE, tmp;
             BuildPlan min = unit.plans.first();
             if(unit.plans.size < 128){
                 for(var bp : unit.plans){
                     tmp = MI2UTmp.v1.set(bp).dst(unit);
-                    if(tmp < mindst){
+                    if(tmp < minDst){
                         min = bp;
-                        mindst = tmp;
+                        minDst = tmp;
                     }
+
                     if(tmp < buildingRange) break;
                 }
             }
