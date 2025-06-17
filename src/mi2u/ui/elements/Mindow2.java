@@ -37,7 +37,7 @@ public class Mindow2 extends Table{
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
     boolean dragging = false;
     public boolean minimized = false;
-    protected Table titleBar = new Table(), titlePane = new Table();
+    protected Table titleBar = new Table(), titlePane = new Table(Styles.black6);
     protected Table cont = new Table();
     public SettingHandler settings;
     protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(3);
@@ -48,10 +48,6 @@ public class Mindow2 extends Table{
 
     public Mindow2(String name){
         this.name = name;
-
-        setBackground(Tex.pane);
-        margin(4f);
-
         registerToGlobal();
         initSettings();
         loadUISettings();
@@ -72,6 +68,7 @@ public class Mindow2 extends Table{
         row();
 
         if(!minimized){
+            cont.setBackground(Styles.black3);
             cont.touchable = Touchable.enabled;
             setupCont(cont);
             add(cont).growX();
@@ -89,10 +86,7 @@ public class Mindow2 extends Table{
 
     public void setupTitle(){
         titleBar.clear();
-
-        titleBar.setBackground(minimized? Tex.clear: Tex.underline);
-        titleBar.margin(0f).marginBottom(minimized? 0: 4f);
-
+        titleBar.setBackground(titleBarbgNormal);
         if(!minimized){
             titlePane.touchable = Touchable.enabled;
             titleBar.add(titlePane).growX();

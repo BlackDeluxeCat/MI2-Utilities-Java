@@ -169,20 +169,24 @@ public class SettingHandler{
                 t.row();
                 if(restart) t.add("[orange]RS[]");
                 if(reloadWorld) t.add("[sky]RW[]");
-            }).tooltip(tooltip -> {
-                tooltip.table(t -> {
-                    t.setBackground(Tex.buttonTrans);
+            }).with(tb -> {
+                var tool = new Tooltip(tooltip -> {
+                    tooltip.table(t -> {
+                        t.setBackground(Tex.buttonTrans);
 
-                    t.label(() -> "[accent]" + title + "[]").growX().row();
-                    t.label(() -> "[lightgray]" + name + "[]").growX().row();
-                    t.labelWrap(() -> description).padTop(8f).padBottom(8f).minWidth(300f).growX().row();
+                        t.label(() -> "[accent]" + title + "[]").growX().row();
+                        t.label(() -> "[lightgray]" + name + "[]").growX().row();
+                        t.labelWrap(() -> description).padTop(8f).padBottom(8f).minWidth(300f).growX().row();
 
-                    t.table(warning -> {
-                        if (restart) warning.left().label(() -> "[orange]" + bundle.get("settings.tags.restart") + "[]").pad(2).padRight(8f);
-                        if (reloadWorld) warning.left().label(() -> "[sky]" + bundle.get("settings.tags.reloadWorld") + "[]").pad(2).padRight(8f);
-                        if (performance) warning.left().label(() -> "[negstat]" + bundle.get("settings.tags.performance") + "[]").pad(2).padRight(8f);
-                    }).growX().left().bottom();
-                }).growX().maxWidth(500f);
+                        t.table(warning -> {
+                            if (restart) warning.left().label(() -> "[orange]" + bundle.get("settings.tags.restart") + "[]").pad(2).padRight(8f);
+                            if (reloadWorld) warning.left().label(() -> "[sky]" + bundle.get("settings.tags.reloadWorld") + "[]").pad(2).padRight(8f);
+                            if (performance) warning.left().label(() -> "[negstat]" + bundle.get("settings.tags.performance") + "[]").pad(2).padRight(8f);
+                        }).growX().left().bottom();
+                    }).growX().maxWidth(500f);
+                }, Tooltip.Tooltips.getInstance());
+                tool.allowMobile = true;
+                tb.addListener(tool);
             }).size(40f).pad(2f);
         }
 
