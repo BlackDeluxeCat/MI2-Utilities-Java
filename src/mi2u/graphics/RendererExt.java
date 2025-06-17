@@ -383,7 +383,7 @@ public class RendererExt{
                 barDrawer.fill(Align.top, Mathf.clamp(unit.health / unit.maxHealth), lenMul, 2f);
             }else{
                 Draw.color(Color.gray, 0.8f);
-                barDrawer.fill(Align.top, Mathf.clamp(-unit.health / unit.maxHealth), lenMul, 2f);
+                barDrawer.fill(Align.top, 1f - Mathf.clamp(-unit.health / unit.maxHealth), lenMul, 2f);
             }
 
             if(unit.drownTime > 0f){
@@ -393,7 +393,7 @@ public class RendererExt{
 
             if(unit.shield > 0){
                 Draw.color(Pal.shield, 0.8f);
-                barDrawer.fill(Align.top, 1, Mathf.mod(unit.shield / unit.maxHealth, 1f), lenMul, 2f);
+                barDrawer.fill(Align.top, Mathf.mod(unit.shield / unit.maxHealth, 1f), lenMul, 2f);
                 if(unit.shield > unit.maxHealth) drawText("x" + Mathf.floor(unit.shield / unit.maxHealth), unit.x + lenMul * unit.hitSize / 2f - 4f, barDrawer.getBarCenterY(Align.top), Pal.shield, 1f, Align.left);
             }
         }
@@ -405,6 +405,7 @@ public class RendererExt{
         for(StatusEffect eff : content.statusEffects()){
             if(eff == StatusEffects.none) continue;
             if(unit.hasEffect(eff)){
+                Draw.color(eff.color, 0.8f);
                 Draw.alpha(unit.getDuration(eff) < 180f ? 0.3f + 0.7f * Math.abs(Mathf.sin(Time.time / 20f)) : 1f);
                 Draw.rect(eff.fullIcon,
                         unit.x - uhwidth + 2f + 4f * Mathf.mod(index, columns),
