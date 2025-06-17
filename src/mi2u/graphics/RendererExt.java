@@ -406,10 +406,10 @@ public class RendererExt{
             if(eff == StatusEffects.none) continue;
             if(unit.hasEffect(eff)){
                 Draw.alpha(unit.getDuration(eff) < 180f ? 0.3f + 0.7f * Math.abs(Mathf.sin(Time.time / 20f)) : 1f);
-                Draw.rect(eff.uiIcon,
+                Draw.rect(eff.fullIcon,
                         unit.x - uhwidth + 2f + 4f * Mathf.mod(index, columns),
                         unit.y + hhitsize + 3f + 5f * Mathf.floor(index / columns),
-                        eff.uiIcon.width / (float)eff.uiIcon.height * 5f, 5f);
+                        eff.fullIcon.width / (float)eff.fullIcon.height * 5f, 5f);
                 index++;
             }
         }
@@ -710,7 +710,7 @@ public class RendererExt{
 
                 if(ub.sortItem == null){
                     Draw.color();
-                    Draw.rect(drawItem.uiIcon, ub.x, ub.y, 4f, 4f);
+                    Draw.rect(drawItem.fullIcon, ub.x, ub.y, 4f, 4f);
                 }
                 Draw.reset();
             }
@@ -723,14 +723,14 @@ public class RendererExt{
         if(front == null || back == null || back.items == null || front.team != db.team || back.team != db.team || !back.canUnload() || !(((DirectionalUnloader)db.block).allowCoreUnload || !(back instanceof CoreBlock.CoreBuild))) return;
         if(db.unloadItem != null){
             Draw.alpha(db.unloadTimer / ((DirectionalUnloader)db.block).speed < 1f && back.items.has(db.unloadItem) && front.acceptItem(db, db.unloadItem) ? 0.8f : 0f);
-            Draw.rect(db.unloadItem.uiIcon, db.x, db.y, 4f, 4f);
+            Draw.rect(db.unloadItem.fullIcon, db.x, db.y, 4f, 4f);
         }else{
             var itemseq = content.items();
             for(int i = 0; i < itemseq.size; i++){
                 Item item = itemseq.get((i + db.offset) % itemseq.size);
                 if(back.items.has(item) && front.acceptItem(db, item)){
                     Draw.alpha(0.8f);
-                    Draw.rect(item.uiIcon, db.x, db.y, 4f, 4f);
+                    Draw.rect(item.fullIcon, db.x, db.y, 4f, 4f);
                     break;
                 }
             }
@@ -782,7 +782,7 @@ public class RendererExt{
 
         if(rb.lastItem != null){
             Draw.color();
-            Draw.rect(rb.lastItem.uiIcon, rb.x, rb.y, 4f, 4f);
+            Draw.rect(rb.lastItem.fullIcon, rb.x, rb.y, 4f, 4f);
         }
         Draw.reset();
     }
@@ -803,6 +803,9 @@ public class RendererExt{
     }
 
     public static void drawText(String text, float x, float y, Color color, float scl, int align){
+        float z = Draw.z();
+        Draw.z(z + 0.01f);
+
         Font font = Fonts.outline;
         GlyphLayout layout = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
         boolean ints = font.usesIntegerPositions();
@@ -818,6 +821,7 @@ public class RendererExt{
         font.getData().setScale(1f);
         Draw.reset();
         Pools.free(layout);
+        Draw.z(z);
     }
 
     public static void forceDrawSelect(){

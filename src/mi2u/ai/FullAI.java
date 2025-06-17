@@ -60,10 +60,7 @@ public class FullAI extends AIController{
 
     @Override
     public void updateUnit(){
-        if(!(control.input instanceof InputOverwrite) && mi2ui.settings.getBool("inputReplace")){
-            control.setInput(mobile ? MobileInputExt.mobileExt : DesktopInputExt.desktopExt);
-        }
-
+        if(unit == null) return;
         if(control.input instanceof InputOverwrite inp){
             inp.clear();
             modes.each(mode -> {
@@ -74,7 +71,7 @@ public class FullAI extends AIController{
 
     /**unit actions can be covered by the lasted related mode. Executed after each mode acted.*/
     public void moveAction(Position target, float radius, boolean checkWithin){
-        if(control.input instanceof InputOverwrite inp) inp.approach(target, radius, checkWithin);
+        moveAction(target.getX(), target.getY(), radius, checkWithin);
     }
 
     public void moveAction(float x, float y, float radius, boolean checkWithin){

@@ -125,7 +125,7 @@ public class BuildingInventory extends Element{
 
                 dx = Mathf.mod(i, size) * iconsize;
                 dy = rowdy * Mathf.floor(i / size) * iconsize;
-                Draw.rect(item.uiIcon, x + dx + halfIconsize, y + dy + halfIconsize, sq34Iconsize, sq34Iconsize);
+                Draw.rect(item.fullIcon, x + dx + halfIconsize, y + dy + halfIconsize, sq34Iconsize, sq34Iconsize);
 
                 font.draw(amt < 100f ? Strings.autoFixed(amt, 2) : UI.formatAmount((int)amt), x + dx, y + dy + halfIconsize);
 
@@ -141,7 +141,7 @@ public class BuildingInventory extends Element{
 
                 dx = Mathf.mod(i, size) * iconsize;
                 dy = rowdy * Mathf.floor(i / size) * iconsize;
-                Draw.rect(item.uiIcon, x + dx + halfIconsize, y + dy + halfIconsize, sq34Iconsize, sq34Iconsize);
+                Draw.rect(item.fullIcon, x + dx + halfIconsize, y + dy + halfIconsize, sq34Iconsize, sq34Iconsize);
 
                 font.draw(UI.formatAmount(amti), x + dx, y + dy + halfIconsize);
 
@@ -155,7 +155,7 @@ public class BuildingInventory extends Element{
 
                 dx = Mathf.mod(i, size) * iconsize;
                 dy = rowdy * Mathf.floor(i / size) * iconsize;
-                Draw.rect(item.item.uiIcon, x + dx + halfIconsize, y + dy + halfIconsize, sq34Iconsize, sq34Iconsize);
+                Draw.rect(item.item.fullIcon, x + dx + halfIconsize, y + dy + halfIconsize, sq34Iconsize, sq34Iconsize);
                 ammoIcon.draw(x + dx + (1f + 0.4f) * halfIconsize, y + dy + 0.4f * halfIconsize, iconsize / 4f, iconsize / 4f);
                 font.draw(UI.formatAmount(item.amount), x + dx, y + dy + halfIconsize);
 
