@@ -272,13 +272,7 @@ public class MI2UI extends Mindow2{
 
         settings.title("input");
 
-        settings.checkPref("inputReplace", true, b -> {
-            if(b){
-                control.setInput(mobile ? MobileInputExt.mobileExt : DesktopInputExt.desktopExt);
-            }else{
-                control.setInput(mobile ? new MobileInput() : new DesktopInput());
-            }
-        }).tag(true, false, false);
+        settings.checkPref("inputReplace", true).tag(true, false, false);
         settings.checkPref("instantBuild", false);
         settings.checkPref("forceTapTile", false);
         settings.checkPref("edgePanning", false);
