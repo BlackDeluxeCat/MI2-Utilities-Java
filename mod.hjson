@@ -5,7 +5,7 @@ displayName: "MI2-Utilities Java"
 name: "mi2-utilities-java"
 
 #the mod version
-version: 1.7.0-alpha-2
+version: 1.7.0-beta-1
 
 #the minimum game build required to run this mod
 minGameVersion: 149
@@ -22,9 +22,4 @@ author: "BlackDeluxeCat"
 main: "mi2u.MI2Utilities"
 
 #the mod description as seen in the mod dialog
-description: "# MI2-Utilities Java
-
-### Intro
-- [English](README.md) | [中文](README_zh.md)
-
-QOL Mod, powerful assists to vanilla gameplay. For destined Mindustry players.
+description: "QOL Mod, powerful assists to vanilla gameplay. For destined Mindustry players."
