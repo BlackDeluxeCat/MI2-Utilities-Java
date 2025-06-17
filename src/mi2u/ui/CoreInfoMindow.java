@@ -63,7 +63,7 @@ public class CoreInfoMindow extends Mindow2{
                 teamSelect.popup();
                 teamSelect.snapTo(this);
             }).grow().minWidth(32f).update(b -> {
-                b.setText(team.localized() + (select == null ? Core.bundle.get("CoreInfo.selectButton.playerteam"):""));
+                b.setText(select == null ? "[[#" + team.id + "]" : ("#" + team.id));
                 b.getLabel().setColor(team == null ? Color.white:team.color);
                 b.getLabel().setFontScale(0.8f);
             });
