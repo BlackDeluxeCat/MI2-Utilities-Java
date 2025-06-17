@@ -336,7 +336,6 @@ public class Mindow2 extends Table{
                 }).grow().row();
                 this.cont.addChild(new Table(){
                     {
-                        settings.buildDescription(this);
                         touchable = Touchable.disabled;
                         update(() -> {
                             cont.stageToLocalCoordinates(MI2UTmp.v3.set(Core.input.mouse()));

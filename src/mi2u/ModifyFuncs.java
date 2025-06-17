@@ -199,7 +199,6 @@ public class ModifyFuncs{
                 st.getSettings().add(m.settings.list);//foo's support.
                 st.addChild(new Table(){
                     {
-                        m.settings.buildDescription(this);
                         touchable = Touchable.disabled;
                         update(() -> {
                             st.stageToLocalCoordinates(MI2UTmp.v3.set(Core.input.mouse()));
