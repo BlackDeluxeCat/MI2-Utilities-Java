@@ -21,13 +21,15 @@ import mindustry.ui.dialogs.*;
 import static arc.Core.*;
 import static arc.util.Align.*;
 import static mi2u.MI2UVars.*;
-/**  
+
+/**
  * Mindow2 is a dragable Table that partly works like a window.
  * cont is a container for user items.
  * settings is a SettingEntry seq.
  * <p>
  * {@code setupCont(Table cont)}for cont rebuild, should be overrided.<p>
  * {@code initSettings()}for customize settings, should start with settings.clear()
+ *
  * @author BlackDeluxeCat
  */
 
@@ -42,7 +44,8 @@ public class Mindow2 extends Table{
     public SettingHandler settings;
     protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(3);
     public int edgesnap = Align.center;
-    @Nullable public Mindow2 tbSnap, lrSnap;
+    @Nullable
+    public Mindow2 tbSnap, lrSnap;
     public int tbSnapAlign, lrSnapAlign;
     public float tbLeftOff, lrBottomOff;
 
@@ -76,10 +79,15 @@ public class Mindow2 extends Table{
         setTransform(true);
     }
 
-    /** called when rebuild Mindow2, should be overrided */
-    public void setupCont(Table cont){}
+    /**
+     * called when rebuild Mindow2, should be overrided
+     */
+    public void setupCont(Table cont){
+    }
 
-    /** called when click minimize-button, can be overrided */
+    /**
+     * called when click minimize-button, can be overrided
+     */
     public void minimize(){
         rebuild();
     }
@@ -98,6 +106,7 @@ public class Mindow2 extends Table{
             t.label(() -> dragging ? Iconc.move + "" : "-").size(titleButtonSize).labelAlign(center);
         }).get().addListener(new InputListener(){
             final Vec2 tmpv = new Vec2();
+
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
                 fromx = x;
@@ -152,7 +161,9 @@ public class Mindow2 extends Table{
         pack();
     }
 
-    /** Returns the X position of the specified {@link Align alignment}. */
+    /**
+     * Returns the X position of the specified {@link Align alignment}.
+     */
     @Override
     public float getX(int alignment){
         float x = this.x;
@@ -163,7 +174,9 @@ public class Mindow2 extends Table{
         return x;
     }
 
-    /** Returns the Y position of the specified {@link Align alignment}. */
+    /**
+     * Returns the Y position of the specified {@link Align alignment}.
+     */
     @Override
     public float getY(int alignment){
         float y = this.y;
@@ -275,12 +288,12 @@ public class Mindow2 extends Table{
                 tbLeftOff = x - m.x;
             }
 
-            if (Math.abs(lrBottomOff) < 8) lrBottomOff = 0f;
-            if (Math.abs(tbLeftOff) < 8) tbLeftOff = 0f;
-            if (Math.abs(getHeight() + lrBottomOff - m.getHeight()) < 8) lrBottomOff = m.getHeight() - getHeight();
-            if (Math.abs(getWidth() + tbLeftOff - m.getWidth()) < 8) tbLeftOff = m.getWidth() - getWidth();
-
+            if(Math.abs(lrBottomOff) < 8) lrBottomOff = 0f;
+            if(Math.abs(tbLeftOff) < 8) tbLeftOff = 0f;
+            if(Math.abs(getHeight() + lrBottomOff - m.getHeight()) < 8) lrBottomOff = m.getHeight() - getHeight();
+            if(Math.abs(getWidth() + tbLeftOff - m.getWidth()) < 8) tbLeftOff = m.getWidth() - getWidth();
         }
+
         testSnaps();
         interval.reset(1, 10000);
     }
@@ -318,7 +331,7 @@ public class Mindow2 extends Table{
 
     /**
      * Settings shoulded be set in Seq: settings, will be shown and configurable in SettingsDialog
-    */
+     */
     public void showSettings(){
         new BaseDialog("@settings.meta.dialogTitle"){
             {
@@ -348,7 +361,9 @@ public class Mindow2 extends Table{
         };
     }
 
-    /** can be overrided, should use super.initSettings(), called in rebuild() */
+    /**
+     * can be overrided, should use super.initSettings(), called in rebuild()
+     */
     public void initSettings(){
         if(name == null || name.isEmpty()) return;
         if(settings == null) settings = new SettingHandler(name);
