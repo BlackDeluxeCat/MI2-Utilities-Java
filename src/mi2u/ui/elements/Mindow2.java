@@ -280,6 +280,12 @@ public class Mindow2 extends Table{
                 tbSnapAlign = Align.top;
                 tbLeftOff = x - m.x;
             }
+
+            if (Math.abs(lrBottomOff) < 8) lrBottomOff = 0f;
+            if (Math.abs(tbLeftOff) < 8) tbLeftOff = 0f;
+            if (Math.abs(getHeight() + lrBottomOff - m.getHeight()) < 8) lrBottomOff = m.getHeight() - getHeight();
+            if (Math.abs(getWidth() + tbLeftOff - m.getWidth()) < 8) tbLeftOff = m.getWidth() - getWidth();
+
         }
         testSnaps();
         interval.reset(1, 10000);
