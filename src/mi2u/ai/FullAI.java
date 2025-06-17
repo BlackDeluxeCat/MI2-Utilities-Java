@@ -442,8 +442,6 @@ public class FullAI extends AIController{
         public LExecutor exec = new LExecutor();
         public LogicAI ai = new LogicAI();
         public int instructionsPerTick = 100;
-        MI2Utils.IntervalMillis timer = new MI2Utils.IntervalMillis();
-        MI2Utils.IntervalMillis actionTimer = new MI2Utils.IntervalMillis(2);
         public boolean itemTrans, payloadTrans;
         public static StringBuffer log = new StringBuffer();
         Queue<BuildPlan> plans = new Queue<>();
@@ -452,8 +450,7 @@ public class FullAI extends AIController{
 
         public static PopupTable chooseContentTable = new PopupTable();
 
-        //public int lastPathId = 0;
-        //public float lastMoveX, lastMoveY;
+        short timerUpdMovement = 0, timerMove = 1, timerShoot = 2, timerTransItemPayload = 3;
 
         public LogicMode(){
             super();
@@ -463,7 +460,7 @@ public class FullAI extends AIController{
 
             logicMode = this;
             bannedInstructions.clear();
-            bannedInstructions.addAll(ControlI.class, WriteI.class, StopI.class, SetBlockI.class, SpawnUnitI.class, ApplyEffectI.class, SetRuleI.class, SetRateI.class, ExplosionI.class, SetFlagI.class, SpawnWaveI.class, SetPropI.class);
+            bannedInstructions.addAll(WriteI.class, ControlI.class, StopI.class, SetBlockI.class, SpawnUnitI.class, ApplyEffectI.class, SetWeatherI.class, SpawnWaveI.class, SetRuleI.class, ExplosionI.class, SetRateI.class, SyncI.class, SetFlagI.class, SetPropI.class, LocalePrintI.class);
             btext = Iconc.blockWorldProcessor + "";
             bimg = Core.atlas.drawable("mi2-utilities-java-ui-customai");
 
@@ -529,12 +526,6 @@ public class FullAI extends AIController{
                     "jump 45 lessThan x x.max\n")));
             code = codes.first();
             readCode(code.value);
-
-            Events.on(EventType.WorldLoadEvent.class, e-> {
-                if(logicMode != null){
-                    logicMode.readCode(logicMode.code.value);
-                }
-            });
         }
 
         @Override
@@ -630,11 +621,17 @@ public class FullAI extends AIController{
         @Override
         public void act(){
             exec.ipt.numval = instructionsPerTick;
+            exec.unit.constant = false;
             var ctrl = unit.controller();
             unit.controller(ai);
 
-            updatePlayerActionTimer();
-            if(timer.get(200)){
+            //TODO 可调运输冷却
+            if(timer.get(timerTransItemPayload, 1)){
+                itemTrans = true;
+                payloadTrans = true;
+            }
+
+            if(timer.get(timerUpdMovement, 5)){
                 ai.targetTimer = 0f;
                 ai.controlTimer = LogicAI.logicControlTimeout;
                 ai.updateMovement();
@@ -660,7 +657,7 @@ public class FullAI extends AIController{
             unit.controller(ctrl);
             fullAI.unit(unit);
 
-            if(!actionTimer.check(0, (int)LogicAI.logicControlTimeout / 60 * 1000)){
+            if(!timer.check(timerMove, LogicAI.logicControlTimeout / 60)){
                 boostAction(ai.boost);
                 if(ai.control != LUnitControl.pathfind || unit.isFlying()){
                     moveAction(ai.moveX, ai.moveY, ai.control == LUnitControl.move ? 1f : Math.max(ai.moveRad, 1f), false);
@@ -677,7 +674,7 @@ public class FullAI extends AIController{
             }*/
             }
 
-            if(!actionTimer.check(1, (int)LogicAI.logicControlTimeout / 60 * 1000)){
+            if(!timer.check(timerShoot, LogicAI.logicControlTimeout / 60)){
                 var tgt = ai.target(0, 0, 0, false, false);
                 if(tgt != null) shootAction(MI2UTmp.v3.set(tgt.getX(), tgt.getY()), ai.shoot);
             }
@@ -690,11 +687,9 @@ public class FullAI extends AIController{
         public void readCode(String str){
             code.value = str;
             LAssembler asm = LAssembler.assemble(str, true);
-            asm.putConst("@mapw", world.width());
-            asm.putConst("@maph", world.height());
+            exec.load(asm);
             asm.putConst("@links", exec.links.length);
             asm.putConst("@ipt", instructionsPerTick);
-            exec.load(asm);
             exec.privileged = true;
             customAIUITable.clear();
             customAIUITable.touchable = Touchable.enabled;
@@ -705,11 +700,6 @@ public class FullAI extends AIController{
             customAIUITable.add("@ai.config.logic.ui").height(20f).row();
             customAIUITable.update(() -> customAIUITable.keepInScreen());
             customAIUITable.defaults().size(80, 32);
-        }
-
-        public void updatePlayerActionTimer(){
-            itemTrans = true;
-            payloadTrans = true;
         }
 
         public boolean isLocalSandbox(){
@@ -734,19 +724,19 @@ public class FullAI extends AIController{
             }else if(inst instanceof UnitControlI li){
                 switch(li.type){
                     case target, targetp -> {
-                        actionTimer.get(1, 1);
+                        timer.get(timerShoot, 1);
                         return false;
                     }
-                    case move, pathfind, boost -> {
-                        actionTimer.get(0, 1);
+                    case move, pathfind, autoPathfind, boost -> {
+                        timer.get(timerMove, 1);
                         return false;
                     }
                     case idle -> {
-                        actionTimer.reset(0, 100000);
+                        timer.reset(timerMove, 60);
                         return false;
                     }
                     case stop -> {
-                        actionTimer.reset(1, 100000);
+                        timer.reset(timerShoot, 60);
                         return false;
                     }
                     case itemTake -> {
@@ -904,6 +894,7 @@ public class FullAI extends AIController{
         public static class LogicModeCode{
             String name;
             String value;
+            /** Serialization-required constructor. DO NOT DELETE.   */
             public LogicModeCode(){}
             public LogicModeCode(String n, String v){
                 name = n;
