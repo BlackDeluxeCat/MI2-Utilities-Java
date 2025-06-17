@@ -37,7 +37,7 @@ public class Mindow2 extends Table{
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
     boolean dragging = false;
     public boolean minimized = false;
-    protected Table titleBar = new Table(), titlePane = new Table(Styles.black6);
+    protected Table titleBar = new Table(), titlePane = new Table();
     protected Table cont = new Table();
     public SettingHandler settings;
     protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(3);
@@ -48,6 +48,10 @@ public class Mindow2 extends Table{
 
     public Mindow2(String name){
         this.name = name;
+
+        setBackground(Tex.pane);
+        margin(4f);
+
         registerToGlobal();
         initSettings();
         loadUISettings();
@@ -68,7 +72,6 @@ public class Mindow2 extends Table{
         row();
 
         if(!minimized){
-            cont.setBackground(Styles.black3);
             cont.touchable = Touchable.enabled;
             setupCont(cont);
             add(cont).growX();
@@ -86,14 +89,17 @@ public class Mindow2 extends Table{
 
     public void setupTitle(){
         titleBar.clear();
+
+        titleBar.setBackground(minimized? Tex.clear: Tex.underline);
+        titleBar.margin(0f).marginBottom(minimized? 0: 4f);
+
         if(!minimized){
             titlePane.touchable = Touchable.enabled;
             titleBar.add(titlePane).growX();
-            titleBar.button("" + Iconc.settings, textb, this::showSettings).size(titleButtonSize);
+            titleBar.button("" + Iconc.settings, Styles.nonet, this::showSettings).size(titleButtonSize);
         }
 
         titleBar.table(t -> {
-            t.setBackground(titleBarbgNormal);
             if(minimized) t.add(bundle.get(name + ".MI2U"));
             t.label(() -> dragging ? Iconc.move + "" : "-").size(titleButtonSize).labelAlign(center);
         }).get().addListener(new InputListener(){
@@ -330,7 +336,6 @@ public class Mindow2 extends Table{
                 }).grow().row();
                 this.cont.addChild(new Table(){
                     {
-                        settings.buildDescription(this);
                         touchable = Touchable.disabled;
                         update(() -> {
                             cont.stageToLocalCoordinates(MI2UTmp.v3.set(Core.input.mouse()));

@@ -22,8 +22,6 @@ public class SettingHandler{
     public String prefix;
     public Seq<Setting> list = new Seq<>();
 
-    @Nullable Setting hovered;
-
     public SettingHandler(String prefix){
         this.prefix = prefix;
     }
@@ -39,30 +37,6 @@ public class SettingHandler{
     public void buildList(Table p){
         p.clearChildren();
         list.each(setting -> p.table(setting::rebuild).growX().margin(2f).row());
-    }
-
-    /** 在Dialog中fill一个Table，然后调用该方法构建一个悬浮显示的帮助信息栏。 */
-    public void buildDescription(Table shell){
-        shell.visible(() -> hovered != null);
-        shell.table(t -> {
-            t.setBackground(Tex.buttonTrans);
-
-            t.label(() -> hovered == null ? "" : hovered.title).fontScale(1.25f).color(Pal.accent).growX().row();
-
-            t.label(() -> hovered == null ? "" : hovered.name).color(Color.cyan).growX().row();
-
-            t.labelWrap(() -> hovered == null ? "" : hovered.description).padTop(8f).padBottom(8f).minWidth(300f).growX().row();
-
-            t.table(tagt -> {
-                tagt.defaults().pad(2f);
-                tagt.label(() -> hovered == null ? "" : hovered.restart ? "RS" : "").color(Color.orange);
-                tagt.label(() -> hovered == null ? "" : hovered.restart ? "@settings.tags.restart" : "").padRight(8f);
-                tagt.label(() -> hovered == null ? "" : hovered.reloadWorld ? "RW" : "").color(Color.cyan);
-                tagt.label(() -> hovered == null ? "" : hovered.reloadWorld ? "@settings.tags.reloadWorld" : "").padRight(8f);
-                tagt.label(() -> hovered == null ? "" : hovered.performance ? "PF" : "").color(Color.scarlet);
-                tagt.label(() -> hovered == null ? "" : hovered.performance ? "@settings.tags.performance" : "").padRight(8f);
-            }).growX().left().bottom();
-        }).growX().maxWidth(500f);
     }
 
     public Setting getSetting(String name){
@@ -190,13 +164,25 @@ public class SettingHandler{
             table.table(this::build).growX();
             table.table(t -> {
                 t.touchable = Touchable.enabled;
-                t.hovered(() -> hovered = this);
-                t.exited(() -> hovered = null);
                 t.fill(Tex.button, i -> i.image(Icon.info).color(description != null ? Color.gray : Color.clear));
-                if(performance) t.add("PF").color(Color.scarlet);
+                if(performance) t.add("[negstat]PF[]");
                 t.row();
-                if(restart) t.add("RS").color(Color.orange);
-                if(reloadWorld) t.add("RW").color(Color.cyan);
+                if(restart) t.add("[orange]RS[]");
+                if(reloadWorld) t.add("[sky]RW[]");
+            }).tooltip(tooltip -> {
+                tooltip.table(t -> {
+                    t.setBackground(Tex.buttonTrans);
+
+                    t.label(() -> "[accent]" + title + "[]").growX().row();
+                    t.label(() -> "[lightgray]" + name + "[]").growX().row();
+                    t.labelWrap(() -> description).padTop(8f).padBottom(8f).minWidth(300f).growX().row();
+
+                    t.table(warning -> {
+                        if (restart) warning.left().label(() -> "[orange]" + bundle.get("settings.tags.restart") + "[]").pad(2).padRight(8f);
+                        if (reloadWorld) warning.left().label(() -> "[sky]" + bundle.get("settings.tags.reloadWorld") + "[]").pad(2).padRight(8f);
+                        if (performance) warning.left().label(() -> "[negstat]" + bundle.get("settings.tags.performance") + "[]").pad(2).padRight(8f);
+                    }).growX().left().bottom();
+                }).growX().maxWidth(500f);
             }).size(40f).pad(2f);
         }
 
