@@ -55,7 +55,7 @@ public class EmojiMindow extends Mindow2{
 
         rebuildEmojiTable();
 
-        titlePane.table(t -> t.button(Iconc.list + "  " + bundle.get("emoji.switchDisplay"), Styles.nonet, () -> {
+        titlePane.table(t -> t.button(bundle.get("emoji.switchDisplay"), Styles.nonet, () -> {
             listMode = !listMode;
             rebuild();
         }).height(titleButtonSize).update(b -> b.setChecked(listMode)).growX()).grow().minWidth(32f);
@@ -83,8 +83,8 @@ public class EmojiMindow extends Mindow2{
             }
         }
         if (count == 0){
-            iconT.center().label(() -> "[lightgray]"+Iconc.cancel + " No Result[]").width(emojiPerRow * 40f).height(40f);
-            listT.center().label(() -> "[lightgray]"+Iconc.cancel + " No Result[]").width(emojiPerRow * 40f).height(40f);
+            iconT.center().label(() -> bundle.get("emoji.noResult")).width(emojiPerRow * 40f).height(40f);
+            listT.center().label(() -> bundle.get("emoji.noResult")).width(emojiPerRow * 40f).height(40f);
         }else if (count < emojiPerRow){
             for (int i = 0; i < emojiPerRow - count; i++){
                 iconT.image().color(Color.clear).size(40f);
@@ -94,8 +94,14 @@ public class EmojiMindow extends Mindow2{
 
     @Override
     public void setupCont(Table cont){
+        int emojiPerRow = settings.getInt("emojiPerRow", 9);
+        int emojiMaxCol = settings.getInt("emojiMaxCol", 6);
+
+        rebuildEmojiTable();
+
         cont.clear();
         cont.table(t -> {
+            t.top();
             t.table(s -> {
                 s.image(Icon.zoom).size(40f).padLeft(4f);
                 search = s.field(filter, text -> {
@@ -105,7 +111,7 @@ public class EmojiMindow extends Mindow2{
                 search.setMessageText("@players.search");
             }).growX().padRight(8f).row();
 
-            t.pane(listMode ? listT : iconT).maxHeight(Core.graphics.getHeight() / 3f).growX().update(p -> {
+            t.pane(listMode ? listT : iconT).growX().update(p -> {
                 p.setStyle(Styles.smallPane);
                 p.setScrollingDisabled(true, false);
                 Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
@@ -115,13 +121,14 @@ public class EmojiMindow extends Mindow2{
                     Core.scene.setScrollFocus(null);
                 }
             });
-        });
+        }).width(emojiPerRow * 40f + 12f).height(emojiMaxCol * 40f + 48f);
     }
 
     @Override
     public void initSettings(){
         super.initSettings();
-        settings.sliderPref("emojiPerRow", 9, 6, 12, 1, i -> "" + i, i -> rebuildEmojiTable());
+        settings.sliderPref("emojiPerRow", 9, 6, 12, 1, i -> "" + i, i -> rebuild());
+        settings.sliderPref("emojiMaxCol", 6, 2, 12, 1, i -> "" + i, i -> rebuild());
     }
 
     private void updateEmoji(){
