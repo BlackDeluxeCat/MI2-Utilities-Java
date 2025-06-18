@@ -39,6 +39,8 @@ import static mindustry.Vars.*;
 public class FullAI extends AIController{
     public Seq<Mode> modes = new Seq<>();
 
+    boolean unlockUnitBuild = false, cacheRuleLogicUnitBuild;
+
     public FullAI(){
         super();
         modes.add(new CenterFollowMode());
@@ -53,6 +55,17 @@ public class FullAI extends AIController{
                 fullAI.unit(player.unit());
                 fullAI.updateUnit();
             }
+        });
+
+
+        ui.logic.shown(() -> {
+            if(unlockUnitBuild){
+                cacheRuleLogicUnitBuild = state.rules.logicUnitBuild;
+                state.rules.logicUnitBuild = true;
+            }
+        });
+        ui.logic.hidden(() -> {
+            if(unlockUnitBuild) state.rules.logicUnitBuild = cacheRuleLogicUnitBuild;
         });
     }
 
@@ -549,7 +562,7 @@ public class FullAI extends AIController{
             table.table(t -> {
                 t.name = "cfg";
                 t.button("" + Iconc.edit, textb, () -> {
-                    ui.showTextInput("Edit Logic AI Name", "Edit Logic AI Name", code.name, s -> {
+                    ui.showTextInput(Iconc.edit + "Edit Logic AI Name", "Edit Logic AI Name", code.name, s -> {
                         if(!s.equals(code.name)){
                             code.name = s;
                             saveCodes();
@@ -558,11 +571,25 @@ public class FullAI extends AIController{
                 }).size(32f);
                 t.label(() -> code.name).grow();
                 t.button("" + Iconc.blockWorldProcessor, textb, () -> {
-                    ui.logic.show(code.value, exec, true, s -> {
-                        code.value = s;
-                        this.readCode(code.value);
-                        saveCodes();
-                    });
+                    Runnable shower = () -> {
+                        ui.logic.show(code.value, exec, true, s -> {
+                            code.value = s;
+                            this.readCode(code.value);
+                            saveCodes();
+                        });
+                    };
+
+                    if(!state.rules.logicUnitBuild){
+                        ui.showCustomConfirm("", "@ai.config.logic.unitBuildWarning", "" + Iconc.ok, "" + Iconc.cancel, () -> {
+                            unlockUnitBuild = true;
+                            shower.run();
+                        }, () -> {
+                            unlockUnitBuild = false;
+                            shower.run();
+                        });
+                    }else{
+                        shower.run();
+                    }
                 }).size(32f);
                 t.button(Iconc.info + "", textb, () -> {
                     ui.showText("", Core.bundle.get("fullAI.help"), Align.left);
