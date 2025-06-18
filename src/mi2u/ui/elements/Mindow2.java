@@ -340,10 +340,10 @@ public class Mindow2 extends Table{
                     t.button("@settings.meta.mindowHelp", Icon.info, () -> new BaseDialog(""){
                         {
                             addCloseButton();
-                            this.cont.pane(t1 -> t1.add("@" + name + ".help").padBottom(60f).left().width(graphics.getWidth() / 1.5f).get().setWrap(true));
+                            this.cont.pane(t1 -> t1.add("@" + Mindow2.this.name + ".help").padBottom(60f).left().width(graphics.getWidth() / 1.5f).get().setWrap(true));
                             show();
                         }
-                    }).disabled(!bundle.has(name + ".help")).width(300f).height(150f).get().setStyle(textb);
+                    }).disabled(!bundle.has(Mindow2.this.name + ".help")).width(300f).height(150f).get().setStyle(textb);
                     t.row();
                     t.table(tt -> settings.buildList(tt)).width(Math.min(600, Core.graphics.getWidth()));
                 }).grow().row();
