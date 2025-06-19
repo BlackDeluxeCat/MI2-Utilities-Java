@@ -67,7 +67,9 @@ public class Mindow2 extends Table{
         clear();
 
         setupTitle();
-        add(titleBar).growX();
+        var c = new MCollapser(titleBar, false).setCollapsed(true, () -> !this.hasMouse() && !minimized).setDirection(false, true).setDuration(0.1f);
+        add(c).growX();
+        //add(titleBar).growX();
         row();
 
         if(!minimized){
@@ -151,8 +153,8 @@ public class Mindow2 extends Table{
             if(slideAnime && MI2UTmp.v1.set(curx, cury).sub(x, y).len() >= 3f) interval.reset(2, 0);
         }
 
-        if(!interval.check(2, 130)){
-            setPosition(Mathf.lerp(x, curx, 0.4f), Mathf.lerp(y, cury, 0.4f));
+        if(!interval.check(2, 240)){
+            setPosition(Mathf.lerp(x, curx, 0.3f), Mathf.lerp(y, cury, 0.3f));
         }else{
             setPosition(curx, cury);
         }
