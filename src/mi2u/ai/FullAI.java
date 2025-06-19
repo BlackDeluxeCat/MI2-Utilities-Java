@@ -31,6 +31,7 @@ import mindustry.ui.*;
 import mindustry.world.*;
 import mindustry.world.blocks.*;
 import mindustry.world.blocks.defense.turrets.*;
+import mindustry.world.blocks.logic.*;
 import mindustry.world.meta.*;
 
 import static mi2u.MI2UVars.*;
@@ -647,7 +648,7 @@ public class FullAI extends AIController{
 
         @Override
         public void act(){
-            exec.ipt.numval = instructionsPerTick;
+            exec.ipt.numval = Mathf.clamp(instructionsPerTick, 0, ((LogicBlock)Blocks.worldProcessor).maxInstructionsPerTick);
             exec.unit.constant = false;
             var ctrl = unit.controller();
             unit.controller(ai);
@@ -667,13 +668,14 @@ public class FullAI extends AIController{
             plans.clear();
             if(unit.plans != null) unit.plans.each(bp -> plans.add(bp));
             for(int i = 0; i < Mathf.clamp(instructionsPerTick, 1, 2000); i++){
+                exec.counter.setnum(Mathf.mod(exec.counter.numi(), exec.instructions.length));
                 if(exec.instructions.length == 0) break;
                 exec.unit.setobj(unit);
-                if(tryRunOverwrite(exec.instructions[Mathf.mod((int)(exec.counter.numval), exec.instructions.length)])){
+                if(tryRunOverwrite(exec.instructions[exec.counter.numi()])){
                     exec.counter.numval++;
                     continue;
                 }
-                if(!isLocalSandbox() && bannedInstructions.contains(exec.instructions[Mathf.mod((int)(exec.counter.numval), exec.instructions.length)].getClass())){
+                if(!isLocalSandbox() && bannedInstructions.contains(exec.instructions[exec.counter.numi()].getClass())){
                     exec.counter.numval++;
                     continue;
                 }
@@ -686,19 +688,18 @@ public class FullAI extends AIController{
 
             if(!timer.check(timerMove, LogicAI.logicControlTimeout / 60)){
                 boostAction(ai.boost);
-                if(ai.control != LUnitControl.pathfind || unit.isFlying()){
+                if((ai.control != LUnitControl.pathfind && ai.control != LUnitControl.autoPathfind) || unit.isFlying()){
                     moveAction(ai.moveX, ai.moveY, ai.control == LUnitControl.move ? 1f : Math.max(ai.moveRad, 1f), false);
-                }/*else{
-                if(!Mathf.equal(ai.moveX, lastMoveX, 0.1f) || !Mathf.equal(ai.moveY, lastMoveY, 0.1f)){
-                    lastPathId ++;
-                    lastMoveX = ai.moveX;
-                    lastMoveY = ai.moveY;
+                }else{
+                    if(ai.control == LUnitControl.pathfind){
+                        controlPath.getPathPosition(unit, MI2UTmp.v1.set(ai.moveX, ai.moveY), MI2UTmp.v2, null);
+                        moveAction(MI2UTmp.v2, 0.0005f, false);
+                    }
+
+                    if(ai.control == LUnitControl.autoPathfind){
+
+                    }
                 }
-                if(Vars.controlPath.getPathPosition(unit, lastPathId, Tmp.v2.set(ai.moveX, ai.moveY), Tmp.v1, null)){
-                    moveTo(Tmp.v1, 1f, Tmp.v2.epsilonEquals(Tmp.v1, 4.1f) ? 30f : 0f);
-                }
-                moveAction(Tmp.v1, Math.max(ai.moveRad, 1f), false);//tmp.v1 is set in ai.updateMovement()
-            }*/
             }
 
             if(!timer.check(timerShoot, LogicAI.logicControlTimeout / 60)){
@@ -752,7 +753,7 @@ public class FullAI extends AIController{
                 switch(li.type){
                     case target, targetp -> {
                         timer.get(timerShoot, 1);
-                        return false;
+                        return false;//在这里更新timer，随后执行原版指令来设置ai状态，下同
                     }
                     case move, pathfind, autoPathfind, boost -> {
                         timer.get(timerMove, 1);
