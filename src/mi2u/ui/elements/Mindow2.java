@@ -134,7 +134,6 @@ public class Mindow2 extends Table{
             public void touchDragged(InputEvent event, float x, float y, int pointer){
                 Vec2 v = localToStageCoordinates(MI2UTmp.v1.set(x, y)).sub(fromx, fromy);
                 dragging = MI2UTmp.v2.set(v).sub(tmpv).len() > 5f;
-                Log.info(curx );
                 curx = v.x;
                 cury = v.y;
                 setSnap(v.x, v.y);
