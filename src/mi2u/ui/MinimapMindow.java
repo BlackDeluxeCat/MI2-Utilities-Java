@@ -1,7 +1,6 @@
 package mi2u.ui;
 
 import arc.*;
-import arc.func.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.input.*;
@@ -69,53 +68,35 @@ public class MinimapMindow extends Mindow2{
             m.setZoom(m.zoom);
         });
 
-        titlePane.table(t -> {
-            Cons<Table> b = tb -> {
-                tb.table(tt -> {
-                    tt.button(Iconc.zoom + "", MI2UVars.textb, () -> {
-                        finderTable.popup();
-                        finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
-                    }).width(32f).growY();
+        titlePane.defaults().size(titleButtonSize);
+        titleBar.add().growX();
+        titlePane.button(Iconc.zoom + "", MI2UVars.textb, () -> {
+            finderTable.popup();
+            finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
+        });
 
-                    tt.button(Iconc.downOpen + "", MI2UVars.textb, () -> {
-                        buttons.popup(Align.right);
-                        buttons.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
-                    }).width(32f).growY();
-                }).fillX().growY().height(titleButtonSize);
-            };
-
-            Cons<Table> l = tl -> {
-                tl.table(tt -> {
-                    tt.defaults().width(1f);
-                    tt.add("").with(c -> {
-                        c.update(() -> {
-                            c.setText(Strings.fixed(World.conv(player.x), 1) + ", "+ Strings.fixed(World.conv(player.y), 1));
-                            c.setFontScale(titlePane.getWidth() > 110f ? 0.8f : 0.5f);
-                        });
-                        c.setAlignment(Align.right);
-                    });
-                    tt.row();
-                    tt.add("").color(Color.coral).with(c -> {
-                        c.update(() -> {
-                            c.setText(Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ", "+ Strings.fixed(World.conv(Core.input.mouseWorldY()), 1));
-                            c.setFontScale(titlePane.getWidth() > 110f ? 0.8f : 0.5f);
-                        });
-                        c.setAlignment(Align.right);
-                    });
-                }).right();
-            };
-            t.add(new MCollapser(b, true).setCollapsed(false, () -> minimized || !hasMouse()).setDuration(0.2f).setDirection(true, false));
-
-            t.add().growX();
-            t.table(l).right();
-        }).right().growX();
+        titlePane.button(Iconc.downOpen + "", MI2UVars.textb, () -> {
+            buttons.popup(Align.right);
+            buttons.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
+        });
     }
 
     @Override
     public void setupCont(Table cont){
         cont.clear();
         int size = settings.getInt("size");
-        cont.add(m).size(size).pad(1f);
+        cont.add(m).size(size);
+        cont.row();
+        cont.table(t -> {
+            t.defaults().uniformX();
+            t.label(() -> Strings.fixed(World.conv(player.x), 1) + ",").right().fontScale(0.7f);
+            t.label(() -> " " + Strings.fixed(World.conv(player.y), 1)).left().fontScale(0.7f);
+
+            t.row();
+
+            t.label(() -> Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ",").right().fontScale(0.7f);
+            t.label(() -> " " + Strings.fixed(World.conv(Core.input.mouseWorldY()), 1)).left().fontScale(0.7f);
+        });
     }
 
     @Override
@@ -144,7 +125,6 @@ public class MinimapMindow extends Mindow2{
         public Mat transWorldUnit = new Mat(), transUI = new Mat();
 
         public Minimap2(){
-            setFillParent(true);
 
             addListener(new InputListener(){
                 @Override
