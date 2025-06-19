@@ -194,7 +194,7 @@ public class CoreInfoMindow extends Mindow2{
             cont.row();
             cont.pane(uut -> {
                 uut.defaults().padRight(4f).size(iconSize);
-                int columns = Mathf.floor(cont.getPrefWidth() / (4f + iconSize));
+                int columns = Math.max(1, Mathf.floor(cont.getPrefWidth() / (4f + iconSize)));
                 int ind = 0;
 
                 for(UnitType type : content.units()){
