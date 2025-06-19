@@ -39,10 +39,11 @@ public class Mindow2 extends Table{
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
     boolean dragging = false;
     public boolean minimized = false;
+    public boolean hoverTitle = false;
     protected Table titleBar = new Table(), titlePane = new Table(Styles.black6);
     protected Table cont = new Table();
     public SettingHandler settings;
-    protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(3);
+    protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(4);
     public int edgesnap = Align.center;
     @Nullable
     public Mindow2 tbSnap, lrSnap;
@@ -70,7 +71,7 @@ public class Mindow2 extends Table{
         clear();
 
         setupTitle();
-        var c = new MCollapser(titleBar, false).setCollapsed(true, () -> !this.hasMouse() && !minimized).setDirection(false, true).setDuration(0.1f);
+        var c = new MCollapser(titleBar, false).setCollapsed(true, () -> !hoverTitle && !minimized).setDirection(false, true).setDuration(0.1f);
         add(c).growX();
         //add(titleBar).growX();
         row();
@@ -81,6 +82,17 @@ public class Mindow2 extends Table{
             add(cont).growX();
         }
         setTransform(true);
+
+        update(() -> {
+            if(hasMouse()){
+                hoverTitle = true;
+                interval.reset(3, 0);
+            }else {
+                if (interval.check(3, 3000)){
+                    hoverTitle = false;
+                }
+            }
+        });
     }
 
     /**
