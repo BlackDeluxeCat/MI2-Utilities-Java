@@ -233,7 +233,6 @@ public class MinimapMindow extends Mindow2{
 
             if(renderer.minimap.getTexture() != null){
                 drawEntities(x, y, width, height, 0.75f, drawLabel);
-                if(drawSpawn) drawSpawns(x, y, width, height, 0.75f);
             }
 
             clipEnd();
@@ -250,7 +249,7 @@ public class MinimapMindow extends Mindow2{
             zoom = Mathf.clamp(amount, 1f, Math.max(world.width(), world.height()) / baseSize / 2f);
         }
 
-        /** set the world area corresponding to map camera. */
+        /** set the world area corresponding to minimap region. */
         public void setRect(){
             float sz = baseSize * zoom;
             float szh = sz * height / width;
@@ -270,48 +269,48 @@ public class MinimapMindow extends Mindow2{
             return position.scl(rect.width / width, rect.height / height).add(rect.x, rect.y);
         }
 
-        public float scale(float radius){
-            return width / rect.width * radius;
-        }
-
         public void drawEntities(float x, float y, float w, float h, float scaling, boolean withLabels){
             //draw a linerect of view area
-            Lines.stroke(1f, MI2UTmp.c1.set(Color.white).a(0.5f));
-            float cx = (Core.camera.position.x - rect.x) / rect.width * w;
-            float cy = (Core.camera.position.y - rect.y) / rect.height * h;
-            Lines.rect(x + cx - Core.graphics.getWidth() / rect.width * w / renderer.getScale() / 2f,
-                    y + cy - Core.graphics.getHeight() / rect.height * h / renderer.getScale() / 2f,
-                    Core.graphics.getWidth() / rect.width * w / renderer.getScale() ,
-                    Core.graphics.getHeight() / rect.height * h / renderer.getScale());
+            Draw.reset();
+            MI2UTmp.m2.set(Draw.trans());
+
+            float scaleFactor;
+            Mat trans = MI2UTmp.m1;
+            trans.set(MI2UTmp.m2);
+            trans.translate(x, y);
+            trans.scale(scaleFactor = w / rect.width, h / rect.height);
+            trans.translate(-rect.x, -rect.y);
+            Draw.trans(trans);
+
+            scaleFactor = 1f / scaleFactor;
+            scaleFactor *= scaling;
+            float iconScaleFactor = scaleFactor * 24f;
+
+            Draw.color(Color.white, 0.5f);
+            Lines.stroke(scaleFactor);
+            Lines.rect(MI2UTmp.r1.setCentered(Core.camera.position.x, Core.camera.position.y, Core.graphics.getWidth() / renderer.camerascale, Core.graphics.getHeight() / renderer.camerascale));
+
             Draw.color();
             Draw.alpha(color.a);
-
             //just render unit group
-            Groups.unit.each(unit -> {
+            for(var unit : Groups.unit){
                 if(unit.inFogTo(player.team()) || !unit.type.drawMinimap) return;
-                float rx = (unit.x - rect.x) / rect.width * w;
-                float ry = (unit.y - rect.y) / rect.height * h;
-
-                float scale = Scl.scl(1f) / 2f * scaling * 32f;
                 var region = unit.icon();
                 if(drawUnitOutline > 0.01f){
                     Draw.mixcol(Color.white, 1f);
-                    Draw.rect(region, x + rx, y + ry, (1f + drawUnitOutline) * scale, (1f + drawUnitOutline) * scale * (float)region.height / region.width, unit.rotation() - 90);
+                    Draw.rect(region, unit.x, unit.y, (1f + drawUnitOutline) * iconScaleFactor, (1f + drawUnitOutline) * iconScaleFactor * (float)region.height / region.width, unit.rotation() - 90);
                 }
                 //color difference between block and unit in setting
                 Draw.mixcol(MI2UTmp.c1.set(unit.team().color).mul(Mathf.clamp(1f - drawUnitColorDifference)), 1f);
-                Draw.rect(region, x + rx, y + ry, scale, scale * (float)region.height / region.width, unit.rotation() - 90);
+                Draw.rect(region, unit.x, unit.y, iconScaleFactor, iconScaleFactor * (float)region.height / region.width, unit.rotation() - 90);
                 Draw.mixcol();
-            });
+            }
 
             //display labels
             if(withLabels){
                 for(Player player : Groups.player){
                     if(!player.dead()){
-                        float rx = (player.x - rect.x) / rect.width * w;
-                        float ry = (player.y - rect.y) / rect.height * h;
-
-                        drawLabel(x + rx, y + ry, player.name, player.team().color, 1f);
+                        drawLabel(player.x, player.y, player.name, player.team().color, scaleFactor);
                     }
                 }
             }
@@ -345,10 +344,13 @@ public class MinimapMindow extends Mindow2{
                 Draw.shader();
             }
 
+
+            if(drawSpawn) drawSpawns(scaleFactor * 0.75f);
+
             if(drawIndicator){
                 LongSeq indicators = control.indicators.list();
                 float fin = ((Time.globalTime / 30f) % 1f);
-                float rad = 2f + scale(fin * 5f + tilesize - 2f);
+                float rad = fin * 5f + tilesize - 2f;
                 Lines.stroke(Scl.scl((1f - fin) * 4f + 0.5f));
 
                 for(int i = 0; i < indicators.size; i++){
@@ -366,7 +368,6 @@ public class MinimapMindow extends Mindow2{
                     }
 
                     Vec2 v = transform(Tmp.v1.set((ix + 0.5f + offset) * tilesize, (iy + 0.5f + offset) * tilesize));
-                    //v.sub(getMarginBottom(), getMarginBottom());
 
                     Draw.color(Color.orange, Color.scarlet, Mathf.clamp(time / 70f) * color.a);
                     Lines.square(x + v.x, y + v.y, rad);
@@ -376,41 +377,45 @@ public class MinimapMindow extends Mindow2{
             }
 
             //could be buggy
-            /*
             if(drawObjective){
                 state.rules.objectives.eachRunning(obj -> {
                     for(var marker : obj.markers){
-                        marker.drawMinimap(renderer.minimap);
+                        marker.draw(1f);
                     }
                 });
+
+                for(var marker : state.markers){
+                    if(marker.minimap){
+                        marker.draw(1f);
+                    }
+                }
             }
 
-             */
-
+            Draw.trans(MI2UTmp.m2);
             Draw.reset();
         }
 
-        public void drawSpawns(float x, float y, float w, float h, float scaling){
+        public void drawSpawns(float scaling){
             if(!state.hasSpawns() || !state.rules.waves) return;
 
             TextureRegion icon = Icon.units.getRegion();
 
-            Lines.stroke(Scl.scl(1f));
+            Lines.stroke(2f);
 
             Draw.color(state.rules.waveTeam.color, Tmp.c2.set(state.rules.waveTeam.color).value(1.2f), Mathf.absin(Time.time, 16f, 1f) * color.a);
 
             float curve = Mathf.curve(Time.time % 240f, 120f, 240f);
 
-            float rad = scale(state.rules.dropZoneRadius);
+            float rad = state.rules.dropZoneRadius;
 
             for(Tile tile : spawner.getSpawns()){
                 if(!rect.contains(tile.worldx(), tile.worldy())) continue;
-                float tx = (tile.worldx() + 4f - rect.x) / rect.width * w;
-                float ty = (tile.worldy() + 4f - rect.y) / rect.height * h;
+                float tx = tile.worldx() + 4f;
+                float ty = tile.worldy() + 4f;
 
-                Draw.rect(icon, x + tx, y + ty, icon.width * scaling / zoom, icon.height * scaling / zoom);
-                Lines.circle(x + tx, y + ty, rad);
-                if(curve > 0f) Lines.circle(x + tx, y + ty, rad * Interp.pow3Out.apply(curve));
+                Draw.rect(icon, tx, ty, icon.width * scaling / zoom, icon.height * scaling / zoom);
+                Lines.circle(tx, ty, rad);
+                if(curve > 0f) Lines.circle(tx, ty, rad * Interp.pow3Out.apply(curve));
             }
 
             Draw.reset();
@@ -436,10 +441,10 @@ public class MinimapMindow extends Mindow2{
             Font font = Fonts.outline;
             GlyphLayout l = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
             boolean ints = font.usesIntegerPositions();
-            font.getData().setScale(1 / 1.25f / Scl.scl(1f) * scaleFactor);
+            font.getData().setScale(1 / 1.25f / Scl.scl(1f) * scaleFactor * 1f);
             font.setUseIntegerPositions(false);
 
-            l.setText(font, text, color, 90f, Align.left, true);
+            l.setText(font, text, color, 90f * scaleFactor, Align.left, true);
             float yOffset = 20f;
             float margin = 3f * scaleFactor;
 
@@ -447,7 +452,7 @@ public class MinimapMindow extends Mindow2{
             Fill.rect(x, y + yOffset - l.height/2f, l.width + margin, l.height + margin);
             Draw.color();
             font.setColor(color);
-            font.draw(text, x - l.width/2f, y + yOffset, 90f * scaleFactor, Align.left, true);
+            font.draw(text, x - l.width/2f, y + yOffset,90f * scaleFactor, Align.left, true);
             font.setUseIntegerPositions(ints);
             font.getData().setScale(1f);
             Pools.free(l);
