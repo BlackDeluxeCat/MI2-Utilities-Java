@@ -53,9 +53,10 @@ public class MinimapMindow extends Mindow2{
         m.drawUnitOutline = settings.getInt("drawUnitOutline") / 100f;
 
         buttons = new PopupTable();
-        buttons.update(() -> buttons.hideWithoutFocusOn(this, buttons));
-        buttons.defaults().height(32f).minWidth(100f).fillX();
-        buttons.touchable = Touchable.enabled;
+        buttons.defaults().height(titleButtonSize).minWidth(100f).fillX();
+        buttons.addCloseButton(48);
+        buttons.setBackground(Styles.black3);
+        buttons.add().row();
 
         if(settings.getSetting("drawLabel") instanceof SettingHandler.CheckSetting ce) buttons.add(ce.miniButton()).row();
         if(settings.getSetting("drawSpawn") instanceof SettingHandler.CheckSetting ce) buttons.add(ce.miniButton()).row();
@@ -69,7 +70,7 @@ public class MinimapMindow extends Mindow2{
         });
 
         titlePane.defaults().size(titleButtonSize);
-        titleBar.add().growX();
+        titlePane.add().growX();
         titlePane.button(Iconc.zoom + "", MI2UVars.textb, () -> {
             finderTable.popup();
             finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
