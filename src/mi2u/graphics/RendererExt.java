@@ -319,9 +319,6 @@ public class RendererExt{
                 }
             }
 
-            //v7 rts pathfind render, making your device a barbecue.
-            //Pathfind Renderer
-            //TODO line length limitation to prevent lagging
             if(mi2ui.settings.getBool("enUnitPath")){
                 if(unit.isCommandable() && unit.controller() instanceof CommandAI ai){
                     Draw.reset();

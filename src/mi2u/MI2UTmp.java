@@ -1,6 +1,7 @@
 package mi2u;
 
 import arc.graphics.*;
+import arc.math.*;
 import arc.math.geom.*;
 
 public class MI2UTmp{
@@ -14,4 +15,7 @@ public class MI2UTmp{
     public static final Point2 p1 = new Point2();
 
     public static final Rect r1 = new Rect();
+
+    public static final Mat m1 = new Mat();
+    public static final Mat m2 = new Mat();
 }

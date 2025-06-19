@@ -66,6 +66,7 @@ public class MI2UI extends Mindow2{
         });
 
         titlePane.clear();
+        titlePane.add().growX();
         titlePane.button("Sy\nnc", textb, () -> {
             Call.sendChatMessage("/sync");
         }).color(Color.green).size(titleButtonSize).with(tb -> {
@@ -77,7 +78,6 @@ public class MI2UI extends Mindow2{
         }).size(titleButtonSize).checked(tb -> showQuickSettings).with(tb -> {
             tb.getLabel().setColor(Color.gold);
         });
-        titlePane.image().growY().width(2f);
     }
 
     @Override
