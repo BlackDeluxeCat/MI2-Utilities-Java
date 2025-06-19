@@ -35,25 +35,17 @@ public class MinimapMindow extends Mindow2{
     public static WorldFinderTable finderTable = new WorldFinderTable();
     public static PopupTable buttons;
 
-    public boolean catching = false, fullscreenTransparent = false;
     public MinimapMindow(){
         super("Minimap");
 
-        update(() -> {
-            if(control.input instanceof InputOverwrite && control.input.block != null && Core.input.keyDown(KeyCode.controlLeft) && Core.input.keyDown(KeyCode.f)){
+        Events.run(EventType.Trigger.update, () -> {
+            if(control.input.block != null && Core.input.keyDown(KeyCode.controlLeft) && Core.input.keyDown(KeyCode.f)){
                 finderTable.find = control.input.block;
                 finderTable.popup();
                 finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
             }
         });
 
-        Events.on(EventType.TapEvent.class, e -> {
-            if(!catching) return;
-            catching = false;
-            BuildingStatsPopup.popNew(e.tile.build);
-        });
-
-        m.touchable(() -> mindowmap.fullscreenTransparent ? Touchable.disabled : Touchable.enabled);
         m.drawLabel = settings.getBool("drawLabel");
         m.drawSpawn = settings.getBool("drawSpawn");
         m.drawFog = settings.getBool("drawFog");
@@ -81,10 +73,6 @@ public class MinimapMindow extends Mindow2{
         titlePane.table(t -> {
             Cons<Table> b = tb -> {
                 tb.table(tt -> {
-                    tt.button(Iconc.logic + "", MI2UVars.textbtoggle, () -> {
-                        catching = !catching;
-                    }).width(32f).growY().checked(bt -> catching);
-
                     tt.button(Iconc.zoom + "", MI2UVars.textb, () -> {
                         finderTable.popup();
                         finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
@@ -93,17 +81,6 @@ public class MinimapMindow extends Mindow2{
                     tt.button(Iconc.downOpen + "", MI2UVars.textb, () -> {
                         buttons.popup(Align.right);
                         buttons.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
-                    }).width(32f).growY();
-
-                    tt.button("" + Iconc.map, MI2UVars.textb, () -> {
-                        fullscreenTransparent = !fullscreenTransparent;
-                        m.color.a(1f);
-                        if(fullscreenTransparent){
-                            ui.hudGroup.addChild(m);
-                            m.validate();
-                            m.color.a(0.2f);
-                        }
-                        setupCont(cont);
                     }).width(32f).growY();
                 }).fillX().growY().height(titleButtonSize);
             };
@@ -139,12 +116,7 @@ public class MinimapMindow extends Mindow2{
     public void setupCont(Table cont){
         cont.clear();
         int size = settings.getInt("size");
-        if(!fullscreenTransparent){
-            cont.add(m).size(size).pad(1f);
-        }else{
-            //coordinates placeholder
-            cont.label(() -> Mathf.mod(Time.time, 60) > 30 ? "" + Iconc.map : "").width(180f).color(Color.gray).labelAlign(Align.center);
-        }
+        cont.add(m).size(size).pad(1f);
     }
 
     @Override
@@ -161,6 +133,7 @@ public class MinimapMindow extends Mindow2{
     }
     
     public static class Minimap2 extends Element{
+        //minimap camera rect
         public Rect rect = new Rect();
         private static final float baseSize = 16f;
         public float zoom = 8f;
@@ -338,7 +311,7 @@ public class MinimapMindow extends Mindow2{
                         float rx = (player.x - rect.x) / rect.width * w;
                         float ry = (player.y - rect.y) / rect.height * h;
 
-                        drawLabel(x + rx, y + ry, player.name, player.team().color);
+                        drawLabel(x + rx, y + ry, player.name, player.team().color, 1f);
                     }
                 }
             }
@@ -432,8 +405,8 @@ public class MinimapMindow extends Mindow2{
 
             for(Tile tile : spawner.getSpawns()){
                 if(!rect.contains(tile.worldx(), tile.worldy())) continue;
-                float tx = (tile.worldx() - rect.x) / rect.width * w;
-                float ty = (tile.worldy() - rect.y) / rect.height * h;
+                float tx = (tile.worldx() + 4f - rect.x) / rect.width * w;
+                float ty = (tile.worldy() + 4f - rect.y) / rect.height * h;
 
                 Draw.rect(icon, x + tx, y + ty, icon.width * scaling / zoom, icon.height * scaling / zoom);
                 Lines.circle(x + tx, y + ty, rad);
@@ -459,21 +432,22 @@ public class MinimapMindow extends Mindow2{
             return region;
         }
 
-        public void drawLabel(float x, float y, String text, Color color){
+        public void drawLabel(float x, float y, String text, Color color, float scaleFactor){
             Font font = Fonts.outline;
             GlyphLayout l = Pools.obtain(GlyphLayout.class, GlyphLayout::new);
             boolean ints = font.usesIntegerPositions();
-            font.getData().setScale(1 / 1.5f / Scl.scl(1f));
+            font.getData().setScale(1 / 1.25f / Scl.scl(1f) * scaleFactor);
             font.setUseIntegerPositions(false);
 
             l.setText(font, text, color, 90f, Align.left, true);
             float yOffset = 20f;
-            float margin = 3f;
+            float margin = 3f * scaleFactor;
 
             Draw.color(0f, 0f, 0f, 0.2f * this.color.a);
             Fill.rect(x, y + yOffset - l.height/2f, l.width + margin, l.height + margin);
+            Draw.color();
             font.setColor(color);
-            font.draw(text, x - l.width/2f, y + yOffset, 90f, Align.left, true);
+            font.draw(text, x - l.width/2f, y + yOffset, 90f * scaleFactor, Align.left, true);
             font.setUseIntegerPositions(ints);
             font.getData().setScale(1f);
             Pools.free(l);
