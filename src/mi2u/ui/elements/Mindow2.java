@@ -61,6 +61,9 @@ public class Mindow2 extends Table{
         }));
 
         Events.on(ClientLoadEvent.class, e -> rebuild());
+
+        cont.setBackground(Styles.black3);
+        titleBar.setBackground(titleBarbgNormal);
     }
 
     public void rebuild(){
@@ -73,7 +76,6 @@ public class Mindow2 extends Table{
         row();
 
         if(!minimized){
-            cont.setBackground(Styles.black3);
             cont.touchable = Touchable.enabled;
             setupCont(cont);
             add(cont).growX();
@@ -96,7 +98,6 @@ public class Mindow2 extends Table{
 
     public void setupTitle(){
         titleBar.clear();
-        titleBar.setBackground(titleBarbgNormal);
         if(!minimized){
             titlePane.touchable = Touchable.enabled;
             titleBar.add(titlePane).growX();
