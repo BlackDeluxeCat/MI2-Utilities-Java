@@ -373,7 +373,9 @@ public class RendererExt{
         float uwidth = unit.hitSize * lenMul, uhwidth = uwidth / 2f;
         if(unit.shield > Math.min(0.5f * unit.maxHealth, 100f) || !enUnitHpBarDamagedOnly || unit.damaged() || unit.drownTime > 0f){
             Draw.color(MI2UTmp.c1.set(unit.team.color).lerp(Color.white, Mathf.clamp(unit.hitTime)).a(Mathf.lerp(0.5f, 1f, Mathf.clamp(unit.hitTime))));
-            barDrawer.fill(Align.top, 1f, lenMul, 4f);
+            barDrawer.box.width += 2f;
+            barDrawer.fill(Align.top, 1, 1f, lenMul, 4f);
+            barDrawer.box.width -= 2f;
 
             if(unit.health > 0){
                 Draw.color(Pal.health, 0.8f);
