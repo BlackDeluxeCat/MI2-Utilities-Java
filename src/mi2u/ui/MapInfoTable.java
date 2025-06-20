@@ -24,6 +24,8 @@ import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
 import mindustry.world.*;
 
+import java.util.Arrays;
+
 import static mi2u.MI2UVars.*;
 import static mi2u.struct.UnitsData.*;
 import static mindustry.Vars.*;
@@ -411,17 +413,32 @@ public class MapInfoTable extends Table{
                     });
                 }).with(funcSetTextb).disabled(b -> state.rules.bannedUnits.isEmpty());
 
-                tt.row();
-
                 tt.button("@mapInfo.buttons.revealedBlocks", textb, () -> {
                     showIterable("@mapInfo.buttons.revealedBlocks", state.rules.revealedBlocks, null, (block, table) -> {
                         table.image(block.uiIcon).size(32f);
                     });
                 }).with(funcSetTextb).disabled(b -> state.rules.revealedBlocks.isEmpty());
 
+                tt.row();
+
+                tt.button("@mapInfo.buttons.objectives", textb, () -> {
+                    showIterable("@mapInfo.buttons.objectives", state.rules.objectives, null, (objective, table) -> {
+                        table.table(obj -> {
+                            int idx = state.rules.objectives.all.indexOf(objective);
+                            obj.left().label(() -> "[" + idx + "]" + objective.typeName()).growX().row();
+                            obj.table(info -> {
+                                info.label(() -> (objective.hidden? "": "[lightgray]") + "Hidden: " + objective.hidden).growX().row();
+                                info.label(() -> (objective.qualified()? "": "[lightgray]") + "Qualified: " + objective.qualified()).growX().row();
+                                if (objective.flagsAdded.length != 0) info.label(() -> "Added Flags: " + Arrays.toString(objective.flagsAdded)).growX().row();
+                                if (objective.flagsRemoved.length != 0) info.label(() -> "Removed Flags: " + Arrays.toString(objective.flagsRemoved)).growX().row();
+                            }).growX().padLeft(8f);
+                        }).left().growX().padTop(4f).padBottom(4f);
+                    }, 1);
+                }).with(funcSetTextb).disabled(b -> state.rules.objectives.all.isEmpty());
+
                 tt.button("@mapInfo.buttons.objectiveFlags", textb, () -> {
                     showIterable("@mapInfo.buttons.objectiveFlags", state.rules.objectiveFlags, null, (str, table) -> {
-                        table.add(str).size(48f);
+                        table.add(str).size(0, 32f);
                     });
                 }).with(funcSetTextb).disabled(b -> state.rules.objectiveFlags.isEmpty());
 
@@ -504,7 +521,7 @@ public class MapInfoTable extends Table{
         });
     }
 
-    public <T> void showIterable(String title, Iterable<T> array, Boolf<T> boolf, Cons2<T, Table> cons){
+    public <T> void showIterable(String title, Iterable<T> array, Boolf<T> boolf, Cons2<T, Table> cons, int itemPerRow){
         attrsListPopup.clear();
         attrsListPopup.setBackground(Styles.black3);
         attrsListPopup.touchable = Touchable.enabled;
@@ -519,8 +536,8 @@ public class MapInfoTable extends Table{
             int index = 0;
             for(T item : array){
                 if(boolf != null && !boolf.get(item)) continue;
-                cont.table(t -> cons.get(item, t));
-                if(++index >= 8){
+                cont.table(t -> cons.get(item, t)).growX();
+                if(++index >= itemPerRow){
                     index = 0;
                     cont.row();
                 }
@@ -536,6 +553,10 @@ public class MapInfoTable extends Table{
 
         attrsListPopup.popup();
         attrsListPopup.toFront();
+    }
+
+    public <T> void showIterable(String title, Iterable<T> array, Boolf<T> boolf, Cons2<T, Table> cons){
+        showIterable(title, array, boolf, cons, 8);
     }
 
     public class WaveBar extends Table{
