@@ -439,7 +439,7 @@ public class MapInfoTable extends Table{
                 tt.button("@mapInfo.buttons.objectiveFlags", textb, () -> {
                     showIterable("@mapInfo.buttons.objectiveFlags", state.rules.objectiveFlags, null, (str, table) -> {
                         table.add(str).size(0, 32f);
-                    });
+                    }, 1);
                 }).with(funcSetTextb).disabled(b -> state.rules.objectiveFlags.isEmpty());
 
                 tt.button("@mapInfo.buttons.mapTags", textb, () -> {
