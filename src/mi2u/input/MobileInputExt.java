@@ -44,11 +44,11 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
 
     @Override
     protected void updateMovement(Unit unit){
-        //介入原方法的targetPos来调整目标位置
-        //TODO 未经测试的方法
+        //介入原方法的targetPos状态来调整移动位置
+        //对payloadPos的反应似乎是优先完成payload搬运，然后才由该方法覆盖操作
         if(ctrlMove && unit != null){
             float x = Core.camera.position.x, y = Core.camera.position.y;
-            Core.camera.position.set(move);
+            Core.camera.position.set(unit).add(MI2UTmp.v3.set(move).scl(unit.type.aimDst + 8f));
             super.updateMovement(unit);
             Core.camera.position.set(x, y);
         }else{

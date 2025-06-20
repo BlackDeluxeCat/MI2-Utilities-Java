@@ -382,7 +382,6 @@ public class FullAI extends AIController{
         boolean onetimePick = true;
         public CenterFollowMode(){
             btext = Iconc.move + "";
-            enable = mobile;
             bimg = Core.atlas.drawable("mi2-utilities-java-ui-centermove");
         }
         @Override
@@ -406,15 +405,14 @@ public class FullAI extends AIController{
                 }
                 if(onetimePick && unit.stack.item == targetItem && unit.stack.amount > 0) targetItem = null;
 
-            }else if(mobile){
-                if(!enable){
-                    boostAction(true);
-                    moveAction(unit, 0.01f, false);
-                }
-
             }else if(enable){
-                boostAction(true);
-                moveAction(Core.camera.position, 15f, false);
+                if(mobile){
+                    boostAction(true);
+                    moveAction(unit, 8f, true);
+                }else{
+                    boostAction(true);
+                    moveAction(Core.camera.position, 12f, false);
+                }
             }
         }
 

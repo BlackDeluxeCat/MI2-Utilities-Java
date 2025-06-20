@@ -95,8 +95,8 @@ public class MinimapMindow extends Mindow2{
 
             t.row();
 
-            t.label(() -> Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ",").right().fontScale(0.7f);
-            t.label(() -> " " + Strings.fixed(World.conv(Core.input.mouseWorldY()), 1)).left().fontScale(0.7f);
+            t.label(() -> Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ",").right().fontScale(0.7f).color(Color.scarlet);
+            t.label(() -> " " + Strings.fixed(World.conv(Core.input.mouseWorldY()), 1)).left().fontScale(0.7f).color(Color.scarlet);
         });
     }
 

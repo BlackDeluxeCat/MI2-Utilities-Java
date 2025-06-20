@@ -39,16 +39,17 @@ public class Mindow2 extends Table{
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
     boolean dragging = false;
     public boolean minimized = false;
-    public boolean hoverTitle = false;
     protected Table titleBar = new Table(), titlePane = new Table(Styles.black6);
     protected Table cont = new Table();
     public SettingHandler settings;
-    protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(4);
     public int edgesnap = Align.center;
     @Nullable
     public Mindow2 tbSnap, lrSnap;
     public int tbSnapAlign, lrSnapAlign;
     public float tbLeftOff, lrBottomOff;
+
+    static short timerSnapAnime = 0, timerDragSnapping = 1, timerTitleStay = 2;
+    protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(3);
 
     public Mindow2(String name){
         this.name = name;
@@ -71,7 +72,11 @@ public class Mindow2 extends Table{
         clear();
 
         setupTitle();
-        var c = new MCollapser(titleBar, false).setCollapsed(true, () -> !hoverTitle && !minimized).setDirection(false, true).setDuration(0.1f);
+        var c = new MCollapser(titleBar, false).setCollapsed(true, () -> {
+            boolean hasMouse = this.hasMouse();
+            if(hasMouse) interval.get(timerTitleStay, 0);
+            return !minimized && (!hasMouse && interval.check(timerTitleStay, 3000));
+        }).setDirection(false, true).setDuration(0.1f);
         add(c).growX();
         //add(titleBar).growX();
         row();
@@ -82,17 +87,6 @@ public class Mindow2 extends Table{
             add(cont).growX();
         }
         setTransform(true);
-
-        update(() -> {
-            if(hasMouse()){
-                hoverTitle = true;
-                interval.reset(3, 0);
-            }else {
-                if (interval.check(3, 3000)){
-                    hoverTitle = false;
-                }
-            }
-        });
     }
 
     /**
@@ -145,7 +139,6 @@ public class Mindow2 extends Table{
 
                 if(dragging){
                     Mindow2.this.toFront();
-                    interval.get(0, 0);
                     dragging = false;
                 }else{
                     minimized = !minimized;
@@ -161,12 +154,12 @@ public class Mindow2 extends Table{
     @Override
     public void act(float delta){
         super.act(delta);
-        if(interval.get(1, 120)){
+        if(interval.get(timerDragSnapping, 120)){
             boolean slideAnime = edgeSnap(edgesnap) | elementSnap(tbSnap, tbSnapAlign, lrSnap == null && !Align.isLeft(edgesnap) && !Align.isRight(edgesnap)) | elementSnap(lrSnap, lrSnapAlign, tbSnap == null && !Align.isBottom(edgesnap) && !Align.isTop(edgesnap));
-            if(slideAnime && MI2UTmp.v1.set(curx, cury).sub(x, y).len() >= 3f) interval.reset(2, 0);
+            if(slideAnime && MI2UTmp.v1.set(curx, cury).sub(x, y).len() >= 3f) interval.reset(timerSnapAnime, 0);
         }
 
-        if(!interval.check(2, 240)){
+        if(!interval.check(timerSnapAnime, 240)){
             setPosition(Mathf.lerp(x, curx, 0.3f), Mathf.lerp(y, cury, 0.3f));
         }else{
             setPosition(curx, cury);
@@ -310,7 +303,7 @@ public class Mindow2 extends Table{
         }
 
         testSnaps();
-        interval.reset(1, 10000);
+        interval.reset(timerDragSnapping, 10000);
     }
 
     public void testSnaps(){
