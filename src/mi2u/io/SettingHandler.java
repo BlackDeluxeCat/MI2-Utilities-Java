@@ -9,6 +9,7 @@ import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import mi2u.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.ui.*;
@@ -45,6 +46,10 @@ public class SettingHandler{
 
     public boolean getBool(String name){
         return settings.getBool(prefix(name));
+    }
+
+    public boolean getBool(String name, boolean def){
+        return settings.getBool(prefix(name), def);
     }
 
     public int getInt(String name){
@@ -89,6 +94,13 @@ public class SettingHandler{
         var s = new Title(pureName);
         list.add(s);
         return s;
+    }
+
+    public CustomEntry entry(String name, Cons2<CustomEntry, Table> builder){
+        var e = new CustomEntry(name);
+        e.entryBuilder = builder;
+        list.add(e);
+        return e;
     }
 
     public CheckSetting checkPref(String name, boolean def){
@@ -170,7 +182,7 @@ public class SettingHandler{
                 if(restart) t.add("[orange]RS[]");
                 if(reloadWorld) t.add("[sky]RW[]");
             }).with(tb -> {
-                var tool = new Tooltip(tooltip -> {
+                MI2Utils.tooltip(tb, tooltip ->{
                     tooltip.table(t -> {
                         t.setBackground(Tex.buttonTrans);
 
@@ -184,9 +196,7 @@ public class SettingHandler{
                             if (performance) warning.left().label(() -> "[negstat]" + bundle.get("settings.tags.performance") + "[]").pad(2).padRight(8f);
                         }).growX().left().bottom();
                     }).growX().maxWidth(500f);
-                }, Tooltip.Tooltips.getInstance());
-                tool.allowMobile = true;
-                tb.addListener(tool);
+                });
             }).size(40f).pad(2f);
         }
 
@@ -204,6 +214,20 @@ public class SettingHandler{
         public void build(Table table){
             table.add(title).growX().color(Pal.accent).style(Styles.outlineLabel).padTop(12f).row();
             table.image().growX().height(2f).color(Pal.accent);
+        }
+    }
+
+    public class CustomEntry extends Setting{
+        public Cons2<CustomEntry, Table> entryBuilder;
+        public CustomEntry(String name){
+            this.name = name;
+            title = bundle.get("settings." + this.name, name);
+            description = bundle.getOrNull("settings." + this.name + ".description");
+        }
+
+        @Override
+        public void build(Table table){
+            table.table(t -> entryBuilder.get(this, t)).growX();
         }
     }
 
@@ -248,6 +272,7 @@ public class SettingHandler{
                 settings.put(name, !v);
                 if(changed != null) changed.get(!v);
             });
+            MI2Utils.tooltip(b, title);
             b.update(() -> b.setChecked(settings.getBool(name)));
             return b;
         }
@@ -317,7 +342,7 @@ public class SettingHandler{
                     t.defaults().uniform().growX();
                     int i = 0;
                     for(var item : values){
-                        t.button(textf.get(item), textbtoggle, () -> {
+                        t.button(textf.get(item), () -> {
                             group.uncheckAll();
                             group.setChecked(textf.get(item));
                             settings.put(name, item);

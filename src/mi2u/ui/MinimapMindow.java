@@ -37,7 +37,7 @@ public class MinimapMindow extends Mindow2{
         super("Minimap");
 
         Events.run(EventType.Trigger.update, () -> {
-            if(control.input.block != null && Core.input.keyDown(KeyCode.controlLeft) && Core.input.keyDown(KeyCode.f)){
+            if(control.input.block != null && Core.input.keyDown(MBinding.ctrlUI) && Core.input.keyDown(MBinding.uiPopWorldFinder)){
                 finderTable.find = control.input.block;
                 finderTable.popup();
                 finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
@@ -350,10 +350,8 @@ public class MinimapMindow extends Mindow2{
                         offset = build.block.offset / tilesize;
                     }
 
-                    Vec2 v = transform(Tmp.v1.set((ix + 0.5f + offset) * tilesize, (iy + 0.5f + offset) * tilesize));
-
                     Draw.color(Color.orange, Color.scarlet, Mathf.clamp(time / 70f) * color.a);
-                    Lines.square(x + v.x, y + v.y, rad);
+                    Lines.square((ix + 0.5f + offset) * tilesize, (iy + 0.5f + offset) * tilesize, rad);
                 }
 
                 Draw.reset();
