@@ -1,20 +1,15 @@
 package mi2u;
 
-import arc.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.struct.*;
-import mindustry.core.*;
 import mindustry.entities.units.*;
 import mindustry.game.Teams.*;
 import mindustry.gen.*;
-import mindustry.input.*;
 
 import static mindustry.Vars.*;
 
-/** @Author 工业2*/
 public class MI2UFuncs{
-    public static Vec2 tmp1 = new Vec2(), tmp2 = new Vec2(), tmp3 = new Vec2(), tmp4 = new Vec2();
     public static void unitRebuildBlocks(){
         if(!state.isGame() || player.unit() == null || !player.unit().canBuild()) return;
         int p = 0;

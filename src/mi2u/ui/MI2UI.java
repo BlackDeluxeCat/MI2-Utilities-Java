@@ -201,10 +201,10 @@ public class MI2UI extends Mindow2{
             }).row();
 
             m.table(t -> {
-                if(settings.getSetting("enUnitHpBar") instanceof CheckSetting ce) t.add(ce.miniButton("HP" + Iconc.unitDagger));
-                if(settings.getSetting("enBlockHpBar") instanceof CheckSetting ce) t.add(ce.miniButton("HP" + Iconc.teamDerelict));
+                if(settings.getSetting("enUnitHpBar") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.unitDagger));
+                if(settings.getSetting("enBlockHpBar") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.teamDerelict));
                 if(settings.getSetting("enUnitLogic") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.blockMicroProcessor + Iconc.unitDagger));
-                if(settings.getSetting("enUnitPath") instanceof CheckSetting ce) t.add(ce.miniButton("Path" + Iconc.planet + Iconc.unitDagger));
+                if(settings.getSetting("enUnitPath") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.planet + Iconc.unitDagger));
             }).row();
 
             m.table(t -> {
