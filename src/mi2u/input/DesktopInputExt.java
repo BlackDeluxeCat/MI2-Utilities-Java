@@ -131,7 +131,7 @@ public class DesktopInputExt extends DesktopInput implements InputOverwrite{
 
     public void tryCtrlBuildUnderUnit(){
         if(!scene.hasMouse() && !locked() && state.rules.possessionAllowed){
-            if(Core.input.keyDown(Binding.control) && Core.input.keyTap(Binding.select)){
+            if(Core.input.keyDown(MBinding.ctrlBuildBypass) && Core.input.keyTap(Binding.select)){
                 var build = world.buildWorld(Core.input.mouseWorld().x, Core.input.mouseWorld().y);
                 if(RendererExt.disableUnit && selectedUnit() != null && build instanceof ControlBlock cont && cont.canControl() && build.team == player.team() && cont.unit() != player.unit() && cont.unit().isAI()){
                     Call.unitControl(player, cont.unit());

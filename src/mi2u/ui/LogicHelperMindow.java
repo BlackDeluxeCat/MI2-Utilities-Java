@@ -13,6 +13,7 @@ import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import mi2u.*;
+import mi2u.input.*;
 import mi2u.io.*;
 import mi2u.ui.elements.*;
 import mindustry.gen.*;
@@ -66,7 +67,7 @@ public class LogicHelperMindow extends Mindow2{
                 Core.scene.addListener(new InputListener(){
                     @Override
                     public boolean keyDown(InputEvent event, KeyCode keycode){
-                        if(field != null && keycode == KeyCode.tab && settings.getBool("autocomplete")){
+                        if(field != null && keycode == MBinding.autoCompleteLogic.value.key && settings.getBool("autocomplete")){
                             if(hasKey){
                                 field.setFocusTraversal(false);
                                 Core.scene.setKeyboardFocus(field);

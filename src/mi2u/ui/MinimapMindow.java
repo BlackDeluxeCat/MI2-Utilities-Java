@@ -37,7 +37,7 @@ public class MinimapMindow extends Mindow2{
         super("Minimap");
 
         Events.run(EventType.Trigger.update, () -> {
-            if(control.input.block != null && Core.input.keyDown(KeyCode.controlLeft) && Core.input.keyDown(KeyCode.f)){
+            if(control.input.block != null && Core.input.keyDown(MBinding.ctrlUI) && Core.input.keyDown(MBinding.uiPopWorldFinder)){
                 finderTable.find = control.input.block;
                 finderTable.popup();
                 finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
