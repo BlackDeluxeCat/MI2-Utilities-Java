@@ -9,21 +9,24 @@ import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.*;
 import mi2u.game.*;
-import mi2u.input.*;
+import mi2u.graphics.*;
+import mi2u.io.*;
 import mi2u.io.SettingHandler.*;
 import mi2u.ui.elements.*;
 import mindustry.*;
 import mindustry.game.*;
 import mindustry.gen.*;
-import mindustry.input.*;
 import mindustry.ui.*;
+import mindustry.ui.dialogs.*;
 import mindustry.world.blocks.*;
+import mindustry.world.blocks.defense.turrets.*;
 
 import static mi2u.MI2UVars.*;
 import static mi2u.io.SettingHandler.TextFieldSetting.*;
 import static mindustry.Vars.*;
 
 public class MI2UI extends Mindow2{
+    public static SettingHandler filterTurretRangeZone = new SettingHandler("MI2UI.filterTurretRangeZone"), filterUnitRangeZone = new SettingHandler("MI2UI.filterUnitRangeZone");
     public static PopupTable popup = new PopupTable();
     public MapInfoTable mapinfo;
 
@@ -227,11 +230,59 @@ public class MI2UI extends Mindow2{
         settings.checkPref("enMenderZone", false).tag(false, false, true);
         settings.checkPref("enSpawnZone", true);
         settings.checkPref("enTurretRangeZone", false);
+        settings.entry("graphics.filterTurretRangeZone", (entry, t) -> {
+            t.button(entry.title, () -> {
+                new BaseDialog(entry.title){{
+                    addCloseButton();
+                    cont.pane(t -> {
+                        int col = Math.max(1, Mathf.floor(Core.scene.getWidth() / Scl.scl(160f)));
+                        for(var c : content.blocks().select(b -> b instanceof BaseTurret)){
+                            TextButton button = new TextButton(c.localizedName, textbtoggle);
+                            button.add(new Image(c.uiIcon)).size(32f).pad(8f);
+                            button.getCells().reverse();
+                            button.clicked(() -> {
+                                filterTurretRangeZone.putBool(c.name, button.isChecked());
+                                for(var block : content.blocks()){
+                                    RendererExt.filterTurretRangeZone[block.id] = MI2UI.filterTurretRangeZone.getBool(block.name, true);
+                                }
+                            });
+                            t.add(button).size(140, 100).pad(4f).update(tb -> tb.setChecked(filterTurretRangeZone.getBool(c.name, true)));
+                            if(t.getChildren().size % col == 0) t.row();
+                        }
+                    }).with(p -> p.setForceScroll(true, true));
+                    show();
+                }};
+            }).growX();
+        });
         settings.sliderPref("turretZoneColorStyle", 0, 0, 1, 1, s -> {
             if(s == 1) return "Anti Air";
             return "-";
         });
         settings.checkPref("enUnitRangeZone", false);
+        settings.entry("graphics.filterUnitRangeZone", (entry, t) -> {
+            t.button(entry.title, () -> {
+                new BaseDialog(entry.title){{
+                    addCloseButton();
+                    cont.pane(t -> {
+                        int col = Math.max(1, Mathf.floor(Core.scene.getWidth() / Scl.scl(160f)));
+                        for(var c : content.units()){
+                            TextButton button = new TextButton(c.localizedName, textbtoggle);
+                            button.add(new Image(c.uiIcon)).size(32f).pad(8f);
+                            button.getCells().reverse();
+                            button.clicked(() -> {
+                                filterUnitRangeZone.putBool(c.name, button.isChecked());
+                                for(var block : content.units()){
+                                    RendererExt.filterUnitRangeZone[block.id] = MI2UI.filterUnitRangeZone.getBool(block.name, true);
+                                }
+                            });
+                            t.add(button).size(140, 100).pad(4f).update(tb -> tb.setChecked(filterUnitRangeZone.getBool(c.name, true)));
+                            if(t.getChildren().size % col == 0) t.row();
+                        }
+                    }).with(p -> p.setForceScroll(true, true));
+                    show();
+                }};
+            }).growX();
+        });
 
         settings.title("graphics.distributionReveal");
 

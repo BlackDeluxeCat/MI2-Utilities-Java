@@ -48,6 +48,10 @@ public class SettingHandler{
         return settings.getBool(prefix(name));
     }
 
+    public boolean getBool(String name, boolean def){
+        return settings.getBool(prefix(name), def);
+    }
+
     public int getInt(String name){
         return settings.getInt(prefix(name));
     }
@@ -90,6 +94,13 @@ public class SettingHandler{
         var s = new Title(pureName);
         list.add(s);
         return s;
+    }
+
+    public CustomEntry entry(String name, Cons2<CustomEntry, Table> builder){
+        var e = new CustomEntry(name);
+        e.entryBuilder = builder;
+        list.add(e);
+        return e;
     }
 
     public CheckSetting checkPref(String name, boolean def){
@@ -206,6 +217,20 @@ public class SettingHandler{
         }
     }
 
+    public class CustomEntry extends Setting{
+        public Cons2<CustomEntry, Table> entryBuilder;
+        public CustomEntry(String name){
+            this.name = name;
+            title = bundle.get("settings." + this.name, name);
+            description = bundle.getOrNull("settings." + this.name + ".description");
+        }
+
+        @Override
+        public void build(Table table){
+            table.table(t -> entryBuilder.get(this, t)).growX();
+        }
+    }
+
     public class CheckSetting extends Setting{
         boolean def;
         Boolc changed;
@@ -317,7 +342,7 @@ public class SettingHandler{
                     t.defaults().uniform().growX();
                     int i = 0;
                     for(var item : values){
-                        t.button(textf.get(item), textbtoggle, () -> {
+                        t.button(textf.get(item), () -> {
                             group.uncheckAll();
                             group.setChecked(textf.get(item));
                             settings.put(name, item);

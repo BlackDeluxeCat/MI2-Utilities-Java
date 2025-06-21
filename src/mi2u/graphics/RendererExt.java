@@ -69,9 +69,21 @@ public class RendererExt{
     public static boolean disableUnit;
     public static boolean disableBuilding;
     public static boolean disableBullet;
+    public static boolean[] filterTurretRangeZone;
+    public static boolean[] filterUnitRangeZone;
 
     public static void initBase(){
         BuildingInventory.init();
+
+        filterTurretRangeZone = new boolean[content.blocks().size];
+        for(var block : content.blocks()){
+            filterTurretRangeZone[block.id] = MI2UI.filterTurretRangeZone.getBool(block.name, true);
+        }
+
+        filterUnitRangeZone = new boolean[content.units().size];
+        for(var unit : content.units()){
+            filterUnitRangeZone[unit.id] = MI2UI.filterUnitRangeZone.getBool(unit.name, true);
+        }
 
         Events.on(EventType.WorldLoadEvent.class, e -> {
             players.clear();
@@ -165,7 +177,7 @@ public class RendererExt{
                     boolean transport = drawBlackboxBuilding(tile.build);
                     if(drevealInventory && !transport) drawItemStack(tile.build);
                 }
-                if(enTurretZone && tile.build instanceof BaseTurret.BaseTurretBuild btb) drawTurretZone(btb);
+                if(enTurretZone && tile.build instanceof BaseTurret.BaseTurretBuild btb && filterTurretRangeZone[tile.build.block.id]) drawTurretZone(btb);
                 if(enOverdriveZone && tile.build instanceof OverdriveProjector.OverdriveBuild odb) drawOverDriver(odb);
                 if(enMenderZone && tile.build instanceof MendProjector.MendBuild mb) drawMender(mb);
                 if(enMenderZone && tile.build instanceof RegenProjector.RegenProjectorBuild rb) drawRegen(rb);
@@ -273,7 +285,7 @@ public class RendererExt{
                 Lines.endLine();
             }
 
-            if(enUnitRangeZone){
+            if(enUnitRangeZone && filterUnitRangeZone[unit.type.id]){
                 float range = unit.range();
 
                 Draw.color(unit.team.color);
