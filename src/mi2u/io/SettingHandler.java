@@ -9,6 +9,7 @@ import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import mi2u.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.ui.*;
@@ -170,7 +171,7 @@ public class SettingHandler{
                 if(restart) t.add("[orange]RS[]");
                 if(reloadWorld) t.add("[sky]RW[]");
             }).with(tb -> {
-                var tool = new Tooltip(tooltip -> {
+                MI2Utils.tooltip(tb, tooltip ->{
                     tooltip.table(t -> {
                         t.setBackground(Tex.buttonTrans);
 
@@ -184,9 +185,7 @@ public class SettingHandler{
                             if (performance) warning.left().label(() -> "[negstat]" + bundle.get("settings.tags.performance") + "[]").pad(2).padRight(8f);
                         }).growX().left().bottom();
                     }).growX().maxWidth(500f);
-                }, Tooltip.Tooltips.getInstance());
-                tool.allowMobile = true;
-                tb.addListener(tool);
+                });
             }).size(40f).pad(2f);
         }
 
@@ -248,6 +247,7 @@ public class SettingHandler{
                 settings.put(name, !v);
                 if(changed != null) changed.get(!v);
             });
+            MI2Utils.tooltip(b, title);
             b.update(() -> b.setChecked(settings.getBool(name)));
             return b;
         }

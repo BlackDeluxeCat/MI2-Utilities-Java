@@ -1,7 +1,12 @@
 package mi2u;
 
+import arc.func.*;
+import arc.scene.*;
+import arc.scene.ui.*;
+import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import mindustry.ui.*;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -105,5 +110,18 @@ public class MI2Utils{
         public long[] getTimes(){
             return times;
         }
+    }
+
+    //不想新建更多的utility类了就放这吧
+    /**为元素添加一个移动端可用的tooltip*/
+    public static void tooltip(Element e, Cons<Table> builder){
+        var tool = new Tooltip(tooltip -> tooltip.table(builder).margin(2f), Tooltip.Tooltips.getInstance());
+        tool.container.setBackground(Styles.black3);
+        tool.allowMobile = true;
+        e.addListener(tool);
+    }
+
+    public static void tooltip(Element e, String text){
+        tooltip(e, t -> t.add(text));
     }
 }

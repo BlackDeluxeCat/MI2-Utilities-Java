@@ -85,17 +85,9 @@ public class MI2UI extends Mindow2{
         cont.clear();
         cont.table(play -> {
             play.table(t -> {
-                t.button("DG", textb, MI2UFuncs::cleanGhostBlock).minSize(36f).with(funcSetTextb).disabled(b -> player.team().data().plans.isEmpty()).with(tb -> {
-                    var tool = Tooltip.Tooltips.getInstance().create("@mi2ui.buttons.cleanGhost");
-                    tool.allowMobile = true;
-                    tb.addListener(tool);
-                });
+                t.button("DG", textb, MI2UFuncs::cleanGhostBlock).minSize(36f).with(funcSetTextb).disabled(b -> player.team().data().plans.isEmpty()).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.cleanGhost"));
 
-                t.button("RB", textb, MI2UFuncs::unitRebuildBlocks).minSize(36f).with(funcSetTextb).with(tb -> {
-                    var tool = Tooltip.Tooltips.getInstance().create("@mi2ui.buttons.rebuild");
-                    tool.allowMobile = true;
-                    tb.addListener(tool);
-                });
+                t.button("RB", textb, MI2UFuncs::unitRebuildBlocks).minSize(36f).with(funcSetTextb).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.rebuild"));
 
                 //The update rate is based on button.update(), and affected by lagging
                 t.button("", textbtoggle, FpsController::toggle).update(b -> {

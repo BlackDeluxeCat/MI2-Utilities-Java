@@ -2,25 +2,24 @@ package mi2u.ui;
 
 import arc.*;
 import arc.func.*;
-import arc.graphics.Color;
-import arc.graphics.g2d.TextureRegion;
+import arc.graphics.*;
+import arc.graphics.g2d.*;
 import arc.scene.*;
-import arc.scene.style.TextureRegionDrawable;
+import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
-import mi2u.io.SettingHandler;
+import mi2u.*;
 import mi2u.ui.elements.*;
 import mindustry.gen.*;
-import mindustry.graphics.Pal;
 import mindustry.ui.*;
 
 import java.lang.reflect.*;
 
-import static arc.Core.bundle;
+import static arc.Core.*;
 import static mi2u.MI2UVars.*;
-import static mindustry.Vars.ui;
+import static mindustry.Vars.*;
 
 public class EmojiMindow extends Mindow2{
     public static Cons<TextButton> funcSetTextButton = c -> {
@@ -42,7 +41,7 @@ public class EmojiMindow extends Mindow2{
 
     public String filter = "";
 
-    public EmojiMindow() {
+    public EmojiMindow(){
         super("Emojis");
 
         updateEmoji();
@@ -68,25 +67,25 @@ public class EmojiMindow extends Mindow2{
         listT.clear();
         iconT.clear();
 
-        for (String key : regionMap.keys()) {
+        for(String key : regionMap.keys()){
             String emoji = emojiMap.get(key);
-            if (filter.isEmpty() || key.toLowerCase().contains(filter.toLowerCase()) || filter.contains(emoji)) {
+            if(filter.isEmpty() || key.toLowerCase().contains(filter.toLowerCase()) || filter.contains(emoji)){
                 TextureRegionDrawable region = new TextureRegionDrawable(regionMap.get(key));
 
                 count++;
 
-                iconT.button(region, Styles.clearNonei, () -> copy(emoji)).with(funcSetImageButton).tooltip(key);
-                if (count % emojiPerRow == 0) iconT.row();
+                iconT.button(region, Styles.clearNonei, () -> copy(emoji)).with(funcSetImageButton).with(e -> MI2Utils.tooltip(e, key));
+                if(count % emojiPerRow == 0) iconT.row();
                 listT.button(key, Styles.nonet, () -> copy(key)).growX().with(funcSetTextButton).width((emojiPerRow - 1) * 40f);
                 listT.button(region, Styles.clearNonei, () -> copy(emoji)).with(funcSetImageButton);
                 listT.row();
             }
         }
-        if (count == 0){
+        if(count == 0){
             iconT.center().label(() -> bundle.get("emoji.noResult")).width(emojiPerRow * 40f).height(40f);
             listT.center().label(() -> bundle.get("emoji.noResult")).width(emojiPerRow * 40f).height(40f);
-        }else if (count < emojiPerRow){
-            for (int i = 0; i < emojiPerRow - count; i++){
+        }else if(count < emojiPerRow){
+            for(int i = 0; i < emojiPerRow - count; i++){
                 iconT.image().color(Color.clear).size(40f);
             }
         }
@@ -142,7 +141,7 @@ public class EmojiMindow extends Mindow2{
 
         for(String name : orderedKey){
             String key = Fonts.unicodeToName(emojiMap.get(name).charAt(0));
-            if (key != null){
+            if(key != null){
                 TextureRegion region = Fonts.getLargeIcon(key);
                 regionMap.put(name, region);
             }
