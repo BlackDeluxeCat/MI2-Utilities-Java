@@ -107,12 +107,12 @@ public class Mindow2 extends Table{
         if(!minimized){
             titlePane.touchable = Touchable.enabled;
             titleBar.add(titlePane).growX();
-            titleBar.button("" + Iconc.settings, Styles.nonet, this::showSettings).size(titleButtonSize);
+            titleBar.button("" + Iconc.settings, Styles.nonet, this::showSettings).size(buttonSize);
         }
 
         titleBar.table(t -> {
             if(minimized) t.add(bundle.get(name + ".MI2U"));
-            t.label(() -> dragging ? Iconc.move + "" : "-").size(titleButtonSize).labelAlign(center);
+            t.label(() -> dragging ? Iconc.move + "" : "-").size(buttonSize).labelAlign(center);
         }).get().addListener(new InputListener(){
             final Vec2 tmpv = new Vec2();
 

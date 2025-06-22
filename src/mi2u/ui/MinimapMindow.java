@@ -53,7 +53,7 @@ public class MinimapMindow extends Mindow2{
         m.drawUnitOutline = settings.getInt("drawUnitOutline") / 100f;
 
         buttons = new PopupTable();
-        buttons.defaults().height(titleButtonSize).minWidth(100f).fillX();
+        buttons.defaults().height(buttonSize).minWidth(100f).fillX();
         buttons.addCloseButton(48);
         buttons.setBackground(Styles.black3);
         buttons.add().row();
@@ -69,7 +69,7 @@ public class MinimapMindow extends Mindow2{
             m.setZoom(m.zoom);
         });
 
-        titlePane.defaults().size(titleButtonSize);
+        titlePane.defaults().size(buttonSize);
         titlePane.add().growX();
         titlePane.button(Iconc.zoom + "", MI2UVars.textb, () -> {
             finderTable.popup();

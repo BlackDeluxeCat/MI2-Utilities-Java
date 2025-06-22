@@ -57,7 +57,7 @@ public class EmojiMindow extends Mindow2{
         titlePane.table(t -> t.button(bundle.get("emoji.switchDisplay"), Styles.nonet, () -> {
             listMode = !listMode;
             rebuild();
-        }).height(titleButtonSize).update(b -> b.setChecked(listMode)).growX()).grow().minWidth(32f);
+        }).height(buttonSize).update(b -> b.setChecked(listMode)).growX()).grow().minWidth(32f);
     }
 
     public void rebuildEmojiTable(){

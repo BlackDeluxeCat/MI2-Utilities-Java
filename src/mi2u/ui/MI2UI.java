@@ -3,7 +3,6 @@ package mi2u.ui;
 import arc.*;
 import arc.graphics.*;
 import arc.math.*;
-import arc.scene.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
@@ -16,7 +15,6 @@ import mi2u.ui.elements.*;
 import mindustry.*;
 import mindustry.game.*;
 import mindustry.gen.*;
-import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
 import mindustry.world.blocks.*;
 import mindustry.world.blocks.defense.turrets.*;
@@ -72,13 +70,13 @@ public class MI2UI extends Mindow2{
         titlePane.add().growX();
         titlePane.button("Sy\nnc", textb, () -> {
             Call.sendChatMessage("/sync");
-        }).color(Color.green).size(titleButtonSize).with(tb -> {
+        }).color(Color.green).size(buttonSize).with(tb -> {
             tb.getLabel().setFontScale(0.8f);
         });
-        titlePane.add(mapinfo = new MapInfoTable()).height(titleButtonSize);
+        titlePane.add(mapinfo = new MapInfoTable()).height(buttonSize);
         titlePane.button("" + Iconc.settings, textbtoggle, () -> {
             showQuickSettings = !showQuickSettings;
-        }).size(titleButtonSize).checked(tb -> showQuickSettings).with(tb -> {
+        }).size(buttonSize).checked(tb -> showQuickSettings).with(tb -> {
             tb.getLabel().setColor(Color.gold);
         });
     }
@@ -117,70 +115,20 @@ public class MI2UI extends Mindow2{
             play.row();
             play.table(tt -> {
                 tt.button(b -> {
-                    b.image(Core.atlas.drawable("mi2-utilities-java-ui-aicfg")).size(24f).scaling(Scaling.fit);
+                    b.image(Core.atlas.drawable("mi2-utilities-java-ui-aicfg")).size(24f).pad(8f).scaling(Scaling.fit);
                 }, textb, () -> {
-                    popup.clear();
-                    popup.addCloseButton();
-                    popup.addDragBar();
-                    popup.addInGameVisible();
-                    popup.setSize(300f, 200f);
-                    popup.margin(4f).setBackground(Styles.black8);
-                    popup.image().color(Color.cyan).growX().height(8f);
-                    popup.row();
-                    popup.pane(p -> {
-                        for(var mode : fullAI.modes){
-                            p.table(t -> {
-                                t.setBackground(Mindow2.gray2);
-                                t.button(b -> {
-                                    b.image().grow().update(img -> img.setColor(mode.enable ? Color.acid : Color.red));
-                                }, textb, () -> {
-                                    mode.enable = !mode.enable;
-                                }).size(16f);
-                                if(mode.bimg != null){
-                                    t.image(mode.bimg).size(18f).scaling(Scaling.fit);
-                                }else{
-                                    t.add(mode.btext).color(Color.sky).left();
-                                }
-                                t.label(() -> mode.configUIExpand ? "-" : ">").grow().get().clicked(() -> {
-                                    mode.configUIExpand = !mode.configUIExpand;
-                                });
-                            }).growX().minHeight(18f).padTop(8f);
-                            p.row();
-                            p.add(new MCollapser(mode::buildConfig, true).setCollapsed(false, () -> !mode.configUIExpand)).growX();
-                            p.row();
-                        }
-                    }).growX().update(p -> {
-                        Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-                        if(e != null && e.isDescendantOf(p)) {
-                            p.requestScroll();
-                        }else if(p.hasScroll()){
-                            Core.scene.setScrollFocus(null);
-                        }
-                    }).maxHeight(Core.graphics.getHeight()*0.6f/Scl.scl());
-                    popup.popup();
-                    popup.update(popup::keepInScreen);
-                    popup.setPositionInScreen(Core.graphics.getWidth()/2f, Core.graphics.getHeight()/2f);
-                }).grow();
-                tt.table(ttt -> {
-                    fullAI.modes.each(mode -> {
-                        ttt.button(bbb -> {
-                            if(mode.bimg != null){
-                                bbb.image(mode.bimg).size(24f).scaling(Scaling.fit).pad(4f);
-                            }else{
-                                bbb.add(mode.btext).align(Align.center);
-                            }
-                        }, textbtoggle, () -> {
-                            mode.enable = !mode.enable;
-                        }).checked(b -> mode.enable).minSize(32f).grow();
-                    });
-                }).grow();
-            });
-            play.row();
-            play.table(timet -> {
-                timet.defaults().pad(2f).growX().minWidth(40f);
-                timet.label(() -> Iconc.save + Strings.formatMillis(control.saves.getTotalPlaytime())).fontScale(0.7f);
-                timet.label(() -> Iconc.play + Strings.formatMillis(runTime)).fontScale(0.7f);
-                timet.label(() -> Iconc.pause + Strings.formatMillis(realRunTime)).fontScale(0.7f);
+                    fullAI.buildConfig();
+                    fullAI.cfgTable.popup();
+                    fullAI.cfgTable.setPositionInScreen(Core.graphics.getWidth()/2f, Core.graphics.getHeight()/2f);
+                });
+                tt.table(tttt -> {
+                    tttt.defaults().pad(2f).growX().minWidth(40f);
+                    tttt.label(() -> Iconc.save + Strings.formatMillis(control.saves.getTotalPlaytime())).fontScale(0.6f);
+                    tttt.row();
+                    tttt.label(() -> Iconc.play + Strings.formatMillis(runTime)).fontScale(0.6f);
+                    tttt.row();
+                    tttt.label(() -> Iconc.pause + Strings.formatMillis(realRunTime)).fontScale(0.6f);
+                }).fill().growX();
             }).growX();
         });
 

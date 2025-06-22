@@ -11,7 +11,6 @@ import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import arc.util.pooling.*;
-import mi2u.*;
 import mi2u.input.*;
 import mi2u.struct.*;
 import mi2u.ui.elements.*;
@@ -51,7 +50,7 @@ public class CoreInfoMindow extends Mindow2{
         usedUnits = new ObjectSet<>();
 
         titlePane.table(teamt -> {
-            teamt.button(itemTimerInts.get(itemTimerIndex) + "s", textb, null).size(titleButtonSize).with(b -> {
+            teamt.button(itemTimerInts.get(itemTimerIndex) + "s", textb, null).size(buttonSize).with(b -> {
                 b.clicked(() -> {
                     itemTimerIndex += 1;
                     itemTimerIndex = Mathf.mod(itemTimerIndex, itemTimerInts.size);
@@ -71,7 +70,7 @@ public class CoreInfoMindow extends Mindow2{
                 pg.powerIOBars = !pg.powerIOBars;
                 pg.diagram.clearChildren();
             }).growY();
-        }).height(titleButtonSize).growX();
+        }).height(buttonSize).growX();
 
         itemRecoders = new FloatDataRecorder[content.items().size];
         itemCharts = new PopupTable[content.items().size];
@@ -314,7 +313,7 @@ public class CoreInfoMindow extends Mindow2{
                 select = null;
                 rebuild();
                 teamSelect.hide();
-            }).minSize(titleButtonSize * 2f).grow().disabled(select == null).with(b -> {
+            }).minSize(buttonSize * 2f).grow().disabled(select == null).with(b -> {
                 b.getLabel().setWrap(false);
                 b.getLabel().setColor(player.team().color);
             });
@@ -324,7 +323,7 @@ public class CoreInfoMindow extends Mindow2{
                     select = t.team;
                     rebuild();
                     teamSelect.hide();
-                }).minSize(titleButtonSize * 2f).disabled(select == t.team).with(b -> {
+                }).minSize(buttonSize * 2f).disabled(select == t.team).with(b -> {
                     b.getLabel().setWrap(false);
                     b.getLabel().setColor(t.team.color);
                 });

@@ -9,6 +9,7 @@ import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
+import arc.util.serialization.*;
 import mi2u.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
@@ -88,6 +89,13 @@ public class SettingHandler{
 
     public void putBool(String name, boolean v){
         settings.put(prefix(name), v);
+    }
+
+    public static void registerJsonClass(Class<?> clazz){
+        Json json = MI2Utils.getValue(Core.settings, "json");
+        if(json != null){
+            json.addClassTag(clazz.getName(), clazz);
+        }
     }
 
     public Title title(String pureName){

@@ -78,12 +78,8 @@ public class PopupTable extends Table{
         if(!hasMouse) hide();
     }
 
-    public void addDragBar(){
-        addDragBar(20f, Color.acid);
-    }
-
-    public void addDragBar(float height, Color color){
-        image().growX().height(height).color(color).get().addListener(new InputListener(){
+    public void addDragPopupListener(Element e){
+        e.addListener(new InputListener(){
             float fromx, fromy;
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
@@ -102,22 +98,7 @@ public class PopupTable extends Table{
     }
 
     public void addDragMove(){
-        addListener(new InputListener(){
-            float fromx, fromy;
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
-                fromx = x;
-                fromy = y;
-                return true;
-            }
-
-            @Override
-            public void touchDragged(InputEvent event, float x, float y, int pointer){
-                if(cancelDrag) return;
-                Vec2 v = localToStageCoordinates(MI2UTmp.v1.set(x, y));
-                setPositionInScreen(v.x - fromx, v.y - fromy);
-            }
-        });
+        addDragPopupListener(this);
     }
 
     public void addCloseButton(){

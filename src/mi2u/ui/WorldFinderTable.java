@@ -266,7 +266,7 @@ public class WorldFinderTable extends PopupTable{
             case 2 -> {
                 selectTable.button("" + Iconc.map, textb, () -> {
                     team = null;
-                }).minSize(titleButtonSize * 2f).disabled(b -> team == null).with(b -> {
+                }).minSize(buttonSize * 2f).disabled(b -> team == null).with(b -> {
                     b.getLabel().setWrap(false);
                 });
                 int j = 1;
@@ -275,7 +275,7 @@ public class WorldFinderTable extends PopupTable{
                     if(team0.data().buildings.size > 0){
                         selectTable.button(team0.localized(), textb, () -> {
                             team = team0;
-                        }).minSize(titleButtonSize * 2f).disabled(b -> team == team0).with(b -> {
+                        }).minSize(buttonSize * 2f).disabled(b -> team == team0).with(b -> {
                             b.getLabel().setWrap(false);
                             b.getLabel().setColor(team0.color);
                         });

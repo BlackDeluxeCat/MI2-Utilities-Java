@@ -39,7 +39,7 @@ public class MI2Utilities extends Mod{
             Mindow2.titleBarbgSnapped = whiteui.tint(1f, 0.1f, 0.2f, 0.2f);
             Mindow2.white = whiteui.tint(1f, 1f, 1f, 1f);
             Mindow2.gray2 = whiteui.tint(0.2f, 0.2f, 0.2f, 1f);
-            titleButtonSize = 32f;
+            buttonSize = 32f;
 
             Pixmap fade = new Pixmap(128, 128);
             for(int x = 0; x < fade.width; x++){
@@ -60,6 +60,8 @@ public class MI2Utilities extends Mod{
             if(mi2ui.settings.getBool("inputReplace")){
                 control.setInput(mobile ? MobileInputExt.mobileExt : DesktopInputExt.desktopExt);
             }
+
+            fullAI.loadModes();
 
             renderer.maxZoom = mi2ui.settings.getFloat("maxZoom");
             renderer.minZoom = mi2ui.settings.getFloat("minZoom");

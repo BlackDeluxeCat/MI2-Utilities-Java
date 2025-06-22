@@ -73,12 +73,12 @@ public class MapInfoTable extends Table{
         });
 
         //ui on MI2U
-        button(Iconc.map + "", textb , () -> mapAttsDialog.show()).with(funcSetTextb).size(titleButtonSize);
+        button(Iconc.map + "", textb , () -> mapAttsDialog.show()).with(funcSetTextb).size(buttonSize);
         button(Iconc.waves + "", textb, () -> {
             wavesPopup.popup(Align.top);
             wavesPopup.snapTo(this);
             wavesPopup.keepInScreen();
-        }).with(funcSetTextb).size(titleButtonSize);
+        }).with(funcSetTextb).size(buttonSize);
 
         //map attributes
         mapAttsDialog = new BaseDialog("@mapInfo.buttons.allAttrs");
@@ -104,25 +104,25 @@ public class MapInfoTable extends Table{
                 t3.button("<<", textb, () -> {
                     syncCurWave = false;
                     curWave = Math.max(curWave - 10, 0);
-                }).with(funcSetTextb).size(titleButtonSize);
+                }).with(funcSetTextb).size(buttonSize);
                 t3.button("<", textb, () -> {
                     syncCurWave = false;
                     curWave = Math.max(curWave - 1, 0);
-                }).with(funcSetTextb).size(titleButtonSize);
+                }).with(funcSetTextb).size(buttonSize);
                 t3.button("O", textbtoggle, () -> {
                     syncCurWave = !syncCurWave;
-                }).with(funcSetTextb).size(titleButtonSize).update(b -> {
+                }).with(funcSetTextb).size(buttonSize).update(b -> {
                     b.setChecked(syncCurWave);
                     if(syncCurWave) curWave = Math.max(state.wave - 1, 0);
                 });
                 t3.button(">", textb, () -> {
                     syncCurWave = false;
                     curWave = Math.max(curWave + 1, 0);
-                }).with(funcSetTextb).size(titleButtonSize);
+                }).with(funcSetTextb).size(buttonSize);
                 t3.button(">>", textb, () -> {
                     syncCurWave = false;
                     curWave = Math.max(curWave + 10, 0);
-                }).with(funcSetTextb).size(titleButtonSize);
+                }).with(funcSetTextb).size(buttonSize);
                 TextField tf = new TextField();
                 tf.changed(() -> {
                     if(Strings.canParseInt(tf.getText()) && Strings.parseInt(tf.getText()) > 0){
@@ -140,10 +140,10 @@ public class MapInfoTable extends Table{
             t3.add("@mapInfo.buttons.adminFunctions");
             t3.button("@mapInfo.buttons.forceRunWave", textb, () -> {
                 logic.runWave();
-            }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).height(titleButtonSize);
+            }).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).height(buttonSize);
             t3.button("@rules.wavetimer", textbtoggle, () -> {
                 if(state.rules.infiniteResources) state.rules.waveTimer = !state.rules.waveTimer;
-            }).update(b -> b.setChecked(state.rules.waveTimer)).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).height(titleButtonSize);
+            }).update(b -> b.setChecked(state.rules.waveTimer)).with(funcSetTextb).with(b -> b.setDisabled(() -> net.client())).height(buttonSize);
         }).left().row();
 
         //显示设置
