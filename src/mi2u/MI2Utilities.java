@@ -12,8 +12,10 @@ import mi2u.graphics.*;
 import mi2u.input.*;
 import mi2u.ui.*;
 import mi2u.ui.elements.*;
+import mindustry.core.Logic;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
+import mindustry.maps.Map;
 import mindustry.mod.*;
 import mindustry.ui.*;
 
@@ -75,6 +77,8 @@ public class MI2Utilities extends Mod{
                 mindowmap.visible(() -> state.isGame() && ui.hudfrag.shown);
                 if(mi2ui.settings.getBool("showLogicHelper")) logicHelper.addTo(logicHelper.hasParent() ? logicHelper.parent : ui.logic);
 
+                MI2UVars.initTables();
+
                 RendererExt.initBase();
                 ModifyFuncs.modifyVanilla();
                 BuildingStatsPopup.init();
@@ -83,6 +87,11 @@ public class MI2Utilities extends Mod{
             //popup too early will cause font rendering bug.
             Time.runTask(140f, () -> {
                 if(mi2ui.settings.getBool("enableUpdate")) checkUpdate();
+            });
+
+            Time.runTask(200f, () -> {
+                Map map = maps.loadInternalMap("caldera");
+                control.playMap(map, map.rules());
             });
         });
 
