@@ -252,16 +252,15 @@ public class MinimapMindow extends Mindow2{
         }
 
         public void drawEntities(float x, float y, float w, float h, float scaling, boolean withLabels){
-            //draw a linerect of view area
-            transUI.set(Draw.trans());
+            transUI.idt().set(Draw.trans());
 
-            Draw.reset();
             float scaleFactor;
             transWorldUnit.set(transUI);
             transWorldUnit.translate(x, y);
             transWorldUnit.scale(scaleFactor = w / rect.width, h / rect.height);
             transWorldUnit.translate(-rect.x, -rect.y);
             Draw.trans(transWorldUnit);
+            Draw.reset();
 
             scaleFactor = 1f / scaleFactor;
             scaleFactor *= scaling;
@@ -299,20 +298,19 @@ public class MinimapMindow extends Mindow2{
             Draw.reset();
 
             if(state.rules.fog && drawFog){
-                //战争迷雾覆盖层不需要坐标变换
-                Draw.trans(transUI);
                 Draw.shader(Shaders.fog);
                 Texture staticTex = renderer.fog.getStaticTexture(), dynamicTex = renderer.fog.getDynamicTexture();
 
                 //crisp pixels
                 dynamicTex.setFilter(Texture.TextureFilter.nearest);
-                var region = getRegion();
 
                 Tmp.tr1.set(dynamicTex);
-                Tmp.tr1.set(region.u, 1f - region.v, region.u2, 1f - region.v2);    //地形纹理遮罩按比例映射到迷雾纹理遮罩
+                Tmp.tr1.set(0f, 1f, 1f, 0);
 
                 Draw.color(state.rules.dynamicColor, state.rules.dynamicColor.a * color.a);
-                Draw.rect(Tmp.tr1, x + w/2f, y + h/2f, w, h);
+                float ww = world.width() * tilesize;
+                float wh = world.height() * tilesize;
+                Draw.rect(Tmp.tr1, ww / 2f, wh / 2f, ww, wh);
 
                 if(state.rules.staticFog){
                     staticTex.setFilter(Texture.TextureFilter.nearest);
@@ -320,12 +318,11 @@ public class MinimapMindow extends Mindow2{
                     Tmp.tr1.texture = staticTex;
                     //must be black to fit with borders
                     Draw.color(0f, 0f, 0f, state.rules.staticColor.a);
-                    Draw.rect(Tmp.tr1, x + w/2f, y + h/2f, w, h);
+                    Draw.rect(Tmp.tr1, ww / 2f, wh / 2f, ww, wh);
                 }
 
                 Draw.color();
                 Draw.shader();
-                Draw.trans(transWorldUnit);
             }
 
             if(drawSpawn) drawSpawns(scaleFactor * 0.75f);
