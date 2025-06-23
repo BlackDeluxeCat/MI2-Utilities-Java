@@ -142,9 +142,7 @@ public class FullAI extends AIController{
                     t.row();
                 }
             }).growX();
-        }).maxHeight(Core.graphics.getHeight() / 2f / Scl.scl()).width(420f).with(p -> {
-            p.setForceScroll(false, true);
-        }).update(p -> {
+        }).maxHeight(Core.graphics.getHeight() / 2f / Scl.scl()).width(440f).update(p -> {
             Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
             if(e != null && e.isDescendantOf(p)) {
                 p.requestScroll();
@@ -211,28 +209,31 @@ public class FullAI extends AIController{
 
         public void buildTitle(Table table){
             table.table(tt -> {
+                tt.defaults().pad(2f);
                 tt.button("" + Iconc.up, textb, () -> {
                     int i = ai.modes.indexOf(this);
                     ai.modes.swap(i, Math.max(i - 1, 0));
                     ai.buildConfig();
-                }).disabled(ai.modes.indexOf(this) == 0).size(buttonSize).pad(2f);
+                }).disabled(ai.modes.indexOf(this) == 0).size(buttonSize);
 
                 tt.button("" + Iconc.down, textb, () -> {
                     int i = ai.modes.indexOf(this);
                     ai.modes.swap(i, Math.min(i + 1, ai.modes.size - 1));
                     ai.buildConfig();
-                }).disabled(ai.modes.indexOf(this) == ai.modes.size - 1).size(buttonSize).pad(2f);
+                }).disabled(ai.modes.indexOf(this) == ai.modes.size - 1).size(buttonSize);
 
-                tt.button("" + Iconc.edit, textbtoggle, () -> configUIExpand = !configUIExpand).checked(tb -> configUIExpand).size(32f).pad(2f);
+                tt.button("" + Iconc.edit, textbtoggle, () -> configUIExpand = !configUIExpand).checked(tb -> configUIExpand).size(32f);
 
                 tt.add(new MCollapser(t -> t.button("[scarlet]" + Iconc.cancel, textb, () -> {
                     ai.modes.remove(this);
                     ai.buildConfig();
                 }).size(buttonSize), true).setCollapsed(true, () -> !configUIExpand).setDirection(true, false).setDuration(0.1f));
 
-                tt.image(meta.get(this.getClass()).icon).size(32f).pad(2f).scaling(Scaling.fit);
+                tt.table(ent -> {
+                    ent.image(meta.get(this.getClass()).icon).size(32f).scaling(Scaling.fit);
+                    ent.label(() -> (enable ? (" [accent]" + Iconc.play) : (" [gray]" + Iconc.pause)) + " " + name()).growX();
+                }).left().growX().get().clicked(() -> enable = !enable);
 
-                tt.label(() -> (enable ? (" [accent]" + Iconc.play) : (" [gray]" + Iconc.pause)) + " " + name()).growX().pad(2f).get().clicked(() -> enable = !enable);
             }).growX();
         }
 

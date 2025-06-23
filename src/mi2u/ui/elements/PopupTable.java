@@ -118,6 +118,6 @@ public class PopupTable extends Table{
     }
 
     public void addInGameVisible(){
-        visible(() -> Vars.state.isMenu() || Vars.ui.hudfrag.shown);
+        visible(() -> !Vars.state.isMenu() && Vars.ui.hudfrag.shown);
     }
 }

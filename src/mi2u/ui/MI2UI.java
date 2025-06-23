@@ -86,9 +86,18 @@ public class MI2UI extends Mindow2{
         cont.clear();
         cont.table(play -> {
             play.table(t -> {
-                t.button("DG", textb, MI2UFuncs::cleanGhostBlock).minSize(36f).with(funcSetTextb).disabled(b -> player.team().data().plans.isEmpty()).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.cleanGhost"));
+                t.defaults().size(buttonSize);
+                t.button(b -> {
+                    b.image(Core.atlas.drawable("mi2-utilities-java-ui-aicfg")).scaling(Scaling.fit);
+                }, textb, () -> {
+                    fullAI.buildConfig();
+                    fullAI.cfgTable.popup();
+                    fullAI.cfgTable.setPositionInScreen(Core.graphics.getWidth()/2f, Core.graphics.getHeight()/2f);
+                });
 
-                t.button("RB", textb, MI2UFuncs::unitRebuildBlocks).minSize(36f).with(funcSetTextb).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.rebuild"));
+                t.button("DG", textb, MI2UFuncs::cleanGhostBlock).with(funcSetTextb).disabled(b -> player.team().data().plans.isEmpty()).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.cleanGhost"));
+
+                t.button("RB", textb, MI2UFuncs::unitRebuildBlocks).with(funcSetTextb).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.rebuild"));
 
                 //The update rate is based on button.update(), and affected by lagging
                 t.button("", textbtoggle, FpsController::toggle).update(b -> {
@@ -110,25 +119,14 @@ public class MI2UI extends Mindow2{
                     b.getLabelCell().expand(false, false).fill(false).width(0.5f);
                     b.getLabel().setAlignment(Align.right);
                     b.getCells().swap(0,1);
-                }).grow();
+                }).grow().maxWidth(1000f);
             }).growX();
             play.row();
             play.table(tt -> {
-                tt.button(b -> {
-                    b.image(Core.atlas.drawable("mi2-utilities-java-ui-aicfg")).size(24f).pad(8f).scaling(Scaling.fit);
-                }, textb, () -> {
-                    fullAI.buildConfig();
-                    fullAI.cfgTable.popup();
-                    fullAI.cfgTable.setPositionInScreen(Core.graphics.getWidth()/2f, Core.graphics.getHeight()/2f);
-                });
-                tt.table(tttt -> {
-                    tttt.defaults().pad(2f).growX().minWidth(40f);
-                    tttt.label(() -> Iconc.save + Strings.formatMillis(control.saves.getTotalPlaytime())).fontScale(0.6f);
-                    tttt.row();
-                    tttt.label(() -> Iconc.play + Strings.formatMillis(runTime)).fontScale(0.6f);
-                    tttt.row();
-                    tttt.label(() -> Iconc.pause + Strings.formatMillis(realRunTime)).fontScale(0.6f);
-                }).fill().growX();
+                tt.defaults().pad(2f).growX().minWidth(40f);
+                tt.label(() -> Iconc.save + Strings.formatMillis(control.saves.getTotalPlaytime())).fontScale(0.7f);
+                tt.label(() -> Iconc.play + Strings.formatMillis(runTime)).fontScale(0.7f);
+                tt.label(() -> Iconc.pause + Strings.formatMillis(realRunTime)).fontScale(0.7f);
             }).growX();
         });
 
