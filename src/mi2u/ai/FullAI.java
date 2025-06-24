@@ -548,11 +548,11 @@ public class FullAI extends AIController{
                 this.keepInScreen();
             }
         };
-        transient short timerUpdMovement = 0, timerMove = 1, timerShoot = 2, timerTransItemPayload = 3;
+        static short timerUpdMovement = 0, timerMove = 1, timerShoot = 2, timerTransItemPayload = 3;
 
         public String handle = "";
         public String code = "";
-        public int instructionsPerTick = 100;
+        public int instructionsPerTick = 10;
 
         transient public LExecutor exec = new LExecutor();
         transient public boolean itemTrans, payloadTrans;
@@ -637,6 +637,19 @@ public class FullAI extends AIController{
                         logTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
                     }
                 }).with(funcSetTextb);
+
+                t.table(tt -> {
+                    tt.defaults().pad(2f).minWidth(32f);
+                    tt.stack(new Label((timer.check(timerMove, LogicAI.logicControlTimeout) ? "[darkgray]" : "[accent]") + Iconc.move), new Table(ttt -> {
+                        ttt.setFillParent(true);
+                        ttt.labelWrap(() -> timer.check(timerMove, LogicAI.logicControlTimeout) ? "" : Strings.autoFixed((LogicAI.logicControlTimeout - timer.getTime(timerMove)) / 60f, 1)).grow().fontScale(0.6f).with(l -> l.setAlignment(Align.bottomRight));
+                    }));
+
+                    tt.stack(new Label((timer.check(timerShoot, LogicAI.logicControlTimeout) ? "[darkgray]" : "[accent]") + Iconc.commandAttack), new Table(ttt -> {
+                        ttt.setFillParent(true);
+                        ttt.labelWrap(() -> timer.check(timerShoot, LogicAI.logicControlTimeout) ? "" : Strings.autoFixed((LogicAI.logicControlTimeout - timer.getTime(timerShoot)) / 60f, 1)).grow().fontScale(0.6f).with(l -> l.setAlignment(Align.bottomRight));
+                    }));
+                });
             }).grow();
         }
 
@@ -694,7 +707,7 @@ public class FullAI extends AIController{
             ai.unit.controller(ctrl);
             fullAI.unit(player.unit());
 
-            if(!timer.check(timerMove, LogicAI.logicControlTimeout / 60)){
+            if(!timer.check(timerMove, LogicAI.logicControlTimeout)){
                 ai.boostAction(logicAI.boost);
                 if((logicAI.control != LUnitControl.pathfind && logicAI.control != LUnitControl.autoPathfind) || ai.unit.isFlying()){
                     ai.moveAction(logicAI.moveX, logicAI.moveY, logicAI.control == LUnitControl.move ? 1f : Math.max(logicAI.moveRad, 1f), false);
@@ -710,7 +723,7 @@ public class FullAI extends AIController{
                 }
             }
 
-            if(!timer.check(timerShoot, LogicAI.logicControlTimeout / 60)){
+            if(!timer.check(timerShoot, LogicAI.logicControlTimeout)){
                 var tgt = logicAI.target(0, 0, 0, false, false);
                 if(tgt != null) ai.shootAction(MI2UTmp.v3.set(tgt.getX(), tgt.getY()), logicAI.shoot);
             }
@@ -753,12 +766,12 @@ public class FullAI extends AIController{
                         return false;
                     }
                     case idle -> {
-                        timer.reset(timerMove, LogicAI.logicControlTimeout / 60);
-                        return false;
+                        timer.reset(timerMove, LogicAI.logicControlTimeout);
+                        return true;
                     }
                     case stop -> {
-                        timer.reset(timerShoot, LogicAI.logicControlTimeout / 60);
-                        return false;
+                        timer.reset(timerShoot, LogicAI.logicControlTimeout);
+                        return true;
                     }
                     case itemTake -> {
                         if(!(li.p2.obj() instanceof Item item)) return false;

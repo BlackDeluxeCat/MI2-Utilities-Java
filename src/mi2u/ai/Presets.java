@@ -5,7 +5,7 @@ import arc.struct.*;
 public class Presets{
     public static Seq<MAI> all = new Seq<>();
 
-    public final static MAI unitspawner = new MAI("unitspawner", "set @ipt 5\n" +
+    public final static MAI unitspawner = new MAI("unitspawner", "setrate 5\n" +
                                                                      "jump 25 strictEqual init 1\n" +
                                                                      "set init 1\n" +
                                                                      "set type @flare\n" +
@@ -33,7 +33,7 @@ public class Presets{
                                                                      "jump 27 strictEqual run 1\n" +
                                                                      "end\n" +
                                                                      "set run 0\n" +
-                                                                     "effect placeBlock x y 2 %ffaaff\n" +
+                                                                     "effect placeBlock x y 2 %ffaaff \n" +
                                                                      "spawn type x y rot @crux result\n" +
                                                                      "status false unmoving unit 20\n");
 
@@ -98,7 +98,7 @@ public class Presets{
                                                                      "setrate ipt\n" +
                                                                      "jump 45 lessThan x x.max\n");
 
-    public static final MAI switchteam = new MAI("switchteam", "set @ipt 1\n" +
+    public static final MAI switchteam = new MAI("switchteam", "setrate 1\n" +
                                                                    "jump 6 strictEqual init 1\n" +
                                                                    "set init 1\n" +
                                                                    "print \"UI.clear()\"\n" +
