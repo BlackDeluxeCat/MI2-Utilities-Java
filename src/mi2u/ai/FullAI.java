@@ -40,6 +40,7 @@ import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
 
 public class FullAI extends AIController{
+    public static Seq<Class> all = new Seq<>();
     public static ObjectMap<Class, Prov<Mode>> prov = new ObjectMap<>();
     public static ObjectMap<Class, Mode.ModeMeta> meta = new ObjectMap<>();
     public Seq<Mode> modes = new Seq<>();
@@ -51,15 +52,15 @@ public class FullAI extends AIController{
     public FullAI(){
         super();
 
-        register(BaseMineMode.class, new Mode.ModeMeta("Auto Miner", "", new TextureRegionDrawable(UnitTypes.mono.uiIcon)), BaseMineMode::new);
+        register(BaseMineMode.class, new Mode.ModeMeta(Core.bundle.get("ai.preset.baseminemode"), Core.bundle.get("ai.preset.baseminemode.intro"), new TextureRegionDrawable(UnitTypes.mono.uiIcon)), BaseMineMode::new);
 
-        register(AutoBuildMode.class, new Mode.ModeMeta("Build Plan Tracker", "", new TextureRegionDrawable(UnitTypes.poly.uiIcon)), AutoBuildMode::new);
+        register(AutoBuildMode.class, new Mode.ModeMeta(Core.bundle.get("ai.preset.autobuildmode"), Core.bundle.get("ai.preset.autobuildmode.intro"), new TextureRegionDrawable(UnitTypes.poly.uiIcon)), AutoBuildMode::new);
 
-        register(AutoTargetMode.class, new Mode.ModeMeta("Auto Aim", "", Core.atlas.drawable("mi2-utilities-java-ui-shoot")), AutoTargetMode::new);
+        register(AutoTargetMode.class, new Mode.ModeMeta(Core.bundle.get("ai.preset.autotargetmode"), Core.bundle.get("ai.preset.autotargetmode.intro"), Core.atlas.drawable("mi2-utilities-java-ui-shoot")), AutoTargetMode::new);
 
-        register(CenterFollowMode.class, new Mode.ModeMeta("Center Lock", "", Core.atlas.drawable("mi2-utilities-java-ui-centermove")), CenterFollowMode::new);
+        register(CenterFollowMode.class, new Mode.ModeMeta(Core.bundle.get("ai.preset.centerfollowmode"), Core.bundle.get("ai.preset.centerfollowmode.intro"), Core.atlas.drawable("mi2-utilities-java-ui-centermove")), CenterFollowMode::new);
 
-        register(LogicMode.class, new Mode.ModeMeta("World Processor Keygen", "", Core.atlas.drawable("mi2-utilities-java-ui-customai")), LogicMode::new);
+        register(LogicMode.class, new Mode.ModeMeta(Core.bundle.get("ai.preset.logicmode"), Core.bundle.get("ai.preset.logicmode.intro"), Core.atlas.drawable("mi2-utilities-java-ui-customai")), LogicMode::new);
 
         Events.run(EventType.Trigger.update, () -> {
             if(state.isGame() && state.isPlaying()){
@@ -80,6 +81,7 @@ public class FullAI extends AIController{
     }
 
     public void register(Class clazz, Mode.ModeMeta m, Prov<Mode> p){
+        all.add(clazz);
         meta.put(clazz, m);
         prov.put(clazz, p);
         SettingHandler.registerJsonClass(clazz);
@@ -96,24 +98,25 @@ public class FullAI extends AIController{
             t.button("Add New", textb, () -> {
                 new BaseDialog(""){{
                     addCloseButton();
-                    cont.pane(bs -> {
-                        bs.image().width(2f).growY().pad(2f);
-                        prov.each((clazz, prov) -> {
-                            bs.button(b -> {
-                                b.margin(16f);
-                                b.defaults().pad(16f);
-                                b.add(meta.get(clazz).name).labelAlign(Align.center);
-                                b.row();
-                                b.add(meta.get(clazz).intro);
-                            }, textb, () -> {
-                                modes.add(prov.get());
+                    cont.pane(p -> {
+                        p.defaults().pad(2f);
+                        all.each(clazz -> {
+                            p.image().width(2f).growY();
+                            p.button(meta.get(clazz).name, textb, () -> {
+                                modes.add(prov.get(clazz).get());
                                 buildConfig();
                                 hide();
-                            }).width(300f);
-                            bs.image().width(2f).growY().pad(2f);
+                            }).with(tb -> {
+                                tb.getLabelCell().color(Color.cyan).fontScale(1.3f);
+                            }).size(360f,200f);
                         });
-                    }).fill().with(sp -> {
-                        sp.setForceScroll(true, true);
+                        p.row();
+                        all.each(clazz -> {
+                            p.image().width(2f).growY();
+                            p.pane(t -> t.labelWrap(meta.get(clazz).intro).grow().labelAlign(Align.topLeft)).grow().with(pp -> pp.setScrollingDisabledX(true));
+                        });
+                    }).with(p -> {
+                        p.setScrollingDisabledY(true);
                     });
                     show();
                 }};
@@ -442,10 +445,10 @@ public class FullAI extends AIController{
         public void buildConfig(Table table){
             table.table(t -> {
                 t.defaults().growX();
-                t.button("@ai.config.autorebuild", textbtoggle, () -> {
+                t.button("@ai.preset.autobuildmode.rebuild", textbtoggle, () -> {
                     rebuild = !rebuild;
                 }).update(b -> b.setChecked(rebuild)).with(funcSetTextb);
-                t.button("@ai.config.follow", textbtoggle, () -> follow = !follow).update(b -> b.setChecked(follow)).with(funcSetTextb);
+                t.button("@ai.preset.autobuildmode.support", textbtoggle, () -> follow = !follow).update(b -> b.setChecked(follow)).with(funcSetTextb);
             }).growX();
         }
     }
@@ -484,8 +487,8 @@ public class FullAI extends AIController{
         public void buildConfig(Table table){
             table.table(t -> {
                 t.defaults().growX();
-                t.button("@ai.config.attack", textbtoggle, () -> attack = !attack).update(b -> b.setChecked(attack)).with(funcSetTextb);
-                t.button("@ai.config.heal", textbtoggle, () -> heal = !heal).update(b -> b.setChecked(heal)).with(funcSetTextb);
+                t.button("@ai.preset.autotargetmode.attack", textbtoggle, () -> attack = !attack).update(b -> b.setChecked(attack)).with(funcSetTextb);
+                t.button("@ai.preset.autotargetmode.heal", textbtoggle, () -> heal = !heal).update(b -> b.setChecked(heal)).with(funcSetTextb);
             }).growX();
         }
     }
@@ -709,11 +712,11 @@ public class FullAI extends AIController{
                         return false;
                     }
                     case idle -> {
-                        timer.reset(timerMove, 60);
+                        timer.reset(timerShoot, LogicAI.logicControlTimeout / 60);
                         return false;
                     }
                     case stop -> {
-                        timer.reset(timerShoot, 60);
+                        timer.reset(timerMove, LogicAI.logicControlTimeout / 60);
                         return false;
                     }
                     case itemTake -> {
