@@ -24,6 +24,7 @@ import mindustry.entities.*;
 import mindustry.entities.units.*;
 import mindustry.game.*;
 import mindustry.gen.*;
+import mindustry.graphics.*;
 import mindustry.input.*;
 import mindustry.logic.*;
 import mindustry.logic.LExecutor.*;
@@ -40,8 +41,9 @@ import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
 
 public class FullAI extends AIController{
-    public static Seq<Class> all = new Seq<>();
-    public static ObjectMap<Class, Prov<Mode>> prov = new ObjectMap<>();
+    /** 所有可添加的AI的元数据 */
+    public static Seq<Mode.ModeMeta> all = new Seq<>();
+    /** 所有Mode类的元数据 */
     public static ObjectMap<Class, Mode.ModeMeta> meta = new ObjectMap<>();
     public Seq<Mode> modes = new Seq<>();
 
@@ -52,15 +54,17 @@ public class FullAI extends AIController{
     public FullAI(){
         super();
 
-        register(BaseMineMode.class, new Mode.ModeMeta(Core.bundle.get("ai.preset.baseminemode"), Core.bundle.get("ai.preset.baseminemode.intro"), new TextureRegionDrawable(UnitTypes.mono.uiIcon)), BaseMineMode::new);
+        register(BaseMineMode.class, new Mode.ModeMeta(BaseMineMode.class, Core.bundle.get("ai.preset.baseminemode"), Core.bundle.get("ai.preset.baseminemode.intro"), new TextureRegionDrawable(UnitTypes.mono.uiIcon), BaseMineMode::new));
 
-        register(AutoBuildMode.class, new Mode.ModeMeta(Core.bundle.get("ai.preset.autobuildmode"), Core.bundle.get("ai.preset.autobuildmode.intro"), new TextureRegionDrawable(UnitTypes.poly.uiIcon)), AutoBuildMode::new);
+        register(AutoBuildMode.class, new Mode.ModeMeta(AutoBuildMode.class, Core.bundle.get("ai.preset.autobuildmode"), Core.bundle.get("ai.preset.autobuildmode.intro"), new TextureRegionDrawable(UnitTypes.poly.uiIcon), AutoBuildMode::new));
 
-        register(AutoTargetMode.class, new Mode.ModeMeta(Core.bundle.get("ai.preset.autotargetmode"), Core.bundle.get("ai.preset.autotargetmode.intro"), Core.atlas.drawable("mi2-utilities-java-ui-shoot")), AutoTargetMode::new);
+        register(AutoTargetMode.class, new Mode.ModeMeta(AutoTargetMode.class, Core.bundle.get("ai.preset.autotargetmode"), Core.bundle.get("ai.preset.autotargetmode.intro"), Core.atlas.drawable("mi2-utilities-java-ui-shoot"), AutoTargetMode::new));
 
-        register(CenterFollowMode.class, new Mode.ModeMeta(Core.bundle.get("ai.preset.centerfollowmode"), Core.bundle.get("ai.preset.centerfollowmode.intro"), Core.atlas.drawable("mi2-utilities-java-ui-centermove")), CenterFollowMode::new);
+        register(CenterFollowMode.class, new Mode.ModeMeta(CenterFollowMode.class, Core.bundle.get("ai.preset.centerfollowmode"), Core.bundle.get("ai.preset.centerfollowmode.intro"), Core.atlas.drawable("mi2-utilities-java-ui-centermove"), CenterFollowMode::new));
 
-        register(LogicMode.class, new Mode.ModeMeta(Core.bundle.get("ai.preset.logicmode"), Core.bundle.get("ai.preset.logicmode.intro"), Core.atlas.drawable("mi2-utilities-java-ui-customai")), LogicMode::new);
+        register(LogicMode.class, new Mode.ModeMeta(LogicMode.class, Core.bundle.get("ai.preset.logicmode"), Core.bundle.get("ai.preset.logicmode.intro"), Core.atlas.drawable("mi2-utilities-java-ui-customai"), LogicMode::new));
+
+        loadPresets();
 
         Events.run(EventType.Trigger.update, () -> {
             if(state.isGame() && state.isPlaying()){
@@ -80,13 +84,6 @@ public class FullAI extends AIController{
         });
     }
 
-    public void register(Class clazz, Mode.ModeMeta m, Prov<Mode> p){
-        all.add(clazz);
-        meta.put(clazz, m);
-        prov.put(clazz, p);
-        SettingHandler.registerJsonClass(clazz);
-    }
-
     public void buildConfig(){
         modeFlush();
         cfgTable.clear();
@@ -100,10 +97,10 @@ public class FullAI extends AIController{
                     addCloseButton();
                     cont.pane(p -> {
                         p.defaults().pad(2f);
-                        all.each(clazz -> {
+                        all.each(meta -> {
                             p.image().width(2f).growY();
-                            p.button(meta.get(clazz).name, textb, () -> {
-                                modes.add(prov.get(clazz).get());
+                            p.button(meta.name, textb, () -> {
+                                modes.add(meta.prov.get());
                                 buildConfig();
                                 hide();
                             }).with(tb -> {
@@ -111,9 +108,9 @@ public class FullAI extends AIController{
                             }).size(360f,200f);
                         });
                         p.row();
-                        all.each(clazz -> {
+                        all.each(meta -> {
                             p.image().width(2f).growY();
-                            p.pane(t -> t.labelWrap(meta.get(clazz).intro).grow().labelAlign(Align.topLeft)).grow().with(pp -> pp.setScrollingDisabledX(true));
+                            p.pane(t -> t.labelWrap(meta.intro).grow().labelAlign(Align.topLeft)).grow().with(pp -> pp.setScrollingDisabledX(true));
                         });
                     }).with(p -> {
                         p.setScrollingDisabledY(true);
@@ -165,6 +162,31 @@ public class FullAI extends AIController{
         Core.settings.putJson("MI2U.ai.modes", modes);
     }
 
+    //加载assest下所有世处AI的预置脚本
+    public void loadPresets(){
+        for(var mai : Presets.all){
+            String code = mai.value;
+            String presetName = Core.bundle.get("ai.preset.logicmode.preset." + mai.name);
+            String presetIntro = Core.bundle.get("ai.preset.logicmode.preset." + mai.name + ".intro");
+            if(code != null) register(LogicMode.class, new Mode.ModeMeta(LogicMode.class, presetName, presetIntro, null, () -> {
+                var m = new LogicMode();
+                m.readCode(code);
+                m.handle = presetName;
+                return m;
+            }));
+        }
+    }
+
+    public void register(Class clazz, Mode.ModeMeta m){
+        all.add(m);
+        if(!meta.containsKey(clazz)) meta.put(clazz, m);
+        SettingHandler.registerJsonClass(clazz);
+    }
+
+    public void modeFlush(){
+        modes.each(mode -> mode.ai = this);
+    }
+
     @Override
     public void updateUnit(){
         modeFlush();
@@ -175,10 +197,6 @@ public class FullAI extends AIController{
                 if(mode.enable) mode.act();
             });
         }
-    }
-
-    public void modeFlush(){
-        modes.each(mode -> mode.ai = this);
     }
 
     /**unit actions can be covered by the lasted related mode. Executed after each mode acted.*/
@@ -233,7 +251,12 @@ public class FullAI extends AIController{
                 }).size(buttonSize), true).setCollapsed(true, () -> !configUIExpand).setDirection(true, false).setDuration(0.1f));
 
                 tt.table(ent -> {
-                    ent.image(meta.get(this.getClass()).icon).size(32f).scaling(Scaling.fit);
+                    var icon = meta.get(this.getClass()).icon;
+                    if(icon == null){
+                        ent.image().size(32f);
+                    }else{
+                        ent.image(icon).size(32f).scaling(Scaling.fit);
+                    }
                     ent.label(() -> (enable ? (" [accent]" + Iconc.play) : (" [gray]" + Iconc.pause)) + " " + name()).growX();
                 }).left().growX().get().clicked(() -> enable = !enable);
 
@@ -247,12 +270,16 @@ public class FullAI extends AIController{
         }
 
         public static class ModeMeta{
+            public Class<?> clazz;
             public String name, intro;
-            public Drawable icon;
-            public ModeMeta(String name, String intro, Drawable icon){
+            public @Nullable Drawable icon;
+            public Prov<Mode> prov;
+            public ModeMeta(Class<?> clazz, String name, String intro, @Nullable Drawable icon, Prov<Mode> prov){
+                this.clazz = clazz;
                 this.name = name;
                 this.intro = intro;
                 this.icon = icon;
+                this.prov = prov;
             }
         }
     }
@@ -531,7 +558,7 @@ public class FullAI extends AIController{
         transient public boolean itemTrans, payloadTrans;
         transient public StringBuffer log = new StringBuffer();
         transient Queue<BuildPlan> plans = new Queue<>();
-        transient public PopupTable customAIUITable = new PopupTable();
+        transient public PopupTable customAIUITable = new PopupTable(), logTable = new PopupTable();
 
         static{
             bannedInstructions.addAll(WriteI.class, ControlI.class, StopI.class, SetBlockI.class, SpawnUnitI.class, ApplyEffectI.class, SetWeatherI.class, SpawnWaveI.class, SetRuleI.class, ExplosionI.class, SetRateI.class, SyncI.class, SetFlagI.class, SetPropI.class, LocalePrintI.class);
@@ -577,32 +604,59 @@ public class FullAI extends AIController{
                     }
                 }).with(funcSetTextb);
 
-                t.button("@ai.config.logic.ui", textbtoggle, () -> {
+                t.button(Core.bundle.get("ai.config.logic.ui") + Iconc.list, textb, () -> {
                     if(customAIUITable.shown){
                         customAIUITable.hide();
                     }else{
                         customAIUITable.popup();
                         customAIUITable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
                     }
-                }).with(funcSetTextb).checked(tb -> customAIUITable.shown);
+                }).with(funcSetTextb);
+
+                t.button("Print" + Iconc.blockWorldMessage, textb, () -> {
+                    if(logTable.shown){
+                        logTable.hide();
+                    }else{
+                        logTable.clearChildren();
+                        logTable.touchable = Touchable.enabled;
+                        logTable.background(Styles.black3);
+                        logTable.addCloseButton(40f);
+                        logTable.add("Print" + Iconc.blockWorldMessage).size(200f, 40f).with(l -> logTable.addDragPopupListener(l)).row();
+                        logTable.image().growX().height(2f).color(Pal.logicOperations).row();
+                        logTable.pane(p -> {
+                            p.labelWrap(() -> log).growX();
+                        }).growX().maxHeight(200f).update(p -> {
+                            Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
+                            if(e != null && e.isDescendantOf(p)) {
+                                p.requestScroll();
+                            }else if(p.hasScroll()){
+                                Core.scene.setScrollFocus(null);
+                            }
+                        });
+                        logTable.popup();
+                        logTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
+                    }
+                }).with(funcSetTextb);
             }).grow();
+        }
 
-            table.row();
-
-            table.add("PrintFlush").growX();
-
-            table.row();
-            table.pane(t -> {
-                t.name = "log";
-                t.image().color(Color.royal).growY().width(2f);
-                t.labelWrap(() -> log).grow();
-            }).grow().maxHeight(200f);
+        public void readCode(String str){
+            code = str;
+            LAssembler asm = LAssembler.assemble(str, true);
+            exec.load(asm);
+            asm.putConst("@links", exec.links.length);
+            asm.putConst("@ipt", instructionsPerTick);
+            exec.privileged = true;
+            resetCustomUI();
         }
 
         @Override
         public void act(){
-            if(exec.instructions.length == 0) return;
-            exec.ipt.numval = Mathf.clamp(instructionsPerTick, 0, ((LogicBlock)Blocks.worldProcessor).maxInstructionsPerTick);
+            if(exec.instructions.length == 0){
+                if(code != null && !code.isEmpty()) readCode(code); //for loading init
+                if(exec.instructions.length == 0) return;
+            }
+            exec.ipt.numval = Mathf.clamp(instructionsPerTick, 1, ((LogicBlock)Blocks.worldProcessor).maxInstructionsPerTick);
             exec.unit.constant = false;
             var ctrl = ai.unit.controller();
             ai.unit.controller(logicAI);
@@ -662,24 +716,6 @@ public class FullAI extends AIController{
             }
         }
 
-        public void readCode(String str){
-            code = str;
-            LAssembler asm = LAssembler.assemble(str, true);
-            exec.load(asm);
-            asm.putConst("@links", exec.links.length);
-            asm.putConst("@ipt", instructionsPerTick);
-            exec.privileged = true;
-            customAIUITable.clear();
-            customAIUITable.touchable = Touchable.enabled;
-            customAIUITable.margin(2f);
-            customAIUITable.background(Styles.black3);
-            customAIUITable.addDragMove();
-            customAIUITable.addCloseButton(20f);
-            customAIUITable.add("@ai.config.logic.ui").height(20f).row();
-            customAIUITable.update(() -> customAIUITable.keepInScreen());
-            customAIUITable.defaults().size(80, 32);
-        }
-
         public boolean isLocalSandbox(){
             return !net.client() || state.rules.mode() == Gamemode.sandbox;
         }
@@ -688,6 +724,13 @@ public class FullAI extends AIController{
             if(inst instanceof SetRateI sr){
                 instructionsPerTick = sr.amount.numi();
                 return true;
+            }else if(inst instanceof SetPropI li){
+                //player set team
+                if(li.type.obj() == LAccess.team && li.of.obj() == ai.unit){
+                    if(li.value.team() != null) player.team(li.value.team());
+                }
+                //unit set team
+                return false;
             }else if(inst instanceof ControlI li){
                 if(!player.dead() && li.target.obj() instanceof Building b && (isLocalSandbox() || b.team == exec.team)){
                     if(li.type == LAccess.config){
@@ -705,16 +748,16 @@ public class FullAI extends AIController{
                         timer.get(timerShoot, 1);
                         return false;//在这里更新timer，随后执行原版指令来设置ai状态，下同
                     }
-                    case move, pathfind, autoPathfind, boost -> {
+                    case move, approach, pathfind, autoPathfind, boost -> {
                         timer.get(timerMove, 1);
                         return false;
                     }
                     case idle -> {
-                        timer.reset(timerShoot, LogicAI.logicControlTimeout / 60);
+                        timer.reset(timerMove, LogicAI.logicControlTimeout / 60);
                         return false;
                     }
                     case stop -> {
-                        timer.reset(timerMove, LogicAI.logicControlTimeout / 60);
+                        timer.reset(timerShoot, LogicAI.logicControlTimeout / 60);
                         return false;
                     }
                     case itemTake -> {
@@ -785,9 +828,7 @@ public class FullAI extends AIController{
                 customAIUITable.row();
                 return true;
             }else if(type.equals("clear")){
-                customAIUITable.clearChildren();
-                customAIUITable.addCloseButton(20f);
-                customAIUITable.add("@ai.config.logic.ui").height(20f).row();
+                resetCustomUI();
                 return true;
             }
             if(blocks.length < 3) return false;
@@ -818,18 +859,30 @@ public class FullAI extends AIController{
                 case "info" -> {
                     customAIUITable.add("").fill().with(b -> {
                         b.setFontScale(0.7f);
-                        b.clicked(() -> b.cullable = !b.cullable);
+                        b.clicked(() -> b.cullable = !b.cullable);  //作为是否启用追踪视角的toggler
                         b.update(() -> {
-                            b.setText(PrintI.toString(target.obj()));
-                            b.setColor(b.cullable ? Color.cyan : Color.white);
+                            b.setText(target.obj() != null ? PrintI.toString(target.obj()) : Strings.autoFixed(target.numfOrNan(), 3));
+                            b.setColor(!b.cullable ? Color.cyan : Color.white);
                             if(b.hasMouse()) HoverTopTable.hoverInfo.setHovered(target.obj());
-                            if(b.cullable && (target.obj() instanceof Posc posc)) InputUtils.panStable(posc);
+                            if(!b.cullable && (target.obj() instanceof Posc posc)) InputUtils.panStable(posc);
                         });
                     });
                 }
             }
 
             return true;
+        }
+
+        public void resetCustomUI(){
+            customAIUITable.clear();
+            customAIUITable.touchable = Touchable.enabled;
+            customAIUITable.margin(2f);
+            customAIUITable.background(Styles.black3);
+            customAIUITable.addCloseButton(40f);
+            customAIUITable.add("@ai.config.logic.ui").height(40f).growX().with(l -> customAIUITable.addDragPopupListener(l)).row();
+            customAIUITable.image().colspan(4).growX().height(2f).color(Pal.logicWorld).row();
+            customAIUITable.update(() -> customAIUITable.keepInScreen());
+            customAIUITable.defaults().size(100, 32);
         }
 
         public static <T extends UnlockableContent> void buildTable(Table table, Seq<T> items, Prov<T> holder, Cons<T> consumer, boolean closeSelect, int rows, int columns){

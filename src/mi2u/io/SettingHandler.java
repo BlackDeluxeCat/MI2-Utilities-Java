@@ -94,7 +94,7 @@ public class SettingHandler{
     public static void registerJsonClass(Class<?> clazz){
         Json json = MI2Utils.getValue(Core.settings, "json");
         if(json != null){
-            json.addClassTag(clazz.getName(), clazz);
+            if(json.getClass(clazz.getName()) == null) json.addClassTag(clazz.getName(), clazz);
         }
     }
 
