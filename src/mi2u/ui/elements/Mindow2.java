@@ -37,7 +37,8 @@ public class Mindow2 extends Table{
     public static Drawable titleBarbgNormal, titleBarbgSnapped, white, gray2;
 
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
-    boolean dragging = false;
+    protected boolean dragging = false;
+    @Deprecated protected boolean hideTitle = false;
     public boolean minimized = false;
     protected Table titleBar = new Table(), titlePane = new Table(Styles.black6);
     protected Table cont = new Table();
@@ -73,6 +74,7 @@ public class Mindow2 extends Table{
 
         setupTitle();
         var c = new MCollapser(titleBar, false).setCollapsed(true, () -> {
+            if(!hideTitle) return false;
             boolean hasMouse = this.hasMouse();
             if(hasMouse) interval.get(timerTitleStay, 0);
             return !minimized && (!hasMouse && interval.check(timerTitleStay, 3000));

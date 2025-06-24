@@ -35,6 +35,7 @@ public class MinimapMindow extends Mindow2{
 
     public MinimapMindow(){
         super("Minimap");
+        hideTitle = true;
 
         Events.run(EventType.Trigger.update, () -> {
             if(control.input.block != null && Core.input.keyDown(MBinding.ctrlUI) && Core.input.keyDown(MBinding.uiPopWorldFinder)){
