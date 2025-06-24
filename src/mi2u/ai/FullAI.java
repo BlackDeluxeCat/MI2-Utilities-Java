@@ -561,9 +561,7 @@ public class FullAI extends AIController{
 
                 t.button("" + Iconc.edit + Iconc.blockWorldProcessor, textb, () -> {
                     Runnable shower = () -> {
-                        ui.logic.show(code, exec, true, s -> {
-                            this.readCode(code);
-                        });
+                        ui.logic.show(code, exec, true, this::readCode);
                     };
 
                     if(!state.rules.logicUnitBuild){
