@@ -275,7 +275,7 @@ public class MinimapMindow extends Mindow2{
             Draw.alpha(color.a);
             //just render unit group
             for(var unit : Groups.unit){
-                if(unit.inFogTo(player.team()) || !unit.type.drawMinimap) return;
+                if(unit.inFogTo(player.team()) || !unit.type.drawMinimap) continue;
                 var region = unit.icon();
                 if(drawUnitOutline > 0.01f){
                     Draw.mixcol(Color.white, 1f);
