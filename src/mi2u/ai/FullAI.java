@@ -750,6 +750,7 @@ public class FullAI extends AIController{
             if(inst instanceof SetRateI sr){
                 instructionsPerTick = sr.amount.numi();
                 return true;
+
             }else if(inst instanceof SetPropI li){
                 //player set team
                 if(li.type.obj() == LAccess.team && li.of.obj() == ai.unit){
@@ -757,6 +758,7 @@ public class FullAI extends AIController{
                 }
                 //unit set team
                 return false;
+
             }else if(inst instanceof ControlI li){
                 if(!player.dead() && li.target.obj() instanceof Building b && (isLocalSandbox() || b.team == exec.team)){
                     if(li.type == LAccess.config){
@@ -764,10 +766,12 @@ public class FullAI extends AIController{
                     }
                 }
                 return true;
+
             }else if(inst instanceof PrintFlushI){
                 log.setLength(0);
                 log.append(exec.textBuffer, 0, exec.textBuffer.length());
                 exec.textBuffer.setLength(0);
+
             }else if(inst instanceof UnitControlI li){
                 switch(li.type){
                     case target, targetp -> {
@@ -835,8 +839,51 @@ public class FullAI extends AIController{
                         return true;
                     }
                 }
+
             }else if(inst instanceof PrintI printI){
                 return printUI(printI);
+
+            }else if(inst instanceof ReadI readI){
+                //读取其他世处AI的变量
+                if(readI.target.isobj && readI.target.objval instanceof CharSequence str){
+                    LogicMode lm = null;
+                    for(int i = 0; i < ai.modes.size; i++){
+                        if(ai.modes.get(i) instanceof LogicMode && ai.modes.get(i).name().contentEquals(str)){
+                            lm = (LogicMode)ai.modes.get(i);
+                        }
+                    }
+                    if(lm != null && readI.position.isobj && readI.position.objval instanceof String name){
+                        LVar fromVar = lm.exec.optionalVar(name);
+                        if(fromVar != null && !readI.output.constant){
+                            readI.output.objval = fromVar.objval;
+                            readI.output.numval = fromVar.numval;
+                            readI.output.isobj = fromVar.isobj;
+                            return true;
+                        }
+                    }
+                }
+                return false;
+
+            }else if(inst instanceof WriteI writeI){
+                //写入其他世处AI的变量
+                if(writeI.target.isobj && writeI.target.objval instanceof CharSequence str){
+                    LogicMode lm = null;
+                    for(int i = ai.modes.size - 1; i >= 0; i--){
+                        if(ai.modes.get(i) instanceof LogicMode && ai.modes.get(i).name().contentEquals(str)){
+                            lm = (LogicMode)ai.modes.get(i);
+                        }
+                    }
+                    if(lm != null && writeI.position.isobj && writeI.position.objval instanceof String name){
+                        LVar toVar = lm.exec.optionalVar(name);
+                        if(toVar != null && !toVar.constant){
+                            toVar.objval = writeI.value.objval;
+                            toVar.numval = writeI.value.numval;
+                            toVar.isobj = writeI.value.isobj;
+                            return true;
+                        }
+                    }
+                }
+                return false;
             }
 
             return false;
