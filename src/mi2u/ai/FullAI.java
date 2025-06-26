@@ -265,6 +265,20 @@ public class FullAI extends AIController{
 
         public void buildConfig(Table table){}
 
+        public static Stack timerIconStack(Prov<String> icon, Boolp charged, Floatp prov){
+            Stack stack = new Stack();
+            var i = new Label(() -> (charged.get() ? "[lightgray]" : "[darkgray]") + icon.get());
+            stack.add(i);
+            var l = new Label(() -> charged.get() ? Strings.autoFixed(prov.get(), 1) : "");
+            l.setFillParent(true);
+            l.setAlignment(Align.bottomRight);
+            l.setWrap(true);
+            l.setFontScale(0.6f);
+            stack.add(l);
+            stack.setHeight(32f);
+            return stack;
+        }
+
         public String name(){
             return meta.get(this.getClass()).name;
         }
@@ -299,14 +313,14 @@ public class FullAI extends AIController{
         @Override
         public void act(){
             Building core = ai.unit.closestCore();
-            ai.boostAction(true);
             if(!(ai.unit.canMine()) || core == null) return;
+            ai.boostAction(true);
             if(ai.unit.mineTile != null && !ai.unit.mineTile.within(ai.unit, ai.unit.type.mineRange)){
                 ai.unit.mineTile = null;
             }
             if(mining){
                 if(timer.get(timerTargetItem, 60 * 4) || targetItem == null){
-                    targetItem = list.min(i -> ai.unit.canMine(i), i -> core.items.get(i));
+                    targetItem = list.min(i -> ai.unit.canMine(i) && (indexer.hasOre(i) || indexer.hasWallOre(i)), i -> core.items.get(i));
                 }
                 //core full of the target item, do nothing
                 if(targetItem != null && core.acceptStack(targetItem, 1, ai.unit) == 0){
@@ -320,7 +334,7 @@ public class FullAI extends AIController{
                         mining = false;
                     }
 
-                    if(timer.get(timerFindOre, 120f)){
+                    if(timer.get(timerFindOre, 60 * 2)){
                         //Anuke终于做一回人了
                         ore = ai.unit.type.mineWalls ? indexer.findClosestWallOre(ai.unit, targetItem) : indexer.findClosestOre(ai.unit, targetItem);
                     }
@@ -343,8 +357,6 @@ public class FullAI extends AIController{
                     if(timer.get(timerTransferItem, 120f)){
                         control.input.droppingItem = true;
                         control.input.tryDropItems(core, ai.unit.aimX, ai.unit.aimY);
-                    }else{
-                        ai.shootAction(MI2UTmp.v1.set(core).lerpDelta(Mathf.range(-12f, 12f), Mathf.range(-8f, 8f), 0.1f), true);
                     }
                     mining = true;
                 }
@@ -355,6 +367,13 @@ public class FullAI extends AIController{
 
         @Override
         public void buildConfig(Table table){
+            table.table(t -> {
+                t.defaults().pad(2f).minWidth(32f);
+                t.add(timerIconStack(() -> targetItem == null ? ("" + Iconc.none) : (targetItem.hasEmoji() ? targetItem.emoji() : targetItem.localizedName), () -> targetItem == null || !timer.check(timerTargetItem, 60 * 4), () -> (60 * 4 - timer.getTime(timerTargetItem)) / 60f));
+                t.add(timerIconStack(() -> "" + Iconc.zoom, () -> ai.unit != null && ai.unit.mineTile != null, () -> (60 * 2 - timer.getTime(timerFindOre)) / 60f));
+                t.add(timerIconStack(() -> "" + Iconc.upload, () -> !timer.check(timerTransferItem, 60 * 2), () -> (60 * 2 - timer.getTime(timerTransferItem)) / 60f));
+            }).growX().row();
+
             table.table(p -> {
                 int i = 0;
                 for(var item : content.items()){
@@ -363,7 +382,7 @@ public class FullAI extends AIController{
                     p.button(b -> {
                         var icon = new Image(item.uiIcon);
                         icon.setFillParent(true);
-                        var label = new Label(() -> ((floor ? "F" : "") + (wall ? "w" : "")));
+                        var label = new Label(() -> ((floor ? "F" : "") + (wall ? "W" : "")));
                         label.setAlignment(Align.bottomRight);
                         label.setFontScale(0.7f);
                         b.stack(icon, label);
@@ -373,14 +392,14 @@ public class FullAI extends AIController{
                         }else {
                             list.add(item);
                         }
-                    }).fill().margin(2f).disabled(!floor && !wall).update(b -> b.setChecked(list.contains(item)));
+                    }).fill().margin(2f).checked(b -> list.contains(item));
                     i++;
                     if(i >= 10){
                         i = 0;
                         p.row();
                     }
                 }
-            }).maxHeight(300f);
+            });
         }
     }
 
@@ -640,15 +659,9 @@ public class FullAI extends AIController{
 
                 t.table(tt -> {
                     tt.defaults().pad(2f).minWidth(32f);
-                    tt.stack(new Label((timer.check(timerMove, LogicAI.logicControlTimeout) ? "[darkgray]" : "[accent]") + Iconc.move), new Table(ttt -> {
-                        ttt.setFillParent(true);
-                        ttt.labelWrap(() -> timer.check(timerMove, LogicAI.logicControlTimeout) ? "" : Strings.autoFixed((LogicAI.logicControlTimeout - timer.getTime(timerMove)) / 60f, 1)).grow().fontScale(0.6f).with(l -> l.setAlignment(Align.bottomRight));
-                    }));
+                    tt.add(timerIconStack(() -> "" + Iconc.move, () -> !timer.check(timerMove, LogicAI.logicControlTimeout), () -> (LogicAI.logicControlTimeout - timer.getTime(timerMove)) / 60f));
 
-                    tt.stack(new Label((timer.check(timerShoot, LogicAI.logicControlTimeout) ? "[darkgray]" : "[accent]") + Iconc.commandAttack), new Table(ttt -> {
-                        ttt.setFillParent(true);
-                        ttt.labelWrap(() -> timer.check(timerShoot, LogicAI.logicControlTimeout) ? "" : Strings.autoFixed((LogicAI.logicControlTimeout - timer.getTime(timerShoot)) / 60f, 1)).grow().fontScale(0.6f).with(l -> l.setAlignment(Align.bottomRight));
-                    }));
+                    tt.add(timerIconStack(() -> "" + Iconc.commandAttack, () -> !timer.check(timerShoot, LogicAI.logicControlTimeout), () -> (LogicAI.logicControlTimeout - timer.getTime(timerShoot)) / 60f));
                 });
             }).grow();
         }
