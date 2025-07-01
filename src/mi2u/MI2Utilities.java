@@ -63,9 +63,6 @@ public class MI2Utilities extends Mod{
 
             fullAI.loadModes();
 
-            renderer.maxZoom = mi2ui.settings.getFloat("maxZoom");
-            renderer.minZoom = mi2ui.settings.getFloat("minZoom");
-
             Time.runTask(40f, () -> {
                 mi2ui.addTo(Core.scene.root);
                 mi2ui.visible(() -> state.isGame() && ui.hudfrag.shown);
