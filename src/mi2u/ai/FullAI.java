@@ -439,7 +439,7 @@ public class FullAI extends AIController{
 
                                 if(req){
                                     autoPlan.config = plan.config;
-                                    ai.unit.plans.addFirst(autoPlan.set(plan.x, plan.y, plan.rotation, plan.block));
+                                    if(!ai.unit.plans.contains(autoPlan)) ai.unit.plans.addFirst(autoPlan.set(plan.x, plan.y, plan.rotation, plan.block));
                                 }
                             }
                         }
