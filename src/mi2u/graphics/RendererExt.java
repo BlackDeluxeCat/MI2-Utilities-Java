@@ -444,7 +444,8 @@ public class RendererExt{
     //TODO set a Runnable list.
     public static void drawBlockHpBar(Building build){
         final float lenMul = 0.8f;
-        Draw.z(Layer.shields + 3f);
+        float z = Draw.z();
+        Draw.z(Layer.overlayUI);
         barDrawer.reset().set(build.x, build.y, build.hitSize() * 0.8f, build.hitSize() * 0.8f);
 
         if(build.health < build.maxHealth){
@@ -490,6 +491,7 @@ public class RendererExt{
         }
 
         Draw.color();
+        Draw.z(z);
     }
 
     public static void drawItemStack(Building b){
@@ -497,6 +499,8 @@ public class RendererExt{
     }
 
     public static boolean drawBlackboxBuilding(Building b){
+        float z = Draw.z();
+        Draw.z(Layer.overlayUI);
         if(drevealJunction && b instanceof Junction.JunctionBuild jb) drawJunction(jb);
         else if(drevealBridge && b instanceof BufferedItemBridge.BufferedItemBridgeBuild bb) drawBufferedItemBridge(bb);
         else if(drevealBridge && b instanceof ItemBridge.ItemBridgeBuild ib) drawItemBridge(ib);
@@ -504,7 +508,11 @@ public class RendererExt{
         else if(drevealJunction && b instanceof Router.RouterBuild rb) drawRouter(rb);
         else if(drevealBridge && b instanceof DuctBridge.DuctBridgeBuild db) drawDuctBridge(db);
         else if(drevealUnloader && b instanceof DirectionalUnloader.DirectionalUnloaderBuild rb) drawDirectionalUnloader(rb);
-        else return false;
+        else{
+            Draw.z(z);
+            return false;
+        }
+        Draw.z(z);
         return true;
     }
 
