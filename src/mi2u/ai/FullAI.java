@@ -218,6 +218,7 @@ public class FullAI extends AIController{
 
     public static class Mode{
         public boolean enable = false;
+        public String handle = "";
 
         transient FullAI ai;
         transient public boolean configUIExpand = false;
@@ -245,10 +246,19 @@ public class FullAI extends AIController{
 
                 tt.button("" + Iconc.edit, textbtoggle, () -> configUIExpand = !configUIExpand).checked(tb -> configUIExpand).size(32f);
 
-                tt.add(new MCollapser(t -> t.button("[scarlet]" + Iconc.cancel, textb, () -> {
-                    ai.modes.remove(this);
-                    ai.buildConfig();
-                }).size(buttonSize), true).setCollapsed(true, () -> !configUIExpand).setDirection(true, false).setDuration(0.1f));
+                tt.add(new MCollapser(t -> {
+                    t.button("[scarlet]" + Iconc.cancel, textb, () -> {
+                        ai.modes.remove(this);
+                        ai.buildConfig();
+                    }).size(buttonSize);
+                    t.button("" + Iconc.star, textb, () -> {
+                        ui.showTextInput("Edit Logic AI Name", "Edit Logic AI Name", handle, s -> {
+                            if(!s.equals(handle)){
+                                handle = s;
+                            }
+                        });
+                    }).size(buttonSize);
+                }, true).setCollapsed(true, () -> !configUIExpand).setDirection(true, false).setDuration(0.1f));
 
                 tt.table(ent -> {
                     var icon = meta.get(this.getClass()).icon;
@@ -280,7 +290,7 @@ public class FullAI extends AIController{
         }
 
         public String name(){
-            return meta.get(this.getClass()).name;
+            return handle == null || handle.isEmpty() ? meta.get(this.getClass()).name : handle;
         }
 
         public static class ModeMeta{
@@ -569,7 +579,6 @@ public class FullAI extends AIController{
         };
         static short timerUpdMovement = 0, timerMove = 1, timerShoot = 2, timerTransItemPayload = 3;
 
-        public String handle = "";
         public String code = "";
         public int instructionsPerTick = 10;
 
@@ -588,24 +597,12 @@ public class FullAI extends AIController{
         }
 
         @Override
-        public String name(){
-            return handle == null || handle.isEmpty() ? super.name() : handle;
-        }
-
-        @Override
         public void buildConfig(Table table){
             table.table(t -> {
                 t.name = "cfg";
                 t.defaults().minSize(32f).pad(2f).fill();
-                t.button(Iconc.edit + "Naming", textb, () -> {
-                    ui.showTextInput("Edit Logic AI Name", "Edit Logic AI Name", handle, s -> {
-                        if(!s.equals(handle)){
-                            handle = s;
-                        }
-                    });
-                }).with(funcSetTextb);
 
-                t.button("" + Iconc.edit + Iconc.blockWorldProcessor, textb, () -> {
+                t.button("" + Iconc.terminal + Iconc.blockWorldProcessor, textb, () -> {
                     Runnable shower = () -> {
                         ui.logic.show(code, exec, true, this::readCode);
                     };
