@@ -26,6 +26,7 @@ public class MobileInputExt extends MobileInput implements InputOverwrite{
         super.update();
         Unit unit = player.unit();
         if(ctrlBoost) player.boosting = boost;
+        //TODO use unit.aim()
         if(ctrlShoot && unit != null){
             player.shooting = shoot && !(unit instanceof Mechc && unit.isFlying());
             if(player.shooting){
