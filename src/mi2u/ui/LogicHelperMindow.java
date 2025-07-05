@@ -137,11 +137,11 @@ public class LogicHelperMindow extends Mindow2{
             @Override
             public void act(float delta){
                 super.act(delta);
-                if(Core.input.keyDown(KeyCode.up) && !buttons.getChildren().isEmpty() && timer.check(1, 700) && timer.get(2, 50)){
+                if(Core.input.keyDown(KeyCode.up) && buttons != null && !buttons.getChildren().isEmpty() && timer.check(1, 700) && timer.get(2, 50)){
                     tabIndex = Mathf.mod(--tabIndex, buttons.getChildren().size);
                     scrollToTabIndex();
                 }
-                if(Core.input.keyDown(KeyCode.down) && !buttons.getChildren().isEmpty() && timer.check(1, 700) && timer.get(2, 50)){
+                if(Core.input.keyDown(KeyCode.down) && buttons != null && !buttons.getChildren().isEmpty() && timer.check(1, 700) && timer.get(2, 50)){
                     tabIndex = Mathf.mod(++tabIndex, buttons.getChildren().size);
                     scrollToTabIndex();
                 }
