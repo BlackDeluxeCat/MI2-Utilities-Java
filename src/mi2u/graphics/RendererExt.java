@@ -72,6 +72,9 @@ public class RendererExt{
     public static boolean[] filterTurretRangeZone;
     public static boolean[] filterUnitRangeZone;
 
+    public static boolean[] filterDisableBuilding;
+    public static boolean[] filterDisableUnit;
+
     public static void initBase(){
         BuildingInventory.init();
 
@@ -83,6 +86,16 @@ public class RendererExt{
         filterUnitRangeZone = new boolean[content.units().size];
         for(var unit : content.units()){
             filterUnitRangeZone[unit.id] = MI2UI.filterUnitRangeZone.getBool(unit.name, true);
+        }
+
+        filterDisableBuilding = new boolean[content.blocks().size];
+        for(var block : content.blocks()){
+            filterDisableBuilding[block.id] = MI2UI.filterDisableBuilding.getBool(block.name, true);
+        }
+
+        filterDisableUnit = new boolean[content.units().size];
+        for(var unit : content.units()){
+            filterDisableUnit[unit.id] = MI2UI.filterDisableUnit.getBool(unit.name, true);
         }
 
         Events.on(EventType.WorldLoadEvent.class, e -> {
@@ -150,7 +163,7 @@ public class RendererExt{
                 dd.setIndex__draw(-1);
             }
             if(d instanceof Unit u){
-                if(disableUnit){
+                if(disableUnit && filterDisableUnit[u.type.id]){
                     Groups.draw.removeIndex(u, MI2Utils.getValue(drawIndexUnit, u));
                     u.setIndex__draw(-1);
                     hiddenUnit.add(u);
@@ -167,7 +180,9 @@ public class RendererExt{
         Seq<Tile> tiles = MI2Utils.getValue(renderer.blocks, "tileview");
         BuildingInventory.ids.clear();
         if(tiles != null){
-            if(disableBuilding) tiles.clear();
+            if(disableBuilding){
+                tiles.removeAll(tile -> tile.build != null && filterDisableBuilding[tile.build.block.id]);
+            }
 
             for(var tile : tiles){
                 if(tile.build == null) continue;

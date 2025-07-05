@@ -16,6 +16,7 @@ import mindustry.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.ui.dialogs.*;
+import mindustry.world.*;
 import mindustry.world.blocks.*;
 import mindustry.world.blocks.defense.turrets.*;
 
@@ -24,7 +25,7 @@ import static mi2u.io.SettingHandler.TextFieldSetting.*;
 import static mindustry.Vars.*;
 
 public class MI2UI extends Mindow2{
-    public static SettingHandler filterTurretRangeZone = new SettingHandler("MI2UI.filterTurretRangeZone"), filterUnitRangeZone = new SettingHandler("MI2UI.filterUnitRangeZone");
+    public static SettingHandler filterTurretRangeZone = new SettingHandler("MI2UI.filterTurretRangeZone"), filterUnitRangeZone = new SettingHandler("MI2UI.filterUnitRangeZone"), filterDisableUnit = new SettingHandler("MI2UI.filterDisableUnit"), filterDisableBuilding = new SettingHandler("MI2UI.filterDisableBuilding");
     public static PopupTable popup = new PopupTable();
     public MapInfoTable mapinfo;
 
@@ -176,7 +177,7 @@ public class MI2UI extends Mindow2{
         settings.checkPref("enMenderZone", false).tag(false, false, true);
         settings.checkPref("enSpawnZone", true);
         settings.checkPref("enTurretRangeZone", false);
-        settings.entry("graphics.filterTurretRangeZone", (entry, t) -> {
+        settings.entry("graphics.filterBlock", (entry, t) -> {
             t.button(entry.title, () -> {
                 new BaseDialog(entry.title){{
                     addCloseButton();
@@ -205,7 +206,7 @@ public class MI2UI extends Mindow2{
             return "-";
         });
         settings.checkPref("enUnitRangeZone", false);
-        settings.entry("graphics.filterUnitRangeZone", (entry, t) -> {
+        settings.entry("graphics.filterUnit", (entry, t) -> {
             t.button(entry.title, () -> {
                 new BaseDialog(entry.title){{
                     addCloseButton();
@@ -252,8 +253,56 @@ public class MI2UI extends Mindow2{
 
         settings.checkPref("disableWreck", false);
         settings.checkPref("disableUnit", false);
+        settings.entry("graphics.filterUnit", (entry, t) -> {
+            t.button(entry.title, () -> {
+                new BaseDialog(entry.title){{
+                    addCloseButton();
+                    cont.pane(t -> {
+                        int col = Math.max(1, Mathf.floor(Core.scene.getWidth() / Scl.scl(160f)));
+                        for(var c : content.units()){
+                            TextButton button = new TextButton(c.localizedName, textbtoggle);
+                            button.add(new Image(c.uiIcon)).size(32f).pad(8f);
+                            button.getCells().reverse();
+                            button.clicked(() -> {
+                                filterDisableUnit.putBool(c.name, button.isChecked());
+                                for(var block : content.units()){
+                                    RendererExt.filterDisableUnit[block.id] = MI2UI.filterDisableUnit.getBool(block.name, true);
+                                }
+                            });
+                            t.add(button).size(140, 100).pad(4f).update(tb -> tb.setChecked(filterDisableUnit.getBool(c.name, true)));
+                            if(t.getChildren().size % col == 0) t.row();
+                        }
+                    }).with(p -> p.setForceScroll(true, true));
+                    show();
+                }};
+            }).growX();
+        });
         settings.checkPref("disableBullet", false);
         settings.checkPref("disableBuilding", false);
+        settings.entry("graphics.filterBlock", (entry, t) -> {
+            t.button(entry.title, () -> {
+                new BaseDialog(entry.title){{
+                    addCloseButton();
+                    cont.pane(t -> {
+                        int col = Math.max(1, Mathf.floor(Core.scene.getWidth() / Scl.scl(160f)));
+                        for(var c : content.blocks().select(Block::hasBuilding)){
+                            TextButton button = new TextButton(c.localizedName, textbtoggle);
+                            button.add(new Image(c.uiIcon)).size(32f).pad(8f);
+                            button.getCells().reverse();
+                            button.clicked(() -> {
+                                filterDisableBuilding.putBool(c.name, button.isChecked());
+                                for(var block : content.blocks()){
+                                    RendererExt.filterDisableBuilding[block.id] = MI2UI.filterDisableBuilding.getBool(block.name, true);
+                                }
+                            });
+                            t.add(button).size(140, 100).pad(4f).update(tb -> tb.setChecked(filterDisableBuilding.getBool(c.name, true)));
+                            if(t.getChildren().size % col == 0) t.row();
+                        }
+                    }).with(p -> p.setForceScroll(true, true));
+                    show();
+                }};
+            }).growX();
+        });
 
         settings.title("game.fpsCtrl");
 
