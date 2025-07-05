@@ -247,15 +247,17 @@ public class FullAI extends AIController{
                 tt.button("" + Iconc.edit, textbtoggle, () -> configUIExpand = !configUIExpand).checked(tb -> configUIExpand).size(32f);
 
                 tt.add(new MCollapser(t -> {
-                    t.button("[scarlet]" + Iconc.cancel, textb, () -> {
-                        ai.modes.remove(this);
-                        ai.buildConfig();
-                    }).size(buttonSize);
                     t.button("" + Iconc.star, textb, () -> {
                         ui.showTextInput("Edit Logic AI Name", "Edit Logic AI Name", handle, s -> {
                             if(!s.equals(handle)){
                                 handle = s;
                             }
+                        });
+                    }).size(buttonSize);
+                    t.button("[scarlet]" + Iconc.cancel, textb, () -> {
+                        ui.showConfirm("Remove This AI: " + name(), () -> {
+                            ai.modes.remove(this);
+                            ai.buildConfig();
                         });
                     }).size(buttonSize);
                 }, true).setCollapsed(true, () -> !configUIExpand).setDirection(true, false).setDuration(0.1f));
