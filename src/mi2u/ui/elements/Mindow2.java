@@ -2,6 +2,8 @@ package mi2u.ui.elements;
 
 import arc.*;
 import arc.func.*;
+import arc.graphics.*;
+import arc.graphics.g2d.*;
 import arc.input.*;
 import arc.math.*;
 import arc.math.geom.*;
@@ -15,6 +17,7 @@ import mi2u.*;
 import mi2u.io.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
+import mindustry.graphics.*;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
 
@@ -94,8 +97,7 @@ public class Mindow2 extends Table{
     /**
      * called when rebuild Mindow2, should be overrided
      */
-    public void setupCont(Table cont){
-    }
+    public void setupCont(Table cont){}
 
     /**
      * called when click minimize-button, can be overrided
@@ -128,7 +130,7 @@ public class Mindow2 extends Table{
 
             @Override
             public void touchDragged(InputEvent event, float x, float y, int pointer){
-                Vec2 v = localToStageCoordinates(MI2UTmp.v1.set(x, y)).sub(fromx, fromy);
+                Vec2 v = localToParentCoordinates(MI2UTmp.v1.set(x, y)).sub(fromx, fromy);
                 dragging = MI2UTmp.v2.set(v).sub(tmpv).len() > 5f;
                 curx = v.x;
                 cury = v.y;
@@ -169,6 +171,46 @@ public class Mindow2 extends Table{
         keepInStage();
         invalidate();
         pack();
+    }
+
+    @Override
+    public void draw(){
+        super.draw();
+        if(dragging){
+            var r = MI2UTmp.r1;
+            float fraction = Math.floorMod(Time.millis(), 800)/800f;
+            float w = Interp.fastSlow.apply(fraction) * 16f;
+
+            applyTransform(computeTransform());
+            Draw.color(Color.cyan, 1 - fraction);
+            Lines.stroke(w);
+            Lines.rect(r.set(0, 0, width, height).grow(w * 2));
+            resetTransform();
+
+            if(lrSnap != null){
+                lrSnap.applyTransform(lrSnap.computeTransform());
+                Draw.color(Color.scarlet, 1 - fraction);
+                Lines.rect(r.set(0, 0, lrSnap.width, lrSnap.height).grow(w * 2));
+                lrSnap.resetTransform();
+            }
+
+            if(tbSnap != null){
+                tbSnap.applyTransform(tbSnap.computeTransform());
+
+                Draw.color(Color.gold, 1 - fraction);
+                Lines.rect(r.set(0, 0, tbSnap.width, tbSnap.height).grow(w * 2));
+                tbSnap.resetTransform();
+            }
+
+            Draw.color(Color.yellow, 1 - fraction);
+            Lines.stroke(w * 2);
+            if(Align.isTop(edgesnap)) Lines.lineAngle(0, scene.getHeight(), 0, scene.getWidth());
+            if(Align.isBottom(edgesnap)) Lines.lineAngle(0, 0, 0, scene.getWidth());
+
+            if(Align.isLeft(edgesnap)) Lines.lineAngle(0, 0, 90, scene.getHeight());
+            if(Align.isRight(edgesnap)) Lines.lineAngle(scene.getWidth(), 0, 90, scene.getHeight());
+
+        }
     }
 
     /**
