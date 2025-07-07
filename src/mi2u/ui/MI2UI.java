@@ -40,6 +40,7 @@ public class MI2UI extends Mindow2{
 
     public MI2UI(){
         super("MI2UI", true);
+        visible(() -> state.isGame() && ui.hudfrag.shown);
 
         Events.run(EventType.Trigger.draw, FpsController::update);
 

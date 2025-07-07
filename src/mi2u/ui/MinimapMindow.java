@@ -36,6 +36,7 @@ public class MinimapMindow extends Mindow2{
     public MinimapMindow(){
         super("Minimap", true);
         hideTitle = true;
+        visible(() -> state.isGame() && ui.hudfrag.shown);
 
         Events.run(EventType.Trigger.update, () -> {
             if(control.input.block != null && Core.input.keyDown(MBinding.ctrlUI) && Core.input.keyDown(MBinding.uiPopWorldFinder)){

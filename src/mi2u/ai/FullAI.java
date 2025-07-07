@@ -929,6 +929,7 @@ public class FullAI extends AIController{
     public class AIMindow extends Mindow2{
         public AIMindow(){
             super("AI");
+            visible(() -> state.isGame() && ui.hudfrag.shown);
 
             titlePane.defaults().growX().pad(2f).height(buttonSize);
             titlePane.button("Add New", textb, () -> {
