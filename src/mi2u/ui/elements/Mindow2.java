@@ -37,39 +37,38 @@ import static mi2u.MI2UVars.*;
  */
 
 public class Mindow2 extends Table{
-    public static Drawable titleBarbgNormal, titleBarbgSnapped, white, gray2;
+    public static Drawable titleBarbgNormal;
 
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
     protected boolean dragging = false;
-    @Deprecated protected boolean hideTitle = false;
+    protected @Deprecated boolean hideTitle = false;
     public boolean minimized = false;
     protected Table titleBar = new Table(), titlePane = new Table(Styles.black6);
     protected Table cont = new Table();
-    public SettingHandler settings;
+
+    /** 窗口专属的settings，在构造方法调用{@code useSettings()}以启用*/
+    public @Nullable SettingHandler settings;
+
     public int edgesnap = Align.center;
-    @Nullable
-    public Mindow2 tbSnap, lrSnap;
+    public @Nullable Mindow2 tbSnap, lrSnap;
     public int tbSnapAlign, lrSnapAlign;
     public float tbLeftOff, lrBottomOff;
 
     static short timerSnapAnime = 0, timerDragSnapping = 1, timerTitleStay = 2;
     protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(3);
 
-    public Mindow2(String name){
+    public Mindow2(String name, boolean hasSettings){
         this.name = name;
-        registerToGlobal();
+        if(!mindow2s.contains(m -> m.name.equals(this.name))) mindow2s.add(this);
+        if(hasSettings) useSettings();
         initSettings();
-        loadUISettings();
-
-        Events.on(ResizeEvent.class, e -> Time.run(60f, () -> {
-            loadUISettings();
-            rebuild();
-        }));
-
-        Events.on(ClientLoadEvent.class, e -> rebuild());
 
         cont.setBackground(Styles.black3);
         titleBar.setBackground(titleBarbgNormal);
+
+        Events.on(ResizeEvent.class, e -> Time.run(60f, this::loadUISettings));
+
+        Events.on(ClientLoadEvent.class, e -> loadUISettings());
     }
 
     public void rebuild(){
@@ -413,12 +412,14 @@ public class Mindow2 extends Table{
         };
     }
 
+    public void useSettings(){
+        if(settings == null) settings = new SettingHandler(name);
+    }
     /**
-     * can be overrided, should use super.initSettings(), called in rebuild()
+     * can be overrided, should use super.initSettings()
      */
     public void initSettings(){
-        if(name == null || name.isEmpty()) return;
-        if(settings == null) settings = new SettingHandler(name);
+        if(name == null || name.isEmpty() || settings == null) return;
         settings.list.clear();
         var sScl = settings.sliderPref("scale", 100, 20, 400, 10, s -> s + "%", scl -> setScale(scl / 100f));
         sScl.title = bundle.get("settings.mindow.scale");
@@ -426,7 +427,7 @@ public class Mindow2 extends Table{
     }
 
     public void loadUISettings(){
-        if(name == null || name.isEmpty()) return;
+        if(name == null || name.isEmpty() || settings == null) return;
         minimized = settings.getBool("minimized");
         edgesnap = settings.getInt("edgesnap");
         curx = settings.getInt("curx");
@@ -446,13 +447,14 @@ public class Mindow2 extends Table{
         tbSnapAlign = settings.getInt("TBsnapAlign");
         tbLeftOff = settings.getInt("TBsnapOff");
         testSnaps();
+        rebuild();
     }
 
     /**
      * Override this method for custom UI settings save
      */
     public void saveUISettings(){
-        if(name == null || name.isEmpty()) return;
+        if(name == null || name.isEmpty() || settings == null) return;
 
         settings.putBool("minimized", minimized);
         settings.putInt("edgesnap", edgesnap);
@@ -465,17 +467,11 @@ public class Mindow2 extends Table{
         }
         settings.putInt("scale", (int)(scaleX * 100));
 
-        settings.putString("LRsnap", lrSnap == null ? "" : lrSnap.name);
+        settings.putString("LRsnap", lrSnap == null || lrSnap.name == null ? "" : lrSnap.name);
         settings.putInt("LRsnapAlign", lrSnapAlign);
         settings.putInt("LRsnapOff", (int)lrBottomOff);
-        settings.putString("TBsnap", tbSnap == null ? "" : tbSnap.name);
+        settings.putString("TBsnap", tbSnap == null || tbSnap.name == null ? "" : tbSnap.name);
         settings.putInt("TBsnapAlign", tbSnapAlign);
         settings.putInt("TBsnapOff", (int)tbLeftOff);
-    }
-
-    public void registerToGlobal(){
-        if(name != null && !name.isEmpty() && !mindow2s.contains(m -> m.name.equals(this.name))){
-            mindow2s.add(this);
-        }
     }
 }

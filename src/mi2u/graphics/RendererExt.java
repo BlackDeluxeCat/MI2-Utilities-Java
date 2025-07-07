@@ -75,7 +75,7 @@ public class RendererExt{
     public static boolean[] filterDisableBuilding;
     public static boolean[] filterDisableUnit;
 
-    public static void initBase(){
+    public static void init(){
         BuildingInventory.init();
 
         filterTurretRangeZone = new boolean[content.blocks().size];

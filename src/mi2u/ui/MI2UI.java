@@ -34,7 +34,7 @@ public class MI2UI extends Mindow2{
     public boolean showQuickSettings;
 
     public MI2UI(){
-        super("MI2UI");
+        super("MI2UI", true);
 
         Events.run(EventType.Trigger.draw, FpsController::update);
 

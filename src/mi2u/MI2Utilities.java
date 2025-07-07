@@ -36,10 +36,6 @@ public class MI2Utilities extends Mod{
 
             var whiteui = (TextureRegionDrawable)Tex.whiteui;
             Mindow2.titleBarbgNormal = whiteui.tint(1f, 0.1f, 0.2f, 0.3f);
-            Mindow2.titleBarbgSnapped = whiteui.tint(1f, 0.1f, 0.2f, 0.2f);
-            Mindow2.white = whiteui.tint(1f, 1f, 1f, 1f);
-            Mindow2.gray2 = whiteui.tint(0.2f, 0.2f, 0.2f, 1f);
-            buttonSize = 32f;
 
             Pixmap fade = new Pixmap(128, 128);
             for(int x = 0; x < fade.width; x++){
@@ -61,8 +57,6 @@ public class MI2Utilities extends Mod{
                 control.setInput(mobile ? MobileInputExt.mobileExt : DesktopInputExt.desktopExt);
             }
 
-            fullAI.loadModes();
-
             Time.runTask(40f, () -> {
                 mi2ui.addTo(Core.scene.root);
                 mi2ui.visible(() -> state.isGame() && ui.hudfrag.shown);
@@ -74,7 +68,7 @@ public class MI2Utilities extends Mod{
                 mindowmap.visible(() -> state.isGame() && ui.hudfrag.shown);
                 if(mi2ui.settings.getBool("showLogicHelper")) logicHelper.addTo(logicHelper.hasParent() ? logicHelper.parent : ui.logic);
 
-                RendererExt.initBase();
+                RendererExt.init();
                 ModifyFuncs.modifyVanilla();
                 BuildingStatsPopup.init();
             });

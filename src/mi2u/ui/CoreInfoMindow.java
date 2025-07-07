@@ -45,7 +45,7 @@ public class CoreInfoMindow extends Mindow2{
     public int itemTimerIndex = 0;
 
     public CoreInfoMindow(){
-        super("CoreInfo");
+        super("CoreInfo", true);
         usedItems = new ObjectSet<>();
         usedUnits = new ObjectSet<>();
 

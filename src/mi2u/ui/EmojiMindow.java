@@ -42,7 +42,7 @@ public class EmojiMindow extends Mindow2{
     public String filter = "";
 
     public EmojiMindow(){
-        super("Emojis");
+        super("Emojis", true);
 
         updateEmoji();
 

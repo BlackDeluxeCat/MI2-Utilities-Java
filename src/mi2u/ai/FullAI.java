@@ -65,6 +65,7 @@ public class FullAI extends AIController{
         register(LogicMode.class, new Mode.ModeMeta(LogicMode.class, Core.bundle.get("ai.preset.logicmode"), Core.bundle.get("ai.preset.logicmode.intro"), Core.atlas.drawable("mi2-utilities-java-ui-customai"), LogicMode::new));
 
         loadPresets();
+        loadModes();
 
         Events.run(EventType.Trigger.update, () -> {
             if(state.isGame() && state.isPlaying()){

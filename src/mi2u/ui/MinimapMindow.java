@@ -34,7 +34,7 @@ public class MinimapMindow extends Mindow2{
     public static PopupTable buttons;
 
     public MinimapMindow(){
-        super("Minimap");
+        super("Minimap", true);
         hideTitle = true;
 
         Events.run(EventType.Trigger.update, () -> {
