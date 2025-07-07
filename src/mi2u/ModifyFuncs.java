@@ -184,7 +184,10 @@ public class ModifyFuncs{
             mi2ui.settings.buildList(cont);
             st.table(buttons -> {
                 buttons.defaults().uniform().height(64f).grow();
-                mindow2s.each(m -> buttons.button("@" + m.name + ".MI2U", () -> m.settings.buildList(cont)));
+                mindow2s.each(m -> {
+                    if(m.settings == null) return;
+                    buttons.button("@" + m.name + ".MI2U", () -> m.settings.buildList(cont));
+                });
             }).width(600f);
 
             st.row();
@@ -196,6 +199,7 @@ public class ModifyFuncs{
             st.add(cont).growX();
 
             mindow2s.each(m -> {
+                if(m.settings == null) return;
                 st.getSettings().add(m.settings.list);//foo's support.
                 st.addChild(new Table(){
                     {

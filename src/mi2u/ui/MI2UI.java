@@ -25,13 +25,18 @@ import static mi2u.io.SettingHandler.TextFieldSetting.*;
 import static mindustry.Vars.*;
 
 public class MI2UI extends Mindow2{
-    public static SettingHandler filterTurretRangeZone = new SettingHandler("MI2UI.filterTurretRangeZone"), filterUnitRangeZone = new SettingHandler("MI2UI.filterUnitRangeZone"), filterDisableUnit = new SettingHandler("MI2UI.filterDisableUnit"), filterDisableBuilding = new SettingHandler("MI2UI.filterDisableBuilding");
     public static PopupTable popup = new PopupTable();
     public MapInfoTable mapinfo;
 
     private long runTime = 0, lastRunTime = 0, realRunTime = 0, lastRealRun = 0;
 
     public boolean showQuickSettings;
+
+    public static SettingHandler
+        filterTurretRangeZone = new SettingHandler("MI2UI.filterTurretRangeZone"),
+        filterUnitRangeZone = new SettingHandler("MI2UI.filterUnitRangeZone"),
+        filterDisableUnit = new SettingHandler("MI2UI.filterDisableUnit"),
+        filterDisableBuilding = new SettingHandler("MI2UI.filterDisableBuilding");
 
     public MI2UI(){
         super("MI2UI", true);
@@ -91,9 +96,8 @@ public class MI2UI extends Mindow2{
                 t.button(b -> {
                     b.image(Core.atlas.drawable("mi2-utilities-java-ui-aicfg")).scaling(Scaling.fit);
                 }, textb, () -> {
-                    fullAI.buildConfig();
-                    fullAI.cfgTable.popup();
-                    fullAI.cfgTable.setPositionInScreen(Core.graphics.getWidth()/2f, Core.graphics.getHeight()/2f);
+                    fullAI.aiMindow.addTo(this.parent);
+                    fullAI.aiMindow.setPosition(x, y);
                 });
 
                 t.button("DG", textb, MI2UFuncs::cleanGhostBlock).with(funcSetTextb).disabled(b -> player.team().data().plans.isEmpty()).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.cleanGhost"));

@@ -47,7 +47,7 @@ public class FullAI extends AIController{
     public static ObjectMap<Class, Mode.ModeMeta> meta = new ObjectMap<>();
     public Seq<Mode> modes = new Seq<>();
 
-    public PopupTable cfgTable = new PopupTable();
+    public AIMindow aiMindow = new AIMindow();
 
     static boolean unlockUnitBuild = false, cacheRuleLogicUnitBuild;
 
@@ -83,76 +83,6 @@ public class FullAI extends AIController{
         ui.logic.hidden(() -> {
             if(unlockUnitBuild) state.rules.logicUnitBuild = cacheRuleLogicUnitBuild;
         });
-    }
-
-    public void buildConfig(){
-        modeFlush();
-        cfgTable.clear();
-        cfgTable.addInGameVisible();
-        cfgTable.margin(2f).setBackground(Styles.black8);
-
-        cfgTable.table(t -> {
-            t.defaults().growX().pad(2f).height(buttonSize);
-            t.button("Add New", textb, () -> {
-                new BaseDialog(""){{
-                    addCloseButton();
-                    cont.pane(p -> {
-                        p.defaults().pad(2f);
-                        all.each(meta -> {
-                            p.image().width(2f).growY();
-                            p.button(meta.name, textb, () -> {
-                                modes.add(meta.prov.get());
-                                buildConfig();
-                                hide();
-                            }).with(tb -> {
-                                tb.getLabelCell().color(Color.cyan).fontScale(1.3f);
-                            }).size(360f,200f);
-                        });
-                        p.row();
-                        all.each(meta -> {
-                            p.image().width(2f).growY();
-                            p.pane(t -> t.labelWrap(meta.intro).grow().labelAlign(Align.topLeft)).grow().with(pp -> pp.setScrollingDisabledX(true));
-                        });
-                    }).with(p -> {
-                        p.setScrollingDisabledY(true);
-                    });
-                    show();
-                }};
-            });
-
-            t.image().with(i -> cfgTable.addDragPopupListener(i)).color(Color.cyan);
-
-            t.button("Save & Close", textb, () -> {
-                saveModes();
-                cfgTable.hide();
-            });
-        }).growX();
-
-        cfgTable.row();
-
-        cfgTable.pane(p -> {
-            p.table(t -> {
-                t.name = "cfg";
-                for(var mode : modes){
-                    t.table(mode::buildTitle).growX().get().setBackground(Styles.grayPanel);
-                    t.row();
-                    t.add(new MCollapser(tt -> {
-                        mode.buildConfig(tt);
-                        tt.marginBottom(16f);
-                    }, true).setCollapsed(false, () -> !mode.configUIExpand).setDirection(false, true)).growX();
-                    t.row();
-                }
-            }).growX();
-        }).maxHeight(Core.graphics.getHeight() / 2f / Scl.scl()).width(440f).update(p -> {
-            Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-            if(e != null && e.isDescendantOf(p)) {
-                p.requestScroll();
-            }else if(p.hasScroll()){
-                Core.scene.setScrollFocus(null);
-            }
-        });
-
-        cfgTable.update(cfgTable::keepInScreen);
     }
 
     public void loadModes(){
@@ -236,13 +166,13 @@ public class FullAI extends AIController{
                 tt.button("" + Iconc.up, textb, () -> {
                     int i = ai.modes.indexOf(this);
                     ai.modes.swap(i, Math.max(i - 1, 0));
-                    ai.buildConfig();
+                    ai.aiMindow.rebuild();
                 }).disabled(ai.modes.indexOf(this) == 0).size(buttonSize);
 
                 tt.button("" + Iconc.down, textb, () -> {
                     int i = ai.modes.indexOf(this);
                     ai.modes.swap(i, Math.min(i + 1, ai.modes.size - 1));
-                    ai.buildConfig();
+                    ai.aiMindow.rebuild();
                 }).disabled(ai.modes.indexOf(this) == ai.modes.size - 1).size(buttonSize);
 
                 tt.button("" + Iconc.edit, textbtoggle, () -> configUIExpand = !configUIExpand).checked(tb -> configUIExpand).size(32f);
@@ -258,7 +188,7 @@ public class FullAI extends AIController{
                     t.button("[scarlet]" + Iconc.cancel, textb, () -> {
                         ui.showConfirm("Remove This AI: " + name(), () -> {
                             ai.modes.remove(this);
-                            ai.buildConfig();
+                            ai.aiMindow.rebuild();
                         });
                     }).size(buttonSize);
                 }, true).setCollapsed(true, () -> !configUIExpand).setDirection(true, false).setDuration(0.1f));
@@ -993,6 +923,82 @@ public class FullAI extends AIController{
             pane.setOverscroll(false, false);
             main.add(pane).maxHeight(40 * rows);
             table.top().add(main);
+        }
+    }
+
+    public class AIMindow extends Mindow2{
+        public AIMindow(){
+            super("AI");
+
+            titlePane.defaults().growX().pad(2f).height(buttonSize);
+            titlePane.button("Add New", textb, () -> {
+                new BaseDialog(""){{
+                    addCloseButton();
+                    cont.pane(p -> {
+                        p.defaults().pad(2f);
+                        all.each(meta -> {
+                            p.image().width(2f).growY();
+                            p.button(meta.name, textb, () -> {
+                                modes.add(meta.prov.get());
+                                rebuild();
+                                hide();
+                            }).with(tb -> {
+                                tb.getLabelCell().color(Color.cyan).fontScale(1.3f);
+                            }).size(360f,200f);
+                        });
+                        p.row();
+                        all.each(meta -> {
+                            p.image().width(2f).growY();
+                            p.pane(t -> t.labelWrap(meta.intro).grow().labelAlign(Align.topLeft)).grow().with(pp -> pp.setScrollingDisabledX(true));
+                        });
+                    }).with(p -> {
+                        p.setScrollingDisabledY(true);
+                    });
+                    show();
+                }};
+            });
+
+            titlePane.button("Save & Close", textb, () -> {
+                saveModes();
+                close();
+            });
+
+            titlePane.button("Close", textb, this::close);
+        }
+
+        @Override
+        public void setupCont(Table cont){
+            modeFlush();
+            cont.clear();
+            cont.margin(2f).setBackground(Styles.black8);
+
+            cont.table(t -> {
+
+            }).growX();
+
+            cont.row();
+
+            cont.pane(p -> {
+                p.table(t -> {
+                    t.name = "cfg";
+                    for(var mode : modes){
+                        t.table(mode::buildTitle).growX().get().setBackground(Styles.grayPanel);
+                        t.row();
+                        t.add(new MCollapser(tt -> {
+                            mode.buildConfig(tt);
+                            tt.marginBottom(16f);
+                        }, true).setCollapsed(false, () -> !mode.configUIExpand).setDirection(false, true)).growX();
+                        t.row();
+                    }
+                }).growX();
+            }).maxHeight(Core.graphics.getHeight() / 2f / Scl.scl()).width(440f).update(p -> {
+                Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
+                if(e != null && e.isDescendantOf(p)) {
+                    p.requestScroll();
+                }else if(p.hasScroll()){
+                    Core.scene.setScrollFocus(null);
+                }
+            });
         }
     }
 }

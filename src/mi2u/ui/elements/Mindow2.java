@@ -31,7 +31,7 @@ import static mi2u.MI2UVars.*;
  * settings is a SettingEntry seq.
  * <p>
  * {@code setupCont(Table cont)}for cont rebuild, should be overrided.<p>
- * {@code initSettings()}for customize settings, should start with settings.clear()
+ * {@code initSettings()}for customize setting entries, should start with settings.clear()
  *
  * @author BlackDeluxeCat
  */
@@ -41,8 +41,9 @@ public class Mindow2 extends Table{
 
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
     protected boolean dragging = false;
-    protected @Deprecated boolean hideTitle = false;
+    protected boolean hideTitle = false, hasCloseButton = false;
     public boolean minimized = false;
+
     protected Table titleBar = new Table(), titlePane = new Table(Styles.black6);
     protected Table cont = new Table();
 
@@ -58,17 +59,31 @@ public class Mindow2 extends Table{
     protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(3);
 
     public Mindow2(String name, boolean hasSettings){
-        this.name = name;
+        this.name = name == null ? "" : name;
         if(!mindow2s.contains(m -> m.name.equals(this.name))) mindow2s.add(this);
-        if(hasSettings) useSettings();
+        if(!name.isEmpty() && hasSettings) useSettings();
         initSettings();
 
         cont.setBackground(Styles.black3);
         titleBar.setBackground(titleBarbgNormal);
 
-        Events.on(ResizeEvent.class, e -> Time.run(60f, this::loadUISettings));
+        Events.on(ResizeEvent.class, e -> Time.run(60f, () -> {
+            loadUISettings();
+            rebuild();
+        }));
 
-        Events.on(ClientLoadEvent.class, e -> loadUISettings());
+        Events.on(ClientLoadEvent.class, e -> {
+            loadUISettings();
+            rebuild();
+        });
+    }
+
+    public Mindow2(String name){
+        this(name, false);
+    }
+
+    public Mindow2(){
+        this("");
     }
 
     public void rebuild(){
@@ -82,7 +97,6 @@ public class Mindow2 extends Table{
             return !minimized && (!hasMouse && interval.check(timerTitleStay, 3000));
         }).setDirection(false, true).setDuration(0.1f);
         add(c).growX();
-        //add(titleBar).growX();
         row();
 
         if(!minimized){
@@ -94,15 +108,19 @@ public class Mindow2 extends Table{
     }
 
     /**
-     * called when rebuild Mindow2, should be overrided
+     * called when rebuild Mindow2, should be overridden
      */
     public void setupCont(Table cont){}
 
     /**
-     * called when click minimize-button, can be overrided
+     * called when click minimize-button, can be overridden
      */
     public void minimize(){
         rebuild();
+    }
+
+    public void close(){
+        remove();
     }
 
     public void setupTitle(){
@@ -110,12 +128,13 @@ public class Mindow2 extends Table{
         if(!minimized){
             titlePane.touchable = Touchable.enabled;
             titleBar.add(titlePane).growX();
-            titleBar.button("" + Iconc.settings, Styles.nonet, this::showSettings).size(buttonSize);
+            if(settings != null) titleBar.button("" + Iconc.settings, Styles.nonet, this::showSettings).size(buttonSize);
+            if(hasCloseButton) titleBar.button("" + Iconc.cancel, Styles.nonet, this::close).size(buttonSize);
         }
 
         titleBar.table(t -> {
             if(minimized) t.add(bundle.get(name + ".MI2U"));
-            t.label(() -> dragging ? Iconc.move + "" : "-").size(buttonSize).labelAlign(center);
+            t.label(() -> dragging ? Iconc.move + "" : minimized ? "□" : "-").size(buttonSize).labelAlign(center);
         }).get().addListener(new InputListener(){
             final Vec2 tmpv = new Vec2();
 
@@ -447,7 +466,6 @@ public class Mindow2 extends Table{
         tbSnapAlign = settings.getInt("TBsnapAlign");
         tbLeftOff = settings.getInt("TBsnapOff");
         testSnaps();
-        rebuild();
     }
 
     /**
