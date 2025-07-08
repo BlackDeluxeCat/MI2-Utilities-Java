@@ -126,6 +126,14 @@ public class WorldFinderTable extends PopupTable{
                 planReplace(find, replace, -1f);
             }).height(size).with(funcSetTextb);
         }).grow();
+
+        Events.run(EventType.Trigger.update, () -> {
+            if(control.input.block != null && Core.input.keyDown(MBinding.ctrlUI) && Core.input.keyDown(MBinding.uiPopWorldFinder)){
+                find = control.input.block;
+                popup();
+                setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
+            }
+        });
     }
 
     public void planReplace(Block from, Block to, float range){

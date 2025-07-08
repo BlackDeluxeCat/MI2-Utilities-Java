@@ -41,18 +41,39 @@ public class WaveInfoMindow extends Mindow2{
         hasCloseButton = true;
         setVisibleInGame();
 
-        //管理员功能
-        titlePane.defaults().pad(2f).height(buttonSize);
-        titlePane.button(Iconc.admin + Core.bundle.get("mapInfo.buttons.setWave"), textb, () -> {
-            curWave = Math.max(curWave, 0);
-            state.wave = curWave + 1;
-        }).with(funcSetTextb).disabled(b -> net.client());
-        titlePane.button(Iconc.admin + Core.bundle.get("mapInfo.buttons.forceRunWave"), textb, () -> {
-            logic.runWave();
-        }).with(funcSetTextb).disabled(b -> net.client());
-        titlePane.button(Iconc.admin + Core.bundle.get("rules.wavetimer"), textbtoggle, () -> {
-            if(state.rules.infiniteResources) state.rules.waveTimer = !state.rules.waveTimer;
-        }).update(b -> b.setChecked(state.rules.waveTimer)).with(funcSetTextb).disabled(b -> net.client());
+        titlePane.button("≪", textb, () -> {
+            syncCurWave = false;
+            curWave = Math.max(curWave - 10, 0);
+        }).with(funcSetTextb).size(buttonSize);
+        titlePane.button("<", textb, () -> {
+            syncCurWave = false;
+            curWave = Math.max(curWave - 1, 0);
+        }).with(funcSetTextb).size(buttonSize);
+        titlePane.button("O", textbtoggle, () -> {
+            syncCurWave = !syncCurWave;
+        }).with(funcSetTextb).size(buttonSize).update(b -> {
+            b.setChecked(syncCurWave);
+            if(syncCurWave) curWave = Math.max(state.wave - 1, 0);
+        });
+        titlePane.button(">", textb, () -> {
+            syncCurWave = false;
+            curWave = Math.max(curWave + 1, 0);
+        }).with(funcSetTextb).size(buttonSize);
+        titlePane.button("≫", textb, () -> {
+            syncCurWave = false;
+            curWave = Math.max(curWave + 10, 0);
+        }).with(funcSetTextb).size(buttonSize);
+        TextField tf = new TextField(String.valueOf(curWave));
+        tf.changed(() -> {
+            if(Strings.canParseInt(tf.getText()) && Strings.parseInt(tf.getText()) > 0){
+                syncCurWave = false;
+                curWave = Math.max(Strings.parseInt(tf.getText()) - 1, 0);
+            }
+        });
+        tf.update(() -> {
+            if(!tf.hasKeyboard()) tf.setText(curWave + 1 + "");
+        });
+        titlePane.add(tf).width(80f).height(buttonSize);
 
         Events.on(EventType.WorldLoadEvent.class, e -> {
             clearData();
@@ -80,48 +101,27 @@ public class WaveInfoMindow extends Mindow2{
         cont.clear();
 
         cont.table(t -> {
-            t.table(t3 -> {
-                t3.button("≪", textb, () -> {
-                    syncCurWave = false;
-                    curWave = Math.max(curWave - 10, 0);
-                }).with(funcSetTextb).size(buttonSize);
-                t3.button("<", textb, () -> {
-                    syncCurWave = false;
-                    curWave = Math.max(curWave - 1, 0);
-                }).with(funcSetTextb).size(buttonSize);
-                t3.button("O", textbtoggle, () -> {
-                    syncCurWave = !syncCurWave;
-                }).with(funcSetTextb).size(buttonSize).update(b -> {
-                    b.setChecked(syncCurWave);
-                    if(syncCurWave) curWave = Math.max(state.wave - 1, 0);
-                });
-                t3.button(">", textb, () -> {
-                    syncCurWave = false;
-                    curWave = Math.max(curWave + 1, 0);
-                }).with(funcSetTextb).size(buttonSize);
-                t3.button("≫", textb, () -> {
-                    syncCurWave = false;
-                    curWave = Math.max(curWave + 10, 0);
-                }).with(funcSetTextb).size(buttonSize);
-                TextField tf = new TextField();
-                tf.changed(() -> {
-                    if(Strings.canParseInt(tf.getText()) && Strings.parseInt(tf.getText()) > 0){
-                        syncCurWave = false;
-                        curWave = Math.max(Strings.parseInt(tf.getText()) - 1, 0);
-                    }
-                });
-                t3.add(tf).width(60f).height(buttonSize);
-            }).colspan(2);
+            //管理员功能
+            t.defaults().height(buttonSize);
+            t.button(Iconc.admin + Core.bundle.get("waveinfo.buttons.setWave"), textb, () -> {
+                curWave = Math.max(curWave, 0);
+                state.wave = curWave + 1;
+            }).with(funcSetTextb).disabled(b -> net.client());
+            t.button(Iconc.admin + Core.bundle.get("waveinfo.buttons.forceRunWave"), textb, () -> {
+                logic.runWave();
+            }).with(funcSetTextb).disabled(b -> net.client());
+            t.button(Iconc.admin + Core.bundle.get("rules.wavetimer"), textbtoggle, () -> {
+                if(state.rules.infiniteResources) state.rules.waveTimer = !state.rules.waveTimer;
+            }).update(b -> b.setChecked(state.rules.waveTimer)).with(funcSetTextb).disabled(b -> net.client());
         }).growX().row();
 
         //显示设置
         cont.table(t4 -> {
             t4.defaults().fillY();
-            t4.add("@mapInfo.view");
-            t4.button("@mapInfo.buttons.expand", textb, () -> {
+            t4.button("@waveinfo.buttons.expand", textb, () -> {
                 hpBars.each(bar -> bar.collapser.setCollapsed(false, true));
             }).with(funcSetTextb);
-            t4.button("@mapInfo.buttons.fold", textb, () -> {
+            t4.button("@waveinfo.buttons.fold", textb, () -> {
                 hpBars.each(bar -> bar.collapser.setCollapsed(true, true));
             }).with(funcSetTextb);
 

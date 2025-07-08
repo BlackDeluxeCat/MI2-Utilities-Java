@@ -7,6 +7,7 @@ import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.ai.*;
 import mi2u.ui.elements.*;
+import mindustry.gen.*;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
 
@@ -16,9 +17,10 @@ public class AIMindow extends Mindow2{
     public AIMindow(){
         super("AI");
         setVisibleInGame();
+        hasCloseButton = true;
 
-        titlePane.defaults().growX().pad(2f).height(buttonSize);
-        titlePane.button("Add New", textb, () -> {
+        titlePane.defaults().growX().height(buttonSize);
+        titlePane.button(Iconc.add + Core.bundle.get("ai.add"), textb, () -> {
             new BaseDialog(""){{
                 addCloseButton();
                 cont.pane(p -> {
@@ -45,12 +47,7 @@ public class AIMindow extends Mindow2{
             }};
         });
 
-        titlePane.button("Save & Close", textb, () -> {
-            fullAI.saveModes();
-            close();
-        });
-
-        titlePane.button("Close", textb, this::close);
+        titlePane.button(Iconc.save + Core.bundle.get("ai.save"), textb, () -> fullAI.saveModes());
     }
 
     @Override

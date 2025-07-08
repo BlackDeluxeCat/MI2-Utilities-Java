@@ -30,21 +30,14 @@ import static mindustry.Vars.*;
 
 public class MinimapMindow extends Mindow2{
     public static Minimap2 m = new Minimap2();
-    public static WorldFinderTable finderTable = new WorldFinderTable();
     public static PopupTable buttons;
 
     public MinimapMindow(){
         super("Minimap", true);
         hideTitle = true;
         setVisibleInGame();
-
-        Events.run(EventType.Trigger.update, () -> {
-            if(control.input.block != null && Core.input.keyDown(MBinding.ctrlUI) && Core.input.keyDown(MBinding.uiPopWorldFinder)){
-                finderTable.find = control.input.block;
-                finderTable.popup();
-                finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
-            }
-        });
+        touchable = Touchable.childrenOnly;
+        cont.background(Styles.none);
 
         m.drawLabel = settings.getBool("drawLabel");
         m.drawSpawn = settings.getBool("drawSpawn");
@@ -73,11 +66,6 @@ public class MinimapMindow extends Mindow2{
 
         titlePane.defaults().size(buttonSize);
         titlePane.add().growX();
-        titlePane.button(Iconc.zoom + "", MI2UVars.textb, () -> {
-            finderTable.popup();
-            finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
-        });
-
         titlePane.button(Iconc.downOpen + "", MI2UVars.textb, () -> {
             buttons.popup(Align.right);
             buttons.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
@@ -87,18 +75,19 @@ public class MinimapMindow extends Mindow2{
     @Override
     public void setupCont(Table cont){
         cont.clear();
+        cont.touchable = Touchable.childrenOnly;
         int size = settings.getInt("size");
-        cont.add(m).size(size);
+        cont.table(t -> t.background(Styles.black3).add(m).pad(2f).size(size));
         cont.row();
         cont.table(t -> {
-            t.defaults().uniformX();
-            t.label(() -> Strings.fixed(World.conv(player.x), 1) + ",").right().fontScale(0.7f);
-            t.label(() -> " " + Strings.fixed(World.conv(player.y), 1)).left().fontScale(0.7f);
+            t.defaults().width(0.1f);
+            t.label(() -> Strings.fixed(World.conv(player.x), 1) + ",").labelAlign(Align.right).fontScale(0.7f);
+            t.label(() -> " " + Strings.fixed(World.conv(player.y), 1)).labelAlign(Align.left).fontScale(0.7f);
 
             t.row();
 
-            t.label(() -> Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ",").right().fontScale(0.7f).color(Color.scarlet);
-            t.label(() -> " " + Strings.fixed(World.conv(Core.input.mouseWorldY()), 1)).left().fontScale(0.7f).color(Color.scarlet);
+            t.label(() -> Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ",").labelAlign(Align.right).fontScale(0.7f).color(Color.scarlet);
+            t.label(() -> " " + Strings.fixed(World.conv(Core.input.mouseWorldY()), 1)).labelAlign(Align.left).fontScale(0.7f).color(Color.scarlet);
         });
     }
 

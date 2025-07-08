@@ -81,10 +81,14 @@ public class MI2UI extends Mindow2{
             aiMindow.forceSetPosition(x, y);
             aiMindow.addTo(this.parent);
         });
-        titlePane.button("" + Iconc.map, textb, () -> mapInfo.show());
         titlePane.button("" + Iconc.waves, textb, () -> {
             waveInfo.forceSetPosition(x, y);
             waveInfo.addTo(this.parent);
+        });
+        titlePane.button("" + Iconc.map, textb, () -> mapInfo.show());
+        titlePane.button(Iconc.zoom + "", MI2UVars.textb, () -> {
+            finderTable.popup();
+            finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
         });
         titlePane.button("" + Iconc.settings, textbtoggle, () -> {
             showQuickSettings = !showQuickSettings;
@@ -135,7 +139,7 @@ public class MI2UI extends Mindow2{
                 tt.label(() -> Iconc.play + Strings.formatMillis(runTime)).fontScale(0.7f);
                 tt.label(() -> Iconc.pause + Strings.formatMillis(realRunTime)).fontScale(0.7f);
             }).growX();
-        });
+        }).growX();
 
         cont.row();
 
