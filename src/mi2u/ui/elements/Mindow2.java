@@ -24,6 +24,8 @@ import mindustry.ui.dialogs.*;
 import static arc.Core.*;
 import static arc.util.Align.*;
 import static mi2u.MI2UVars.*;
+import static mindustry.Vars.state;
+import static mindustry.Vars.ui;
 
 /**
  * Mindow2 is a dragable Table that partly works like a window.
@@ -82,10 +84,6 @@ public class Mindow2 extends Table{
         this(name, false);
     }
 
-    public Mindow2(){
-        this("");
-    }
-
     public void rebuild(){
         clear();
 
@@ -121,6 +119,10 @@ public class Mindow2 extends Table{
 
     public void close(){
         remove();
+    }
+
+    public void setVisibleInGame(){
+        visible(() -> state.isGame() && ui.hudfrag.shown);
     }
 
     public void setupTitle(){
@@ -257,6 +259,11 @@ public class Mindow2 extends Table{
         return y;
     }
 
+    public void forceSetPosition(float x, float y){
+        curx = x;
+        cury = y;
+    }
+
     @Override
     public void setPosition(float x, float y, int alignment){
         if((alignment & right) != 0)
@@ -322,7 +329,7 @@ public class Mindow2 extends Table{
 
         float dst1 = Float.MAX_VALUE, dst2 = Float.MAX_VALUE, dst;
         for(Mindow2 m : mindow2s){
-            if(m == this || m.name.isEmpty()) continue;
+            if(m == this) continue;
             if(m.lrSnap == this || m.tbSnap == this) continue;
             if(!m.visible || !m.hasParent()) continue;
 
@@ -369,26 +376,21 @@ public class Mindow2 extends Table{
     }
 
     public void testSnaps(){
-        ObjectSet<Mindow2> set = new ObjectSet<>();
-        set.add(this);
-        if(lrSnap != null && !lrSnap.testSnap(set)) lrSnap = null;
-        set.clear();
-        set.add(this);
-        if(tbSnap != null && !tbSnap.testSnap(set)) tbSnap = null;
+        if(lrSnap != null && !lrSnap.testSnap(this)) lrSnap = null;
+        if(tbSnap != null && !tbSnap.testSnap(this)) tbSnap = null;
     }
 
     //circular snapping
-    public boolean testSnap(ObjectSet<Mindow2> set){
-        set.add(this);
-        if(lrSnap != null && !set.add(lrSnap)){
+    public boolean testSnap(Mindow2 requester){
+        if(lrSnap == requester){
             return false;
         }
 
-        if(tbSnap != null && !set.add(tbSnap)){
+        if(tbSnap == requester){
             return false;
         }
 
-        return (lrSnap == null || lrSnap.testSnap(set)) && (tbSnap == null || tbSnap.testSnap(set));
+        return (lrSnap == null || lrSnap.testSnap(requester)) && (tbSnap == null || tbSnap.testSnap(requester));
     }
 
     public void addTo(Group newParent){

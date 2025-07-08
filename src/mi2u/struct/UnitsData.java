@@ -52,11 +52,11 @@ public class UnitsData{
         //wave data cleanup
         allwaves.each(WaveData::removeDead);
 
-        allwaves.removeAll(waved -> waved.units.isEmpty() && Math.abs(state.wave - 1 - waved.wave) > 2 && (waved.wave - MapInfoTable.curWave < 0 || waved.wave - MapInfoTable.curWave > sensed));
+        allwaves.removeAll(waved -> waved.units.isEmpty() && Math.abs(state.wave - 1 - waved.wave) > 2 && (waved.wave - WaveInfoMindow.curWave < 0 || waved.wave - WaveInfoMindow.curWave > sensed));
         int cs = 0;
         while(cs < sensed){
             int css = cs;
-            if(!allwaves.contains(waveData -> waveData.wave == MapInfoTable.curWave + css)) allwaves.add(poolWave.obtain().set(MapInfoTable.curWave + css));
+            if(!allwaves.contains(waveData -> waveData.wave == WaveInfoMindow.curWave + css)) allwaves.add(poolWave.obtain().set(WaveInfoMindow.curWave + css));
             cs++;
         }
 

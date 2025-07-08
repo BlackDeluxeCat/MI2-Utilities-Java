@@ -46,7 +46,7 @@ public class CoreInfoMindow extends Mindow2{
 
     public CoreInfoMindow(){
         super("CoreInfo", true);
-        visible(() -> state.isGame() && ui.hudfrag.shown);
+        setVisibleInGame();
         usedItems = new ObjectSet<>();
         usedUnits = new ObjectSet<>();
 

@@ -31,4 +31,9 @@ public class MI2UVars{
     public static CoreInfoMindow coreInfo = new CoreInfoMindow();
     public static LogicHelperMindow logicHelper = new LogicHelperMindow();
     public static MinimapMindow mindowmap = new MinimapMindow();
+
+    public static WaveInfoMindow waveInfo = new WaveInfoMindow();
+    public static AIMindow aiMindow = new AIMindow();
+
+    public static MapInfoDialog mapInfo = new MapInfoDialog();
 }

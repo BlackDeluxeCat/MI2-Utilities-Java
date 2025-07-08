@@ -26,7 +26,6 @@ import static mindustry.Vars.*;
 
 public class MI2UI extends Mindow2{
     public static PopupTable popup = new PopupTable();
-    public MapInfoTable mapinfo;
 
     private long runTime = 0, lastRunTime = 0, realRunTime = 0, lastRealRun = 0;
 
@@ -40,7 +39,7 @@ public class MI2UI extends Mindow2{
 
     public MI2UI(){
         super("MI2UI", true);
-        visible(() -> state.isGame() && ui.hudfrag.shown);
+        setVisibleInGame();
 
         Events.run(EventType.Trigger.draw, FpsController::update);
 
@@ -75,15 +74,21 @@ public class MI2UI extends Mindow2{
 
         titlePane.clear();
         titlePane.add().growX();
-        titlePane.button("Sy\nnc", textb, () -> {
-            Call.sendChatMessage("/sync");
-        }).color(Color.green).size(buttonSize).with(tb -> {
-            tb.getLabel().setFontScale(0.8f);
+        titlePane.defaults().size(buttonSize);
+        titlePane.button(b -> {
+            b.image(Core.atlas.drawable("mi2-utilities-java-ui-aicfg")).scaling(Scaling.fit);
+        }, textb, () -> {
+            aiMindow.forceSetPosition(x, y);
+            aiMindow.addTo(this.parent);
         });
-        titlePane.add(mapinfo = new MapInfoTable()).height(buttonSize);
+        titlePane.button("" + Iconc.map, textb, () -> mapInfo.show());
+        titlePane.button("" + Iconc.waves, textb, () -> {
+            waveInfo.forceSetPosition(x, y);
+            waveInfo.addTo(this.parent);
+        });
         titlePane.button("" + Iconc.settings, textbtoggle, () -> {
             showQuickSettings = !showQuickSettings;
-        }).size(buttonSize).checked(tb -> showQuickSettings).with(tb -> {
+        }).checked(tb -> showQuickSettings).with(tb -> {
             tb.getLabel().setColor(Color.gold);
         });
     }
@@ -94,12 +99,8 @@ public class MI2UI extends Mindow2{
         cont.table(play -> {
             play.table(t -> {
                 t.defaults().size(buttonSize);
-                t.button(b -> {
-                    b.image(Core.atlas.drawable("mi2-utilities-java-ui-aicfg")).scaling(Scaling.fit);
-                }, textb, () -> {
-                    fullAI.aiMindow.addTo(this.parent);
-                    fullAI.aiMindow.setPosition(x, y);
-                });
+
+                t.button("Sy\nnc", textb, () -> Call.sendChatMessage("/sync")).color(Color.green).with(tb -> tb.getLabel().setFontScale(0.8f));
 
                 t.button("DG", textb, MI2UFuncs::cleanGhostBlock).with(funcSetTextb).disabled(b -> player.team().data().plans.isEmpty()).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.cleanGhost"));
 
