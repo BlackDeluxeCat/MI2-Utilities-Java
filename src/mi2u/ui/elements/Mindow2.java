@@ -40,10 +40,11 @@ import static mindustry.Vars.ui;
 
 public class Mindow2 extends Table{
     public static Drawable titleBarbgNormal;
+    public static boolean configMindow = false;
 
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
     protected boolean dragging = false;
-    protected boolean hideTitle = false, hasCloseButton = false;
+    public boolean hideTitle = false, hasCloseButton = false;
     public boolean minimized = false;
 
     protected Table titleBar = new Table(), titlePane = new Table(Styles.black6);
@@ -56,9 +57,45 @@ public class Mindow2 extends Table{
     public @Nullable Mindow2 tbSnap, lrSnap;
     public int tbSnapAlign, lrSnapAlign;
     public float tbLeftOff, lrBottomOff;
+    public InputListener dragListener = new InputListener(){
+        final Vec2 tmpv = new Vec2();
 
-    static short timerSnapAnime = 0, timerDragSnapping = 1, timerTitleStay = 2;
-    protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(3);
+        @Override
+        public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
+            fromx = x;
+            fromy = y;
+            tmpv.set(curx, cury);
+            return true;
+        }
+
+        @Override
+        public void touchDragged(InputEvent event, float x, float y, int pointer){
+            Vec2 v = localToParentCoordinates(MI2UTmp.v1.set(x, y)).sub(fromx, fromy);
+            dragging = MI2UTmp.v2.set(v).sub(tmpv).len() > 5f;
+            curx = v.x;
+            cury = v.y;
+            setSnap(v.x, v.y);
+        }
+
+        @Override
+        public void touchUp(InputEvent event, float x, float y, int pointer, KeyCode button){
+            super.touchUp(event, x, y, pointer, button);
+
+            if(dragging){
+                Mindow2.this.toFront();
+                dragging = false;
+            }else{
+                minimized = !minimized;
+                cury += (minimized ? 1f : -1f) * cont.getHeight() * scaleY;
+                minimize();
+            }
+
+            saveUISettings();
+        }
+    };
+
+    static short timerSnapAnime = 0, timerDragSnapping = 1;
+    protected MI2Utils.IntervalMillis interval = new MI2Utils.IntervalMillis(2);
 
     public Mindow2(String name, boolean hasSettings){
         this.name = name == null ? "" : name;
@@ -88,13 +125,8 @@ public class Mindow2 extends Table{
         clear();
 
         setupTitle();
-        var c = new MCollapser(titleBar, false).setCollapsed(true, () -> {
-            if(!hideTitle) return false;
-            boolean hasMouse = this.hasMouse();
-            if(hasMouse) interval.get(timerTitleStay, 0);
-            return !minimized && (!hasMouse && interval.check(timerTitleStay, 3000));
-        }).setDirection(false, true).setDuration(0.1f);
-        add(c).growX();
+
+        if(!hideTitle) add(titleBar).growX();
         row();
 
         if(!minimized){
@@ -102,6 +134,19 @@ public class Mindow2 extends Table{
             setupCont(cont);
             add(cont).growX();
         }
+
+        addChild(new Table(t -> {
+            t.setFillParent(true);
+            t.background(Styles.black8);
+            t.defaults().grow();
+            t.visible(() -> configMindow && !minimized);
+            t.image(Icon.move).get().addListener(dragListener);
+
+            if(settings != null) t.button(Icon.settings, Styles.emptyi, this::showSettings);
+            if(hasCloseButton) t.button(Icon.cancel, Styles.emptyi, this::close);
+            t.button(Iconc.exit + "Exit Config", Styles.cleart, () -> configMindow = !configMindow).get().getLabel().setColor(Color.goldenrod);
+        }));
+
         setTransform(true);
     }
 
@@ -137,42 +182,7 @@ public class Mindow2 extends Table{
         titleBar.table(t -> {
             if(minimized) t.add(bundle.get(name + ".MI2U"));
             t.label(() -> dragging ? Iconc.move + "" : minimized ? "□" : "-").size(buttonSize).labelAlign(center);
-        }).get().addListener(new InputListener(){
-            final Vec2 tmpv = new Vec2();
-
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
-                fromx = x;
-                fromy = y;
-                tmpv.set(curx, cury);
-                return true;
-            }
-
-            @Override
-            public void touchDragged(InputEvent event, float x, float y, int pointer){
-                Vec2 v = localToParentCoordinates(MI2UTmp.v1.set(x, y)).sub(fromx, fromy);
-                dragging = MI2UTmp.v2.set(v).sub(tmpv).len() > 5f;
-                curx = v.x;
-                cury = v.y;
-                setSnap(v.x, v.y);
-            }
-
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, KeyCode button){
-                super.touchUp(event, x, y, pointer, button);
-
-                if(dragging){
-                    Mindow2.this.toFront();
-                    dragging = false;
-                }else{
-                    minimized = !minimized;
-                    cury += (minimized ? 1f : -1f) * cont.getHeight() * scaleY;
-                    minimize();
-                }
-
-                saveUISettings();
-            }
-        });
+        }).get().addListener(dragListener);
     }
 
     @Override

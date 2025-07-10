@@ -85,7 +85,7 @@ public class WaveInfoMindow extends Mindow2{
             });
             hpBars.clear();
             tmp.clear();
-            Time.run(Math.min(state.rules.waveSpacing, 10f), UnitsData::catchWave);
+            Time.run(Math.min(state.rules.waveSpacing, 30f), UnitsData::catchWave);
         });
 
         Events.on(EventType.CoreChangeEvent.class, e -> WorldData.updateSpanwer());

@@ -66,10 +66,7 @@ public class MinimapMindow extends Mindow2{
 
         titlePane.defaults().size(buttonSize);
         titlePane.add().growX();
-        titlePane.button(Iconc.downOpen + "", MI2UVars.textb, () -> {
-            buttons.popup(Align.right);
-            buttons.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
-        });
+
     }
 
     @Override
@@ -80,15 +77,21 @@ public class MinimapMindow extends Mindow2{
         cont.table(t -> t.background(Styles.black3).add(m).pad(2f).size(size));
         cont.row();
         cont.table(t -> {
-            t.defaults().width(0.1f);
-            t.label(() -> Strings.fixed(World.conv(player.x), 1) + ",").labelAlign(Align.right).fontScale(0.7f);
-            t.label(() -> " " + Strings.fixed(World.conv(player.y), 1)).labelAlign(Align.left).fontScale(0.7f);
+            t.table(tt -> {
+                tt.defaults().width(0.1f);
+                tt.label(() -> Strings.fixed(World.conv(player.x), 1) + ",").labelAlign(Align.right).fontScale(0.7f);
+                tt.label(() -> " " + Strings.fixed(World.conv(player.y), 1)).labelAlign(Align.left).fontScale(0.7f);
 
-            t.row();
+                tt.row();
 
-            t.label(() -> Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ",").labelAlign(Align.right).fontScale(0.7f).color(Color.scarlet);
-            t.label(() -> " " + Strings.fixed(World.conv(Core.input.mouseWorldY()), 1)).labelAlign(Align.left).fontScale(0.7f).color(Color.scarlet);
-        });
+                tt.label(() -> Strings.fixed(World.conv(Core.input.mouseWorldX()), 1) + ",").labelAlign(Align.right).fontScale(0.7f).color(Color.scarlet);
+                tt.label(() -> " " + Strings.fixed(World.conv(Core.input.mouseWorldY()), 1)).labelAlign(Align.left).fontScale(0.7f).color(Color.scarlet);
+            }).growX();
+            t.button(Iconc.downOpen + "", MI2UVars.textb, () -> {
+                buttons.popup(Align.right);
+                buttons.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
+            }).size(buttonSize).top();
+        }).growX();
     }
 
     @Override

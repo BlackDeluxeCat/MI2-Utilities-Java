@@ -90,11 +90,7 @@ public class MI2UI extends Mindow2{
             finderTable.popup();
             finderTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
         });
-        titlePane.button("" + Iconc.settings, textbtoggle, () -> {
-            showQuickSettings = !showQuickSettings;
-        }).checked(tb -> showQuickSettings).with(tb -> {
-            tb.getLabel().setColor(Color.gold);
-        });
+        titlePane.button("M", textb, () -> configMindow = !configMindow);
     }
 
     @Override
@@ -104,11 +100,13 @@ public class MI2UI extends Mindow2{
             play.table(t -> {
                 t.defaults().size(buttonSize);
 
+                t.button("" + Iconc.settings, textbtoggle, () -> showQuickSettings = !showQuickSettings).checked(tb -> showQuickSettings).with(tb -> tb.getLabel().setColor(Color.gold));
+
                 t.button("Sy\nnc", textb, () -> Call.sendChatMessage("/sync")).color(Color.green).with(tb -> tb.getLabel().setFontScale(0.8f));
 
                 t.button("DG", textb, MI2UFuncs::cleanGhostBlock).with(funcSetTextb).disabled(b -> player.team().data().plans.isEmpty()).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.cleanGhost"));
 
-                t.button("RB", textb, MI2UFuncs::unitRebuildBlocks).with(funcSetTextb).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.rebuild"));
+                t.button("RB", textb, MI2UFuncs::unitRebuildBlocks).with(funcSetTextb).disabled(b -> player.team().data().plans.isEmpty()).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.rebuild"));
 
                 //The update rate is based on button.update(), and affected by lagging
                 t.button("", textbtoggle, FpsController::toggle).update(b -> {

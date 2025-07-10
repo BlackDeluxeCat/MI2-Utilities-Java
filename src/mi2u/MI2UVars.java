@@ -13,7 +13,7 @@ import mindustry.ui.*;
 
 public class MI2UVars{
     public static float buttonSize = 32f;
-    public static TextButtonStyle textb = Styles.flatt, textbtoggle = Styles.flatTogglet;
+    public static TextButtonStyle textb = Styles.cleart, textbtoggle = Styles.clearTogglet;
     public static Cons<TextButton> funcSetTextb = c -> {
         c.getLabel().setAlignment(Align.center);
         c.getLabel().setWrap(false);
