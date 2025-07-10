@@ -32,7 +32,7 @@ import mindustry.world.blocks.units.*;
 import java.lang.reflect.*;
 
 import static mi2u.MI2UVars.*;
-import static mi2u.graphics.HitboxBarDrawer.barDrawer;
+import static mi2u.graphics.HitboxBarDrawer.*;
 import static mindustry.Vars.*;
 
 /**

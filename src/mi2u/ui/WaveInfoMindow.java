@@ -19,13 +19,9 @@ import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.ui.*;
 
-import static mi2u.MI2UVars.buttonSize;
-import static mi2u.MI2UVars.funcSetTextb;
-import static mi2u.MI2UVars.textb;
-import static mi2u.MI2UVars.textbtoggle;
+import static mi2u.MI2UVars.*;
 import static mi2u.struct.UnitsData.*;
 import static mindustry.Vars.*;
-import static mindustry.Vars.net;
 
 public class WaveInfoMindow extends Mindow2{
     Table barsTable;

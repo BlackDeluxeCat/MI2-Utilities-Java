@@ -1,7 +1,6 @@
 package mi2u.ui.elements;
 
 import arc.*;
-import arc.graphics.*;
 import arc.input.*;
 import arc.math.*;
 import arc.math.geom.*;

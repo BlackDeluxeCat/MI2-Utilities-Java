@@ -5,7 +5,7 @@ import arc.math.*;
 import arc.util.*;
 
 import static mi2u.MI2UVars.*;
-import static mindustry.Vars.maxDeltaClient;
+import static mindustry.Vars.*;
 
 public class FpsController{
     public static float scl = 1f, ratio = 1f, tgtFps = 120f, min = 3f;

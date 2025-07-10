@@ -11,21 +11,18 @@ import arc.scene.*;
 import arc.scene.event.*;
 import arc.scene.style.*;
 import arc.scene.ui.layout.*;
-import arc.struct.*;
 import arc.util.*;
 import mi2u.*;
 import mi2u.io.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
-import mindustry.graphics.*;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
 
 import static arc.Core.*;
 import static arc.util.Align.*;
 import static mi2u.MI2UVars.*;
-import static mindustry.Vars.state;
-import static mindustry.Vars.ui;
+import static mindustry.Vars.*;
 
 /**
  * Mindow2 is a dragable Table that partly works like a window.

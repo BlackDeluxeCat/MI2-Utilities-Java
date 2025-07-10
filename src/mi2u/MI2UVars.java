@@ -16,6 +16,8 @@ public class MI2UVars{
     public static TextButtonStyle textb = Styles.cleart, textbtoggle = new TextButtonStyle(Styles.clearTogglet){{
         up = Styles.none;
     }};
+
+    public static Button.ButtonStyle buttonStyle = new Button.ButtonStyle(textb), buttonToggleStyle = new Button.ButtonStyle(textbtoggle);
     public static Cons<TextButton> funcSetTextb = c -> {
         c.getLabel().setAlignment(Align.center);
         c.getLabel().setWrap(false);
@@ -36,7 +38,7 @@ public class MI2UVars{
 
     public static WaveInfoMindow waveInfo = new WaveInfoMindow();
     public static AIMindow aiMindow = new AIMindow();
+    public static WorldFinderMindow finderTable = new WorldFinderMindow();
 
-    public static WorldFinderTable finderTable = new WorldFinderTable();
     public static MapInfoDialog mapInfo = new MapInfoDialog();
 }

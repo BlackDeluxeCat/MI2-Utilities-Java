@@ -10,7 +10,6 @@ import arc.scene.event.*;
 import arc.scene.ui.*;
 import arc.struct.*;
 import arc.util.*;
-import mi2u.*;
 import mi2u.input.*;
 import mi2u.ui.elements.*;
 import mindustry.gen.*;

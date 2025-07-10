@@ -17,11 +17,8 @@ import mindustry.world.*;
 
 import java.util.*;
 
-import static mi2u.MI2UVars.funcSetTextb;
-import static mi2u.MI2UVars.textb;
+import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
-import static mindustry.Vars.state;
-import static mindustry.Vars.tilesize;
 
 public class MapInfoDialog extends BaseDialog{
     protected PopupTable attrsListPopup = new PopupTable();
