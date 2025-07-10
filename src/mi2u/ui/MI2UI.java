@@ -78,15 +78,21 @@ public class MI2UI extends Mindow2{
         titlePane.button(b -> {
             b.image(Core.atlas.drawable("mi2-utilities-java-ui-aicfg")).scaling(Scaling.fit);
         }, textbtoggle, () -> {
-            aiMindow.forceSetPosition(x, y);
-            aiMindow.addTo(this.parent);
+            if(aiMindow.closed()) aiMindow.addTo(this.parent);
+            else aiMindow.close();
         }).checked(tb -> aiMindow.hasParent());
         titlePane.button("" + Iconc.waves, textbtoggle, () -> {
-            waveInfo.forceSetPosition(x, y);
-            waveInfo.addTo(this.parent);
+            if(waveInfo.closed()) waveInfo.addTo(this.parent);
+            else waveInfo.close();
         }).checked(tb -> waveInfo.hasParent());
         titlePane.button("" + Iconc.map, textbtoggle, () -> mapInfo.show()).checked(tb -> mapInfo.hasParent());
-        titlePane.button(Iconc.zoom + "", textbtoggle, () -> finderTable.addTo(this.parent)).checked(tb -> finderTable.hasParent());
+        titlePane.button(Iconc.zoom + "", textbtoggle, () -> {
+            if(finderTable.closed()){
+                finderTable.addTo(this.parent);
+                finderTable.forceSetPosition(Core.input.mouseX(), Core.input.mouseY());
+            }
+            else finderTable.close();
+        }).checked(tb -> finderTable.hasParent());
         titlePane.button("M", textbtoggle, () -> configMindow = !configMindow).checked(tb -> configMindow);
     }
 

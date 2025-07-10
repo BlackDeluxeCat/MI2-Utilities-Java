@@ -163,6 +163,10 @@ public class Mindow2 extends Table{
         remove();
     }
 
+    public boolean closed(){
+        return !hasParent();
+    }
+
     public void setVisibleInGame(){
         visible(() -> state.isGame() && ui.hudfrag.shown);
     }

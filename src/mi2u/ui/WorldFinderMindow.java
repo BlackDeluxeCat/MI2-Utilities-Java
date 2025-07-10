@@ -50,6 +50,8 @@ public class WorldFinderMindow extends Mindow2{
         Events.run(EventType.Trigger.update, () -> {
             if(control.input.block != null && Core.input.keyDown(MBinding.ctrlUI) && Core.input.keyDown(MBinding.uiPopWorldFinder)){
                 find = control.input.block;
+                minimized = false;
+                minimize();
                 addTo(Core.scene.root);
                 forceSetPosition(Core.input.mouseX(), Core.input.mouseY());
             }
@@ -216,6 +218,8 @@ public class WorldFinderMindow extends Mindow2{
                     find = block;
                     finder.findTarget = find;
                     finder.findIndex = 0;
+                    replace = Blocks.air;
+                    buildReplaceSelect(replaceSelectBlockTable);
                 }).with(b -> MI2Utils.tooltip(b, block.localizedName));
 
                 if(i++ >= 6){

@@ -15,7 +15,7 @@ import static mi2u.MI2UVars.*;
 
 public class AIMindow extends Mindow2{
     public AIMindow(){
-        super("AI");
+        super("AI", true);
         setVisibleInGame();
         hasCloseButton = true;
 

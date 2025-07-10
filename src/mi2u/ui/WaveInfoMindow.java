@@ -33,7 +33,7 @@ public class WaveInfoMindow extends Mindow2{
     protected Seq<WaveBar> hpBars = new Seq<>(), pool = new Seq<>(), tmp = new Seq<>();
 
     public WaveInfoMindow(){
-        super("WaveInfo");
+        super("WaveInfo", true);
         hasCloseButton = true;
         setVisibleInGame();
 
