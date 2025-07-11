@@ -5,7 +5,6 @@ import arc.graphics.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.*;
-import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
@@ -19,7 +18,6 @@ import mindustry.entities.units.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
-import mindustry.ui.*;
 import mindustry.world.*;
 
 import static mi2u.MI2UVars.*;

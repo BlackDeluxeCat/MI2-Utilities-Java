@@ -1,4 +1,4 @@
-package mi2u.ui;
+package mi2u.ui.stats;
 
 import arc.*;
 import arc.func.*;
