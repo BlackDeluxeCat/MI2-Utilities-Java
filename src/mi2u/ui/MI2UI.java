@@ -78,7 +78,17 @@ public class MI2UI extends Mindow2{
         titlePane.defaults().size(buttonSize);
 
         titlePane.button(b -> {
-            b.image(Core.atlas.drawable("mi2-utilities-java-ui-aicfg")).scaling(Scaling.fit);
+            b.add(new CombinationIcon(t -> t.add("" + Iconc.map)).bottomRight(t -> t.add("" + Iconc.zoom).pad(4f).fontScale(0.6f).get())).grow();
+        }, textbtoggle, () -> {
+            if(finderTable.closed()){
+                finderTable.addTo(this.parent);
+                finderTable.forceSetPosition(Core.input.mouseX(), Core.input.mouseY());
+            }
+            else finderTable.close();
+        }).checked(tb -> finderTable.hasParent());
+
+        titlePane.button(b -> {
+            b.add(new CombinationIcon(t -> t.image(Core.atlas.drawable("mi2-utilities-java-ui-ai")).scaling(Scaling.fit)).bottomRight(t -> t.add("" + Iconc.pencil).pad(2f).fontScale(0.7f).get())).grow();
         }, textbtoggle, () -> {
             if(aiMindow.closed()) aiMindow.addTo(this.parent);
             else aiMindow.close();
@@ -94,16 +104,6 @@ public class MI2UI extends Mindow2{
         titlePane.button(b -> {
             b.add(new CombinationIcon(t -> t.add("" + Iconc.map)).bottomRight(t -> t.add("" + Iconc.infoCircle).pad(2f).fontScale(0.7f).get().setColor(Pal.accent))).grow();
         }, textbtoggle, () -> mapInfo.show()).checked(tb -> mapInfo.hasParent());
-
-        titlePane.button(b -> {
-            b.add(new CombinationIcon(t -> t.add("" + Iconc.map)).bottomRight(t -> t.add("" + Iconc.zoom).pad(4f).fontScale(0.6f).get().setColor(Pal.accent))).grow();
-        }, textbtoggle, () -> {
-            if(finderTable.closed()){
-                finderTable.addTo(this.parent);
-                finderTable.forceSetPosition(Core.input.mouseX(), Core.input.mouseY());
-            }
-            else finderTable.close();
-        }).checked(tb -> finderTable.hasParent());
 
         titlePane.button("M", textbtoggle, () -> configMindow = !configMindow).checked(tb -> configMindow);
     }
