@@ -15,6 +15,7 @@ import mi2u.ui.elements.*;
 import mindustry.*;
 import mindustry.game.*;
 import mindustry.gen.*;
+import mindustry.graphics.*;
 import mindustry.ui.dialogs.*;
 import mindustry.world.*;
 import mindustry.world.blocks.*;
@@ -75,24 +76,35 @@ public class MI2UI extends Mindow2{
         titlePane.clear();
         titlePane.add().growX();
         titlePane.defaults().size(buttonSize);
+
         titlePane.button(b -> {
             b.image(Core.atlas.drawable("mi2-utilities-java-ui-aicfg")).scaling(Scaling.fit);
         }, textbtoggle, () -> {
             if(aiMindow.closed()) aiMindow.addTo(this.parent);
             else aiMindow.close();
         }).checked(tb -> aiMindow.hasParent());
-        titlePane.button("" + Iconc.waves, textbtoggle, () -> {
+
+        titlePane.button(b -> {
+            b.add(new CombinationIcon(t -> t.add("" + Iconc.waves)).bottomRight(t -> t.add("" + Iconc.infoCircle).pad(2f).fontScale(0.7f).get().setColor(Pal.accent))).grow();
+        }, textbtoggle, () -> {
             if(waveInfo.closed()) waveInfo.addTo(this.parent);
             else waveInfo.close();
         }).checked(tb -> waveInfo.hasParent());
-        titlePane.button("" + Iconc.map, textbtoggle, () -> mapInfo.show()).checked(tb -> mapInfo.hasParent());
-        titlePane.button(Iconc.zoom + "", textbtoggle, () -> {
+
+        titlePane.button(b -> {
+            b.add(new CombinationIcon(t -> t.add("" + Iconc.map)).bottomRight(t -> t.add("" + Iconc.infoCircle).pad(2f).fontScale(0.7f).get().setColor(Pal.accent))).grow();
+        }, textbtoggle, () -> mapInfo.show()).checked(tb -> mapInfo.hasParent());
+
+        titlePane.button(b -> {
+            b.add(new CombinationIcon(t -> t.add("" + Iconc.map)).bottomRight(t -> t.add("" + Iconc.zoom).pad(4f).fontScale(0.6f).get().setColor(Pal.accent))).grow();
+        }, textbtoggle, () -> {
             if(finderTable.closed()){
                 finderTable.addTo(this.parent);
                 finderTable.forceSetPosition(Core.input.mouseX(), Core.input.mouseY());
             }
             else finderTable.close();
         }).checked(tb -> finderTable.hasParent());
+
         titlePane.button("M", textbtoggle, () -> configMindow = !configMindow).checked(tb -> configMindow);
     }
 

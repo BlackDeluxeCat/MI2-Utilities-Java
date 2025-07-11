@@ -17,6 +17,7 @@ import mindustry.content.*;
 import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.gen.*;
+import mindustry.graphics.*;
 import mindustry.ui.*;
 
 import static mi2u.MI2UVars.*;
@@ -24,7 +25,7 @@ import static mi2u.struct.UnitsData.*;
 import static mindustry.Vars.*;
 
 public class WaveInfoMindow extends Mindow2{
-    Table barsTable;
+    Table barsTable = new Table();
     private final MI2Utils.IntervalMillis waveUpd = new MI2Utils.IntervalMillis();
     private boolean syncCurWave = true;
     /** start from 0 */
@@ -37,7 +38,7 @@ public class WaveInfoMindow extends Mindow2{
         hasCloseButton = true;
         setVisibleInGame();
 
-        titlePane.button("≪", textb, () -> {
+        titlePane.button("<<", textb, () -> {
             syncCurWave = false;
             curWave = Math.max(curWave - 10, 0);
         }).with(funcSetTextb).size(buttonSize);
@@ -55,7 +56,7 @@ public class WaveInfoMindow extends Mindow2{
             syncCurWave = false;
             curWave = Math.max(curWave + 1, 0);
         }).with(funcSetTextb).size(buttonSize);
-        titlePane.button("≫", textb, () -> {
+        titlePane.button(">>", textb, () -> {
             syncCurWave = false;
             curWave = Math.max(curWave + 10, 0);
         }).with(funcSetTextb).size(buttonSize);
@@ -98,17 +99,22 @@ public class WaveInfoMindow extends Mindow2{
 
         cont.table(t -> {
             //管理员功能
-            t.defaults().height(buttonSize);
-            t.button(Iconc.admin + Core.bundle.get("waveinfo.buttons.setWave"), textb, () -> {
+            t.defaults().height(buttonSize).growX();
+
+            t.button(b -> b.add(new CombinationIcon(c -> c.add(Core.bundle.get("waveinfo.buttons.setWave"))).topLeft(c -> c.add("" + Iconc.admin).fontScale(0.6f).labelAlign(Align.topLeft).get().setColor(Pal.accent))).grow(),
+                textb, () -> {
                 curWave = Math.max(curWave, 0);
                 state.wave = curWave + 1;
-            }).with(funcSetTextb).disabled(b -> net.client());
-            t.button(Iconc.admin + Core.bundle.get("waveinfo.buttons.forceRunWave"), textb, () -> {
+            }).disabled(b -> net.client());
+
+            t.button(b -> b.add(new CombinationIcon(c -> c.add(Core.bundle.get("waveinfo.buttons.forceRunWave"))).topLeft(c -> c.add("" + Iconc.admin).fontScale(0.6f).labelAlign(Align.topLeft).get().setColor(Pal.accent))).grow(),
+                textb, () -> {
                 logic.runWave();
-            }).with(funcSetTextb).disabled(b -> net.client());
-            t.button(Iconc.admin + Core.bundle.get("rules.wavetimer"), textbtoggle, () -> {
+            }).disabled(b -> net.client());
+
+            t.button(b -> b.add(new CombinationIcon(c -> c.add(Core.bundle.get("rules.wavetimer"))).topLeft(c -> c.add("" + Iconc.admin).fontScale(0.6f).labelAlign(Align.topLeft).get().setColor(Pal.accent))).grow(), textbtoggle, () -> {
                 if(state.rules.infiniteResources) state.rules.waveTimer = !state.rules.waveTimer;
-            }).update(b -> b.setChecked(state.rules.waveTimer)).with(funcSetTextb).disabled(b -> net.client());
+            }).update(b -> b.setChecked(state.rules.waveTimer)).disabled(b -> net.client());
         }).growX().row();
 
         //显示设置
@@ -158,7 +164,7 @@ public class WaveInfoMindow extends Mindow2{
 
         final float[] h = new float[1];
         h[0] = 300f;
-        cont.pane(t -> barsTable = t).fillX().self(c -> {
+        cont.pane(barsTable).fillX().self(c -> {
             c.update(p -> {
                 h[0] = Mathf.clamp(h[0], 20f, (Core.graphics.getHeight() - 400f)/Scl.scl());
                 c.height(h[0]);

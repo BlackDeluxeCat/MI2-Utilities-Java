@@ -16,8 +16,6 @@ public class MI2UVars{
     public static TextButtonStyle textb = Styles.cleart, textbtoggle = new TextButtonStyle(Styles.clearTogglet){{
         up = Styles.none;
     }};
-
-    public static Button.ButtonStyle buttonStyle = new Button.ButtonStyle(textb), buttonToggleStyle = new Button.ButtonStyle(textbtoggle);
     public static Cons<TextButton> funcSetTextb = c -> {
         c.getLabel().setAlignment(Align.center);
         c.getLabel().setWrap(false);

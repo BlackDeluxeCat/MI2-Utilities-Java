@@ -18,6 +18,7 @@ import mindustry.content.*;
 import mindustry.entities.units.*;
 import mindustry.game.*;
 import mindustry.gen.*;
+import mindustry.graphics.*;
 import mindustry.ui.*;
 import mindustry.world.*;
 
@@ -43,9 +44,8 @@ public class WorldFinderMindow extends Mindow2{
         hasCloseButton = true;
 
         titlePane.defaults().height(buttonSize);
-        titlePane.button(Iconc.effect + "", textbtoggle, () -> searchEffects = !searchEffects).checked(b -> searchEffects).size(buttonSize).with(b -> MI2Utils.tooltip(b, Core.bundle.get("worldfinder.effects")));;
-        titlePane.add().growX();
-        titlePane.add("@" + name + ".MI2U");
+        titlePane.button(Iconc.effect + "", textbtoggle, () -> searchEffects = !searchEffects).checked(b -> searchEffects).size(buttonSize).with(b -> MI2Utils.tooltip(b, Core.bundle.get("worldfinder.effects")));
+        titlePane.add("@" + name + ".MI2U").labelAlign(Align.center).growX();
 
         Events.run(EventType.Trigger.update, () -> {
             if(control.input.block != null && Core.input.keyDown(MBinding.ctrlUI) && Core.input.keyDown(MBinding.uiPopWorldFinder)){
@@ -77,13 +77,13 @@ public class WorldFinderMindow extends Mindow2{
 
             t.add(Core.bundle.get("worldfinder.find")).minWidth(2 * buttonSize);
             t.button(b -> {
-                b.image(() -> find.uiIcon).scaling(Scaling.fit).pad(2f);
-                b.add("").update(l -> {
+                b.add(new CombinationIcon(c -> c.image(() -> find.uiIcon).scaling(Scaling.fit).pad(2f)).bottomRight(c -> c.add("").update(l -> {
                     int count = WorldData.countBlock(find, team);
                     l.setText(count + "");
                     l.setFontScale(count >= 1000 ? 0.5f : 0.8f);
-                }).labelAlign(Align.bottomRight).width(0.1f).growY();
-            }, buttonToggleStyle, () -> {
+                    l.setColor(l.hasMouse() ? Pal.accent : Color.white);
+                }).labelAlign(Align.bottomRight).grow()));
+            }, textbtoggle, () -> {
                 searchSelectBlock = !searchSelectBlock;
                 if(searchSelectBlockTable != null) buildSearchSelect(searchSelectBlockTable);
             }).with(b -> MI2Utils.tooltip(b, tt -> tt.label(() -> find.localizedName))).checked(b -> searchSelectBlock).size(buttonSize);
@@ -128,30 +128,27 @@ public class WorldFinderMindow extends Mindow2{
             t.button(b -> {
                 b.image(() -> replace.uiIcon).scaling(Scaling.fit).pad(2f);
                 //b.label(() -> WorldData.countBlock(find, team) + "").labelAlign(Align.right).width(0.1f).fontScale(0.6f);
-            }, buttonToggleStyle, () -> {
+            }, textbtoggle, () -> {
                 replaceSelectBlock = !replaceSelectBlock;
                 if(replaceSelectBlockTable != null) buildReplaceSelect(replaceSelectBlockTable);
             }).with(b -> MI2Utils.tooltip(b, tt -> tt.label(() -> replace.localizedName))).checked(b -> replaceSelectBlock);
 
             t.button(b -> {
-                b.add("#").labelAlign(Align.center);
-                b.add("" + Iconc.play).fontScale(0.6f).labelAlign(Align.bottomRight).width(0.1f).growY();
-            }, buttonStyle, () -> {
+                b.add(new CombinationIcon(c -> c.add("#")).bottomRight(c -> c.add("" + Iconc.play).fontScale(0.8f).labelAlign(Align.bottomRight).get().setColor(Pal.accent))).grow();
+            }, textb, () -> {
                 planReplace(find, replace, finder.findNext(0));
                 finder.findNext();
             }).with(b -> MI2Utils.tooltip(b, Core.bundle.get("worldfinder.replace.next")));
 
             t.button(b -> {
-                b.add("" + Iconc.unitPoly).labelAlign(Align.center);
-                b.add(Iconc.fill + "" + Iconc.play).fontScale(0.6f).labelAlign(Align.bottomRight).width(0.1f).growY();
-            }, buttonStyle, () -> {
+                b.add(new CombinationIcon(c -> c.add("" + Iconc.unitPoly)).bottomRight(c -> c.add(Iconc.fill + " " + Iconc.play).fontScale(0.8f).labelAlign(Align.bottomRight).get().setColor(Pal.accent))).grow();
+            }, textb, () -> {
                 planReplace(find, replace, buildingRange);
             }).with(b -> MI2Utils.tooltip(b, Core.bundle.get("worldfinder.replace.buildrange")));;
 
             t.button(b -> {
-                b.add("" + Iconc.map).labelAlign(Align.center);
-                b.add(Iconc.fill + "" + Iconc.play).fontScale(0.6f).labelAlign(Align.bottomRight).width(0.1f).growY();
-            }, buttonStyle, () -> {
+                b.add(new CombinationIcon(c -> c.add("" + Iconc.map)).bottomRight(c -> c.add(Iconc.fill + " " + Iconc.play).fontScale(0.8f).labelAlign(Align.bottomRight).get().setColor(Pal.accent))).grow();
+            }, textb, () -> {
                 planReplace(find, replace, -1f);
             }).with(b -> MI2Utils.tooltip(b, Core.bundle.get("worldfinder.replace.map")));;
         }).left();
