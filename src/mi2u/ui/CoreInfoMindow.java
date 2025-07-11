@@ -245,7 +245,7 @@ public class CoreInfoMindow extends Mindow2{
 
         //buildplan popup table
         if(buildPlanTable == null) buildPlanTable = new PopupTable();
-        buildPlanTable.visible(() -> ui.hudfrag.shown);
+        buildPlanTable.visible(() -> ui.hudfrag.shown && state.isGame());
         buildPlanTable.setBackground(Styles.black6);
         buildPlanTable.update(() -> {
             buildPlanTable.setPositionInScreen(this.x, this.y - buildPlanTable.getPrefHeight());

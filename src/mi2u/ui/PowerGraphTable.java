@@ -97,6 +97,7 @@ public class PowerGraphTable extends Table{
                 totalGen += c.totalgen;
                 totalCons += c.totalcons;
             });
+            layout();
         }
     }
 
