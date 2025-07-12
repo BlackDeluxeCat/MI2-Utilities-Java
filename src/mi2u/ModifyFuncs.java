@@ -133,7 +133,7 @@ public class ModifyFuncs{
         if(mi2ui.settings.getBool("replaceTopTable")){
             Table topTable = Reflect.get(ui.hudfrag.blockfrag, "topTable");
             if(topTable == null){
-                Log.infoTag("MI2U", "failed to replace info top-table");
+                Log.infoTag("MI2U", "failed to replace info top-ensureTable");
                 return;
             }
 

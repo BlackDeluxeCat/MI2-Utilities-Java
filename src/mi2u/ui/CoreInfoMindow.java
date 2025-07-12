@@ -243,7 +243,7 @@ public class CoreInfoMindow extends Mindow2{
             }).with(c -> c.setFadeScrollBars(true));
         }
 
-        //buildplan popup table
+        //buildplan popup ensureTable
         if(buildPlanTable == null) buildPlanTable = new PopupTable();
         buildPlanTable.visible(() -> ui.hudfrag.shown && state.isGame());
         buildPlanTable.setBackground(Styles.black6);

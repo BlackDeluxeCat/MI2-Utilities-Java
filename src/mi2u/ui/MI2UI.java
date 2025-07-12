@@ -78,28 +78,38 @@ public class MI2UI extends Mindow2{
         titlePane.defaults().size(buttonSize);
 
         titlePane.button(b -> {
+            b.add(new CombinationIcon(t -> t.add("" + Iconc.chartBar)).bottomRight(t -> t.add("" + Iconc.infoCircle).pad(4f).fontScale(0.6f).get())).grow();
+        }, textbtoggle, () -> {
+            if(monitorMindow.closed()){
+                monitorMindow.addTo(this.parent);
+                monitorMindow.forceSetPosition(Core.input.mouseX(), Core.input.mouseY());
+            }
+            else monitorMindow.close();
+        }).checked(tb -> !monitorMindow.closed());
+
+        titlePane.button(b -> {
             b.add(new CombinationIcon(t -> t.add("" + Iconc.map)).bottomRight(t -> t.add("" + Iconc.zoom).pad(4f).fontScale(0.6f).get())).grow();
         }, textbtoggle, () -> {
-            if(finderTable.closed()){
-                finderTable.addTo(this.parent);
-                finderTable.forceSetPosition(Core.input.mouseX(), Core.input.mouseY());
+            if(finderMindow.closed()){
+                finderMindow.addTo(this.parent);
+                finderMindow.forceSetPosition(Core.input.mouseX(), Core.input.mouseY());
             }
-            else finderTable.close();
-        }).checked(tb -> finderTable.hasParent());
+            else finderMindow.close();
+        }).checked(tb -> !finderMindow.closed());
 
         titlePane.button(b -> {
             b.add(new CombinationIcon(t -> t.image(Core.atlas.drawable("mi2-utilities-java-ui-ai")).scaling(Scaling.fit)).bottomRight(t -> t.add("" + Iconc.pencil).pad(2f).fontScale(0.7f))).grow();
         }, textbtoggle, () -> {
             if(aiMindow.closed()) aiMindow.addTo(this.parent);
             else aiMindow.close();
-        }).checked(tb -> aiMindow.hasParent());
+        }).checked(tb -> !aiMindow.closed());
 
         titlePane.button(b -> {
             b.add(new CombinationIcon(t -> t.add("" + Iconc.waves)).bottomRight(t -> t.add("" + Iconc.infoCircle).pad(2f).fontScale(0.7f).get().setColor(Pal.accent))).grow();
         }, textbtoggle, () -> {
             if(waveInfo.closed()) waveInfo.addTo(this.parent);
             else waveInfo.close();
-        }).checked(tb -> waveInfo.hasParent());
+        }).checked(tb -> !waveInfo.closed());
 
         titlePane.button(b -> {
             b.add(new CombinationIcon(t -> t.add("" + Iconc.map)).bottomRight(t -> t.add("" + Iconc.infoCircle).pad(2f).fontScale(0.7f).get().setColor(Pal.accent))).grow();

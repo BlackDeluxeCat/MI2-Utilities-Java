@@ -243,7 +243,7 @@ public class HoverTopTable extends PopupTable{
         table.row();
 
         /*
-        table.table(bars -> {
+        ensureTable.ensureTable(bars -> {
             bars.defaults().growX().height(20f).pad(4);
 
             bars.add(new Bar(() -> Core.bundle.get("stat.health") + ":" + Strings.autoFixed(unit.health(), 3) + "(" + Strings.fixed(unit.health * 100 / unit.maxHealth, 0) + "%) + " + Strings.autoFixed(unit.shield, 2), () -> Pal.health, unit::healthf).blink(Color.white));
@@ -263,7 +263,7 @@ public class HoverTopTable extends PopupTable{
                 bars.row();
 
                 var count = new float[]{-1};
-                bars.table().update(t -> {
+                bars.ensureTable().update(t -> {
                     if(count[0] != payload.payloadUsed()){
                         payload.contentInfo(t, 8 * 2, 270);
                         count[0] = payload.payloadUsed();
@@ -273,7 +273,7 @@ public class HoverTopTable extends PopupTable{
         }).growX();
          */
 
-        //table.row();
+        //ensureTable.row();
 
         table.table().update(t -> {
             for(var effect : content.statusEffects()){
@@ -290,13 +290,13 @@ public class HoverTopTable extends PopupTable{
             }
         }).growX();
 
-        //table.row();
+        //ensureTable.row();
 
-        //table.label(() -> Blocks.microProcessor.emoji() + (unit.controller() instanceof LogicAI ? Core.bundle.get("units.processorcontrol") : "") + " " + (long)unit.flag).growX().wrap().left();
+        //ensureTable.label(() -> Blocks.microProcessor.emoji() + (unit.controller() instanceof LogicAI ? Core.bundle.get("units.processorcontrol") : "") + " " + (long)unit.flag).growX().wrap().left();
 
-        //table.row();
+        //ensureTable.row();
 
-        //table.label(() -> Core.bundle.format("lastcommanded", unit.lastCommanded)).growX().wrap().left();
+        //ensureTable.label(() -> Core.bundle.format("lastcommanded", unit.lastCommanded)).growX().wrap().left();
     }
 
     /** Returns the thing being hovered over. */

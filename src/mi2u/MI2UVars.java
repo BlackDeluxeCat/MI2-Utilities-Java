@@ -36,7 +36,8 @@ public class MI2UVars{
 
     public static WaveInfoMindow waveInfo = new WaveInfoMindow();
     public static AIMindow aiMindow = new AIMindow();
-    public static WorldFinderMindow finderTable = new WorldFinderMindow();
+    public static WorldFinderMindow finderMindow = new WorldFinderMindow();
+    public static MonitorMindow monitorMindow = new MonitorMindow();
 
     public static MapInfoDialog mapInfo = new MapInfoDialog();
 }
