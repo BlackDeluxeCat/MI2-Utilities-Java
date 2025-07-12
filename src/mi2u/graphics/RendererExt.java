@@ -639,7 +639,6 @@ public class RendererExt{
 
     public static void drawDuctBridge(DuctBridge.DuctBridgeBuild ib){
         Draw.reset();
-        Draw.z(Layer.power);
         //draw each item this bridge have
         if(ib.items != null){
             Draw.color(Color.white, 0.8f);
@@ -657,7 +656,6 @@ public class RendererExt{
 
     public static void drawItemBridge(ItemBridge.ItemBridgeBuild ib){
         Draw.reset();
-        Draw.z(Layer.power);
         //draw each item this bridge have
         if(ib.items != null){
             Draw.color(Color.white, 0.8f);
@@ -721,7 +719,6 @@ public class RendererExt{
 
 
             if(!(drawItem == null || fromb == null || tob == null)){
-                Draw.z(Layer.block + 1f);
 
                 Vec2 off = MI2UTmp.v1, end = MI2UTmp.v2;
                 //im a dumbness. just think the two blocks as intervals, and get their intersection.
@@ -778,7 +775,6 @@ public class RendererExt{
         Building tob = rb.proximity.size == 0 ? null : rb.proximity.get(((rb.rotation) % rb.proximity.size - 1 + rb.proximity.size) % rb.proximity.size);
 
         Draw.color();
-        Draw.z(Layer.block + 1f);
         if(tob != null){
             Vec2 off = MI2UTmp.v1, end = MI2UTmp.v2;
             //line length: sum of block sizes sub xy distance
