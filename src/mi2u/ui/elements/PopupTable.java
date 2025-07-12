@@ -90,7 +90,7 @@ public class PopupTable extends Table{
             @Override
             public void touchDragged(InputEvent event, float x, float y, int pointer){
                 if(cancelDrag) return;
-                Vec2 v = localToStageCoordinates(MI2UTmp.v1.set(x, y));
+                Vec2 v = localToParentCoordinates(MI2UTmp.v1.set(x, y));
                 setPositionInScreen(v.x - fromx, v.y - fromy);
             }
         });
