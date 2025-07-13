@@ -116,7 +116,7 @@ public class MI2Utils{
     /**为元素添加一个移动端可用的tooltip*/
     public static void tooltip(Element e, Cons<Table> builder){
         var tool = new Tooltip(tooltip -> tooltip.table(builder).margin(2f), Tooltip.Tooltips.getInstance());
-        tool.container.setBackground(Styles.black3);
+        tool.container.setBackground(Styles.black5);
         tool.allowMobile = true;
         e.addListener(tool);
     }

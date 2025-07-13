@@ -88,7 +88,7 @@ public class MI2UI extends Mindow2{
         }).checked(tb -> finderTable.hasParent());
 
         titlePane.button(b -> {
-            b.add(new CombinationIcon(t -> t.image(Core.atlas.drawable("mi2-utilities-java-ui-ai")).scaling(Scaling.fit)).bottomRight(t -> t.add("" + Iconc.pencil).pad(2f).fontScale(0.7f).get())).grow();
+            b.add(new CombinationIcon(t -> t.image(Core.atlas.drawable("mi2-utilities-java-ui-ai")).scaling(Scaling.fit)).bottomRight(t -> t.add("" + Iconc.pencil).pad(2f).fontScale(0.7f))).grow();
         }, textbtoggle, () -> {
             if(aiMindow.closed()) aiMindow.addTo(this.parent);
             else aiMindow.close();
@@ -105,7 +105,9 @@ public class MI2UI extends Mindow2{
             b.add(new CombinationIcon(t -> t.add("" + Iconc.map)).bottomRight(t -> t.add("" + Iconc.infoCircle).pad(2f).fontScale(0.7f).get().setColor(Pal.accent))).grow();
         }, textbtoggle, () -> mapInfo.show()).checked(tb -> mapInfo.hasParent());
 
-        titlePane.button("M", textbtoggle, () -> configMindow = !configMindow).checked(tb -> configMindow);
+        titlePane.button(b -> {
+            b.add(new CombinationIcon(t -> t.add("M")).bottomRight(t -> t.add("" + Iconc.settings).pad(2f).fontScale(0.7f).get().setColor(MI2UTmp.c1.set(1f, 0.1f, 0.2f)))).grow();
+        }, textbtoggle, () -> configMindow = !configMindow).checked(tb -> configMindow).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.uicfg"));;
     }
 
     @Override
@@ -147,10 +149,11 @@ public class MI2UI extends Mindow2{
             }).growX();
             play.row();
             play.table(tt -> {
+                float scl = 0.7f;
                 tt.defaults().pad(2f).growX().minWidth(40f);
-                tt.label(() -> Iconc.save + Strings.formatMillis(control.saves.getTotalPlaytime())).fontScale(0.7f);
-                tt.label(() -> Iconc.play + Strings.formatMillis(runTime)).fontScale(0.7f);
-                tt.label(() -> Iconc.pause + Strings.formatMillis(realRunTime)).fontScale(0.7f);
+                tt.add(new CombinationIcon(t -> t.label(() -> Strings.formatMillis(control.saves.getTotalPlaytime())).fontScale(scl)).bottomLeft(t -> t.add("" + Iconc.save).fontScale(scl).color(MI2UTmp.c1.set(Pal.accent).a(0.5f))));
+                tt.add(new CombinationIcon(t -> t.label(() -> Strings.formatMillis(runTime)).fontScale(scl)).bottomLeft(t -> t.add("" + Iconc.play).fontScale(scl).color(MI2UTmp.c1.set(Pal.accent).a(0.5f))));
+                tt.add(new CombinationIcon(t -> t.label(() -> Strings.formatMillis(realRunTime)).fontScale(scl)).bottomLeft(t -> t.add("" + Iconc.pause).fontScale(scl).color(MI2UTmp.c1.set(Pal.accent).a(0.5f))));
             }).growX();
         }).growX();
 

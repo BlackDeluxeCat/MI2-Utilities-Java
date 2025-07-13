@@ -141,7 +141,7 @@ public class Mindow2 extends Table{
 
             if(settings != null) t.button(Icon.settings, Styles.emptyi, this::showSettings);
             if(hasCloseButton) t.button(Icon.cancel, Styles.emptyi, this::close);
-            t.button(Iconc.exit + "Exit Config", Styles.cleart, () -> configMindow = !configMindow).get().getLabel().setColor(Color.goldenrod);
+            t.button(Iconc.exit + "\n" + Core.bundle.get("mi2ui.buttons.uicfg.exit"), Styles.cleart, () -> configMindow = !configMindow).get().getLabel().setColor(Color.goldenrod);
         }));
 
         setTransform(true);
