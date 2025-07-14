@@ -11,7 +11,7 @@ import static mi2u.MI2UVars.*;
 import static mindustry.Vars.world;
 
 public abstract class BuildingMonitor extends Monitor{
-    public int pos = -1;
+    public int source = -1;
     public transient @Nullable Building b;
     public transient boolean fetching;
 
@@ -20,29 +20,25 @@ public abstract class BuildingMonitor extends Monitor{
     }
 
     @Override
-    public void build(Table table){}
-
-    @Override
-    public void buildCfg(Table table){
-        table.table(t -> {
-            t.defaults().growX();
-            t.label(() -> posStr() + (b == null ? "" : (" " + b.block.localizedName)));
-            t.button("选点", textbtoggle, () -> fetching = !fetching).checked(b -> fetching).with(funcSetTextb).height(buttonSize);
-        }).growX().row();
+    public void buildFetch(Table table){
+        table.clear();
+        table.button("选点", textbtoggle, () -> fetching = !fetching).checked(b -> fetching).growX().update(t -> {
+            if(fetching && !Core.scene.hasMouse() && Core.input.keyTap(Binding.select)){
+                var tile = world.tileWorld(Core.input.mouseWorldX(), Core.input.mouseWorldY());
+                source = tile == null ? -1 : tile.pos();
+                b = world.build(source);
+                fetching = false;
+            }
+        }).grow();
     }
 
     @Override
-    public void update(){
-        if(fetching && !Core.scene.hasMouse() && Core.input.keyTap(Binding.select)){
-            fetching = false;
-            var tile = world.tileWorld(Core.input.mouseWorldX(), Core.input.mouseWorldY());
-            pos = tile == null ? -1 : tile.pos();
-        }
-        if(pos == -1) return;
-        b = world.build(pos);
+    public void validate(){
+        b = world.build(source);
     }
 
-    public String posStr(){
-        return pos == -1 ? "未选中" : (Point2.x(pos) + "," + Point2.y(pos));
+    @Override
+    public String title(){
+        return source == -1 ? "未选中" : (Point2.x(source) + "," + Point2.y(source));
     }
 }

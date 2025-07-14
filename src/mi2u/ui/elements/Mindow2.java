@@ -9,7 +9,6 @@ import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.*;
 import arc.scene.event.*;
-import arc.scene.style.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.*;
@@ -36,7 +35,6 @@ import static mindustry.Vars.*;
  */
 
 public class Mindow2 extends Table{
-    public static Drawable titleBarbgNormal;
     public static boolean configMindow = false;
 
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
@@ -101,7 +99,7 @@ public class Mindow2 extends Table{
         initSettings();
 
         cont.setBackground(Styles.black3);
-        titleBar.setBackground(titleBarbgNormal);
+        titleBar.setBackground(titleBarBackground);
 
         Events.on(ResizeEvent.class, e -> Time.run(60f, () -> {
             loadUISettings();

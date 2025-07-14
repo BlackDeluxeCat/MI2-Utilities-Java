@@ -35,7 +35,7 @@ public class MI2Utilities extends Mod{
             InputUtils.init();
 
             var whiteui = (TextureRegionDrawable)Tex.whiteui;
-            Mindow2.titleBarbgNormal = whiteui.tint(1f, 0.1f, 0.2f, 0.3f);
+            titleBarBackground = whiteui.tint(1f, 0.1f, 0.2f, 0.3f);
 
             Pixmap fade = new Pixmap(128, 128);
             for(int x = 0; x < fade.width; x++){

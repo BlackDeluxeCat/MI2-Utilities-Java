@@ -19,6 +19,7 @@ public class ItemChartBM extends BuildingMonitor{
 
     @Override
     public void build(Table table){
+        table.clear();
         table.add(new Element(){
             @Override
             public void draw(){
@@ -36,20 +37,17 @@ public class ItemChartBM extends BuildingMonitor{
 
     @Override
     public void buildCfg(Table table){
-        super.buildCfg(table);
+        table.clear();
         table.pane(t -> {
             for(int i = 0; i < content.items().size; i++){
                 int id = i;
                 t.button(content.item(i).localizedName, textbtoggle, () -> cfg[id] = !cfg[id]).checked(tb -> cfg[id]).height(buttonSize).with(funcSetTextb);
             }
         }).with(p -> p.setForceScroll(true, false)).growX();
-        table.row();
-
     }
 
     @Override
     public void update(){
-        super.update();
         for(int i = 0; i < content.items().size; i++){
             if(recorders[i] == null){
                 if(cfg[i]){
@@ -65,7 +63,7 @@ public class ItemChartBM extends BuildingMonitor{
     }
 
     @Override
-    public void reset(){
+    public void reflush(){
         for(var r : recorders){
             if(r != null) r.reset();
         }

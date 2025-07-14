@@ -10,13 +10,13 @@ import static mi2u.MI2UVars.buttonSize;
 public class HealthBM extends BuildingMonitor{
     public HealthBM(){
         super();
-        w = 6;
+        w = 8;
+        h = 1;
     }
 
     @Override
     public void build(Table table){
-        super.build(table);
-        table.label(() -> posStr() + (b == null ? "" : b.block.localizedName)).growX().height(buttonSize).row();
+        table.clear();
         table.add(new MI2Bar(() ->  b == null ? "" : ("   " + b.health + "/" + b.maxHealth), () -> Pal.health, () -> b == null ? 0f : b.health / b.maxHealth).blink(Color.white)).growX().height(buttonSize);
     }
 }

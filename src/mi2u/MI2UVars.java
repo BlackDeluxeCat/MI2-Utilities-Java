@@ -13,6 +13,7 @@ import mindustry.ui.*;
 
 public class MI2UVars{
     public static float buttonSize = 32f;
+    public static Drawable titleBarBackground;
     public static TextButtonStyle textb = Styles.cleart, textbtoggle = new TextButtonStyle(Styles.clearTogglet){{
         up = Styles.none;
     }};

@@ -4,6 +4,7 @@ import arc.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.input.*;
+import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.event.*;
 import arc.scene.ui.layout.*;
@@ -23,7 +24,7 @@ import static mi2u.MI2UVars.*;
 public class MonitorMindow extends Mindow2{
     public Seq<Monitor> monitors = new Seq<>();
 
-    public boolean cfg = false, cfgMove = false;
+    public float unitSize = 32f;
 
     public MonitorCanvas group = new MonitorCanvas();
 
@@ -34,15 +35,21 @@ public class MonitorMindow extends Mindow2{
 
         titlePane.defaults().height(buttonSize).growX();
 
-        titlePane.button("设置监视器", textbtoggle, () -> {
-            cfg = !cfg;
+        titlePane.button("清空", textb, () -> {
+            monitors.clear();
             rebuild();
         }).with(funcSetTextb);
 
-        titlePane.button("设置界面", textbtoggle, () -> {
-            cfgMove = !cfgMove;
-            rebuild();
-        }).with(funcSetTextb);
+        titlePane.button("全屏打开", textb, () -> {
+        new BaseDialog(""){
+            {
+                setupCont(cont);
+                addCloseButton();
+                hidden(() -> rebuild());
+                show();
+            }
+        };
+    }).with(funcSetTextb);
 
         titlePane.button("" + Iconc.add, textb, () -> new BaseDialog(""){
             {
@@ -118,7 +125,7 @@ public class MonitorMindow extends Mindow2{
         @Override
         public void act(float delta){
             children.each(e -> {
-                if(e instanceof MonitorTable t) e.setPosition(-camera.x + t.m.x, -camera.y + t.m.y);
+                if(e instanceof MonitorTable t) e.setPosition(-camera.x + t.m.x * unitSize, -camera.y + t.m.y * unitSize);
             });
             super.act(delta);
         }
@@ -129,7 +136,7 @@ public class MonitorMindow extends Mindow2{
 
             if(clipBegin(0, 0, getWidth(), getHeight())){
                 Draw.color(Color.white, 0.5f);
-                Fill.rect(-camera.x, -camera.y, 42, 42);
+                Fill.rect(-camera.x, -camera.y, 8, 8);
                 drawChildren();
                 Draw.flush();
                 clipEnd();
@@ -141,56 +148,83 @@ public class MonitorMindow extends Mindow2{
 
     public class MonitorTable extends Table{
         public Monitor m;
+        public Table title = new Table(), display = new Table(), config = new Table(), fetch = new Table();
+
+        public final static int tabDisplay = 0, tabConfig = 1, tabFetch = 2;
+        public transient int tab = tabDisplay;
+
         public MonitorTable(Monitor m){
             this.m = m;
+
+            title.background(titleBarBackground);
+            title.defaults().size(unitSize);
+            title.button("" + Iconc.blockTileLogicDisplay, textb, () -> {
+                tab = tabDisplay;
+                rebuild();
+            });
+            title.button("" + Iconc.settings, textb, () -> {
+                tab = tabConfig;
+                rebuild();
+            });
+            title.button("" + Iconc.zoom, textb, () -> {
+                tab = tabFetch;
+                rebuild();
+            });
+            title.button("" + Iconc.trash, textb, () -> {
+                monitors.remove(m);
+                remove();
+            });
+            title.defaults().maxWidth(9999);
+            title.label(m::title).growX().align(Align.left);
+            title.add("" + Iconc.move).with(l -> {
+                l.setAlignment(Align.center);
+                l.addListener(new InputListener(){
+                    float fromx1, fromy1;
+
+                    @Override
+                    public boolean touchDown(InputEvent event, float x1, float y1, int pointer, KeyCode button){
+                        fromx1 = x1;
+                        fromy1 = y1;
+                        l.setColor(Pal.accent);
+                        return true;
+                    }
+
+                    @Override
+                    public void touchDragged(InputEvent event, float x1, float y1, int pointer){
+                        Vec2 v = localToParentCoordinates(MI2UTmp.v1.set(x1, y1));
+                        setPosition(MonitorTable.this.m.x = Mathf.round((v.x - fromx1 + group.camera.x) / unitSize), Mathf.round((MonitorTable.this.m.y = v.y - fromy1 + group.camera.y) / unitSize));
+                    }
+
+                    @Override
+                    public void touchUp(InputEvent event, float x, float y, int pointer, KeyCode button){
+                        super.touchUp(event, x, y, pointer, button);
+                        l.setColor(Color.white);
+                    }
+                });
+            }).size(unitSize);
+
+            m.build(display);
+            m.buildCfg(config);
+            m.buildFetch(fetch);
+
             rebuild();
+        }
+
+        public Table tab(int tab){
+            return switch(tab){
+                case tabConfig -> config;
+                case tabFetch -> fetch;
+                case tabDisplay -> display;
+                default -> display;
+            };
         }
 
         public void rebuild(){
             clear();
-
-            table(t -> {
-                t.background(Styles.black6);
-                if(cfgMove){
-                    t.defaults().growX().height(buttonSize);
-                    t.button("刷新" + Iconc.refresh, textb, () -> {
-                        m.reset();
-                        rebuild();
-                    });
-                    t.button("删除" + Iconc.trash, textb, () -> {
-                        monitors.remove(m);
-                        remove();
-                    });
-                    t.row();
-                    t.add("" + Iconc.move).colspan(2).with(l -> {
-                        l.setAlignment(Align.center);
-                        l.addListener(new InputListener(){
-                            float fromx1, fromy1;
-
-                            @Override
-                            public boolean touchDown(InputEvent event, float x1, float y1, int pointer, KeyCode button){
-                                fromx1 = x1;
-                                fromy1 = y1;
-                                l.setColor(Pal.accent);
-                                return true;
-                            }
-
-                            @Override
-                            public void touchDragged(InputEvent event, float x1, float y1, int pointer){
-                                Vec2 v = localToParentCoordinates(MI2UTmp.v1.set(x1, y1));
-                                setPosition(MonitorTable.this.m.x = v.x - fromx1 + group.camera.x, MonitorTable.this.m.y = v.y - fromy1 + group.camera.y);
-                            }
-
-                            @Override
-                            public void touchUp(InputEvent event, float x, float y, int pointer, KeyCode button){
-                                super.touchUp(event, x, y, pointer, button);
-                                l.setColor(Color.white);
-                            }
-                        });
-                    });
-                }else if(cfg) this.m.buildCfg(t);
-                else this.m.build(t);
-            }).self(c -> c.get().update(() -> c.size(m.w * buttonSize, m.h * buttonSize)));
+            background(Styles.black3);
+            add(title).growX().height(unitSize);
+            row();
+            add(tab(tab)).self(c -> c.get().update(() -> c.size(m.w * buttonSize, m.h * buttonSize)));
         }
     }
 }
