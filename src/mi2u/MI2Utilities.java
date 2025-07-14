@@ -32,22 +32,8 @@ public class MI2Utilities extends Mod{
         Events.on(ClientLoadEvent.class, e -> {
             MOD = mods.getMod(MI2Utilities.class);
             MOD.meta.subtitle = MOD.meta.version;
+            MI2UVars.init();
             InputUtils.init();
-
-            var whiteui = (TextureRegionDrawable)Tex.whiteui;
-            titleBarBackground = whiteui.tint(1f, 0.1f, 0.2f, 0.3f);
-
-            Pixmap fade = new Pixmap(128, 128);
-            for(int x = 0; x < fade.width; x++){
-                for(int y = 0; y < fade.height; y++){
-                    FloatFloatf func = f -> Mathf.pow(f, 0.6f);
-                    fade.set(x, y, MI2UTmp.c2.set(Color.black).a(0.4f * func.get(
-                            Math.min(x, Math.min(y, Math.min(fade.width-x-1, fade.height-y-1))) / (fade.width/2f)
-                    )));
-                }
-            }
-            Core.atlas.addRegion("fadeBackground", new TextureRegion(new Texture(fade)));
-            fadeBackground = new TextureRegionDrawable(Core.atlas.find("fadeBackground"));
 
             //anyone need max size < vanilla size, open an issue on Github
             maxSchematicSize = Math.max(maxSchematicSize, mi2ui.settings.getInt("maxSchematicSize", 64));
