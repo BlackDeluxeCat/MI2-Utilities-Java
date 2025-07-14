@@ -4,8 +4,10 @@ import arc.graphics.g2d.*;
 import arc.scene.*;
 import arc.scene.ui.layout.*;
 import mi2u.struct.*;
+import mi2u.ui.*;
 
 import static mi2u.MI2UVars.*;
+import static mi2u.ui.MonitorMindow.unitSize;
 import static mindustry.Vars.content;
 
 public class ItemChartBM extends BuildingMonitor{
@@ -13,7 +15,7 @@ public class ItemChartBM extends BuildingMonitor{
     public boolean[] cfg = new boolean[content.items().size];
     public ItemChartBM(){
         super();
-        w = 5;
+        w = 6;
         h = 4;
     }
 
@@ -41,9 +43,10 @@ public class ItemChartBM extends BuildingMonitor{
         table.pane(t -> {
             for(int i = 0; i < content.items().size; i++){
                 int id = i;
-                t.button(content.item(i).localizedName, textbtoggle, () -> cfg[id] = !cfg[id]).checked(tb -> cfg[id]).height(buttonSize).with(funcSetTextb);
+                t.button(content.item(i).localizedName, textbtoggle, () -> cfg[id] = !cfg[id]).checked(tb -> cfg[id]).height(unitSize).with(funcSetTextb);
+                if(i % w == 0) t.row();
             }
-        }).with(p -> p.setForceScroll(true, false)).growX();
+        }).growX();
     }
 
     @Override

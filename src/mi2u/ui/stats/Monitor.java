@@ -10,7 +10,7 @@ import arc.scene.ui.layout.*;
  */
 public abstract class Monitor{
     public float x, y;
-    public int w = 10, h = 2;
+    public int w = 5, h = 2;
 
     public Monitor(){}
 

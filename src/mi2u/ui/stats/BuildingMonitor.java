@@ -22,13 +22,14 @@ public abstract class BuildingMonitor extends Monitor{
     @Override
     public void buildFetch(Table table){
         table.clear();
-        table.button("选点", textbtoggle, () -> fetching = !fetching).checked(b -> fetching).growX().update(t -> {
-            if(fetching && !Core.scene.hasMouse() && Core.input.keyTap(Binding.select)){
+        table.button(b -> b.label(this::pos), textbtoggle, () -> fetching = !fetching).growX().update(t -> {
+            if(fetching && !Core.scene.hasMouse() && Core.input.keyRelease(Binding.select)){
                 var tile = world.tileWorld(Core.input.mouseWorldX(), Core.input.mouseWorldY());
                 source = tile == null ? -1 : tile.pos();
                 b = world.build(source);
                 fetching = false;
             }
+            t.setChecked(fetching);
         }).grow();
     }
 
@@ -39,6 +40,10 @@ public abstract class BuildingMonitor extends Monitor{
 
     @Override
     public String title(){
+        return "" + (source == -1 ? Iconc.none : b == null ? Iconc.blockEmpty : b.block.localizedName);
+    }
+
+    public String pos(){
         return source == -1 ? "未选中" : (Point2.x(source) + "," + Point2.y(source));
     }
 }

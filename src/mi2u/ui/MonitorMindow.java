@@ -24,7 +24,7 @@ import static mi2u.MI2UVars.*;
 public class MonitorMindow extends Mindow2{
     public Seq<Monitor> monitors = new Seq<>();
 
-    public float unitSize = 32f;
+    public static float unitSize = 32f;
 
     public MonitorCanvas group = new MonitorCanvas();
 
@@ -45,7 +45,11 @@ public class MonitorMindow extends Mindow2{
             {
                 setupCont(cont);
                 addCloseButton();
-                hidden(() -> rebuild());
+                group.camera.sub(Core.graphics.getWidth() / 2f, Core.graphics.getHeight() / 2f);
+                hidden(() -> {
+                    rebuild();
+                    group.camera.add(Core.graphics.getWidth() / 2f, Core.graphics.getHeight() / 2f);
+                });
                 show();
             }
         };
@@ -92,9 +96,7 @@ public class MonitorMindow extends Mindow2{
     }
 
     public class MonitorCanvas extends WidgetGroup{
-        /**
-         * camera position left bottom.
-         */
+        /**camera position left bottom.*/
         public Vec2 camera = new Vec2();
 
         public MonitorCanvas(){
@@ -125,7 +127,7 @@ public class MonitorMindow extends Mindow2{
         @Override
         public void act(float delta){
             children.each(e -> {
-                if(e instanceof MonitorTable t) e.setPosition(-camera.x + t.m.x * unitSize, -camera.y + t.m.y * unitSize);
+                if(e instanceof MonitorTable t) e.setPosition(-camera.x + t.m.x * Scl.scl(unitSize), -camera.y + t.m.y * Scl.scl(unitSize));
             });
             super.act(delta);
         }
@@ -166,16 +168,15 @@ public class MonitorMindow extends Mindow2{
                 tab = tabConfig;
                 rebuild();
             });
-            title.button("" + Iconc.zoom, textb, () -> {
-                tab = tabFetch;
-                rebuild();
-            });
             title.button("" + Iconc.trash, textb, () -> {
                 monitors.remove(m);
                 remove();
             });
             title.defaults().maxWidth(9999);
-            title.label(m::title).growX().align(Align.left);
+            title.button(b -> b.label(m::title).labelAlign(Align.center).growX(), textb, () -> {
+                tab = tabFetch;
+                rebuild();
+            }).growX();
             title.add("" + Iconc.move).with(l -> {
                 l.setAlignment(Align.center);
                 l.addListener(new InputListener(){
@@ -190,15 +191,11 @@ public class MonitorMindow extends Mindow2{
                     }
 
                     @Override
-                    public void touchDragged(InputEvent event, float x1, float y1, int pointer){
-                        Vec2 v = localToParentCoordinates(MI2UTmp.v1.set(x1, y1));
-                        setPosition(MonitorTable.this.m.x = Mathf.round((v.x - fromx1 + group.camera.x) / unitSize), Mathf.round((MonitorTable.this.m.y = v.y - fromy1 + group.camera.y) / unitSize));
-                    }
-
-                    @Override
                     public void touchUp(InputEvent event, float x, float y, int pointer, KeyCode button){
                         super.touchUp(event, x, y, pointer, button);
                         l.setColor(Color.white);
+                        Vec2 v = localToParentCoordinates(MI2UTmp.v1.set(x, y));
+                        setPosition(MonitorTable.this.m.x = Mathf.round((v.x - fromx1 + group.camera.x) / Scl.scl(unitSize)), MonitorTable.this.m.y = Mathf.round((v.y - fromy1 + group.camera.y) / Scl.scl(unitSize)));
                     }
                 });
             }).size(unitSize);
@@ -221,10 +218,13 @@ public class MonitorMindow extends Mindow2{
 
         public void rebuild(){
             clear();
-            background(Styles.black3);
-            add(title).growX().height(unitSize);
-            row();
-            add(tab(tab)).self(c -> c.get().update(() -> c.size(m.w * buttonSize, m.h * buttonSize)));
+            table(shell -> {
+                shell.background(Styles.black3);
+                shell.add(title).growX().height(unitSize);
+                shell.row();
+                shell.add(tab(tab)).self(c -> c.get().update(() -> c.size(m.w * unitSize, m.h * unitSize)));
+            });
+            update(() -> setSize(Scl.scl() * m.w * unitSize, Scl.scl() * (m.h + 1) * unitSize));
         }
     }
 }
