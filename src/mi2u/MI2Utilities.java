@@ -47,7 +47,7 @@ public class MI2Utilities extends Mod{
                 mi2ui.addTo(Core.scene.root);
                 if(mi2ui.settings.getBool("showEmojis")) emojis.addTo(emojis.hasParent() ? emojis.parent : Core.scene.root);
                 if(mi2ui.settings.getBool("showCoreInfo")) coreInfo.addTo(coreInfo.hasParent() ? coreInfo.parent : Core.scene.root);
-                if(mi2ui.settings.getBool("showMindowMap")) mindowmap.addTo(mindowmap.hasParent() ? mindowmap.parent : Core.scene.root);
+                if(mi2ui.settings.getBool("showMinimap")) mindowmap.addTo(mindowmap.hasParent() ? mindowmap.parent : Core.scene.root);
                 if(mi2ui.settings.getBool("showLogicHelper")) logicHelper.addTo(logicHelper.hasParent() ? logicHelper.parent : ui.logic);
 
                 RendererExt.init();
