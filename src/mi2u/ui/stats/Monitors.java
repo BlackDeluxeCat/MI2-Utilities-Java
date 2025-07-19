@@ -7,7 +7,8 @@ public class Monitors{
     public static Seq<MonitorMeta> all = new Seq<>();
 
     public static MonitorMeta health = new MonitorMeta("health", HealthBM::new, Type.building),
-    itemChart = new MonitorMeta("itemchart", ItemChartBM::new, Type.building);
+    itemChart = new MonitorMeta("itemchart", ItemChartBM::new, Type.building),
+    logicProcessor = new MonitorMeta("logicprocessor", ProcessorMonitor::new, Type.building);
 
     public static class MonitorMeta{
         public String name;

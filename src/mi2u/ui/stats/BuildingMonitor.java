@@ -26,8 +26,9 @@ public abstract class BuildingMonitor extends Monitor{
             if(fetching && !Core.scene.hasMouse() && Core.input.keyRelease(Binding.select)){
                 var tile = world.tileWorld(Core.input.mouseWorldX(), Core.input.mouseWorldY());
                 source = tile == null ? -1 : tile.pos();
-                b = world.build(source);
+                validate();
                 fetching = false;
+                reflush();
             }
             t.setChecked(fetching);
         }).grow();

@@ -80,12 +80,8 @@ public class MI2UI extends Mindow2{
         titlePane.button(b -> {
             b.add(new CombinationIcon(t -> t.add("" + Iconc.chartBar)).bottomRight(t -> t.add("" + Iconc.infoCircle).pad(4f).fontScale(0.6f).get())).grow();
         }, textbtoggle, () -> {
-            if(monitorMindow.closed()){
-                monitorMindow.addTo(this.parent);
-                monitorMindow.forceSetPosition(Core.input.mouseX(), Core.input.mouseY());
-            }
-            else monitorMindow.close();
-        }).checked(tb -> !monitorMindow.closed());
+            if(!monitorCanvas.remove()) Core.scene.add(monitorCanvas);
+        }).checked(tb -> monitorCanvas.hasParent());
 
         titlePane.button(b -> {
             b.add(new CombinationIcon(t -> t.add("" + Iconc.map)).bottomRight(t -> t.add("" + Iconc.zoom).pad(4f).fontScale(0.6f).get())).grow();
@@ -133,7 +129,7 @@ public class MI2UI extends Mindow2{
 
                 t.button("DG", textb, MI2UFuncs::cleanGhostBlock).with(funcSetTextb).disabled(b -> player.team().data().plans.isEmpty()).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.cleanGhost"));
 
-                t.button("RB", textb, MI2UFuncs::unitRebuildBlocks).with(funcSetTextb).disabled(b -> player.team().data().plans.isEmpty()).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.rebuild"));
+                t.button("RB", textb, MI2UFuncs::unitRebuildBlocks).with(funcSetTextb).disabled(b -> player.team().data().plans.isEmpty()).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.setup"));
 
                 //The update rate is based on button.update(), and affected by lagging
                 t.button("", textbtoggle, FpsController::toggle).update(b -> {

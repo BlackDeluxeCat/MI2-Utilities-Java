@@ -28,7 +28,7 @@ import static mindustry.Vars.*;
  * cont is a container for user items.
  * settings is a SettingEntry seq.
  * <p>
- * {@code setupCont(Table cont)}for cont rebuild, should be overrided.<p>
+ * {@code setupCont(Table cont)}for cont setup, should be overrided.<p>
  * {@code initSettings()}for customize setting entries, should start with settings.clear()
  *
  * @author BlackDeluxeCat
@@ -146,7 +146,7 @@ public class Mindow2 extends Table{
     }
 
     /**
-     * called when rebuild Mindow2, should be overridden
+     * called when setup Mindow2, should be overridden
      */
     public void setupCont(Table cont){}
 

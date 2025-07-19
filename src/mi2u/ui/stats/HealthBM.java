@@ -6,12 +6,13 @@ import mi2u.ui.elements.*;
 import mindustry.graphics.*;
 
 import static mi2u.MI2UVars.buttonSize;
+import static mi2u.ui.MonitorCanvas.unitSize;
 
 public class HealthBM extends BuildingMonitor{
     public HealthBM(){
         super();
-        w = 8;
-        h = 1;
+        w = 8 * unitSize;
+        h = 1 * unitSize;
     }
 
     @Override

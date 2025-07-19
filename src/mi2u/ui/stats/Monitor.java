@@ -2,6 +2,8 @@ package mi2u.ui.stats;
 
 import arc.scene.ui.layout.*;
 
+import static mi2u.ui.MonitorCanvas.unitSize;
+
 /**
  * 监视器基类。
  * 一个监视器可以具有数据源、数据缓存、显示、设置。
@@ -10,7 +12,7 @@ import arc.scene.ui.layout.*;
  */
 public abstract class Monitor{
     public float x, y;
-    public int w = 5, h = 2;
+    public float w = 6 * unitSize, h = 2 * unitSize;
 
     public Monitor(){}
 

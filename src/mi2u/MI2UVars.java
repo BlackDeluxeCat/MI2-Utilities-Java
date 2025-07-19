@@ -43,7 +43,7 @@ public class MI2UVars{
     public static WaveInfoMindow waveInfo;
     public static AIMindow aiMindow;
     public static WorldFinderMindow finderMindow;
-    public static MonitorMindow monitorMindow;
+    public static MonitorCanvas monitorCanvas;
 
     public static MapInfoDialog mapInfo;
 
@@ -72,7 +72,7 @@ public class MI2UVars{
         waveInfo = new WaveInfoMindow();
         aiMindow = new AIMindow();
         finderMindow = new WorldFinderMindow();
-        monitorMindow = new MonitorMindow();
+        monitorCanvas = new MonitorCanvas();
 
         mapInfo = new MapInfoDialog();
     }
