@@ -222,14 +222,7 @@ public class WorldFinderMindow extends Mindow2{
                     i = 0;
                 }
             }
-        }).maxHeight(200f).update(p -> {
-            Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-            if(e != null && e.isDescendantOf(p)) {
-                p.requestScroll();
-            }else if(p.hasScroll()){
-                Core.scene.setScrollFocus(null);
-            }
-        });
+        }).maxHeight(200f).update(p -> funcSetScrollFocus.get(p));
     }
 
     public void buildReplaceSelect(Table table){
@@ -255,14 +248,7 @@ public class WorldFinderMindow extends Mindow2{
                     i = 0;
                 }
             }
-        }).maxHeight(300f).update(p -> {
-            Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-            if(e != null && e.isDescendantOf(p)) {
-                p.requestScroll();
-            }else if(p.hasScroll()) {
-                Core.scene.setScrollFocus(null);
-            }
-        });
+        }).maxHeight(300f).update(p -> funcSetScrollFocus.get(p));
     }
 
     public void buildTeamSelect(Table table){

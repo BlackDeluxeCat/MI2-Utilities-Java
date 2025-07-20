@@ -571,14 +571,7 @@ public class FullAI extends AIController{
                         logTable.image().growX().height(2f).color(Pal.logicOperations).row();
                         logTable.pane(p -> {
                             p.labelWrap(() -> log).growX();
-                        }).growX().maxHeight(200f).update(p -> {
-                            Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-                            if(e != null && e.isDescendantOf(p)) {
-                                p.requestScroll();
-                            }else if(p.hasScroll()){
-                                Core.scene.setScrollFocus(null);
-                            }
-                        });
+                        }).growX().maxHeight(200f).update(p -> funcSetScrollFocus.get(p));
                         logTable.popup();
                         logTable.setPositionInScreen(Core.input.mouseX(), Core.input.mouseY());
                     }

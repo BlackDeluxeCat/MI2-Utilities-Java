@@ -168,12 +168,7 @@ public class WaveInfoMindow extends Mindow2{
             c.update(p -> {
                 h[0] = Mathf.clamp(h[0], 20f, (Core.graphics.getHeight() - 400f)/Scl.scl());
                 c.height(h[0]);
-                Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-                if(e != null && e.isDescendantOf(p)){
-                    p.requestScroll();
-                }else if(p.hasScroll()){
-                    Core.scene.setScrollFocus(null);
-                }
+                funcSetScrollFocus.get(p);
             });
         }).row();
     }
@@ -251,14 +246,7 @@ public class WaveInfoMindow extends Mindow2{
                 }).height(10f).minWidth(100f).growX();
                 p.row();
             }
-        }).maxHeight(200f).update(p -> {
-            Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-            if(e != null && e.isDescendantOf(p)){
-                p.requestScroll();
-            }else if(p.hasScroll()){
-                Core.scene.setScrollFocus(null);
-            }
-        });
+        }).maxHeight(200f).update(p -> funcSetScrollFocus.get(p));
     }
 
     public static class WaveBar extends Table{

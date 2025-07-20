@@ -5,6 +5,7 @@ import arc.func.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
+import arc.scene.*;
 import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.scene.ui.TextButton.*;
@@ -26,6 +27,14 @@ public class MI2UVars{
         c.getLabel().setAlignment(Align.center);
         c.getLabel().setWrap(false);
         c.margin(6f);
+    };
+    public static Cons<Element> funcSetScrollFocus = p -> {
+        Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
+        if(e != null && e.isDescendantOf(p)){
+            p.requestScroll();
+        }else if(p.hasScroll()){
+            Core.scene.setScrollFocus(null);
+        }
     };
 
     public static Drawable fadeBackground;

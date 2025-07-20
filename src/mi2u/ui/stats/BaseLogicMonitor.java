@@ -12,8 +12,7 @@ import mindustry.graphics.*;
 import mindustry.logic.*;
 import mindustry.world.blocks.logic.*;
 
-import java.util.*;
-
+import static mi2u.MI2UVars.funcSetScrollFocus;
 import static mi2u.ui.MonitorCanvas.unitSize;
 
 public class BaseLogicMonitor extends BuildingMonitor{
@@ -85,7 +84,7 @@ public class BaseLogicMonitor extends BuildingMonitor{
 
                 seq.each(lvar -> starred.contains(lvar.name), varBuilder);
                 seq.each(lvar -> !starred.contains(lvar.name), varBuilder);
-            }).grow();
+            }).grow().update(p -> funcSetScrollFocus.get(p));
         }
 
         @Override
@@ -148,7 +147,7 @@ public class BaseLogicMonitor extends BuildingMonitor{
                         })).bottomRight(c -> c.add(String.valueOf(id)).color(Pal.accent).fontScale(0.6f))).size(unitSize * 2, unitSize);
                     }
                 }
-            }).grow().with(p -> p.setFadeScrollBars(true));
+            }).grow().with(p -> p.setFadeScrollBars(true)).update(p -> funcSetScrollFocus.get(p));
         }
 
         @Override

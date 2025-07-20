@@ -266,14 +266,7 @@ public class MapInfoDialog extends BaseDialog{
                     cont.row();
                 }
             }
-        }).maxHeight(200f).update(p -> {
-            Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-            if(e != null && e.isDescendantOf(p)){
-                p.requestScroll();
-            }else if(p.hasScroll()){
-                Core.scene.setScrollFocus(null);
-            }
-        }).with(c -> c.setFadeScrollBars(true));
+        }).maxHeight(200f).update(p -> funcSetScrollFocus.get(p)).with(c -> c.setFadeScrollBars(true));
 
         attrsListPopup.popup();
         attrsListPopup.toFront();

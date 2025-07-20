@@ -173,14 +173,7 @@ public class CoreInfoMindow extends Mindow2{
 
                     if(++i % columns == 0) iut.row();
                 }
-            }).minWidth(100f).maxHeight(settings.getInt("itemsMaxHeight")).update(p -> {
-                Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-                if(e != null && e.isDescendantOf(p)){
-                    p.requestScroll();
-                }else if(p.hasScroll()){
-                    Core.scene.setScrollFocus(null);
-                }
-            }).with(c -> c.setFadeScrollBars(true));
+            }).minWidth(100f).maxHeight(settings.getInt("itemsMaxHeight")).update(p -> funcSetScrollFocus.get(p)).with(c -> c.setFadeScrollBars(true));
         }
 
         if(settings.getBool("showPowerGraphs")){
@@ -233,14 +226,7 @@ public class CoreInfoMindow extends Mindow2{
                         }
                     }
                 });
-            }).growX().maxHeight(settings.getInt(".unitsMaxHeight")).update(p -> {
-                Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-                if(e != null && e.isDescendantOf(p)){
-                    p.requestScroll();
-                }else if(p.hasScroll()){
-                    Core.scene.setScrollFocus(null);
-                }
-            }).with(c -> c.setFadeScrollBars(true));
+            }).growX().maxHeight(settings.getInt(".unitsMaxHeight")).update(p -> funcSetScrollFocus.get(p)).with(c -> c.setFadeScrollBars(true));
         }
 
         //buildplan popup ensureTable

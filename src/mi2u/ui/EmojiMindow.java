@@ -110,16 +110,10 @@ public class EmojiMindow extends Mindow2{
                 search.setMessageText("@players.search");
             }).growX().padRight(8f).row();
 
-            t.pane(listMode ? listT : iconT).growX().update(p -> {
+            t.pane(listMode ? listT : iconT).growX().with(p -> {
                 p.setStyle(Styles.smallPane);
                 p.setScrollingDisabled(true, false);
-                Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-                if(e != null && e.isDescendantOf(p)){
-                    p.requestScroll();
-                }else if(p.hasScroll()){
-                    Core.scene.setScrollFocus(null);
-                }
-            });
+            }).update(p -> funcSetScrollFocus.get(p));
         }).width(emojiPerRow * 40f + 12f).height(emojiMaxCol * 40f + 48f);
     }
 

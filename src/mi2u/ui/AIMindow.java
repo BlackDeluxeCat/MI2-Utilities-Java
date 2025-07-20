@@ -75,13 +75,6 @@ public class AIMindow extends Mindow2{
                     t.row();
                 }
             }).growX();
-        }).maxHeight(Core.graphics.getHeight() / 2f / Scl.scl()).width(440f).update(p -> {
-            Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-            if(e != null && e.isDescendantOf(p)){
-                p.requestScroll();
-            }else if(p.hasScroll()){
-                Core.scene.setScrollFocus(null);
-            }
-        });
+        }).maxHeight(Core.graphics.getHeight() / 2f / Scl.scl()).width(440f).update(p -> funcSetScrollFocus.get(p));
     }
 }

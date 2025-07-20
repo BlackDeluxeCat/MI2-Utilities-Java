@@ -189,12 +189,7 @@ public class MinimapMindow extends Mindow2{
         @Override
         public void act(float delta){
             super.act(delta);
-            Element e = Core.scene.hit(Core.input.mouseX(), Core.input.mouseY(), true);
-            if(e != null && e.isDescendantOf(this) && isTouchable()){
-                requestScroll();
-            }else if(hasScroll()){
-                Core.scene.setScrollFocus(null);
-            }
+            funcSetScrollFocus.get(this);
         }
 
         @Override
