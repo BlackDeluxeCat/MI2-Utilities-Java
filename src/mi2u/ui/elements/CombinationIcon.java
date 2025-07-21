@@ -5,7 +5,7 @@ import arc.scene.ui.layout.*;
 
 public class CombinationIcon extends Stack{
     public CombinationIcon(Cons<Table> center){
-        Table table = new Table(t -> t.table(center));
+        Table table = new Table(center);
         table.setFillParent(true);
         add(table);
     }
