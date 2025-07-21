@@ -103,6 +103,7 @@ public class ItemChartBM extends BuildingMonitor{
     @Override
     public void validate(){
         super.validate();
+        if(!b.block.hasItems || b.items == null) return;
         for(int i = 0; i < content.items().size; i++){
             if(recorders[i] == null && cfg[i]){
                 var r = recorders[i] = new FloatDataRecorder(600);
