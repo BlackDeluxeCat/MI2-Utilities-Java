@@ -164,27 +164,27 @@ public class MI2UI extends Mindow2{
         cont.add(new MCollapser(m -> {
             m.defaults().growX();
             m.table(t -> {
-                if(settings.getSetting("disableWreck") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.eyeOff + Iconc.teamDerelict));
-                if(settings.getSetting("disableUnit") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.eyeOff + Iconc.alphaaaa));
-                if(settings.getSetting("disableBullet") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.eyeOff + Iconc.unitAnthicusMissile));
-                if(settings.getSetting("disableBuilding") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.eyeOff + Iconc.blockMechanicalDrill));
-            }).row();
+                if(settings.getSetting("disableWreck") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.eyeOff + Iconc.teamDerelict)).row();
+                if(settings.getSetting("disableUnit") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.eyeOff + Iconc.alphaaaa)).row();
+                if(settings.getSetting("disableBullet") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.eyeOff + Iconc.unitAnthicusMissile)).row();
+                if(settings.getSetting("disableBuilding") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.eyeOff + Iconc.blockMechanicalDrill)).row();
+            }).top();
 
             m.table(t -> {
-                if(settings.getSetting("enUnitHpBar") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.unitDagger));
-                if(settings.getSetting("enBlockHpBar") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.teamDerelict));
-                if(settings.getSetting("enUnitLogic") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.blockMicroProcessor + Iconc.unitDagger));
-                if(settings.getSetting("enUnitPath") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.planet + Iconc.unitDagger));
-            }).row();
+                if(settings.getSetting("enUnitHpBar") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.unitDagger)).row();
+                if(settings.getSetting("enBlockHpBar") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.teamDerelict)).row();
+                if(settings.getSetting("enUnitLogic") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.blockMicroProcessor + Iconc.unitDagger)).row();
+                if(settings.getSetting("enUnitPath") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.planet + Iconc.unitDagger)).row();
+            }).top();
 
             m.table(t -> {
-                if(settings.getSetting("enDistributionReveal") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.zoom + Iconc.distribution));
-                if(settings.getSetting("drevealBridge") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.blockBridgeConveyor));
-                if(settings.getSetting("drevealJunction") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.blockJunction));
-                if(settings.getSetting("drevealUnloader") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.blockUnloader));
-                if(settings.getSetting("drevealInventory") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.blockVault));
-            }).row();
-        }, true).setDirection(true, true).setCollapsed(true, () -> !showQuickSettings)).growX();
+                if(settings.getSetting("enDistributionReveal") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.zoom + Iconc.distribution)).row();
+                if(settings.getSetting("drevealBridge") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.blockBridgeConveyor)).row();
+                if(settings.getSetting("drevealJunction") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.blockJunction)).row();
+                if(settings.getSetting("drevealUnloader") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.blockUnloader)).row();
+                if(settings.getSetting("drevealInventory") instanceof CheckSetting ce) t.add(ce.miniButton("" + Iconc.blockVault)).row();
+            }).top();
+        }, true).setDirection(true, true).setDuration(0.1f).setCollapsed(true, () -> !showQuickSettings)).growX();
     }
 
     @Override
