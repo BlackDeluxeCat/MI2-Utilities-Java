@@ -71,6 +71,14 @@ public class FullAI extends AIController{
             }
         });
 
+        Events.on(EventType.WorldLoadEvent.class, e -> {
+            if(LogicMode.autoCleanMarkers){
+                for(int i = 0; i < MakeMarkerI.maxMarkers; i++){
+                    LogicMode.markers.remove(i);
+                }
+            }
+        });
+
         ui.logic.shown(() -> {
             if(unlockUnitBuild){
                 cacheRuleLogicUnitBuild = state.rules.logicUnitBuild;
@@ -503,6 +511,7 @@ public class FullAI extends AIController{
             }
         };
         public static MapMarkers markers = new MapMarkers();
+        public static boolean autoCleanMarkers = false;
         static short timerUpdMovement = 0, timerMove = 1, timerShoot = 2, timerTransItemPayload = 3;
 
         public String code = "";

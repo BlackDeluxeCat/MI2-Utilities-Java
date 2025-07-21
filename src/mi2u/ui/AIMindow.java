@@ -6,6 +6,7 @@ import arc.scene.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.ai.*;
+import mi2u.io.*;
 import mi2u.ui.elements.*;
 import mindustry.gen.*;
 import mindustry.ui.*;
@@ -19,7 +20,9 @@ public class AIMindow extends Mindow2{
         setVisibleInGame();
         hasCloseButton = true;
 
-        titlePane.defaults().growX().height(buttonSize);
+        titlePane.defaults().height(buttonSize);
+        if(settings.getSetting("autocleanmarkers") instanceof SettingHandler.CheckSetting cs) titlePane.add(cs.miniButton(Iconc.refresh + "Markers"));
+        titlePane.defaults().growX();
         titlePane.button(Iconc.add + Core.bundle.get("ai.add"), textb, () -> {
             new BaseDialog(""){{
                 addCloseButton();
@@ -81,6 +84,12 @@ public class AIMindow extends Mindow2{
     @Override
     public void initSettings(){
         super.initSettings();
-        
+        settings.checkPref("autocleanmarkers", false, b -> FullAI.LogicMode.autoCleanMarkers = b);
+    }
+
+    @Override
+    public void loadUISettings(){
+        super.loadUISettings();
+        FullAI.LogicMode.autoCleanMarkers = settings.getBool("autocleanmarkers", false);
     }
 }
