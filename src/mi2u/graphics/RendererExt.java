@@ -10,6 +10,7 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.pooling.*;
 import mi2u.*;
+import mi2u.ai.*;
 import mi2u.ui.*;
 import mindustry.ai.*;
 import mindustry.ai.types.*;
@@ -108,6 +109,12 @@ public class RendererExt{
             updateSettings();
             players.each((u, v) -> {if(u == null) return; if(!u.isPlayer()||!u.isValid()) players.remove(u);});
             drawBase();
+
+            for(var marker : FullAI.LogicMode.markers){
+                if(marker.world){
+                    marker.draw(marker.autoscale ? 4f / renderer.getDisplayScale() : 1);
+                }
+            }
         });
 
         Events.run(EventType.Trigger.drawOver, () -> {

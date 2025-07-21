@@ -14,6 +14,7 @@ import arc.struct.*;
 import arc.util.*;
 import arc.util.pooling.*;
 import mi2u.*;
+import mi2u.ai.*;
 import mi2u.input.*;
 import mi2u.io.*;
 import mi2u.ui.elements.*;
@@ -42,7 +43,7 @@ public class MinimapMindow extends Mindow2{
         m.drawSpawn = settings.getBool("drawSpawn");
         m.drawFog = settings.getBool("drawFog");
         m.drawIndicator = settings.getBool("drawIndicator");
-        m.drawObjective = settings.getBool("drawObjective");
+        m.drawMarkers = settings.getBool("drawObjective");
         m.drawUnitColorDifference = settings.getInt("drawUnitColorDiff") / 100f;
         m.drawUnitOutline = settings.getInt("drawUnitOutline") / 100f;
 
@@ -100,7 +101,7 @@ public class MinimapMindow extends Mindow2{
         settings.checkPref("drawSpawn", true, b -> m.drawSpawn = b);
         settings.checkPref("drawFog", true, b -> m.drawFog = b);
         settings.checkPref("drawIndicator", true, b -> m.drawIndicator = b);
-        settings.checkPref("drawObjective", true, b -> m.drawObjective = b);
+        settings.checkPref("drawObjective", true, b -> m.drawMarkers = b);
         settings.textPref("size", String.valueOf(140), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 100 && Strings.parseInt(s) <= 3200, s -> setupCont(cont), intParser);
         settings.textPref("drawUnitColorDiff", String.valueOf(10), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 0 && Strings.parseInt(s) <= 100, s -> m.drawUnitColorDifference = Strings.parseInt(s) / 100f, intParser);
         settings.textPref("drawUnitOutline", String.valueOf(10), TextField.TextFieldFilter.digitsOnly, s -> Strings.canParseInt(s) && Strings.parseInt(s) >= 0 && Strings.parseInt(s) <= 100, s -> m.drawUnitOutline = Strings.parseInt(s) / 100f, intParser);
@@ -112,7 +113,7 @@ public class MinimapMindow extends Mindow2{
         private static final float baseSize = 16f;
         public float zoom = 8f;
 
-        public boolean drawLabel = false, drawSpawn = true, drawFog = true, drawIndicator = true, drawObjective = true;
+        public boolean drawLabel = false, drawSpawn = true, drawFog = true, drawIndicator = true, drawMarkers = true;
         public float drawUnitOutline = 0f;
         public float drawUnitColorDifference = 0.9f;
 
@@ -343,7 +344,7 @@ public class MinimapMindow extends Mindow2{
             }
 
             //could be buggy
-            if(drawObjective){
+            if(drawMarkers){
                 state.rules.objectives.eachRunning(obj -> {
                     for(var marker : obj.markers){
                         marker.draw(1f);
@@ -353,6 +354,12 @@ public class MinimapMindow extends Mindow2{
                 for(var marker : state.markers){
                     if(marker.minimap){
                         marker.draw(1f);
+                    }
+                }
+
+                for(var marker : FullAI.LogicMode.markers){
+                    if(marker.minimap){
+                        marker.draw(1);
                     }
                 }
             }

@@ -77,4 +77,10 @@ public class AIMindow extends Mindow2{
             }).growX();
         }).maxHeight(Core.graphics.getHeight() / 2f / Scl.scl()).width(440f).update(p -> funcSetScrollFocus.get(p));
     }
+
+    @Override
+    public void initSettings(){
+        super.initSettings();
+        
+    }
 }

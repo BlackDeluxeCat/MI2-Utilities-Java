@@ -205,18 +205,13 @@ public class FullAI extends AIController{
 
         public void buildConfig(Table table){}
 
-        public static Stack timerIconStack(Prov<String> icon, Boolp charged, Floatp prov){
-            Stack stack = new Stack();
-            var i = new Label(() -> (charged.get() ? "[lightgray]" : "[darkgray]") + icon.get());
-            stack.add(i);
-            var l = new Label(() -> charged.get() ? Strings.autoFixed(prov.get(), 1) : "");
-            l.setFillParent(true);
-            l.setAlignment(Align.bottomRight);
-            l.setWrap(true);
-            l.setFontScale(0.6f);
-            stack.add(l);
-            stack.setHeight(32f);
-            return stack;
+        public static Element timerIconStack(Prov<String> icon, Boolp charged, Floatp prov){
+            CombinationIcon c = new CombinationIcon(t -> {
+                t.label(() -> (charged.get() ? "[lightgray]" : "[darkgray]") + icon.get()).labelAlign(Align.center).grow();
+            }).bottomRight(t -> {
+                t.label(() -> charged.get() ? Strings.autoFixed(prov.get(), 1) : "").labelAlign(Align.right).fontScale(0.6f).grow();
+            });
+            return c;
         }
 
         public String name(){
@@ -404,7 +399,7 @@ public class FullAI extends AIController{
 
                 if(plan != null && world.tile(plan.x, plan.y).block() == plan.block){
                     state.teams.get(player.team()).plans.remove(plan);
-                }else{
+                }else if(plan != null){
                     ai.unit.plans.addFirst(new BuildPlan(plan.x, plan.y, plan.rotation, plan.block, plan.config));
                 }
             }
@@ -507,6 +502,7 @@ public class FullAI extends AIController{
                 this.keepInScreen();
             }
         };
+        public static MapMarkers markers = new MapMarkers();
         static short timerUpdMovement = 0, timerMove = 1, timerShoot = 2, timerTransItemPayload = 3;
 
         public String code = "";
@@ -579,9 +575,9 @@ public class FullAI extends AIController{
 
                 t.table(tt -> {
                     tt.defaults().pad(2f).minWidth(32f);
-                    tt.add(timerIconStack(() -> "" + Iconc.move, () -> !timer.check(timerMove, LogicAI.logicControlTimeout), () -> (LogicAI.logicControlTimeout - timer.getTime(timerMove)) / 60f));
+                    tt.add(timerIconStack(() -> "" + Iconc.move, () -> !timer.check(timerMove, LogicAI.logicControlTimeout), () -> (LogicAI.logicControlTimeout - timer.getTime(timerMove)) / 60f)).size(buttonSize);
 
-                    tt.add(timerIconStack(() -> "" + Iconc.commandAttack, () -> !timer.check(timerShoot, LogicAI.logicControlTimeout), () -> (LogicAI.logicControlTimeout - timer.getTime(timerShoot)) / 60f));
+                    tt.add(timerIconStack(() -> "" + Iconc.commandAttack, () -> !timer.check(timerShoot, LogicAI.logicControlTimeout), () -> (LogicAI.logicControlTimeout - timer.getTime(timerShoot)) / 60f)).size(buttonSize);
                 });
             }).grow();
         }
@@ -651,7 +647,7 @@ public class FullAI extends AIController{
                     }
 
                     if(logicAI.control == LUnitControl.autoPathfind){
-
+                        //where to path find? Use fcking LUnitControl.pathfind
                     }
                 }
             }
@@ -671,6 +667,18 @@ public class FullAI extends AIController{
                 ai.unit.controller(player);
                 si.run(exec);
                 ai.unit.controller(logicAI);
+                return true;
+            }else if(inst instanceof SetMarkerI sm){
+                var original = state.markers;
+                state.markers = markers;
+                sm.run(exec);
+                state.markers = original;
+                return true;
+            }else if(inst instanceof MakeMarkerI mm){
+                var original = state.markers;
+                state.markers = markers;
+                mm.run(exec);
+                state.markers = original;
                 return true;
             }else if(inst instanceof SetRateI sr){
                 instructionsPerTick = sr.amount.numi();
