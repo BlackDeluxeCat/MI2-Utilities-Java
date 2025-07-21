@@ -101,19 +101,15 @@ public class MI2UI extends Mindow2{
         }).checked(tb -> !aiMindow.closed());
 
         titlePane.button(b -> {
-            b.add(new CombinationIcon(t -> t.add("" + Iconc.waves)).bottomRight(t -> t.add("" + Iconc.infoCircle).pad(2f).fontScale(0.7f).get().setColor(Pal.accent))).grow();
+            b.add(new CombinationIcon(t -> t.add("" + Iconc.waves)).bottomRight(t -> t.add("" + Iconc.infoCircle).pad(2f).fontScale(0.7f).get())).grow();
         }, textbtoggle, () -> {
             if(waveInfo.closed()) waveInfo.addTo(this.parent);
             else waveInfo.close();
         }).checked(tb -> !waveInfo.closed());
 
         titlePane.button(b -> {
-            b.add(new CombinationIcon(t -> t.add("" + Iconc.map)).bottomRight(t -> t.add("" + Iconc.infoCircle).pad(2f).fontScale(0.7f).get().setColor(Pal.accent))).grow();
+            b.add(new CombinationIcon(t -> t.add("" + Iconc.map)).bottomRight(t -> t.add("" + Iconc.infoCircle).pad(2f).fontScale(0.7f).get())).grow();
         }, textbtoggle, () -> mapInfo.show()).checked(tb -> mapInfo.hasParent());
-
-        titlePane.button(b -> {
-            b.add(new CombinationIcon(t -> t.add("M")).bottomRight(t -> t.add("" + Iconc.settings).pad(2f).fontScale(0.7f).get().setColor(MI2UTmp.c1.set(1f, 0.1f, 0.2f)))).grow();
-        }, textbtoggle, () -> configMindow = !configMindow).checked(tb -> configMindow).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.uicfg"));;
     }
 
     @Override

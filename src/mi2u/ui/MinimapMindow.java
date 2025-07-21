@@ -34,7 +34,6 @@ public class MinimapMindow extends Mindow2{
 
     public MinimapMindow(){
         super("Minimap", true);
-        hideTitle = true;
         setVisibleInGame();
         touchable = Touchable.childrenOnly;
         cont.background(Styles.none);

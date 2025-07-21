@@ -35,12 +35,10 @@ import static mindustry.Vars.*;
  */
 
 public class Mindow2 extends Table{
-    public static boolean configMindow = false;
-
     public float fromx = 0, fromy = 0, curx = 0, cury = 0;
     protected boolean dragging = false;
-    public boolean hideTitle = false, hasCloseButton = false;
-    public boolean minimized = false;
+    public boolean hasCloseButton = false;
+    public boolean hasTitle = true, minimized = false;
 
     protected Table titleBar = new Table(), titlePane = new Table(Styles.black6);
     protected Table cont = new Table();
@@ -121,26 +119,14 @@ public class Mindow2 extends Table{
 
         setupTitle();
 
-        if(!hideTitle) add(titleBar).growX();
-        row();
+        if(hasTitle) add(titleBar).growX().row();
+
 
         if(!minimized){
             cont.touchable = Touchable.enabled;
             setupCont(cont);
             add(cont).growX();
         }
-
-        addChild(new Table(t -> {
-            t.setFillParent(true);
-            t.background(Styles.black8);
-            t.defaults().grow();
-            t.visible(() -> configMindow && !minimized);
-            t.image(Icon.move).get().addListener(dragListener);
-
-            if(settings != null) t.button(Icon.settings, Styles.emptyi, this::showSettings);
-            if(hasCloseButton) t.button(Icon.cancel, Styles.emptyi, this::close);
-            t.button(Iconc.exit + "\n" + Core.bundle.get("mi2ui.buttons.uicfg.exit"), Styles.cleart, () -> configMindow = !configMindow).get().getLabel().setColor(Color.goldenrod);
-        }));
 
         setTransform(true);
     }
@@ -180,7 +166,7 @@ public class Mindow2 extends Table{
 
         titleBar.table(t -> {
             if(minimized) t.add(bundle.get(name + ".MI2U"));
-            t.label(() -> dragging ? Iconc.move + "" : minimized ? "□" : "-").size(buttonSize).labelAlign(center);
+            t.add(new CombinationIcon(tt -> tt.label(() -> dragging ? Iconc.move + "" : minimized ? "□" : "-").labelAlign(center).grow()).topRight(tt -> tt.label(() -> !dragging ? Iconc.move + "" : "").fontScale(0.6f))).size(buttonSize);
         }).get().addListener(dragListener);
     }
 
@@ -454,10 +440,18 @@ public class Mindow2 extends Table{
         var sScl = settings.sliderPref("scale", 100, 20, 400, 10, s -> s + "%", scl -> setScale(scl / 100f));
         sScl.title = bundle.get("settings.mindow.scale");
         sScl.description = bundle.getOrNull("settings.mindow.scale.description");
+        var sTitle = settings.checkPref("hastitle", true, b -> {
+            hasTitle = b;
+            this.rebuild();
+        });
+        sTitle.title = bundle.get("settings.mindow.hastitle");
+        sTitle.description = bundle.getOrNull("settings.mindow.hastitle.description");
+        settings.title("");
     }
 
     public void loadUISettings(){
         if(name == null || name.isEmpty() || settings == null) return;
+        hasTitle = settings.getBool("hastitle", true);
         minimized = settings.getBool("minimized");
         edgesnap = settings.getInt("edgesnap");
         curx = settings.getInt("curx");
@@ -484,7 +478,7 @@ public class Mindow2 extends Table{
      */
     public void saveUISettings(){
         if(name == null || name.isEmpty() || settings == null) return;
-
+        settings.putBool("hastitle", hasTitle);
         settings.putBool("minimized", minimized);
         settings.putInt("edgesnap", edgesnap);
         //edgesnap will disable curx / cury changes, so they shouldn't be saved when edgesnapping.
