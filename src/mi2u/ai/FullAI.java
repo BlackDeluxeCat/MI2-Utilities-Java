@@ -431,7 +431,7 @@ public class FullAI extends AIController{
         public void buildConfig(Table table){
             table.table(t -> {
                 t.defaults().growX();
-                t.button("@ai.preset.autobuildmode.setup", textbtoggle, () -> {
+                t.button("@ai.preset.autobuildmode.rebuild", textbtoggle, () -> {
                     rebuild = !rebuild;
                 }).update(b -> b.setChecked(rebuild)).with(funcSetTextb);
                 t.button("@ai.preset.autobuildmode.support", textbtoggle, () -> follow = !follow).update(b -> b.setChecked(follow)).with(funcSetTextb);
