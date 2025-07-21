@@ -93,8 +93,9 @@ public class Mindow2 extends Table{
     public Mindow2(String name, boolean hasSettings){
         this.name = name == null ? "" : name;
         if(!mindow2s.contains(m -> m.name.equals(this.name))) mindow2s.add(this);
-        if(!name.isEmpty() && hasSettings) useSettings();
-        initSettings();
+        if(name != null && !name.isEmpty() && hasSettings) useSettings();
+
+        if(name != null && !name.isEmpty() && settings != null) initSettings();
 
         cont.setBackground(Styles.black3);
         titleBar.setBackground(mindowTitleBarBackground);
@@ -435,7 +436,6 @@ public class Mindow2 extends Table{
      * can be overrided, should use super.initSettings()
      */
     public void initSettings(){
-        if(name == null || name.isEmpty() || settings == null) return;
         settings.list.clear();
         var sScl = settings.sliderPref("scale", 100, 20, 400, 10, s -> s + "%", scl -> setScale(scl / 100f));
         sScl.title = bundle.get("settings.mindow.scale");
