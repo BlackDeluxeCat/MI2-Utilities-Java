@@ -135,7 +135,7 @@ public class BaseLogicMonitor extends BuildingMonitor{
                     for(int i = 0; i < mb.memory.length; i++){
                         final int id = i;
                         if(i % Math.max(Mathf.floor(w / 2 / unitSize), 1) == 0) t.row();
-                        t.add(new CombinationIcon(c -> c.add("").grow().with(l -> {
+                        t.add(new CombinationIcon(c -> c.add("").labelAlign(Align.right).grow().with(l -> {
                             updaters.add(() -> {
                                 String num = Strings.autoFixed((float)mb.memory[id], 3);
                                 l.setColor(Color.white);
@@ -147,7 +147,10 @@ public class BaseLogicMonitor extends BuildingMonitor{
                         })).bottomRight(c -> c.add(String.valueOf(id)).color(Pal.accent).fontScale(0.6f))).size(unitSize * 2, unitSize);
                     }
                 }
-            }).grow().with(p -> p.setFadeScrollBars(true)).update(p -> funcSetScrollFocus.get(p));
+            }).grow().with(p -> {
+                p.setFadeScrollBars(true);
+                p.setupFadeScrollBars(0.3f, 0);
+            }).update(p -> funcSetScrollFocus.get(p));
         }
 
         @Override
