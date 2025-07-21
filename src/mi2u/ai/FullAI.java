@@ -604,7 +604,7 @@ public class FullAI extends AIController{
             }
             exec.ipt.numval = Mathf.clamp(instructionsPerTick, 1, ((LogicBlock)Blocks.worldProcessor).maxInstructionsPerTick);
             exec.unit.constant = false;
-            var ctrl = ai.unit.controller();
+
             ai.unit.controller(logicAI);
 
             //TODO 可调运输冷却
@@ -637,7 +637,7 @@ public class FullAI extends AIController{
             }
             if(ai.unit.plans != null && ai.unit.plans.isEmpty()) plans.each(bp -> ai.unit.plans.add(bp));
 
-            ai.unit.controller(ctrl);
+            ai.unit.controller(player);
             fullAI.unit(player.unit());
 
             if(!timer.check(timerMove, LogicAI.logicControlTimeout)){
@@ -667,7 +667,12 @@ public class FullAI extends AIController{
         }
 
         public boolean tryRunOverwrite(LInstruction inst){
-            if(inst instanceof SetRateI sr){
+            if(inst instanceof SenseI si){
+                ai.unit.controller(player);
+                si.run(exec);
+                ai.unit.controller(logicAI);
+                return true;
+            }else if(inst instanceof SetRateI sr){
                 instructionsPerTick = sr.amount.numi();
                 return true;
 
