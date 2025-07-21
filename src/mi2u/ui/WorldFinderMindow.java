@@ -158,7 +158,7 @@ public class WorldFinderMindow extends Mindow2{
 
     public void planReplace(Block from, Block to, float range){
         if(!state.isGame() || player.unit() == null || !player.unit().canBuild()) return;
-        var seq = WorldData.getSeq(from, player.team());
+        var seq = WorldData.getSeq(from, team);
         if(seq == null) return;
 
         seq.each(pos -> {
@@ -180,7 +180,7 @@ public class WorldFinderMindow extends Mindow2{
 
     public void planReplace(Block from, Block to, int pos){
         if(pos == -1) return;
-        if(player.unit().plans().size > 1000) return;
+        if(player.unit().plans().size > 3000) return;
         if(world.tile(pos).breakable() && to == Blocks.air){
             //break
             player.unit().addBuild(new BuildPlan(Point2.x(pos), Point2.y(pos)));
