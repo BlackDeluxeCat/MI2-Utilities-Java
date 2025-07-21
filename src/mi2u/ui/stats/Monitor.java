@@ -13,6 +13,7 @@ import static mi2u.ui.MonitorCanvas.unitSize;
 public abstract class Monitor{
     public float x, y;
     public float w = 6 * unitSize, h = 2 * unitSize;
+    public transient float maxWidth = Float.POSITIVE_INFINITY, maxHeight = Float.POSITIVE_INFINITY, minWidth = 2 * unitSize, minHeight = 2 * unitSize;
 
     public Monitor(){}
 

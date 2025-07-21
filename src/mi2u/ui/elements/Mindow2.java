@@ -97,7 +97,7 @@ public class Mindow2 extends Table{
         initSettings();
 
         cont.setBackground(Styles.black3);
-        titleBar.setBackground(titleBarBackground);
+        titleBar.setBackground(mindowTitleBarBackground);
 
         Events.on(ResizeEvent.class, e -> Time.run(60f, () -> {
             loadUISettings();

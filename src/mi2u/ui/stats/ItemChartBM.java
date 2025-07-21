@@ -1,6 +1,7 @@
 package mi2u.ui.stats;
 
 import arc.graphics.g2d.*;
+import arc.math.*;
 import arc.scene.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
@@ -55,8 +56,8 @@ public class ItemChartBM extends BuildingMonitor{
                         font.getCache().addText(text, dx + unitSize, dy + unitSize, 0, Align.left, false);
                         font.getCache().draw(parentAlpha);
                         dy += unitSize;
-                        if(used % h == h - 1){
-                            dx += unitSize * w / 2f;
+                        if(Mathf.mod(used, h / unitSize) == h / unitSize - 1){
+                            dx += unitSize * 4f;
                             dy = y;
                         }
                     }
@@ -83,7 +84,7 @@ public class ItemChartBM extends BuildingMonitor{
         table.pane(t -> {
             for(var item : content.items()){
                 int id = item.id;
-                if(id % Math.max(w - 1, 1) == 0) t.row();
+                if(id % Math.max(w / unitSize - 1, 1) == 0) t.row();
                 t.button(b -> b.image(item.uiIcon).scaling(Scaling.fit), textbtoggle, () -> {
                     cfg[id] = !cfg[id];
                 }).checked(tb -> cfg[id]).size(unitSize).with(tb -> MI2Utils.tooltip(tb, content.item(id).localizedName));

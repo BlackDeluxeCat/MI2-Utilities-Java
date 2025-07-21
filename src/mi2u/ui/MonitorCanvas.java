@@ -1,7 +1,6 @@
 package mi2u.ui;
 
 import arc.*;
-import arc.func.*;
 import arc.input.*;
 import arc.math.*;
 import arc.math.geom.*;
@@ -57,7 +56,7 @@ public class MonitorCanvas extends WidgetGroup{
             }
         };
 
-        buttons.background(titleBarBackground);
+        buttons.background(monitorTitleBarBackground);
         buttons.defaults().size(3 * unitSize, 2 * unitSize).growX();
         buttons.button("" + Iconc.add, textb, () -> addDialog.show()).with(funcSetTextb);
         buttons.button("清空", textb, () -> {
@@ -119,7 +118,7 @@ public class MonitorCanvas extends WidgetGroup{
         public MonitorTable(Monitor m){
             this.m = m;
 
-            title.background(titleBarBackground);
+            title.background(monitorTitleBarBackground);
             title.defaults().size(unitSize);
             title.button(b -> b.label(() -> "" + (tab == tabDisplay ? Iconc.resize : Iconc.blockLogicDisplay)), textb, () -> {
                 tab = tabDisplay;
@@ -149,10 +148,10 @@ public class MonitorCanvas extends WidgetGroup{
                     if(resizing){
                         //左上角拖拽
                         float dx = localToAscendantCoordinates(MonitorCanvas.this, MI2UTmp.v1.set(x, y)).x - lx;
-                        m.w = Math.max(unit(lw - dx, unitSize), 5 * unitSize);
+                        m.w = Mathf.clamp(unit(lw - dx, unitSize), m.minWidth, m.maxWidth);
                         m.x = lx - (m.w - lw) * Scl.scl();
                         MonitorTable.this.setPosition(-camera.x + m.x, MonitorTable.this.y);
-                        m.h = unit(y + m.h, unitSize);
+                        m.h = Mathf.clamp(unit(y + m.h, unitSize), m.minHeight, m.maxHeight);
                     }
                 }
 

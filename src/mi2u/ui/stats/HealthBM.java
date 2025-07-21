@@ -12,7 +12,8 @@ public class HealthBM extends BuildingMonitor{
     public HealthBM(){
         super();
         w = 8 * unitSize;
-        h = 1 * unitSize;
+        minWidth = 2 * unitSize;
+        h = minHeight = 2 * unitSize;
     }
 
     @Override

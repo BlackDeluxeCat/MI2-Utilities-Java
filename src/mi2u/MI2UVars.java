@@ -19,7 +19,7 @@ import mindustry.ui.*;
 
 public class MI2UVars{
     public static float buttonSize = 32f;
-    public static Drawable titleBarBackground;
+    public static Drawable mindowTitleBarBackground, monitorTitleBarBackground;
     public static TextButtonStyle textb = Styles.cleart, textbtoggle = new TextButtonStyle(Styles.clearTogglet){{
         up = Styles.none;
     }};
@@ -58,7 +58,8 @@ public class MI2UVars{
 
     public static void init(){
         var whiteui = (TextureRegionDrawable)Tex.whiteui;
-        titleBarBackground = whiteui.tint(1f, 0.1f, 0.2f, 0.3f);
+        mindowTitleBarBackground = whiteui.tint(1f, 0.1f, 0.2f, 0.3f);
+        monitorTitleBarBackground = whiteui.tint(0.1f, 0.2f, 1f, 0.3f);
 
         Pixmap fade = new Pixmap(128, 128);
         for(int x = 0; x < fade.width; x++){
