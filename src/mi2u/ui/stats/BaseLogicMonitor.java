@@ -98,7 +98,7 @@ public class BaseLogicMonitor extends BuildingMonitor{
         public void validate(){
             super.validate();
             exec = b instanceof LogicBlock.LogicBuild lb ? lb.executor : null;
-            int hash = exec == null ? 0 : exec.hashCode();
+            int hash = exec == null ? 0 : exec.vars.hashCode();
             if(hash != varsHash){
                 varsHash = hash;
                 reflush();
