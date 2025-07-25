@@ -59,7 +59,7 @@ public class MI2UI extends Mindow2{
                         if(bp.breaking){
                             tile.setAir();
                         }else{
-                            Call.beginPlace(player.unit(), bp.block, player.team(), bp.x, bp.y, bp.rotation);
+                            Call.beginPlace(player.unit(), bp.block, player.team(), bp.x, bp.y, bp.rotation, bp.block.instantBuild ? bp.config : null);
                             if(bp.tile().build instanceof ConstructBlock.ConstructBuild cb) cb.construct(player.unit(), null, 1f, bp.config);
                             player.unit().plans.remove(bp);
                         }
