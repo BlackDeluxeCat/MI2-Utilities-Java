@@ -54,6 +54,9 @@ public class RendererExt{
     public static boolean enUnitHitbox;
     public static boolean enUnitHpBar;
     public static boolean enUnitHpBarDamagedOnly;
+    public static boolean enUnitLogic;
+    public static boolean enUnitPath;
+    public static int unitPathLen;
     public static boolean enUnitRangeZone;
     public static boolean enOverdriveZone;
     public static boolean enMenderZone;
@@ -129,6 +132,9 @@ public class RendererExt{
         enUnitHitbox = mi2ui.settings.getBool("enUnitHitbox");
         enUnitHpBar = mi2ui.settings.getBool("enUnitHpBar");
         enUnitHpBarDamagedOnly = mi2ui.settings.getBool("unitHpBarDamagedOnly");
+        enUnitLogic = mi2ui.settings.getBool("enUnitLogic");
+        enUnitPath = mi2ui.settings.getBool("enUnitPath");
+        unitPathLen = mi2ui.settings.getInt("enUnitPath.length", 40);
         enUnitRangeZone = mi2ui.settings.getBool("enUnitRangeZone");
         enOverdriveZone = mi2ui.settings.getBool("enOverdriveZone");
         enMenderZone = mi2ui.settings.getBool("enMenderZone");
@@ -326,7 +332,7 @@ public class RendererExt{
             //display logicAI info by MI2
             if(unit.controller() instanceof LogicAI logicai){
                 Draw.reset();
-                if(mi2ui.settings.getBool("enUnitLogic")){
+                if(enUnitLogic){
                     if(logicai.controller instanceof LogicBlock.LogicBuild lb && lb.executor != null){
                         Draw.color(0.2f, 1f, 0.6f, 0.3f);
                         Fill.arc(unit.x, unit.y, 6f, 1f - Mathf.clamp(logicai.controlTimer / LogicAI.logicControlTimeout), 90f, 20);
@@ -353,7 +359,7 @@ public class RendererExt{
                 }
             }
 
-            if(mi2ui.settings.getBool("enUnitPath")){
+            if(enUnitPath){
                 if(unit.isCommandable() && unit.controller() instanceof CommandAI ai){
                     Draw.reset();
                     Draw.z(Layer.power - 4f);
@@ -376,8 +382,7 @@ public class RendererExt{
                     Draw.reset();
                     Draw.z(Layer.power - 4f);
                     Tile tile = unit.tileOn();
-                    int max = mi2ui.settings.getInt("enUnitPath.length", 40);
-                    for(int tileIndex = 1; tileIndex <= max; tileIndex++){
+                    for(int tileIndex = 1; tileIndex <= unitPathLen; tileIndex++){
                         Tile nextTile = pathfinder.getTargetTile(tile, pathfinder.getField(unit.team, unit.type.flowfieldPathType, Pathfinder.fieldCore));
                         if(nextTile == null) break;
                         if(nextTile == tile) break;
