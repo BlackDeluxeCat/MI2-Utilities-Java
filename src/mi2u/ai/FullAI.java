@@ -361,10 +361,10 @@ public class FullAI extends AIController{
             if(follow && timer.get(timerCobuild, 15f) && (ai.unit.plans().isEmpty() || ai.unit.buildPlan().samePos(autoPlan))){
                 if(autoPlan.isDone()) ai.unit.validatePlans();
                 //搜寻其他玩家的建造计划
-                for(var player : Groups.player){
-                    if(player.unit() == null || player.team() != ai.unit.team) continue;
+                for(var playo : Groups.player){
+                    if(playo.unit() == null || playo == player || playo.team() != ai.unit.team) continue;
 
-                    var other = player.unit();
+                    var other = playo.unit();
                     if(other != ai.unit && other.canBuild() && other.activelyBuilding() && other.buildPlan() != null){
                         BuildPlan plan = other.buildPlan();
                         //潜在目标只能是已经在建的建筑
@@ -374,7 +374,7 @@ public class FullAI extends AIController{
                                 //检查核心资源
                                 boolean req = true;
                                 for(var itemStack : plan.block.requirements){
-                                    if(player.team().core() != null && !player.team().core().items.has(itemStack.item)){
+                                    if(playo.team().core() != null && !playo.team().core().items.has(itemStack.item)){
                                         req = false;
                                         break;
                                     }
@@ -399,8 +399,9 @@ public class FullAI extends AIController{
                 float minDst = Float.MAX_VALUE;
                 Teams.BlockPlan plan = null;
                 for(var p : ai.unit.team.data().plans){
-                    if(ai.unit.dst(p.x * tilesize, p.y * tilesize) < minDst){
-                        minDst = ai.unit.dst(p.x * tilesize, p.y * tilesize);
+                    float dst = ai.unit.dst(p.x * tilesize, p.y * tilesize);
+                    if(dst < minDst){
+                        minDst = dst;
                         plan = p;
                     }
                 }
