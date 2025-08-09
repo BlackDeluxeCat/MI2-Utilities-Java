@@ -395,19 +395,20 @@ public class FullAI extends AIController{
                 }
             }
 
-            if(rebuild && ai.unit.plans().isEmpty() && timer.get(timerRebuild, 45f) && !ai.unit.team.data().plans.isEmpty()){
+            if(rebuild && ai.unit.plans().isEmpty() && timer.get(timerRebuild, 40f) && !ai.unit.team.data().plans.isEmpty()){
                 float minDst = Float.MAX_VALUE;
                 Teams.BlockPlan plan = null;
                 for(var p : ai.unit.team.data().plans){
                     float dst = ai.unit.dst(p.x * tilesize, p.y * tilesize);
-                    if(dst < minDst){
+                    //sometimes no rebuild plan is added due to unknown reason. so null checking is to ensure a plan if dst calculation misses.
+                    if(plan == null || dst < minDst){
                         minDst = dst;
                         plan = p;
                     }
                 }
 
                 if(plan != null && world.tile(plan.x, plan.y).block() == plan.block){
-                    state.teams.get(player.team()).plans.remove(plan);
+                    ai.unit.team.data().plans.remove(plan);
                 }else if(plan != null){
                     ai.unit.plans.addFirst(new BuildPlan(plan.x, plan.y, plan.rotation, plan.block, plan.config));
                 }
