@@ -22,6 +22,7 @@ import mindustry.core.*;
 import mindustry.game.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
+import mindustry.input.*;
 import mindustry.ui.*;
 import mindustry.world.*;
 
@@ -174,11 +175,15 @@ public class MinimapMindow extends Mindow2{
 
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button){
-                    if(button == KeyCode.mouseRight && control.input.commandMode){
+                    if(control.input.commandMode){
                         setRect();
                         untransform(MI2UTmp.v1.set(x, y));
                         Core.camera.project(MI2UTmp.v1);
-                        control.input.commandTap(MI2UTmp.v1.x, MI2UTmp.v1.y);
+                        if(button == KeyCode.mouseRight){
+                            control.input.commandTap(MI2UTmp.v1.x, MI2UTmp.v1.y);
+                        }else if(button == Binding.commandQueue.value.key){
+                            control.input.commandTap(MI2UTmp.v1.x, MI2UTmp.v1.y, true);
+                        }
                     }
 
                     return super.touchDown(event, x, y, pointer, button);
