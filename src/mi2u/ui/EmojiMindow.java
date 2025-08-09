@@ -43,6 +43,7 @@ public class EmojiMindow extends Mindow2{
 
     public EmojiMindow(){
         super("Emojis", true);
+        setVisibleInGame();
 
         updateEmoji();
 
