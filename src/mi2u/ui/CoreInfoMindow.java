@@ -34,7 +34,9 @@ public class CoreInfoMindow extends Mindow2{
     protected Team select, team;
 
     protected PowerGraphTable pg = new PowerGraphTable();
-    protected PopupTable teamSelect = new PopupTable(), buildPlanTable = new PopupTable();
+    public boolean teamSelect = false;
+    protected Table teamSelectTable = new Table();
+    protected PopupTable buildPlanTable = new PopupTable();
     protected int[] unitIndex = new int[content.units().size];
 
     protected ObjectSet<UnitType> usedUnits;
@@ -50,6 +52,9 @@ public class CoreInfoMindow extends Mindow2{
         usedItems = new ObjectSet<>();
         usedUnits = new ObjectSet<>();
 
+        teamSelectTable.visible(() -> teamSelect);
+        teamSelectTable.setFillParent(true);
+
         titlePane.table(teamt -> {
             teamt.button(itemTimerInts.get(itemTimerIndex) + "s", textb, null).size(buttonSize).with(b -> {
                 b.clicked(() -> {
@@ -58,14 +63,14 @@ public class CoreInfoMindow extends Mindow2{
                     b.setText(itemTimerInts.get(itemTimerIndex) + "s");
                 });
             });
-            teamt.button("Select", textb, () -> {
+            teamt.button("Select", textbtoggle, () -> {
                 rebuildSelect();
-                teamSelect.popup();
-                teamSelect.snapTo(this);
-            }).grow().minWidth(32f).update(b -> {
+                teamSelect = !teamSelect;
+            }).grow().minWidth(buttonSize).update(b -> {
                 b.setText(select == null ? "[[#" + team.id + "]" : ("#" + team.id));
                 b.getLabel().setColor(team == null ? Color.white:team.color);
                 b.getLabel().setFontScale(0.8f);
+                b.setChecked(teamSelect);
             });
             teamt.button(t -> t.label(() -> Iconc.power + String.valueOf(pg.powerIOBars ? Iconc.list : Iconc.line)), textb, () -> {
                 pg.powerIOBars = !pg.powerIOBars;
@@ -182,12 +187,14 @@ public class CoreInfoMindow extends Mindow2{
         }
 
         if(settings.getBool("showUnits")){
+            invalidate();
+            validate();
             int iconSize = settings.getInt("unitIconSize");
 
             cont.row();
             cont.pane(uut -> {
                 uut.defaults().padRight(4f).size(iconSize);
-                int columns = Math.max(1, Mathf.floor(cont.getPrefWidth() / (4f + iconSize)));
+                int columns = Mathf.floor((cont.getPrefWidth() - 10f) / Scl.scl(4f + iconSize));
                 int ind = 0;
 
                 for(UnitType type : content.units()){
@@ -291,15 +298,18 @@ public class CoreInfoMindow extends Mindow2{
                 }
             }
         });
+
+        cont.addChild(teamSelectTable);
     }
 
     public void rebuildSelect(){
-        teamSelect.clear();
-        teamSelect.table(p -> {
-            p.button(Iconc.players + "", textb, () -> {
+        teamSelectTable.clear();
+        teamSelectTable.background(Styles.black8);
+        teamSelectTable.table(p -> {
+            p.button("[[" + Iconc.players + "]", textb, () -> {
                 select = null;
+                teamSelect = false;
                 rebuild();
-                teamSelect.hide();
             }).minSize(buttonSize * 2f).grow().disabled(select == null).with(b -> {
                 b.getLabel().setWrap(false);
                 b.getLabel().setColor(player.team().color);
@@ -308,21 +318,17 @@ public class CoreInfoMindow extends Mindow2{
             for(TeamData t : state.teams.getActive()){
                 p.button(t.team.localized(), textb, () -> {
                     select = t.team;
+                    teamSelect = false;
                     rebuild();
-                    teamSelect.hide();
                 }).minSize(buttonSize * 2f).disabled(select == t.team).with(b -> {
                     b.getLabel().setWrap(false);
                     b.getLabel().setColor(t.team.color);
                 });
-                if(++i < 4) continue;
+                if(++i < width / buttonSize * 2) continue;
                 p.row();
                 i = 0;
             }
         }).maxHeight(300f);
-        teamSelect.update(() -> {
-            teamSelect.toFront();
-            teamSelect.hideWithoutFocusOn(this, teamSelect);
-        });
     }
 
     @Override
