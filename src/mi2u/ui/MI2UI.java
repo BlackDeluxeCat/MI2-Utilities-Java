@@ -125,7 +125,7 @@ public class MI2UI extends Mindow2{
 
                 t.button("DG", textb, MI2UFuncs::cleanGhostBlock).with(funcSetTextb).disabled(b -> player.team().data().plans.isEmpty()).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.cleanGhost"));
 
-                t.button("RB", textb, MI2UFuncs::unitRebuildBlocks).with(funcSetTextb).disabled(b -> player.team().data().plans.isEmpty()).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.setup"));
+                t.button("RB", textb, MI2UFuncs::unitRebuildBlocks).with(funcSetTextb).disabled(b -> player.team().data().plans.isEmpty()).with(tb -> MI2Utils.tooltip(tb, "@mi2ui.buttons.rebuild"));
 
                 //The update rate is based on button.update(), and affected by lagging
                 t.button("", textbtoggle, FpsController::toggle).update(b -> {
