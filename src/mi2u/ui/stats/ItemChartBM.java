@@ -96,7 +96,7 @@ public class ItemChartBM extends BuildingMonitor{
     public void update(){
         validate();
         for(int i = 0; i < content.items().size; i++){
-            if(cfg[i]) recorders[i].update();
+            if(cfg[i] && recorders[i] != null) recorders[i].update();
         }
     }
 
