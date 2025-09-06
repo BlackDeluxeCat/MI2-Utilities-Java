@@ -167,11 +167,13 @@ public class CoreInfoMindow extends Mindow2{
                             t.image(item.uiIcon).size(iconSmall).scaling(Scaling.fit);
                             t.label(() -> core == null ? "0" : UI.formatAmount(core.items.get(item))).minWidth(52f).padBottom(6f).left();
                     }), l).tooltip(t -> t.background(Styles.black6).add(item.localizedName).style(Styles.outlineLabel)).with(s -> {
-                        s.clicked(() -> {
+                        s.update(() -> {
                             var chart = getItemChart(item);
-                            if(chart != null){
+                            if(s.hasMouse()){
                                 chart.setPositionInScreen(this.x - chart.getPrefWidth(), this.y);
                                 chart.popup();
+                            }else{
+                                chart.hide();
                             }
                         });
                     });
@@ -348,8 +350,6 @@ public class CoreInfoMindow extends Mindow2{
             itemCharts[item.id] = new PopupTable(){
                 {
                     this.setBackground(Styles.black8);
-                    this.addCloseButton();
-                    this.addDragMove();
                     this.addInGameVisible();
                     this.update(this::toFront);
                     var ch = new Element(){
