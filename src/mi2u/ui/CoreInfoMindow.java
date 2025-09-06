@@ -170,8 +170,8 @@ public class CoreInfoMindow extends Mindow2{
                         s.update(() -> {
                             var chart = getItemChart(item);
                             if(s.hasMouse()){
-                                chart.setPositionInScreen(this.x - chart.getPrefWidth(), this.y);
-                                chart.popup();
+                                chart.setPositionInScreen(Core.input.mouseX() + 20f, Core.input.mouseY() - 20f - chart.getPrefHeight());
+                                chart.popup(Align.topLeft);
                             }else{
                                 chart.hide();
                             }
@@ -349,6 +349,7 @@ public class CoreInfoMindow extends Mindow2{
         if(itemCharts[item.id] == null){
             itemCharts[item.id] = new PopupTable(){
                 {
+                    this.popupDuration = 0.05f;
                     this.setBackground(Styles.black8);
                     this.addInGameVisible();
                     this.update(this::toFront);
