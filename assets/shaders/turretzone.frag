@@ -6,6 +6,7 @@ uniform vec2 u_invsize;
 uniform float u_time;
 uniform float u_dp;
 uniform vec2 u_offset;
+uniform float u_borderTransparency;
 varying vec2 v_texCoords;
 /** Author @BlackDeluxeCat
 * You are not allowed to use this fragment shader in any place except any Mindustry mod.
@@ -27,12 +28,12 @@ void main(){
     vec4 mined = min(min(min(texture2D(u_texture, T + vec2(0, wide) * v), texture2D(u_texture, T + vec2(0, -wide) * v)), texture2D(u_texture, T + vec2(wide, 0) * v)), texture2D(u_texture, T + vec2(-wide, 0) * v));
 
     if(length(mined.rgb) < 0.0001 && length(color.rgb) > 0.01){
-        gl_FragColor = vec4(color.rgb, mod(coords.y / 2.0 + coords.x / 4.0 - u_time / 4.0, 32.0) / 24.0 + 0.5);
+        gl_FragColor = vec4(color.rgb, mod(coords.y / 2.0 + coords.x / 4.0 - u_time / 4.0, 32.0) / 24.0 + 0.5 * u_borderTransparency);
     }else{
-        if(color.a >= 0.2 && color.a < 0.99){
-            color.a = 0.25;
-        }else if(color.a >= 0.99){
-            color.a = 0.3;
+        if(color.a >= 0.01 && color.a < 0.994){
+            color.a = 0.4 * u_borderTransparency;
+        }else if(color.a >= 0.994){
+            color.a = 0.6 * u_borderTransparency;
         }
         gl_FragColor = color;
     }

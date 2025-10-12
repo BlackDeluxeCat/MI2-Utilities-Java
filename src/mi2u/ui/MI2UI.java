@@ -258,6 +258,7 @@ public class MI2UI extends Mindow2{
                 }};
             }).growX();
         });
+        settings.sliderPref("rangeZoneTransparency", 30, 0, 100, 1, s -> s + "%");
 
         settings.title("graphics.distributionReveal");
 

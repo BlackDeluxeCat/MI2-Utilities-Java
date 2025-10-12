@@ -75,6 +75,7 @@ public class RendererExt{
     public static boolean disableBullet;
     public static boolean[] filterTurretRangeZone;
     public static boolean[] filterUnitRangeZone;
+    public static float rangeZoneTransparency;
 
     public static boolean[] filterDisableBuilding;
     public static boolean[] filterDisableUnit;
@@ -140,6 +141,7 @@ public class RendererExt{
         enMenderZone = mi2ui.settings.getBool("enMenderZone");
         enTurretZone = mi2ui.settings.getBool("enTurretRangeZone");
         turretZoneAAColor = mi2ui.settings.getInt("turretZoneColorStyle") == 1;
+        rangeZoneTransparency = mi2ui.settings.getInt("rangeZoneTransparency") / 100f;
         enBlockHpBar = mi2ui.settings.getBool("enBlockHpBar");
         enDistributionReveal = mi2ui.settings.getBool("enDistributionReveal");
         drevealBridge = mi2ui.settings.getBool("drevealBridge");
@@ -314,17 +316,11 @@ public class RendererExt{
             }
 
             if(enUnitRangeZone && filterUnitRangeZone[unit.type.id]){
-                float range = unit.range();
-
-                Draw.color(unit.team.color);
                 Draw.z(TurretZoneDrawer.getLayer(unit.team.id));
 
-                Draw.alpha(0.05f);
-                Fill.poly(unit.x, unit.y, (int)(range) / 4, range);
-
-                Lines.stroke(2f);
-                Draw.alpha(animatedshields ? 1f : 0.5f);
-                Lines.circle(unit.x, unit.y, range);
+                drawRangeZone(unit.x, unit.y, unit.range(),
+                    MI2UTmp.c2.set(unit.team.color),
+                    MI2UTmp.c1.set(unit.team.color));
 
                 Draw.color();
             }
@@ -620,21 +616,23 @@ public class RendererExt{
 
     public static void drawTurretZone(BaseTurret.BaseTurretBuild btb){
         float z = Draw.z();
-        float range = btb.range();
-
         Draw.z(TurretZoneDrawer.getLayer(btb.team.id));
-
-        Lines.stroke(3f);
-        Draw.color(btb.team.color);
-        Draw.alpha(animatedshields ? 1f : 0.5f);
-        Lines.circle(btb.x, btb.y, range + 1);
-
-        Draw.color(turretZoneAAColor && btb.block instanceof Turret tu ? (tu.targetAir ? Color.cyan : Color.darkGray) : btb.team.color);
-        Draw.alpha(animatedshields ? 0.3f : 0.08f);
-        Fill.poly(btb.x, btb.y, (int)(range) / 3, range);
-
+        drawRangeZone(btb.x, btb.y, btb.range(),
+            MI2UTmp.c2.set(btb.team.color),
+            MI2UTmp.c1.set(turretZoneAAColor && btb.block instanceof Turret tu ? (tu.targetAir ? Color.cyan : Color.darkGray) : btb.team.color));
         Draw.z(z);
         Draw.color();
+    }
+
+    public static void drawRangeZone(float x, float y, float range, Color border, Color fill){
+        Draw.color(border);
+        Lines.stroke(3f);
+        Draw.alpha(animatedshields ? 1f : (0.4f * rangeZoneTransparency));
+        Lines.circle(x, y, range + 1);
+
+        Draw.color(fill);
+        Draw.alpha(animatedshields ? 0.02f : (0.08f * rangeZoneTransparency));
+        Fill.poly(x, y, (int)(range) / 3, range);
     }
 
     public static void drawJunction(Junction.JunctionBuild jb){
