@@ -706,7 +706,7 @@ public class FullAI extends AIController{
             }else if(inst instanceof ControlI li){
                 if(!player.dead() && li.target.obj() instanceof Building b && (isLocalSandbox() || b.team == exec.team)){
                     if(li.type == LAccess.config){
-                        b.configured(player.unit(), li.p1);
+                        b.configured(player.unit(), li.p1.obj());
                     }
                 }
                 return true;
