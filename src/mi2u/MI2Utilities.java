@@ -8,12 +8,14 @@ import arc.math.*;
 import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.util.*;
+import arc.util.serialization.*;
 import mi2u.graphics.*;
 import mi2u.input.*;
 import mi2u.ui.elements.*;
 import mi2u.ui.stats.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
+import mindustry.io.*;
 import mindustry.mod.*;
 import mindustry.ui.*;
 
@@ -25,6 +27,7 @@ import static mindustry.Vars.*;
 
 public class MI2Utilities extends Mod{
     public static final String gitURL = "https://github.com/BlackDeluxeCat/MI2-Utilities-Java";
+    public static String apiURL = "https://api.github.com/repos/BlackDeluxeCat/MI2-Utilities-Java/releases/latest";
     public static final String gitRepo = "BlackDeluxeCat/MI2-Utilities-Java";
     public static Mods.LoadedMod MOD;
 
@@ -93,46 +96,37 @@ public class MI2Utilities extends Mod{
 
                 this.row();
 
-                Runnable httpreq = () -> {
+                Runnable apireq = () -> {
                     sign = 0;
-                    Http.get(gitURL + "/releases/latest", res -> {
+                    Http.get(apiURL, res -> {
                         sign = 1;
                         in.get(1);
                         delay = 1200f;
-                        var str = res.getResultAsString();
-                        var pp = Pattern.compile("(?<=Release ).*?(?= · BlackDeluxeCat/MI2-Utilities-Java)");
-                        var mm = pp.matcher(str);
-                        mm.find();
-                        version = mm.group();
+                        var json = new JsonReader().parse(res.getResultAsString());
+
+                        version = json.getString("name");
+                        intro = json.getString("body");
+
                         if(version.equals(MOD.meta.version)){
                             this.hide();
                         }else{
                             this.popup();
                         }
-
-                        pp = Pattern.compile("(?<=markdown-body my-3\">)[\\S\\s]*?(?=</div>)");
-                        mm = pp.matcher(str);
-                        mm.find();
-                        intro = mm.group();
-
-                        pp = Pattern.compile("<.*?>");
-                        mm = pp.matcher(intro);
-                        intro = mm.replaceAll("");
                         if(introl != null) introl.setText(intro);
                     }, e -> {
                         sign = -1;
                         in.get(1);
                         delay = 600f;
-                        intro = "";
+                        intro = "Network Error";
                         Log.err(e);
                     });
                 };
 
-                httpreq.run();
+                apireq.run();
 
                 this.table(t -> {
                     t.label(() -> sign == 0 ? "@update.checking" : sign == -1 ? "@update.failCheck" : MOD.meta.version.equals(version) ? "@update.latest" : "@update.updateAvailable").align(Align.left).growX().pad(5f).get().setColor(0f, 1f, 0.3f, 1f);
-                    t.button("" + Iconc.refresh, textb, httpreq).disabled(tb -> sign != -1).size(32f);
+                    t.button("" + Iconc.refresh, textb, apireq).disabled(tb -> sign != -1).size(32f);
                 }).growX();
 
                 this.row();
@@ -161,7 +155,7 @@ public class MI2Utilities extends Mod{
                     introl = t.add(intro).align(Align.left).growX().get();  //drawing update discription possibly cause font color bug.
                 }).width(300f).maxHeight(500f);
             }
-            
+
         };
     }
 }
