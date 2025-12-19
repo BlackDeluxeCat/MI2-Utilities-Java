@@ -97,7 +97,7 @@ public class ModifyFuncs{
                 if(tu.heatRequirement > 0f){
                     addBarToBlock(block, "heat", (Turret.TurretBuild entity) ->
                             new Bar(() ->
-                                    Core.bundle.format("bar.heatpercent", (int)entity.heatReq, (int)(entity.efficiencyScale() * 100)) + "/" + (int)tu.heatRequirement + " x" + tu.maxHeatEfficiency,
+                                    Core.bundle.format("bar.heatpercent", (int)entity.heatReq, (int)(entity.heatReq / tu.heatRequirement * 100)) + "/" + (int)tu.heatRequirement + " x" + tu.maxHeatEfficiency,
                                     () -> Pal.lightOrange,
                                     () -> entity.heatReq / tu.heatRequirement));
                 }
