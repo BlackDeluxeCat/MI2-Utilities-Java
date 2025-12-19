@@ -1,6 +1,7 @@
 package mi2u.input;
 
 import arc.*;
+import arc.input.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.util.*;
@@ -21,6 +22,9 @@ import static mindustry.Vars.*;
  * Multi-Mod inputhandler will be written sooner.
  */
 public class DesktopInputExt extends DesktopInput implements InputOverwrite{
+    public static DesktopInputExt getInstance(){
+        return desktopExt;
+    }
     public static DesktopInputExt desktopExt = new DesktopInputExt();
 
     public boolean ctrlBoost = false, boost = false;

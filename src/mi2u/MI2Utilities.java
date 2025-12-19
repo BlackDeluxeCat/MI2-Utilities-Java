@@ -43,7 +43,7 @@ public class MI2Utilities extends Mod{
             mi2ui.settings.putInt("maxSchematicSize", maxSchematicSize);
 
             if(mi2ui.settings.getBool("inputReplace")){
-                control.setInput(mobile ? MobileInputExt.mobileExt : DesktopInputExt.desktopExt);
+                control.setInput(mobile ? MobileInputExt.getInstance() : DesktopInputExt.getInstance());
             }
 
             Time.runTask(40f, () -> {

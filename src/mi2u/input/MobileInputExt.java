@@ -13,6 +13,9 @@ import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
 
 public class MobileInputExt extends MobileInput implements InputOverwrite{
+    public static MobileInputExt getInstance(){
+        return mobileExt;
+    }
     public static MobileInputExt mobileExt = new MobileInputExt();
 
     public boolean ctrlBoost = false, boost = false;
