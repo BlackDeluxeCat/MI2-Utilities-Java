@@ -563,7 +563,7 @@ public class RendererExt{
                 }
             }
 
-            if(enTurretZone && MI2UShaders.turretzone != null){
+            if((enTurretZone || enUnitRangeZone) && MI2UShaders.turretzone != null){
                 TurretZoneDrawer.applyShader();
             }
         }
