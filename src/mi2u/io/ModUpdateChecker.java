@@ -50,8 +50,8 @@ public class ModUpdateChecker {
         @Override
         public String toString() {
             return formatVersion(modVersion, mindustryVersion) +
-                       (exactMatch ? " [已安装]" : "") +
-                       (!compatible ? " [版本不兼容]" : "");
+                       (exactMatch ? " " + Core.bundle.get("update.status.installed") : "") +
+                       (!compatible ? " " + Core.bundle.get("update.status.incompatible") : "");
         }
     }
 
@@ -88,17 +88,21 @@ public class ModUpdateChecker {
                 // 已安装信息
                 this.table(infoTable -> {
                     infoTable.table(sub -> {
-                        sub.add("[gray]已安装版本: []" + formatVersion(MOD.meta.version, MOD.meta.minGameVersion)).left();
+                        sub.add(Core.bundle.get("update.installedVersion") + ": " +
+                                    formatVersion(MOD.meta.version, MOD.meta.minGameVersion)).left();
                     }).padLeft(10f);
                 }).growX().padTop(5f).row();
 
                 // 查询到的版本列表
                 this.table(git -> {
-                    git.add(Iconc.github + "可选版本").color(Color.lightGray).left().pad(4f);
+                    git.add(Iconc.github + " " + Core.bundle.get("update.availableVersions"))
+                        .color(Color.lightGray).left().pad(4f);
                     git.button("" + Iconc.refresh, MI2UVars.textb, ModUpdateChecker.this::fetchReleases)
-                        .disabled(b -> sign != -1).size(MI2UVars.buttonSize);
-                    git.button(Iconc.link + REPO_NAME,
+                        .disabled(b -> sign != -1).size(MI2UVars.buttonSize)
+                        .tooltip(Core.bundle.get("update.refresh"));
+                    git.button(Iconc.link + " " + Core.bundle.get("update.githubRepo"),
                             MI2UVars.textb, () -> Core.app.openURI(GIT_URL)).grow()
+                        .tooltip(Core.bundle.get("update.openLink"))
                         .get().getLabel().setFontScale(0.7f);
                 }).growX().padTop(5f).row();
 
@@ -136,41 +140,44 @@ public class ModUpdateChecker {
         // 显示精确匹配
         if (!exactMatches.isEmpty()) {
             for (ReleaseAsset asset : exactMatches) {
-                addVersionButton(table, asset, Color.green, "已安装");
+                addVersionButton(table, asset, Color.green, "update.status.installed");
             }
         }
 
         // 显示兼容版本
         if (!compatibleVersions.isEmpty()) {
             for (ReleaseAsset asset : compatibleVersions) {
-                addVersionButton(table, asset, Color.white, "可能兼容");
+                addVersionButton(table, asset, Color.white, "update.status.compatible");
             }
         }
 
         // 显示不兼容版本
         if (!incompatibleVersions.isEmpty()) {
             for (ReleaseAsset asset : incompatibleVersions) {
-                addVersionButton(table, asset, Color.gray, "版本不兼容");
+                addVersionButton(table, asset, Color.gray, "update.status.incompatible");
             }
         }
     }
 
-    private void addVersionButton(Table table, ReleaseAsset asset, Color color, String status) {
+    private void addVersionButton(Table table, ReleaseAsset asset, Color color, String statusKey) {
         table.button(b -> {
                 b.table(inner -> {
                     inner.add(asset.modVersion + " (Mindustry " + asset.mindustryVersion + ")")
                         .color(color).left().growX();
-                    inner.add("[" + status + "]").color(color.cpy().mul(0.8f)).right().padLeft(10f);
+                    inner.add(Core.bundle.get(statusKey))
+                        .color(color.cpy().mul(0.8f)).right().padLeft(10f);
                 }).growX();
             }, Styles.flatBordert, () -> showDownloadConfirm(asset))
             .growX().height(40f).padBottom(2f).disabled(b -> !asset.compatible).row();
     }
 
     private void showDownloadConfirm(ReleaseAsset asset) {
-        ui.showConfirm("@confirm",
-            "确定要下载版本 " + asset.modVersion + " 吗？\n" +
-                "Mindustry版本要求: " + asset.mindustryVersion + "\n\n" +
-                (asset.releaseBody.length() > 200 ? asset.releaseBody.substring(0, 200) + "..." : asset.releaseBody),
+        // 使用Mindustry的确认对话框
+        ui.showConfirm(Core.bundle.get("update.confirm.title"),
+            Core.bundle.format("update.confirm.message",
+                asset.modVersion,
+                asset.mindustryVersion,
+                (asset.releaseBody.length() > 200 ? asset.releaseBody.substring(0, 200) + "..." : asset.releaseBody)),
             () -> {
                 // 调用mod安装方法
                 ui.mods.githubImportMod(REPO_NAME, true, asset.releaseUrl.substring(asset.releaseUrl.lastIndexOf("/") + 1));
@@ -197,7 +204,7 @@ public class ModUpdateChecker {
                     dialog.keepInScreen();
                 });
             } catch (Exception e) {
-                Log.err("解析GitHub响应失败", e);
+                Log.err(Core.bundle.get("update.error.parseFailed"), e);
                 sign = -1;
                 Core.app.post(() -> {
                     if (versionListTable != null) {
@@ -210,7 +217,7 @@ public class ModUpdateChecker {
             sign = -1;
             timer.get(1);
             autoCloseDelay = 600f;
-            Log.err("获取release失败", e);
+            Log.err(Core.bundle.get("update.error.fetchFailed"), e);
             Core.app.post(() -> {
                 if (versionListTable != null) {
                     versionListTable.clear();
@@ -270,7 +277,7 @@ public class ModUpdateChecker {
                 compatible
             );
         } else {
-            Log.warn("MI2U Update Check", "发布中存在非标准命名格式的模组文件: " + fileName);
+            Log.warn("MI2U Update Check", Core.bundle.format("update.error.nonStandardFile", fileName));
         }
         return null;
     }
@@ -281,7 +288,7 @@ public class ModUpdateChecker {
             // 这里简化处理：如果当前版本 >= 要求版本，则认为兼容
             return Version.isAtLeast(requiredVersion);
         } catch (Exception e) {
-            Log.err("检查Mindustry版本兼容性失败", e);
+            Log.err(Core.bundle.get("update.error.versionCheck"), e);
             return false;
         }
     }
