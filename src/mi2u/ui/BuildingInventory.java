@@ -74,6 +74,9 @@ public class BuildingInventory extends Element{
             return;
         }
         Core.camera.project(MI2UTmp.v3.set(-1f, -1f).scl(size * tilesize / 2f).add(build.x, build.y));
+        if(parent != null){
+            parent.stageToLocalCoordinates(MI2UTmp.v3);
+        }
         setPosition(MI2UTmp.v3.x, MI2UTmp.v3.y);
     }
 
