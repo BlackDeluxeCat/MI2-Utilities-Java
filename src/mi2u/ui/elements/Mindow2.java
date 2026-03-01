@@ -220,11 +220,21 @@ public class Mindow2 extends Table{
 
             Draw.color(Color.yellow, 1 - fraction);
             Lines.stroke(w * 2);
-            if(Align.isTop(edgesnap)) Lines.lineAngle(0, scene.getHeight(), 0, scene.getWidth());
-            if(Align.isBottom(edgesnap)) Lines.lineAngle(0, 0, 0, scene.getWidth());
+            float left = 0f, right = scene.getWidth(), bottom = 0f, top = scene.getHeight();
+            if(parent != null){
+                Vec2 vbl = parent.localToStageCoordinates(MI2UTmp.v1.setZero());
+                Vec2 vtr = parent.localToStageCoordinates(MI2UTmp.v2.set(parent.getWidth(), parent.getHeight()));
+                left = vbl.x;
+                bottom = vbl.y;
+                right = vtr.x;
+                top = vtr.y;
+            }
 
-            if(Align.isLeft(edgesnap)) Lines.lineAngle(0, 0, 90, scene.getHeight());
-            if(Align.isRight(edgesnap)) Lines.lineAngle(scene.getWidth(), 0, 90, scene.getHeight());
+            if(Align.isTop(edgesnap)) Lines.line(left, top, right, top);
+            if(Align.isBottom(edgesnap)) Lines.line(left, bottom, right, bottom);
+
+            if(Align.isLeft(edgesnap)) Lines.line(left, bottom, left, top);
+            if(Align.isRight(edgesnap)) Lines.line(right, bottom, right, top);
 
         }
     }
@@ -307,9 +317,10 @@ public class Mindow2 extends Table{
     }
 
     public int computeEdgeSnap(float mindowX, float mindowY, float dst){
-        int top = Core.graphics.getHeight() - mindowY - getHeight() * scaleY < dst ? Align.top : 0;
+        if(parent == null) return Align.center;
+        int top = parent.getHeight() - mindowY - getHeight() * scaleY < dst ? Align.top : 0;
         int bottom = mindowY < dst ? Align.bottom : 0;
-        int right = Core.graphics.getWidth() - mindowX - getWidth() * scaleX < dst ? Align.right : 0;
+        int right = parent.getWidth() - mindowX - getWidth() * scaleX < dst ? Align.right : 0;
         int left = mindowX < dst ? Align.left : 0;
         return top | left | right | bottom;
     }
