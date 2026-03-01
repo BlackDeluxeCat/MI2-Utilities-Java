@@ -455,7 +455,10 @@ public class PowerGraphTable extends Table{
             totalcons = totalcap = totalgen = 0;
 
             pg.all.each(b -> blocks[b.block.id] += 1);
-            pg.batteries.each(b -> bstore[b.block.id] += b.block.consPower.capacity);
+            pg.batteries.each(b -> {
+                if(b.block.consPower == null) return;
+                bstore[b.block.id] += b.block.consPower.capacity;
+            });
             pg.consumers.each(b -> {
                 if(b.block.consPower == null) return;
                 if(b.block.consPower instanceof ConsumePowerDynamic cons){
