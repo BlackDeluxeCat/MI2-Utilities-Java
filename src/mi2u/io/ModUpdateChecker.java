@@ -62,7 +62,38 @@ public class ModUpdateChecker {
     public float autoCloseDelay = 900f;
     public Seq<ReleaseAsset> allAssets = new Seq<>();
 
-    public void show() {
+    public void checkInBackgroundAndPopupIfNeeded(){
+        Http.get(API_URL, res -> {
+            try{
+                var json = new JsonReader().parse(res.getResultAsString());
+                Seq<ReleaseAsset> fetchedAssets = parseReleases(json);
+
+                if(hasCompatibleNewerVersion(fetchedAssets)){
+                    Core.app.post(() -> {
+                        if(dialog == null || !dialog.shown){
+                            show(fetchedAssets);
+                        }
+                    });
+                }
+            }catch(Exception e){
+                Log.err(Core.bundle.get("update.error.parseFailed"), e);
+            }
+        }, e -> Log.err(Core.bundle.get("update.error.fetchFailed"), e));
+    }
+
+    private boolean hasCompatibleNewerVersion(Seq<ReleaseAsset> assets){
+        if(MOD == null || MOD.meta == null) return false;
+        String currentModVersion = MOD.meta.version;
+        return assets.contains(asset -> asset.compatible && compareModVersions(asset.modVersion, currentModVersion) > 0);
+    }
+
+    private void show(@Nullable Seq<ReleaseAsset> prefetchedAssets) {
+        if(prefetchedAssets == null) return;
+        allAssets.clear();
+        allAssets.addAll(prefetchedAssets);
+        sign = 1;
+        autoCloseDelay = 1200f;
+
         dialog = new PopupTable() {
             {
                 setBackground(Styles.black5);
@@ -97,9 +128,6 @@ public class ModUpdateChecker {
                 this.table(git -> {
                     git.add(Iconc.github + " " + Core.bundle.get("update.availableVersions"))
                         .color(Color.lightGray).left().pad(4f);
-                    git.button("" + Iconc.refresh, MI2UVars.textb, ModUpdateChecker.this::fetchReleases)
-                        .disabled(b -> sign != -1).size(MI2UVars.buttonSize)
-                        .tooltip(Core.bundle.get("update.refresh"));
                     git.button(Iconc.link + " " + Core.bundle.get("update.githubRepo"),
                             MI2UVars.textb, () -> Core.app.openURI(GIT_URL)).grow()
                         .tooltip(Core.bundle.get("update.openLink"))
@@ -109,7 +137,7 @@ public class ModUpdateChecker {
                 this.pane(scroll -> {
                     versionListTable = scroll;
                     scroll.defaults().growX();
-                    scroll.add("@update.checking").color(Color.gray).left();
+                    buildVersionList(scroll);
                 }).minWidth(400f).maxHeight(300f).row();
 
                 // 底部按钮
@@ -120,9 +148,6 @@ public class ModUpdateChecker {
                         .update(b -> b.setText(Core.bundle.get("update.close") + " (" +
                                                    Strings.fixed((autoCloseDelay - timer.getTime(0)) / 60, 1) + "s)"));
                 }).growX().row();
-
-                // 初始获取数据
-                fetchReleases();
             }
         };
 
@@ -132,10 +157,18 @@ public class ModUpdateChecker {
     private void buildVersionList(Table table) {
         table.clear();
 
-        // 分组：精确匹配、兼容版本、不兼容版本
+        // 分组：可更新、精确匹配、兼容版本、不兼容版本
+        Seq<ReleaseAsset> updatableVersions = allAssets.select(a -> a.compatible && isNewerVersion(a.modVersion));
         Seq<ReleaseAsset> exactMatches = allAssets.select(a -> a.exactMatch);
-        Seq<ReleaseAsset> compatibleVersions = allAssets.select(a -> a.compatible && !a.exactMatch);
+        Seq<ReleaseAsset> compatibleVersions = allAssets.select(a -> a.compatible && !a.exactMatch && !isNewerVersion(a.modVersion));
         Seq<ReleaseAsset> incompatibleVersions = allAssets.select(a -> !a.compatible && !a.exactMatch);
+
+        // 显示可更新版本
+        if (!updatableVersions.isEmpty()) {
+            for (ReleaseAsset asset : updatableVersions) {
+                addVersionButton(table, asset, Color.green, "update.status.updatable");
+            }
+        }
 
         // 显示精确匹配
         if (!exactMatches.isEmpty()) {
@@ -159,6 +192,11 @@ public class ModUpdateChecker {
         }
     }
 
+    private boolean isNewerVersion(String modVersion){
+        if(MOD == null || MOD.meta == null) return false;
+        return compareModVersions(modVersion, MOD.meta.version) > 0;
+    }
+
     private void addVersionButton(Table table, ReleaseAsset asset, Color color, String statusKey) {
         table.button(b -> {
                 b.table(inner -> {
@@ -168,7 +206,7 @@ public class ModUpdateChecker {
                         .color(color.cpy().mul(0.8f)).right().padLeft(10f);
                 }).growX();
             }, Styles.flatBordert, () -> showDownloadConfirm(asset))
-            .growX().height(40f).padBottom(2f).disabled(b -> !asset.compatible).row();
+            .growX().height(40f).padBottom(2f).row();
     }
 
     private void showDownloadConfirm(ReleaseAsset asset) {
@@ -185,50 +223,9 @@ public class ModUpdateChecker {
             });
     }
 
-    private void fetchReleases() {
-        sign = 0;
-        allAssets.clear();
-
-        Http.get(API_URL, res -> {
-            sign = 1;
-            timer.get(1);
-            autoCloseDelay = 1200f;
-
-            try {
-                var json = new JsonReader().parse(res.getResultAsString());
-                parseReleases(json);
-
-                // 在主线程中更新UI
-                Core.app.post(() -> {
-                    buildVersionList(versionListTable);
-                    dialog.keepInScreen();
-                });
-            } catch (Exception e) {
-                Log.err(Core.bundle.get("update.error.parseFailed"), e);
-                sign = -1;
-                Core.app.post(() -> {
-                    if (versionListTable != null) {
-                        versionListTable.clear();
-                        versionListTable.add("@update.failCheck").color(Color.red).left();
-                    }
-                });
-            }
-        }, e -> {
-            sign = -1;
-            timer.get(1);
-            autoCloseDelay = 600f;
-            Log.err(Core.bundle.get("update.error.fetchFailed"), e);
-            Core.app.post(() -> {
-                if (versionListTable != null) {
-                    versionListTable.clear();
-                    versionListTable.add("@update.failCheck").color(Color.red).left();
-                }
-            });
-        });
-    }
-
-    private void parseReleases(JsonValue releasesJson) {
+    private Seq<ReleaseAsset> parseReleases(JsonValue releasesJson) {
         String currentModVersion = MOD.meta.version;
+        Seq<ReleaseAsset> parsedAssets = new Seq<>();
 
         for (JsonValue release : releasesJson) {
             String releaseName = release.getString("tag_name", "");
@@ -241,14 +238,15 @@ public class ModUpdateChecker {
                     ReleaseAsset parsed = parseAsset(asset, releaseName, releaseBody, currentModVersion);
                     if (parsed != null) {
                         parsed.releaseUrl = url;
-                        allAssets.add(parsed);
+                        parsedAssets.add(parsed);
                     }
                 }
             }
         }
 
         // 按版本号降序排序
-        allAssets.sort((a, b) -> compareModVersions(b.modVersion, a.modVersion));
+        parsedAssets.sort((a, b) -> compareModVersions(b.modVersion, a.modVersion));
+        return parsedAssets;
     }
 
     private ReleaseAsset parseAsset(JsonValue assetJson, String releaseName, String releaseBody, String currentModVersion) {

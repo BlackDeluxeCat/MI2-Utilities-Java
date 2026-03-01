@@ -59,7 +59,7 @@ public class MI2Utilities extends Mod{
 
             //popup too early will cause font rendering bug.
             Time.runTask(140f, () -> {
-                if(mi2ui.settings.getBool("enableUpdate")) updateChecker.show();
+                if(mi2ui.settings.getBool("enableUpdate")) updateChecker.checkInBackgroundAndPopupIfNeeded();
             });
         });
 
