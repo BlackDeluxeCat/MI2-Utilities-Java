@@ -74,6 +74,9 @@ public class ModUpdateChecker {
                             show(fetchedAssets);
                         }
                     });
+                }else{
+                    Log.infoTag("MI2U", "No newer version found.");
+
                 }
             }catch(Exception e){
                 Log.err(Core.bundle.get("update.error.parseFailed"), e);
