@@ -1,30 +1,15 @@
 package mi2u;
 
 import arc.*;
-import arc.func.*;
-import arc.graphics.*;
-import arc.graphics.g2d.*;
-import arc.math.*;
-import arc.scene.style.*;
-import arc.scene.ui.*;
 import arc.util.*;
-import arc.util.serialization.*;
 import mi2u.graphics.*;
 import mi2u.input.*;
 import mi2u.io.*;
-import mi2u.ui.elements.*;
-import mi2u.ui.stats.*;
 import mindustry.game.EventType.*;
-import mindustry.gen.*;
-import mindustry.io.*;
 import mindustry.mod.*;
-import mindustry.ui.*;
-
-import java.util.regex.*;
 
 import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
-
 
 public class MI2Utilities extends Mod{
     public static Mods.LoadedMod MOD;
