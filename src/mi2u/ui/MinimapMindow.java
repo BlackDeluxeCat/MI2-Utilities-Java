@@ -286,6 +286,31 @@ public class MinimapMindow extends Mindow2{
                     if(!player.dead()){
                         drawLabel(player.x, player.y, player.name, player.team().color, scaleFactor);
                     }
+                    if(player.pingTime > 0f && renderer.showPings){
+
+                        float rad = 12f;
+
+                        Draw.color(Tmp.c1.set(player.color).mul(Color.darkGray));
+                        Lines.stroke(Scl.scl(scaleFactor * 9f));
+                        Lines.poly(player.pingX, player.pingY, 4, scaleFactor * rad, 0f);
+
+                        Fill.poly(player.pingX, player.pingY + scaleFactor * 30f, 3, scaleFactor * 16f, -90f);
+
+                        Draw.color(player.color);
+                        Lines.stroke(Scl.scl(scaleFactor * 3f));
+                        Lines.poly(player.pingX, player.pingY, 4, scaleFactor * rad, 0f);
+
+                        Fill.poly(player.pingX, player.pingY + scaleFactor * 30f, 3, scaleFactor * 10f, -90f);
+
+                        if(player.pingText != null){
+                            drawLabel(player.pingX, player.pingY + scaleFactor * 65f, player.name, player.color, scaleFactor * 0.7f);
+                            drawLabel(player.pingX, player.pingY + scaleFactor * 50f, player.pingText, Color.white, scaleFactor);
+                        }else{
+                            drawLabel(player.pingX, player.pingY + scaleFactor * 50f, player.name, player.color, scaleFactor);
+                        }
+
+                        Draw.color();
+                    }
                 }
             }
 
