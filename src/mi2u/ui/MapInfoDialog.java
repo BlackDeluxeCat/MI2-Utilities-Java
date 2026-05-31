@@ -100,8 +100,6 @@ public class MapInfoDialog extends BaseDialog{
                     tt.row();
                     addBoolString(() -> state.rules.onlyDepositCore, "@rules.onlydepositcore", tt);
                     tt.row();
-                    addBoolString(() -> state.rules.unitAmmo, "@rules.unitammo", tt);
-                    tt.row();
                     addBoolString(() -> state.rules.possessionAllowed, "@mapInfo.possessionAllowed", tt);
                     tt.row();
                     addBoolString(() -> state.rules.coreCapture, "@rules.corecapture", tt);
