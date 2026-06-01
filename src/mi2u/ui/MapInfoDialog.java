@@ -199,7 +199,6 @@ public class MapInfoDialog extends BaseDialog{
                 teamt.labelWrap("@rules.unitdamagemultiplier");
                 teamt.labelWrap("@rules.unitcrashdamagemultiplier");
                 teamt.labelWrap("@rules.infiniteresources");
-                teamt.labelWrap("@mapInfo.infAmmo");
                 teamt.labelWrap("@mapInfo.cheat");
                 teamt.labelWrap("@mapInfo.rtsAI");
 
@@ -234,7 +233,6 @@ public class MapInfoDialog extends BaseDialog{
                     teamt.add((Mathf.equal(teamRule.unitCrashDamageMultiplier, 1f) ? "[gray]" : "[#" + teamData.team.color + "]") + teamRule.unitCrashDamageMultiplier);
 
                     teamt.add(teamRule.infiniteResources ? "✔" + Iconc.ok:"");
-                    //teamt.add(teamRule.infiniteAmmo ? "✔" + Iconc.ok:"");
                     teamt.add(teamRule.cheat ? "✔" + Iconc.ok:"");
                     teamt.add(teamRule.rtsAi ? teamRule.rtsMinWeight + "[" + teamRule.rtsMinSquad + "~" + teamRule.rtsMaxSquad + "]" + (teamRule.aiCoreSpawn ? Core.bundle.format("mapInfo.aiCoreSpawn") : "") : "");
                 }
