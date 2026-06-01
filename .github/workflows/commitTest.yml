@@ -29,6 +29,12 @@ jobs:
       id: get_version
       run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
 
+    - name: Extract min game version
+      id: get_game_ver
+      run: |
+        MIN_VER=$(grep 'minGameVersion' mod.hjson | sed 's/.*:[[:space:]]*//')
+        echo "min_game_version=$MIN_VER" >> $GITHUB_OUTPUT
+
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -49,7 +55,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: build/libs/${{ github.event.repository.name }}.jar
-        asset_name: ${{ github.event.repository.name }}.${{ steps.get_version.outputs.VERSION }}-157.1.jar
+        asset_name: ${{ github.event.repository.name }}.${{ steps.get_version.outputs.VERSION }}-${{ steps.get_game_ver.outputs.min_game_version }}.jar
         asset_content_type: application/java-archive
 
   buildWindows:
