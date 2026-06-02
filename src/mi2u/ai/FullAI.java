@@ -36,6 +36,8 @@ import mindustry.world.blocks.*;
 import mindustry.world.blocks.defense.turrets.*;
 import mindustry.world.blocks.logic.*;
 
+import java.io.Serializable;
+
 import static mi2u.MI2UVars.*;
 import static mindustry.Vars.*;
 
@@ -152,7 +154,7 @@ public class FullAI extends AIController{
         if(control.input instanceof InputOverwrite inp) inp.shoot(point, shoot, true);
     }
 
-    public static class Mode{
+    public static class Mode implements Serializable{
         public boolean enable = false;
         public String handle = "";
 
