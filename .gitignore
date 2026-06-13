@@ -161,3 +161,8 @@ android/libs/
 *.psd
 
 Game/*
+
+/docs/archived/
+
+# draw.io backup
+/docs/.$*

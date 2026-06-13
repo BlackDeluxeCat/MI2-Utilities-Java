@@ -1,0 +1,437 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.3.0 Chrome/140.0.7339.249 Electron/38.7.2 Safari/537.36" version="29.3.0">
+  <diagram name="第 1 页" id="ugFPkzqr5IZJJfW5kb1o">
+    <mxGraphModel dx="2632" dy="740" grid="1" gridSize="10" guides="1" tooltips="1" connect="0" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="XGk20LJQXmPGTgXszKcP-72" parent="1" style="swimlane;startSize=0;" value="" vertex="1">
+          <mxGeometry height="400" width="600" x="-1240" y="880" as="geometry">
+            <mxRectangle height="40" width="50" x="360" y="720" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-73" parent="XGk20LJQXmPGTgXszKcP-72" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;" value="mi2u.ui.widget" vertex="1">
+          <mxGeometry height="40" width="100" x="20" as="geometry" />
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-13" parent="XGk20LJQXmPGTgXszKcP-72" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=light-dark(#FF9933,#CCFF99);strokeWidth=2;fillColor=default;" value="PowerGraphWidget" vertex="1">
+          <mxGeometry height="60" width="120" x="10" y="319.9999999999999" as="geometry" />
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-15" parent="XGk20LJQXmPGTgXszKcP-72" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=light-dark(#FF9933,#CCFF99);strokeWidth=2;fillColor=default;" value="GameSpeedControlWidget" vertex="1">
+          <mxGeometry height="60" width="120" x="10" y="119.99999999999989" as="geometry" />
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-14" parent="XGk20LJQXmPGTgXszKcP-72" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=light-dark(#FF9933,#CCFF99);strokeWidth=2;fillColor=default;" value="WaveInfoWidget" vertex="1">
+          <mxGeometry height="60" width="120" x="10" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-51" parent="XGk20LJQXmPGTgXszKcP-72" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;/i&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/b&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;WidgetContent&lt;br&gt;&lt;/b&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;extends&amp;nbsp;&lt;b&gt;arc.util.serialization.Json&lt;/b&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;b&gt;.JsonSerializable&lt;/b&gt;&lt;/span&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/b&gt;&lt;/p&gt;&lt;hr&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ name(): String&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;// 还没想好，反正这块得是接口，implements要延后到具体小组件&lt;/span&gt;&lt;/p&gt;" vertex="1">
+          <mxGeometry height="320" width="200" x="360" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-34" edge="1" parent="XGk20LJQXmPGTgXszKcP-72" source="XGk20LJQXmPGTgXszKcP-14" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;edgeStyle=elbowEdgeStyle;" target="XGk20LJQXmPGTgXszKcP-51" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="669" y="-125.90999999999997" as="sourcePoint" />
+            <mxPoint x="475" y="15.090000000000032" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-35" edge="1" parent="XGk20LJQXmPGTgXszKcP-72" source="XGk20LJQXmPGTgXszKcP-15" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;edgeStyle=elbowEdgeStyle;" target="XGk20LJQXmPGTgXszKcP-51" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="684" y="-5" as="sourcePoint" />
+            <mxPoint x="490" y="136" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-33" edge="1" parent="XGk20LJQXmPGTgXszKcP-72" source="XGk20LJQXmPGTgXszKcP-13" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;edgeStyle=elbowEdgeStyle;" target="XGk20LJQXmPGTgXszKcP-51" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="270" y="-65" as="sourcePoint" />
+            <mxPoint x="430" y="-65" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-75" parent="1" style="swimlane;startSize=0;" value="" vertex="1">
+          <mxGeometry height="600" width="880" x="-680" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-76" parent="XGk20LJQXmPGTgXszKcP-75" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;" value="mi2u.ui.islandManager" vertex="1">
+          <mxGeometry height="40" width="100" x="20" as="geometry" />
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-18" parent="XGk20LJQXmPGTgXszKcP-75" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;spacing=2;" value="&lt;p style=&quot;text-align: center; margin: 4px 0px 0px;&quot;&gt;&lt;span style=&quot;background-color: transparent; text-align: left;&quot;&gt;&lt;b&gt;IslandOverlay&lt;/b&gt;&lt;/span&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); text-align: left;&quot;&gt;Manager&lt;/b&gt;&lt;/p&gt;&lt;hr&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ root: WidgetGroup&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ islands: Seq&amp;lt;Island&amp;gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ saveOverlay(): JsonValue&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ loadOverlay(JsonValue)&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;&lt;hr&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;// 编辑模式单例对象&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;// 小组件点菜单&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ widgetShop: WidgetShop&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;// 一级菜单，自建。包含路径面包屑、各二级设置页入口、删除图表入口&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;// islandlayout设置、islandcontent设置、capabilities设置、layouttree设置&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ islandConfiguresPanel: Table&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&amp;nbsp;// 二级设置页，同时只显示一个二级页，委托给island处理&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ islandConfigureTable: Table&lt;/p&gt;&lt;hr&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="440" width="240" x="320" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-64" parent="XGk20LJQXmPGTgXszKcP-75" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;text-align: center; margin: 4px 0px 0px;&quot;&gt;&lt;b style=&quot;background-color: transparent; text-align: left; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;WidgetShop&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;// TODO&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;小组件列表和添加器&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;添加单个Widget或者预制的Island&lt;/p&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="640" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-66" edge="1" parent="XGk20LJQXmPGTgXszKcP-75" source="x4VV83cT4qzIJcIFohZl-18" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;" target="x4VV83cT4qzIJcIFohZl-64" value="Use">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="1140" y="290" as="sourcePoint" />
+            <mxPoint x="1220" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-71" parent="XGk20LJQXmPGTgXszKcP-75" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;align=left;labelPosition=center;verticalLabelPosition=middle;verticalAlign=top;" value="静态的操纵器，依赖其他大部分组件" vertex="1">
+          <mxGeometry height="40" width="200" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="C4bwMTUnUg3LJpQlkqtF-1" parent="XGk20LJQXmPGTgXszKcP-75" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;align=left;" value="island在overlay中的拖拽行为&lt;div&gt;1.移动位置&lt;/div&gt;&lt;div&gt;2.设置吸附（如果有）：根据移动位置的结果判定&lt;/div&gt;&lt;div&gt;3.修改布局树（若移动到路径面包屑上）&lt;/div&gt;" vertex="1">
+          <mxGeometry height="120" width="200" x="40" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="C4bwMTUnUg3LJpQlkqtF-2" parent="XGk20LJQXmPGTgXszKcP-75" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;align=left;" value="&lt;div&gt;面包屑显示当前拖拽的island的路径，是单条的。路径上每个widget岛都展示为label，每个children岛除了label还有一个下拉菜单button，其中罗列了所有children的label并且有上下调序按钮。&lt;/div&gt;&lt;div&gt;widget岛的label不接受拖放。&lt;/div&gt;&lt;div&gt;用例1：路径为root-A-B-C，C想成为A的子级、和B同级，就拖拽到面包屑的A标签（追加到A.children末尾），再在A的下拉菜单中调整B、C顺序。&lt;/div&gt;&lt;div&gt;用例2：路径为root-A-B-C-D，想从widget shop添加island E，要成为C的子级、和D同级放置，将E从shop随意拖出，自动添加到root的子级，再次选中E，拖拽到root的下拉菜单的A标签进入A.children，再次选中E，拖拽到A的下拉菜单的B标签进入B.children，如此直到进入C.children，最后在C的下拉菜单调整D和E的顺序&lt;/div&gt;" vertex="1">
+          <mxGeometry height="280" width="240" x="40" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="C4bwMTUnUg3LJpQlkqtF-3" parent="XGk20LJQXmPGTgXszKcP-75" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;RootCapability&lt;/b&gt;&lt;/p&gt;&lt;span style=&quot;text-align: center;&quot;&gt;implements&lt;/span&gt;&lt;b style=&quot;text-align: center;&quot;&gt;&amp;nbsp;ElementCapability&lt;/b&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style: solid;&quot;&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;// root兜底监听器，捕捉所有类型的&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Element&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Capability&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;，事件冒泡进入根层一般是空枪了，监听器负责打log&lt;/span&gt;&lt;/p&gt;" vertex="1">
+          <mxGeometry height="160" width="200" x="640" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-58" parent="1" style="swimlane;startSize=0;" value="" vertex="1">
+          <mxGeometry height="640" width="560" x="440" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-59" parent="x4VV83cT4qzIJcIFohZl-58" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;" value="mi2u.ui.island.children" vertex="1">
+          <mxGeometry height="40" width="100" x="20" as="geometry" />
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-41" parent="x4VV83cT4qzIJcIFohZl-58" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;ChildrenLayout&lt;/b&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;extends&amp;nbsp;&lt;b&gt;arc.util.serialization.Json&lt;/b&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;b&gt;.JsonSerializable&lt;/b&gt;&lt;/span&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;apply(Table, Seq&amp;lt;Island&amp;gt;)&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;buildConfigureTable(Island, LayoutConfigureTable)&lt;/p&gt;" vertex="1">
+          <mxGeometry height="120" width="200" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-2" parent="x4VV83cT4qzIJcIFohZl-58" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;ColumnLayout&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;div style=&quot;height:2px;&quot;&gt;+ verticalScorllable: boolean&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="320" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-3" edge="1" parent="x4VV83cT4qzIJcIFohZl-58" source="x4VV83cT4qzIJcIFohZl-2" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;" target="XGk20LJQXmPGTgXszKcP-41" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="460" y="60" as="sourcePoint" />
+            <mxPoint x="620" y="60" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-6" parent="x4VV83cT4qzIJcIFohZl-58" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;TabbedLayout&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;div style=&quot;height:2px;&quot;&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="200" x="40" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-7" edge="1" parent="x4VV83cT4qzIJcIFohZl-58" source="x4VV83cT4qzIJcIFohZl-6" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;" target="XGk20LJQXmPGTgXszKcP-41" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="340" y="220" as="sourcePoint" />
+            <mxPoint x="590" y="196.25" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-8" parent="x4VV83cT4qzIJcIFohZl-58" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;&lt;strike&gt;StackLayout&lt;/strike&gt;&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;div style=&quot;height:2px;&quot;&gt;// 目前暂未发现此布局的应用面&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="40" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-9" edge="1" parent="x4VV83cT4qzIJcIFohZl-58" source="x4VV83cT4qzIJcIFohZl-8" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;" target="XGk20LJQXmPGTgXszKcP-41" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="360" y="316" as="sourcePoint" />
+            <mxPoint x="590" y="233.75" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-70" parent="x4VV83cT4qzIJcIFohZl-58" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;&lt;strike&gt;TableLayout&lt;/strike&gt;&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;div style=&quot;height:2px;&quot;&gt;// 用Column和Row组合代替&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="320" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-71" edge="1" parent="x4VV83cT4qzIJcIFohZl-58" source="x4VV83cT4qzIJcIFohZl-70" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;" target="XGk20LJQXmPGTgXszKcP-41" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="360" y="316" as="sourcePoint" />
+            <mxPoint x="590" y="233.75" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-95" parent="x4VV83cT4qzIJcIFohZl-58" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;align=left;" value="问：Tabbed布局的接口不支持传入当前展示页码&lt;div&gt;页码状态也不适合放在ChildrenIsland&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;解法：childrenlayout有状态，可序列化&lt;/div&gt;" vertex="1">
+          <mxGeometry height="160" width="200" x="320" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-39" parent="x4VV83cT4qzIJcIFohZl-58" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;ChildrenContent&lt;/b&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;&amp;nbsp;&lt;/b&gt;implements&amp;nbsp;&lt;b&gt;arc.util.serialization.Json&lt;/b&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;b&gt;.JsonSerializable&lt;/b&gt;&lt;/span&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&amp;nbsp;// 统一的children序列数据模型+&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;可更换的布局模式&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ children:Seq&amp;lt;Island&amp;gt;&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ childrenCount(): int&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ childrenLayout: ChildrenLayout&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ depth: int &amp;lt;= 4 // 非必要不提升&lt;/span&gt;&lt;/p&gt;" vertex="1">
+          <mxGeometry height="160" width="200" x="40" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-42" edge="1" parent="x4VV83cT4qzIJcIFohZl-58" source="XGk20LJQXmPGTgXszKcP-39" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;edgeStyle=elbowEdgeStyle;" target="XGk20LJQXmPGTgXszKcP-41" value="Use">
+          <mxGeometry relative="1" width="160" x="-0.3433" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="290" y="390" />
+            </Array>
+            <mxPoint x="-510" y="832.3600000000001" as="sourcePoint" />
+            <mxPoint x="-340" y="815.36" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-4" parent="x4VV83cT4qzIJcIFohZl-58" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;Row&lt;/b&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Layout&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;div style=&quot;height:2px;&quot;&gt;+ horizontalScrollable: boolean&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="320" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-5" edge="1" parent="x4VV83cT4qzIJcIFohZl-58" source="x4VV83cT4qzIJcIFohZl-4" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;" target="XGk20LJQXmPGTgXszKcP-41" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <Array as="points" />
+            <mxPoint x="310" y="150" as="sourcePoint" />
+            <mxPoint x="590" y="146.25" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-53" edge="1" parent="1" source="x4VV83cT4qzIJcIFohZl-18" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;elbow=vertical;" target="XGk20LJQXmPGTgXszKcP-44" value="Use">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="158.57" y="720.33" as="sourcePoint" />
+            <mxPoint x="-50.43000000000001" y="963.33" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-89" parent="1" style="swimlane;startSize=0;" value="" vertex="1">
+          <mxGeometry height="600" width="680" x="-480" y="1440" as="geometry" />
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-90" parent="x4VV83cT4qzIJcIFohZl-89" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;" value="mi2u.ui.capability" vertex="1">
+          <mxGeometry height="40" width="140" x="20" as="geometry" />
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-96" parent="x4VV83cT4qzIJcIFohZl-89" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;ElementCapability&lt;/b&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;extends&lt;b&gt;&amp;nbsp;&lt;/b&gt;&lt;span style=&quot;background-color: transparent; text-align: left;&quot;&gt;&lt;b&gt;arc.scene.event.EventListener,&amp;nbsp;&lt;/b&gt;&lt;/span&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;arc.util.serialization.Json&lt;/b&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;b&gt;.JsonSerializable&lt;/b&gt;&lt;/span&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;// 能力响应Listener，可响应后代小组件发出的能力动作&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ default EventListener.handle(SceneEvent): boolean // 事件基础状态管理，路由查询事件和命令事件&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ default onQuery(SceneEvent) // 以Event为载体回传T的状态&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ onChange(&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;SceneEvent&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;) // 以Event为命令操作T&lt;/span&gt;&lt;/p&gt;" vertex="1">
+          <mxGeometry height="320" width="360" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-16" parent="x4VV83cT4qzIJcIFohZl-89" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;CapabilityEvent&lt;/b&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;extends &lt;b&gt;arc.scene.event&lt;/b&gt;.&lt;b&gt;SceneEvent&lt;br&gt;&lt;/b&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style: solid;&quot;&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;// 只关心ElementCapability&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;// TODO每个Event按需添加自己的数据字段&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;+ isQuery: boolean&lt;/p&gt;" vertex="1">
+          <mxGeometry height="200" width="200" x="440" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-18" parent="x4VV83cT4qzIJcIFohZl-89" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;DragCapabilityEvent&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;div style=&quot;height:2px;&quot;&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="200" x="440" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-19" parent="x4VV83cT4qzIJcIFohZl-89" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;MinimizeCapabilityEvent&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;div style=&quot;height: 2px; margin-left: 0px;&quot;&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="200" x="440" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-20" parent="x4VV83cT4qzIJcIFohZl-89" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;ChildrenSelectCapabilityEvent&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;div style=&quot;height: 2px; margin-left: 0px;&quot;&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="200" x="440" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-21" parent="x4VV83cT4qzIJcIFohZl-89" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;ResizeCapabilityEvent&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;div style=&quot;height: 2px; margin-left: 0px;&quot;&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="200" x="440" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-25" parent="x4VV83cT4qzIJcIFohZl-89" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;SnapCapabilityEvent&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;div style=&quot;height: 2px; margin-left: 0px;&quot;&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="200" x="440" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-45" edge="1" parent="x4VV83cT4qzIJcIFohZl-89" source="CpYrbA2DbRR7NKdyHjy6-18" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;edgeStyle=elbowEdgeStyle;" target="CpYrbA2DbRR7NKdyHjy6-16" value="Extends">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <Array as="points">
+              <mxPoint x="660" y="270" />
+            </Array>
+            <mxPoint x="340" y="340" as="sourcePoint" />
+            <mxPoint x="500" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-46" edge="1" parent="x4VV83cT4qzIJcIFohZl-89" source="CpYrbA2DbRR7NKdyHjy6-19" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;edgeStyle=elbowEdgeStyle;" target="CpYrbA2DbRR7NKdyHjy6-16" value="Extends">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <Array as="points">
+              <mxPoint x="660" y="300" />
+            </Array>
+            <mxPoint x="340" y="340" as="sourcePoint" />
+            <mxPoint x="500" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-47" edge="1" parent="x4VV83cT4qzIJcIFohZl-89" source="CpYrbA2DbRR7NKdyHjy6-20" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;edgeStyle=elbowEdgeStyle;" target="CpYrbA2DbRR7NKdyHjy6-16" value="Extends">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <Array as="points">
+              <mxPoint x="660" y="260" />
+            </Array>
+            <mxPoint x="340" y="340" as="sourcePoint" />
+            <mxPoint x="500" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-48" edge="1" parent="x4VV83cT4qzIJcIFohZl-89" source="CpYrbA2DbRR7NKdyHjy6-21" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;edgeStyle=elbowEdgeStyle;" target="CpYrbA2DbRR7NKdyHjy6-16" value="Extends">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <Array as="points">
+              <mxPoint x="660" y="300" />
+            </Array>
+            <mxPoint x="340" y="340" as="sourcePoint" />
+            <mxPoint x="500" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-49" edge="1" parent="x4VV83cT4qzIJcIFohZl-89" source="CpYrbA2DbRR7NKdyHjy6-25" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;edgeStyle=elbowEdgeStyle;" target="CpYrbA2DbRR7NKdyHjy6-16" value="Extends">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <Array as="points">
+              <mxPoint x="660" y="340" />
+            </Array>
+            <mxPoint x="340" y="340" as="sourcePoint" />
+            <mxPoint x="500" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-103" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" value="&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;// 能力递归调用第二版设计：可行&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;复用SceneEvent流程&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;能力Widget.fire(XCapabilityEvent)&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;事件向上传递，逐级尝试&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;响应者添加addListener(XCapabilityCapability)（不是addCaptureListener），就能捕捉和handle事件&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;能力Widget就能从event知道事件是否被响应，并获得响应者对象，然后操作响应者对象&lt;br&gt;&lt;br&gt;例：DragCapability，拖拽把手监听自己的drag InputEvent，在InputEvent回调中&lt;br&gt;{&lt;br&gt;发送DragCapabilityEvent，向上走递归链&lt;br&gt;事件返回true后，读取event.listenerActor是为响应者&lt;br&gt;在回调剩余部分做操作，如设置响应者位置&lt;br&gt;}&lt;/p&gt;" vertex="1">
+          <mxGeometry height="280" width="250" x="-770" y="1640" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-14" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;align=left;" value="拖拽和吸附的一个小问题&lt;div&gt;吸附往往是拖拽时顺便判定的&lt;/div&gt;&lt;div&gt;而Element.fire链每次只能响应一个EventListener&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;因此拖拽把手应该承担拖拽和吸附的实现，而能力事件和监听器只提供能力模式检查和匹配&lt;br&gt;&lt;br&gt;拖拽把手fire DragCapabilityEvent&lt;/div&gt;&lt;div&gt;然后回调成功&lt;br&gt;获得响应者Responser&lt;br&gt;设置位置&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;然后再&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;fire SnapCapabilityEvent&lt;/span&gt;&lt;/div&gt;&lt;div&gt;这步检查Responser是否一致，以判断是否同时有吸附能力&lt;/div&gt;&lt;div&gt;若有，尝试寻找周围的吸附目标，类似旧的mindow实现&lt;/div&gt;&lt;div&gt;然后写入&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Responser的IslandLayout中&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="280" width="250" x="-770" y="1920" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-23" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" value="&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;// 能力递归调用第一版设计&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;//&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Island的递归调用接口&lt;/span&gt;&lt;span style=&quot;background-color: transparent; text-align: center;&quot;&gt;&amp;nbsp;recursive&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Invoke(Boolf&amp;lt;Island&amp;gt;): Island 收到&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;某个小组件的自定义请求&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;自定义请求体只能靠闭包传参了&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;Island传入自身&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;自身成功，返回自身&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;自身失败，若有父级，递归给父级，返回父级的结果&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;自身失败，若无父级，返回null&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;小组件从返回值能知道谁消费了这次调用&lt;/p&gt;" vertex="1">
+          <mxGeometry height="200" width="250" x="-770" y="1440" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-24" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" value="&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;// 能力系统的覆盖面&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;能力系统理论上可以支持任意Element&lt;br&gt;&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;但element需要自己做&lt;br&gt;1存放能力的字段&lt;br&gt;1添加和配置能力的外部入口&lt;br&gt;2序列化能力，反序列化流程逻辑&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;// 待解决的问题：比起能力组件（Event发射者）自己拿到&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;响应者&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Island element去处理，我更希望Event发射者只操作Capablity，不关心响应者，&lt;/span&gt;响应者能自己决定如何处理修改量。&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;我预期利用capability是eventlistener这一特点可能可行？&lt;br&gt;A：已经在尝试解决&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;// gpt复审问题&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;1.capabilities事件响应规则&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;合法响应者必须处理和stop事件，该响应者会成为唯一的event.listenerActor。root是兜底响应者，有兜底的能力事件监听器，生成提示或报错信息&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;2.拖拽三合一使得布局编辑和其他两者冲突：建议把布局编辑分离出来，&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;与拖拽和吸附隔离：&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;在面包屑界面做新的拖拽按钮，面包屑面板以外均无响应。&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;3.布局编辑记得拦截循环依赖，包括拖放到自己label、自己后代label、widget岛label、直接父节点（无实际修改）&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;text-align: left; margin: 0px 0px 0px 4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;4.island.parentIsland?是mod定义的布局层概念，如果null，那么island就在root。parent则是arc.ui层概念。&lt;/span&gt;&lt;/p&gt;" vertex="1">
+          <mxGeometry height="520" width="240" x="-1040" y="1440" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-51" parent="1" style="swimlane;startSize=0;" value="" vertex="1">
+          <mxGeometry height="600" width="800" x="400" y="1440" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-52" parent="CpYrbA2DbRR7NKdyHjy6-51" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;" value="mi2u.ui.island.capability" vertex="1">
+          <mxGeometry height="40" width="140" x="20" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-53" parent="CpYrbA2DbRR7NKdyHjy6-51" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;DragCapability&lt;/b&gt;&lt;/p&gt;&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: transparent;&quot;&gt;&lt;div style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;extends&lt;/span&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;&lt;/b&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;IslandCapability&lt;/b&gt;&lt;/div&gt;&lt;/span&gt;&lt;hr size=&quot;1&quot; style=&quot;text-align: center; border-style: solid;&quot;&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;// 监听响应拖拽动作的能力&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;+ deltaX: float&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;+ deltaY: float&lt;/p&gt;" vertex="1">
+          <mxGeometry height="120" width="200" x="40" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-61" parent="CpYrbA2DbRR7NKdyHjy6-51" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;MinimizeCapability&lt;/b&gt;&lt;/p&gt;&lt;span style=&quot;&quot;&gt;&lt;div style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;extends&lt;/span&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;&lt;/b&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;IslandCapability&lt;/b&gt;&lt;/div&gt;&lt;/span&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style: solid;&quot;&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;// 监听响应最小化动作的能力&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;+ minimized: boolean&lt;/p&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="320" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-62" parent="CpYrbA2DbRR7NKdyHjy6-51" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;ChildrenSelectCapability&lt;/b&gt;&lt;/p&gt;&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: transparent;&quot;&gt;&lt;div style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;extends&lt;/span&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;&lt;/b&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;IslandCapability&lt;/b&gt;&lt;/div&gt;&lt;/span&gt;&lt;hr size=&quot;1&quot; style=&quot;text-align: center; border-style: solid;&quot;&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;// 监听响应“选中某个child”动作的能力&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;+ currentIndex: int&lt;/p&gt;" vertex="1">
+          <mxGeometry height="120" width="200" x="320" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-63" parent="CpYrbA2DbRR7NKdyHjy6-51" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;ResizeCapability&lt;/b&gt;&lt;/p&gt;&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: transparent;&quot;&gt;&lt;div style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;extends&lt;/span&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;&lt;/b&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;IslandCapability&lt;/b&gt;&lt;/div&gt;&lt;/span&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style: solid;&quot;&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;// 监听响应调整尺寸动作的能力&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;+ width: float&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;+ height: float&lt;/p&gt;" vertex="1">
+          <mxGeometry height="120" width="200" x="40" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-64" parent="CpYrbA2DbRR7NKdyHjy6-51" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;SnapCapability&lt;/b&gt;&lt;/p&gt;&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: transparent;&quot;&gt;&lt;div style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;extends&lt;/span&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;&lt;/b&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;IslandCapability&lt;/b&gt;&lt;/div&gt;&lt;/span&gt;&lt;hr size=&quot;1&quot; style=&quot;text-align: center; border-style: solid;&quot;&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;// 监听响应吸附动作的能力，触发时根据owner位置尝试snap周围的元素&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;// 吸附：屏边吸附和元素吸附&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;// align标识吸附方向是否启用，无目标的方向应当空置，= center表示无吸附，align | left = 1表示向左吸附到水平target的右侧&amp;nbsp;&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;// target序列化会变成Island路径，null指代屏边吸附&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: transparent;&quot;&gt;+ snapAlign&lt;/span&gt;: int&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;+ snapHorizontalTarget: Island?&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ snapVertical&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Target&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;: Island?&lt;/span&gt;&lt;/p&gt;" vertex="1">
+          <mxGeometry height="240" width="200" x="320" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-86" parent="CpYrbA2DbRR7NKdyHjy6-51" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;IslandCapability&lt;/b&gt;&lt;/p&gt;&lt;span style=&quot;text-align: center;&quot;&gt;implements&lt;/span&gt;&lt;b style=&quot;text-align: center;&quot;&gt;&amp;nbsp;ElementCapability&lt;/b&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style: solid;&quot;&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ owner: Island&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;+ attach(Island)&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;+ onload(Island) // 反序列化时将自身属性应用给Island&lt;/p&gt;" vertex="1">
+          <mxGeometry height="160" width="200" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-88" edge="1" parent="CpYrbA2DbRR7NKdyHjy6-51" source="CpYrbA2DbRR7NKdyHjy6-63" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;edgeStyle=elbowEdgeStyle;" target="CpYrbA2DbRR7NKdyHjy6-86" value="Extends">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <Array as="points">
+              <mxPoint x="280" y="270" />
+            </Array>
+            <mxPoint x="230" y="660" as="sourcePoint" />
+            <mxPoint x="390" y="660" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-89" edge="1" parent="CpYrbA2DbRR7NKdyHjy6-51" source="CpYrbA2DbRR7NKdyHjy6-64" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;edgeStyle=elbowEdgeStyle;" target="CpYrbA2DbRR7NKdyHjy6-86" value="Extends">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <Array as="points">
+              <mxPoint x="280" y="270" />
+            </Array>
+            <mxPoint x="230" y="660" as="sourcePoint" />
+            <mxPoint x="390" y="660" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-90" edge="1" parent="CpYrbA2DbRR7NKdyHjy6-51" source="CpYrbA2DbRR7NKdyHjy6-53" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;edgeStyle=elbowEdgeStyle;" target="CpYrbA2DbRR7NKdyHjy6-86" value="Extends">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <Array as="points">
+              <mxPoint x="280" y="270" />
+            </Array>
+            <mxPoint x="230" y="660" as="sourcePoint" />
+            <mxPoint x="390" y="660" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-91" edge="1" parent="CpYrbA2DbRR7NKdyHjy6-51" source="CpYrbA2DbRR7NKdyHjy6-62" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;edgeStyle=elbowEdgeStyle;" target="CpYrbA2DbRR7NKdyHjy6-86" value="Extends">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <Array as="points">
+              <mxPoint x="280" y="270" />
+            </Array>
+            <mxPoint x="230" y="660" as="sourcePoint" />
+            <mxPoint x="390" y="660" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-92" edge="1" parent="CpYrbA2DbRR7NKdyHjy6-51" source="CpYrbA2DbRR7NKdyHjy6-61" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;edgeStyle=elbowEdgeStyle;" target="CpYrbA2DbRR7NKdyHjy6-86" value="Extends">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <Array as="points">
+              <mxPoint x="280" y="100" />
+            </Array>
+            <mxPoint x="230" y="660" as="sourcePoint" />
+            <mxPoint x="390" y="660" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gjqOen8mpRR3hYViaZnC-23" parent="CpYrbA2DbRR7NKdyHjy6-51" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;align=left;labelPosition=center;verticalLabelPosition=middle;verticalAlign=top;" value="这套能力是适配Island的具体实现&lt;div&gt;至少依赖Island类、ElementCapability接口、对应事件类&lt;/div&gt;" vertex="1">
+          <mxGeometry height="120" width="200" x="560" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-70" edge="1" parent="1" source="CpYrbA2DbRR7NKdyHjy6-51" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;" target="XGk20LJQXmPGTgXszKcP-64" value="Use">
+          <mxGeometry relative="1" width="160" x="-0.8952" y="-6" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="710" y="1260" as="sourcePoint" />
+            <mxPoint x="870" y="1260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-71" edge="1" parent="1" source="CpYrbA2DbRR7NKdyHjy6-86" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;" target="x4VV83cT4qzIJcIFohZl-96" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="760" y="1470" as="sourcePoint" />
+            <mxPoint x="920" y="1470" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-80" edge="1" parent="1" source="CpYrbA2DbRR7NKdyHjy6-63" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;" target="CpYrbA2DbRR7NKdyHjy6-21" value="Use">
+          <mxGeometry relative="1" width="160" x="-0.8241" y="-25" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="880" y="1860" as="sourcePoint" />
+            <mxPoint x="1040" y="1860" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-81" edge="1" parent="1" source="CpYrbA2DbRR7NKdyHjy6-61" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;" target="CpYrbA2DbRR7NKdyHjy6-19" value="Use">
+          <mxGeometry relative="1" width="160" x="-0.8333" y="10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="1093.42" y="1790" as="sourcePoint" />
+            <mxPoint x="620.42" y="2090" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-82" edge="1" parent="1" source="CpYrbA2DbRR7NKdyHjy6-62" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;" target="CpYrbA2DbRR7NKdyHjy6-20" value="Use">
+          <mxGeometry relative="1" width="160" x="-0.964" y="-1" as="geometry">
+            <mxPoint y="1" as="offset" />
+            <mxPoint x="1233" y="1800" as="sourcePoint" />
+            <mxPoint x="760" y="2100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-83" edge="1" parent="1" source="CpYrbA2DbRR7NKdyHjy6-64" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;" target="CpYrbA2DbRR7NKdyHjy6-25" value="Use">
+          <mxGeometry relative="1" width="160" x="-0.9213" y="3" as="geometry">
+            <mxPoint x="1" as="offset" />
+            <mxPoint x="1333" y="1820" as="sourcePoint" />
+            <mxPoint x="860" y="2120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-84" edge="1" parent="1" source="CpYrbA2DbRR7NKdyHjy6-53" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;" target="CpYrbA2DbRR7NKdyHjy6-18" value="Use">
+          <mxGeometry relative="1" width="160" x="-0.836" y="-2" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="1413" y="1850" as="sourcePoint" />
+            <mxPoint x="940" y="2150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CpYrbA2DbRR7NKdyHjy6-85" edge="1" parent="1" source="XGk20LJQXmPGTgXszKcP-44" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;" target="CpYrbA2DbRR7NKdyHjy6-86" value="Use">
+          <mxGeometry relative="1" width="160" x="-0.9337" y="11" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="-90" y="700" />
+            </Array>
+            <mxPoint x="0.4300000000000068" y="1110" as="sourcePoint" />
+            <mxPoint x="99.43" y="910" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-54" edge="1" parent="1" source="XGk20LJQXmPGTgXszKcP-51" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;edgeStyle=elbowEdgeStyle;" target="gjqOen8mpRR3hYViaZnC-8" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <Array as="points">
+              <mxPoint x="-560" y="1080" />
+            </Array>
+            <mxPoint x="-610" y="1240" as="sourcePoint" />
+            <mxPoint x="-560" y="1380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-64" parent="1" style="swimlane;startSize=0;shadow=0;" value="" vertex="1">
+          <mxGeometry height="600" width="640" x="-480" y="760" as="geometry">
+            <mxRectangle height="60" width="150" x="40" y="320" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-63" parent="XGk20LJQXmPGTgXszKcP-64" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;" value="mi2u.ui.island" vertex="1">
+          <mxGeometry height="40" width="100" x="20" as="geometry" />
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-44" parent="XGk20LJQXmPGTgXszKcP-64" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;Island&lt;/b&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: transparent; text-align: left;&quot;&gt;extends&amp;nbsp;&lt;/span&gt;&lt;b style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: transparent;&quot;&gt;&lt;/b&gt;&lt;b style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: transparent;&quot;&gt;arc.scene.ui.layout.Table&lt;/b&gt;&lt;b&gt;&lt;/b&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;&amp;nbsp;&lt;/b&gt;implements&amp;nbsp;&lt;b&gt;arc.util.serialization.Json&lt;/b&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;b&gt;.JsonSerializable&lt;/b&gt;&lt;/span&gt;&lt;b&gt;&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ name: String&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px; padding-left: 0px;&quot;&gt;+ showCondition(Boolp)&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px; padding-left: 0px;&quot;&gt;+ content: IslandContent?&lt;/p&gt;&lt;hr&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px; padding-left: 0px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ capabilities(): Seq&amp;lt;&lt;/span&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;ElementCapability&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;gt;&lt;/span&gt;&lt;/p&gt;&lt;hr&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px; padding-left: 0px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ layout: IslandLayout&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px; padding-left: 0px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ parentIsland:&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Island? // null为root&lt;/span&gt;&lt;/p&gt;&lt;hr&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px; padding-left: 0px;&quot;&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;+ rebuild()&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px; padding-left: 0px;&quot;&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px; padding-left: 0px;&quot;&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;// 除了capabilities还没拆分出去，都是委托处理&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px; padding-left: 0px;&quot;&gt;+ buildLayoutSettingsTable(Table)&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px; padding-left: 0px;&quot;&gt;+ buildCapabilitiesSettingsTable(Table)&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px; padding-left: 0px;&quot;&gt;+ buildContentSettingsTable(Table)&lt;/p&gt;" vertex="1">
+          <mxGeometry height="360" width="200" x="80" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="gjqOen8mpRR3hYViaZnC-8" parent="XGk20LJQXmPGTgXszKcP-64" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;IslandContent&lt;/b&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;&amp;nbsp;&lt;/b&gt;implements&amp;nbsp;&lt;b&gt;arc.util.serialization.Json&lt;/b&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;b&gt;.JsonSerializable&lt;/b&gt;&lt;/span&gt;&lt;b&gt;&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;// ui只关心自己的parent容器尺寸，最好不要管别的&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ build(Island)&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;// 内容是多态的，所以这部分settingTable重载实现&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ hasSetting(): boolean&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ buildSettingsTable(Table)&lt;/p&gt;" vertex="1">
+          <mxGeometry height="200" width="200" x="360" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="gjqOen8mpRR3hYViaZnC-9" edge="1" parent="XGk20LJQXmPGTgXszKcP-64" source="XGk20LJQXmPGTgXszKcP-44" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;" target="gjqOen8mpRR3hYViaZnC-8" value="Use">
+          <mxGeometry relative="1" width="160" x="-0.5" y="10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="-39.56999999999999" y="230" as="sourcePoint" />
+            <mxPoint x="59.43000000000001" y="30" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-38" parent="XGk20LJQXmPGTgXszKcP-64" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;fontFamily=Helvetica;fontSize=12;fontColor=default;fontStyle=0;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;IslandLayout&lt;/b&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;&amp;nbsp;&lt;/b&gt;implements&amp;nbsp;&lt;b&gt;arc.util.serialization.Json&lt;/b&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;b&gt;.JsonSerializable&lt;/b&gt;&lt;/span&gt;&lt;b&gt;&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;固定尺寸&lt;br&gt;+ width: float&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ height: float&lt;/p&gt;&lt;hr&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;延展尺寸&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ expandX: boolean&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ expandY: boolean&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ widthWeight: float&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ heightWeight: float&lt;/p&gt;&lt;hr&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ buildSettingsTable(Table)&lt;/span&gt;&lt;/p&gt;" vertex="1">
+          <mxGeometry height="280" width="200" x="360" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="XGk20LJQXmPGTgXszKcP-43" edge="1" parent="XGk20LJQXmPGTgXszKcP-64" source="XGk20LJQXmPGTgXszKcP-44" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;" target="XGk20LJQXmPGTgXszKcP-38" value="Use">
+          <mxGeometry relative="1" width="160" x="-0.5" y="10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="-39.569999999999936" y="230" as="sourcePoint" />
+            <mxPoint x="59.43000000000001" y="30" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gjqOen8mpRR3hYViaZnC-12" edge="1" parent="XGk20LJQXmPGTgXszKcP-64" source="XGk20LJQXmPGTgXszKcP-44" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;" target="XGk20LJQXmPGTgXszKcP-38" value="">
+          <mxGeometry relative="1" width="160" x="-0.9337" y="11" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points" />
+            <mxPoint x="280" y="217" as="sourcePoint" />
+            <mxPoint x="1400" y="403" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="x4VV83cT4qzIJcIFohZl-51" parent="1" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;text-align: center; margin: 4px 0px 0px;&quot;&gt;&lt;b style=&quot;background-color: transparent; text-align: left; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;strike&gt;LayoutTreeConfigureTable&lt;/strike&gt;&lt;/b&gt;&lt;/p&gt;&lt;p style=&quot;text-align: center; margin: 4px 0px 0px;&quot;&gt;&lt;strike&gt;&lt;span style=&quot;text-align: left;&quot;&gt;extends&amp;nbsp;&lt;/span&gt;&lt;b style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: transparent;&quot;&gt;&lt;/b&gt;&lt;b style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: transparent;&quot;&gt;arc.scene.ui.layout.Table&lt;/b&gt;&lt;b style=&quot;background-color: transparent; text-align: left; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/b&gt;&lt;/strike&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;strike&gt;// 布局树导航编辑器&lt;/strike&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;strike&gt;// Island的同级children调序、上下越级、提升为根&lt;/strike&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;strike&gt;+ selected: Island&lt;/strike&gt;&lt;/p&gt;&lt;hr&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;strike&gt;// 同级操作&lt;/strike&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;strike&gt;+ prevNeighbor(): Island?&lt;/strike&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;strike&gt;+ nextNeighbor(): Island?&lt;/strike&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;strike&gt;+ swapWithPrev(): boolean&lt;/strike&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;strike&gt;+ swapWithNext(): boolean&lt;/strike&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;strike&gt;// 父子级操作&lt;/strike&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;strike&gt;+ parentIsland(): Island?&lt;/strike&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;strike&gt;+ siblingIslands(): Seq&amp;lt;Island&amp;gt;?&lt;/strike&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;strike&gt;+ addTo(Island): boolean&lt;/strike&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;strike&gt;+ addToRoot()&lt;/strike&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;strike&gt;// parent+addTo可插入父级content.children&lt;/strike&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;strike&gt;// siblings+addTo配合可插入任意邻居的children&lt;/strike&gt;&lt;/p&gt;" vertex="1">
+          <mxGeometry height="440" width="200" x="-1600" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="C4bwMTUnUg3LJpQlkqtF-4" edge="1" parent="1" source="C4bwMTUnUg3LJpQlkqtF-3" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;" target="x4VV83cT4qzIJcIFohZl-96" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="760" y="1470" as="sourcePoint" />
+            <mxPoint x="920" y="1470" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7r4HLlJin3LZsL9xnrGo-1" edge="1" parent="1" source="XGk20LJQXmPGTgXszKcP-39" style="endArrow=block;endSize=16;endFill=0;html=1;rounded=0;" target="gjqOen8mpRR3hYViaZnC-8" value="Extends">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="300" y="1120" as="sourcePoint" />
+            <mxPoint x="460" y="1120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="MI2U Island / Capability 决策笔记&lt;br&gt;（记录近两轮架构讨论的关键结论，用于提醒未来的实现方向）&lt;br&gt;&lt;br&gt;1. Capability 无状态化&lt;br&gt;所有 ElementCapability 实现不再持有持久字段&lt;br&gt;持久状态归到语义正确的组件上&lt;br&gt;字段&#x9;原归属&#x9;现归属&lt;br&gt;currentIndex&#x9;ChildrenSelectCapability&#x9;TabbedLayout&lt;br&gt;minimized&#x9;MinimizeCapability&#x9;从 TabbedLayout.currentIndex == lastPage 推导&lt;br&gt;width, height&#x9;ResizeCapability&#x9;IslandLayout.width, height&lt;br&gt;snapAlign, snapHorizontalTarget, snapVerticalTarget&#x9;SnapCapability&#x9;IslandLayout&lt;br&gt;DragCapability.deltaX/Y 是 transient 运行时状态，不持久&lt;br&gt;结论：ElementCapability 家族彻底零序列化，只有 JsonSerializable 接口的壳（write/read 均为空实现），真正需要序列化的子类自行覆盖&lt;br&gt;&lt;br&gt;2. 事件路由机制&lt;br&gt;ElementCapability.handle(SceneEvent) 默认路由：&lt;br&gt;上问 → onQuery(event)，只有返回 true 的 capability 才认领该事件&lt;br&gt;变动 → onChange(event)，同上&lt;br&gt;Arc SceneEvent 冒泡规则：第一个返回 true 的 EventListener 会终止传播，event.listenerActor 指向该 listeners 所属的 Element&lt;br&gt;子 Element fire 事件 → 事件沿 parent 链上浮 → 逐级询问 capability → 第一个 true 胜出&lt;br&gt;3. 最小化方案 D&lt;br&gt;最小化语义：在 TabbedLayout 的 currentIndex == 0 与 currentIndex == 其他页 之间切换&lt;br&gt;TabbedLayout 是 currentIndex 的唯一真相源&lt;br&gt;MinimizeCapability 无自身状态——它只是转译器：收到事件后读 TabbedLayout.currentIndex，在 0 与 N-1 之间对切&lt;br&gt;ChildrenSelectCapability 也无自身状态——它从 TabbedLayout.currentIndex 读，tab 按钮点击时 fire event 改它&lt;br&gt;4. 最小化 UI 行为&lt;br&gt;最小化=隐内容不隐把手&lt;br&gt;全尺寸子岛（index 0）包含全部 widget 内容和把手&lt;br&gt;最小化子岛（index N-1）只包含必要把手（拖拽+最小化共用）&lt;br&gt;把手在任何深度 fire 冒泡事件均可命中祖先 Island&lt;br&gt;5. 跨组件共享参数&lt;br&gt;不使用专门 capability 承载&lt;br&gt;直接放在 Island 上的共享 map：Island.params（ObjectMap）&lt;br&gt;Widget 在 build(Island) 中读取或修改该 map&lt;br&gt;需要 UI 联动时手动调 island.rebuild()&lt;br&gt;6. 事件对象池化&lt;br&gt;所有 CapabilityEvent 子类均使用 Arc Pools 池化&lt;br&gt;使用模式：&lt;br&gt;var e = DragCapabilityEvent.obtain().setDelta(x, y);&lt;br&gt;element.fire(e);&lt;br&gt;Pools.free(e);&lt;br&gt;obtain() 负责从池中取、调用方负责 fire 后 free&lt;br&gt;7. 把手归属&lt;br&gt;UI 把手（拖拽/最小化/缩放）挂在 content 内部任意深度均可&lt;br&gt;它们只是子 Element，发事件冒泡来找祖先 Island 的 capability 响应&lt;br&gt;把手不应依赖特定 content 结构或能力位置&lt;br&gt;8. ElementCapability 泛型移除&lt;br&gt;ElementCapability → ElementCapability&lt;br&gt;T 在接口方法中从未被使用，IslandCapability 内部硬编码 Island&lt;br&gt;泛型只会导致 Seq 被迫退化 raw type" link="MI2U Island / Capability 决策笔记&#xa;（记录近两轮架构讨论的关键结论，用于提醒未来的实现方向）&#xa;&#xa;1. Capability 无状态化&#xa;所有 ElementCapability 实现不再持有持久字段&#xa;持久状态归到语义正确的组件上&#xa;字段&#x9;原归属&#x9;现归属&#xa;currentIndex&#x9;ChildrenSelectCapability&#x9;TabbedLayout&#xa;minimized&#x9;MinimizeCapability&#x9;从 TabbedLayout.currentIndex == lastPage 推导&#xa;width, height&#x9;ResizeCapability&#x9;IslandLayout.width, height&#xa;snapAlign, snapHorizontalTarget, snapVerticalTarget&#x9;SnapCapability&#x9;IslandLayout&#xa;DragCapability.deltaX/Y 是 transient 运行时状态，不持久&#xa;结论：ElementCapability 家族彻底零序列化，只有 JsonSerializable 接口的壳（write/read 均为空实现），真正需要序列化的子类自行覆盖&#xa;&#xa;2. 事件路由机制&#xa;ElementCapability.handle(SceneEvent) 默认路由：&#xa;上问 → onQuery(event)，只有返回 true 的 capability 才认领该事件&#xa;变动 → onChange(event)，同上&#xa;Arc SceneEvent 冒泡规则：第一个返回 true 的 EventListener 会终止传播，event.listenerActor 指向该 listeners 所属的 Element&#xa;子 Element fire 事件 → 事件沿 parent 链上浮 → 逐级询问 capability → 第一个 true 胜出&#xa;3. 最小化方案 D&#xa;最小化语义：在 TabbedLayout 的 currentIndex == 0 与 currentIndex == N-1（最后页）之间切换&#xa;TabbedLayout 是 currentIndex 的唯一真相源&#xa;MinimizeCapability 无自身状态——它只是转译器：收到事件后读 TabbedLayout.currentIndex，在 0 与 N-1 之间对切&#xa;ChildrenSelectCapability 也无自身状态——它从 TabbedLayout.currentIndex 读，tab 按钮点击时 fire event 改它&#xa;4. 最小化 UI 行为&#xa;最小化=隐内容不隐把手&#xa;全尺寸子岛（index 0）包含全部 widget 内容和把手&#xa;最小化子岛（index N-1）只包含必要把手（拖拽+最小化共用）&#xa;把手在任何深度 fire 冒泡事件均可命中祖先 Island&#xa;5. 跨组件共享参数&#xa;不使用专门 capability 承载&#xa;直接放在 Island 上的共享 map：Island.params（ObjectMap）&#xa;Widget 在 build(Island) 中读取或修改该 map&#xa;需要 UI 联动时手动调 island.rebuild()&#xa;6. 事件对象池化&#xa;所有 CapabilityEvent 子类均使用 Arc Pools 池化&#xa;使用模式：&#xa;var e = DragCapabilityEvent.obtain().setDelta(x, y);&#xa;element.fire(e);&#xa;Pools.free(e);&#xa;obtain() 负责从池中取、调用方负责 fire 后 free&#xa;7. 把手归属&#xa;UI 把手（拖拽/最小化/缩放）挂在 content 内部任意深度均可&#xa;它们只是子 Element，发事件冒泡来找祖先 Island 的 capability 响应&#xa;把手不应依赖特定 content 结构或能力位置&#xa;8. ElementCapability 泛型移除&#xa;ElementCapability → ElementCapability&#xa;T 在接口方法中从未被使用，IslandCapability 内部硬编码 Island&#xa;泛型只会导致 Seq 被迫退化 raw type" id="VO0Shea5-9rHVnWNDQU9-1">
+          <mxCell parent="1" style="text;whiteSpace=wrap;html=1;" vertex="1">
+            <mxGeometry height="800" width="550" x="-1640" y="1440" as="geometry" />
+          </mxCell>
+        </UserObject>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
