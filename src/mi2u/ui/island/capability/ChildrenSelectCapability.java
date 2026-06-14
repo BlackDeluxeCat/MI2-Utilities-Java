@@ -1,21 +1,19 @@
 package mi2u.ui.island.capability;
 
 import arc.scene.event.SceneEvent;
-import arc.util.serialization.Json;
-import arc.util.serialization.JsonValue;
 import mi2u.ui.capability.ChildrenSelectCapabilityEvent;
 
 /**
  * 监听响应"选中某个 child"动作的能力。
+ * <p>
+ * 不持有持久化索引状态——当前选中索引归 TabbedLayout 所有。
  */
 public class ChildrenSelectCapability extends IslandCapability{
-    public int index;
 
     @Override
     public boolean onChange(SceneEvent event){
         if(event instanceof ChildrenSelectCapabilityEvent sel){
-            index = sel.index;
-            // TODO: 切换到对应 child 的显示
+            // TODO: 将 sel.index 写入 TabbedLayout.currentIndex 并切换显示
             return true;
         }
         return false;
@@ -24,19 +22,9 @@ public class ChildrenSelectCapability extends IslandCapability{
     @Override
     public boolean onQuery(SceneEvent event){
         if(event instanceof ChildrenSelectCapabilityEvent sel){
-            sel.index = index;
+            // TODO: 从 TabbedLayout.currentIndex 读取当前选中索引
             return true;
         }
         return false;
-    }
-
-    @Override
-    public void write(Json json){
-        json.writeValue("index", index);
-    }
-
-    @Override
-    public void read(Json json, JsonValue jsonData){
-        index = json.readValue("index", int.class, 0, jsonData);
     }
 }

@@ -5,6 +5,7 @@ import arc.util.*;
 import mi2u.graphics.*;
 import mi2u.input.*;
 import mi2u.io.*;
+import mi2u.ui.*;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
 
@@ -46,6 +47,11 @@ public class MI2Utilities extends Mod{
             Time.runTask(140f, () -> {
                 if(mi2ui.settings.getBool("enableUpdate")) updateChecker.checkInBackgroundAndPopupIfNeeded();
             });
+
+
+            // reboot things
+            IslandOverlayManager overlayManager = new IslandOverlayManager();
+            overlayManager.onClientLoad();
         });
 
         Events.on(FileTreeInitEvent.class, e -> Core.app.post(MI2UShaders::load));

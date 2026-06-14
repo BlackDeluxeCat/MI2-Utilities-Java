@@ -1,25 +1,39 @@
 package mi2u.ui.island;
 
 import arc.scene.ui.layout.Table;
+import arc.util.Align;
+import arc.util.Nullable;
 import arc.util.serialization.Json;
 import arc.util.serialization.Json.JsonSerializable;
 import arc.util.serialization.JsonValue;
 
 /**
- * Island 外壳的尺寸和布局约束。
- * 包括固定尺寸、延展标记和权重。
+ * Island 外壳的尺寸、位置和布局约束。
+ * <p>
+ * 包括固定尺寸、延展标记、权重、位置和吸附状态。
  */
 public class IslandLayout implements JsonSerializable{
     public float width = -1, height = -1;
     public boolean expandX, expandY;
     public float widthWeight = 1f, heightWeight = 1f;
 
-    public IslandLayout(){
-    }
+    /** 位置。独立保存，不要直接复用 Element.x / y。 */
+    public float x, y;
 
-    public IslandLayout(float width, float height){
-        this.width = width;
-        this.height = height;
+    /**
+     * 吸附方向标识。
+     * 无目标的方向应空置（= center 表示无吸附）。
+     * target 为 null 指代屏边吸附。
+     */
+    public int snapAlign = Align.center;
+
+    /** 水平吸附目标。null 指代屏边吸附。 */
+    @Nullable public Island snapHorizontalTarget;
+
+    /** 垂直吸附目标。null 指代屏边吸附。 */
+    @Nullable public Island snapVerticalTarget;
+
+    public IslandLayout(){
     }
 
     /** 将布局设置 UI 构建到传入的 table 中。 */
@@ -34,6 +48,11 @@ public class IslandLayout implements JsonSerializable{
         json.writeValue("expandY", expandY);
         json.writeValue("widthWeight", widthWeight);
         json.writeValue("heightWeight", heightWeight);
+        json.writeValue("x", x);
+        json.writeValue("y", y);
+        json.writeValue("snapAlign", snapAlign);
+        json.writeValue("snapHorizontalTarget", snapHorizontalTarget, Island.class);
+        json.writeValue("snapVerticalTarget", snapVerticalTarget, Island.class);
     }
 
     @Override
@@ -44,5 +63,10 @@ public class IslandLayout implements JsonSerializable{
         expandY = json.readValue("expandY", boolean.class, expandY, jsonData);
         widthWeight = json.readValue("widthWeight", float.class, widthWeight, jsonData);
         heightWeight = json.readValue("heightWeight", float.class, heightWeight, jsonData);
+        x = json.readValue("x", float.class, 0f, jsonData);
+        y = json.readValue("y", float.class, 0f, jsonData);
+        snapAlign = json.readValue("snapAlign", int.class, 0, jsonData);
+        snapHorizontalTarget = json.readValue("snapHorizontalTarget", Island.class, jsonData);
+        snapVerticalTarget = json.readValue("snapVerticalTarget", Island.class, jsonData);
     }
 }

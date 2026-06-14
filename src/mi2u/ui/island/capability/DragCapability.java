@@ -1,13 +1,13 @@
 package mi2u.ui.island.capability;
 
 import arc.scene.event.SceneEvent;
-import arc.util.serialization.Json;
-import arc.util.serialization.JsonValue;
 import mi2u.ui.capability.DragCapabilityEvent;
 
 /**
  * 监听响应拖拽动作的能力。
- * onChange 收到 DragCapabilityEvent 时确认可拖拽，并记录当前 delta。
+ * onChange 收到 DragCapabilityEvent 时确认可拖拽，并累计 delta。
+ * <p>
+ * x / y 是运行时瞬态累加器，不参与序列化。
  */
 public class DragCapability extends IslandCapability{
     public transient float x, y;
@@ -20,18 +20,5 @@ public class DragCapability extends IslandCapability{
             return true;
         }
         return false;
-    }
-
-    @Override
-    public void write(Json json){
-        json.writeValue("x", x);
-        json.writeValue("y", y);
-        // drag delta 是运行时状态，暂不持久化
-    }
-
-    @Override
-    public void read(Json json, JsonValue jsonData){
-        x = json.readValue("x", Float.class, jsonData);
-        y = json.readValue("y", Float.class, jsonData);
     }
 }

@@ -1,14 +1,13 @@
 package mi2u.ui.capability;
 
 import arc.scene.event.*;
-import arc.util.serialization.Json.JsonSerializable;
 
 /**
  * 能力响应接口，可响应后代 Element 发出的能力动作。
  * <p>
  * 监听子 Element 的 SceneEvent 冒泡，路由到 onQuery / onChange 处理。
  */
-public interface ElementCapability extends EventListener, JsonSerializable{
+public interface ElementCapability extends EventListener{
 
     /**
      * 事件基础状态管理，路由查询事件和命令事件。

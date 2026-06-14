@@ -1,31 +1,30 @@
 package mi2u.ui.island.capability;
 
 import arc.scene.event.SceneEvent;
-import arc.util.serialization.Json;
-import arc.util.serialization.JsonValue;
 import mi2u.ui.capability.MinimizeCapabilityEvent;
-import mi2u.ui.island.*;
+import mi2u.ui.island.Island;
 
 import static mi2u.MI2UVars.textb;
 
 /**
  * 监听响应最小化动作的能力。
+ * <p>
+ * 不持有持久化最小化状态——最小化状态由 TabbedLayout.currentIndex 推导。
  */
 public class MinimizeCapability extends IslandCapability{
-    public boolean minimized;
 
     @Override
     public boolean onChange(SceneEvent event){
         if(event instanceof MinimizeCapabilityEvent min){
-            minimized = min.minimized;
             if(owner != null){
-                buildMinimized(owner, minimized);
+                //TODO 这里改成控制TabbedLayout
             }
             return true;
         }
         return false;
     }
 
+    @Deprecated
     public void buildMinimized(Island island, boolean minimized){
         if(minimized){
             island.clearChildren();
@@ -40,19 +39,10 @@ public class MinimizeCapability extends IslandCapability{
     @Override
     public boolean onQuery(SceneEvent event){
         if(event instanceof MinimizeCapabilityEvent min){
-            min.minimized = this.minimized;
+            // TODO: 从 TabbedLayout.currentIndex 推导最小化状态
+            // min.minimized = (tabbedLayout.currentIndex == lastPage);
             return true;
         }
         return false;
-    }
-
-    @Override
-    public void write(Json json){
-        json.writeValue("minimized", minimized);
-    }
-
-    @Override
-    public void read(Json json, JsonValue jsonData){
-        minimized = json.readValue("minimized", boolean.class, false, jsonData);
     }
 }

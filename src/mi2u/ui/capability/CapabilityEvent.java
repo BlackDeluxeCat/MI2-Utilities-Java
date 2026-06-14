@@ -1,6 +1,6 @@
 package mi2u.ui.capability;
 
-import arc.scene.event.SceneEvent;
+import arc.scene.event.*;
 
 /**
  * 能力事件基类。

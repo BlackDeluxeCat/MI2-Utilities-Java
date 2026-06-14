@@ -1,7 +1,5 @@
 package mi2u.ui.island.capability;
 
-import arc.util.serialization.Json;
-import arc.util.serialization.JsonValue;
 import mi2u.ui.capability.ElementCapability;
 import mi2u.ui.island.Island;
 
@@ -26,16 +24,5 @@ public class IslandCapability implements ElementCapability{
      * 在 read 完成后由加载方调用。
      */
     public void onload(Island island){
-    }
-
-    // -- JsonSerializable ------------------------------------------------
-    // 子类如有持久化字段应自行重写 write/read。
-
-    @Override
-    public void write(Json json){
-    }
-
-    @Override
-    public void read(Json json, JsonValue jsonData){
     }
 }

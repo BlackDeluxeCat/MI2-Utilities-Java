@@ -25,10 +25,10 @@ public class Island extends Table implements JsonSerializable{
     public Island(){
     }
 
-    public Island(String name, IslandContent content, IslandLayout layout){
+    public Island(String name, IslandContent content){
         this.name = name;
         this.content = content;
-        this.layout = layout;
+        this.layout = new IslandLayout();
     }
 
     public Seq<ElementCapability> capabilities(){
