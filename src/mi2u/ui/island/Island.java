@@ -3,6 +3,7 @@ package mi2u.ui.island;
 import arc.func.*;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
+import arc.util.*;
 import arc.util.serialization.Json;
 import arc.util.serialization.Json.JsonSerializable;
 import arc.util.serialization.JsonValue;
@@ -13,7 +14,6 @@ import mi2u.ui.capability.ElementCapability;
  * 继承 Table，持有内容、布局和能力，是被选中、拖拽、缩放、序列化的基本单位。
  */
 public class Island extends Table implements JsonSerializable{
-    public String name;
     /** 显示条件。为 Boolp 类型，TODO使用kv序列化。 */
     public transient Boolp showCondition = () -> true;
     public IslandContent content;
