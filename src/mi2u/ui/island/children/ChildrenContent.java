@@ -28,8 +28,16 @@ public class ChildrenContent implements IslandContent{
         return children.size;
     }
 
-    public void addChild(Island island){
-        children.add(island);
+    public boolean canAddChild(Island island){
+        return true;
+    }
+
+    public boolean addChild(Island island){
+        if(canAddChild(island)){
+            children.add(island);
+            return true;
+        }
+        return false;
     }
 
     public void removeChild(Island island){

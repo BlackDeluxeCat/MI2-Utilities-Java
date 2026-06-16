@@ -8,17 +8,17 @@ import arc.util.serialization.Json;
 import arc.util.serialization.Json.JsonSerializable;
 import arc.util.serialization.JsonValue;
 import mi2u.ui.capability.ElementCapability;
+import mi2u.ui.island.children.*;
 
 /**
  * Island 是唯一的运行时 UI 外壳。
  * 继承 Table，持有内容、布局和能力，是被选中、拖拽、缩放、序列化的基本单位。
  */
 public class Island extends Table implements JsonSerializable{
-    /** 显示条件。为 Boolp 类型，TODO使用kv序列化。 */
-    public transient Boolp showCondition = () -> true;
+    @Nullable private transient Island parentIsland;
+
     public IslandContent content;
     public IslandLayout layout;
-
     /** 能力列表。JSON 序列化由 write/read 手动处理。 */
     protected transient Seq<ElementCapability> capabilities = new Seq<>();
 
@@ -33,6 +33,28 @@ public class Island extends Table implements JsonSerializable{
 
     public Seq<ElementCapability> capabilities(){
         return capabilities;
+    }
+
+    public Island getParentIsland(){
+        return parentIsland;
+    }
+
+    public boolean setParentIsland(Island isle){
+        if(isle == null){
+            if(parentIsland != null && parentIsland.content instanceof ChildrenContent cc){
+                cc.removeChild(this);
+            }
+            this.parentIsland = null;
+            return true;
+        }else if(isle.content instanceof ChildrenContent cc){
+            boolean added = cc.addChild(this);
+            if(added){
+                parentIsland = isle;
+            }
+            return added;
+        }else{
+            return false;
+        }
     }
 
     /** 委托给 content.build(this) 重建 UI。由调用方在适当时机触发。 */
