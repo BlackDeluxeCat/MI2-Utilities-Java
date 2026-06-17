@@ -13,6 +13,7 @@ import arc.util.serialization.JsonValue;
  * 包括固定尺寸、延展标记、权重、位置和吸附状态。
  */
 public class IslandLayout implements JsonSerializable{
+    public final transient Island owner;
     public float width = -1, height = -1;
     public boolean expandX, expandY;
     public float widthWeight = 1f, heightWeight = 1f;
@@ -33,11 +34,14 @@ public class IslandLayout implements JsonSerializable{
     /** 垂直吸附目标。null 指代屏边吸附。 */
     @Nullable public Island snapVerticalTarget;
 
-    public IslandLayout(){
+    public IslandLayout(Island owner){
+        this.owner = owner;
     }
 
     /** 将布局设置 UI 构建到传入的 table 中。 */
     public void buildSettingsTable(Table table){
+        table.clear();
+        table.add("岛屿设置");
     }
 
     @Override
@@ -51,8 +55,8 @@ public class IslandLayout implements JsonSerializable{
         json.writeValue("x", x);
         json.writeValue("y", y);
         json.writeValue("snapAlign", snapAlign);
-        json.writeValue("snapHorizontalTarget", snapHorizontalTarget, Island.class);
-        json.writeValue("snapVerticalTarget", snapVerticalTarget, Island.class);
+        json.writeValue("snapHorizontalTarget", snapHorizontalTarget.name, Island.class);
+        json.writeValue("snapVerticalTarget", snapVerticalTarget.name, Island.class);
     }
 
     @Override
@@ -66,7 +70,8 @@ public class IslandLayout implements JsonSerializable{
         x = json.readValue("x", float.class, 0f, jsonData);
         y = json.readValue("y", float.class, 0f, jsonData);
         snapAlign = json.readValue("snapAlign", int.class, 0, jsonData);
-        snapHorizontalTarget = json.readValue("snapHorizontalTarget", Island.class, jsonData);
-        snapVerticalTarget = json.readValue("snapVerticalTarget", Island.class, jsonData);
+        // 需要加一些查找方式
+        //snapHorizontalTarget = json.readValue("snapHorizontalTarget", Island.class, jsonData);
+        //snapVerticalTarget = json.readValue("snapVerticalTarget", Island.class, jsonData);
     }
 }

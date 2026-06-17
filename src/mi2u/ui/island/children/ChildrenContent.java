@@ -57,7 +57,7 @@ public class ChildrenContent implements IslandContent{
     }
 
     @Override
-    public void buildSettingsTable(Table table){
+    public void buildSettingsTable(Table table, Island island){
         if(childrenLayout != null){
             childrenLayout.buildSettingsTable(table);
         }

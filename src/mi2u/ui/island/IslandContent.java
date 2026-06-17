@@ -21,6 +21,8 @@ public interface IslandContent extends JsonSerializable{
     }
 
     /** 将设置 UI 构建到传入的 table 中。 */
-    default void buildSettingsTable(Table table){
+    default void buildSettingsTable(Table table, Island island){
+        table.clear();
+        table.add("未实现设置");
     }
 }

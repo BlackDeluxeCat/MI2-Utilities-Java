@@ -28,7 +28,7 @@ public class Island extends Table implements JsonSerializable{
     public Island(String name, IslandContent content){
         this.name = name;
         this.content = content;
-        this.layout = new IslandLayout();
+        this.layout = new IslandLayout(this);
     }
 
     public Seq<ElementCapability> capabilities(){
@@ -37,6 +37,20 @@ public class Island extends Table implements JsonSerializable{
 
     public Island getParentIsland(){
         return parentIsland;
+    }
+
+    @Override
+    public void act(float delta){
+        actApplyIslandLayout();
+        super.act(delta);
+        pack();
+    }
+
+    protected void actApplyIslandLayout(){
+        if(parentIsland == null){
+            this.x = layout.x;
+            this.y = layout.y;
+        }
     }
 
     public boolean setParentIsland(Island isle){

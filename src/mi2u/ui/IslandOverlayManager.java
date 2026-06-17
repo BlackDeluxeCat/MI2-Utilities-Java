@@ -2,6 +2,8 @@ package mi2u.ui;
 
 import arc.*;
 import arc.func.*;
+import arc.graphics.*;
+import arc.input.*;
 import arc.scene.event.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
@@ -10,6 +12,8 @@ import mi2u.ui.elements.*;
 import mi2u.ui.island.*;
 import mi2u.ui.island.children.*;
 import mi2u.ui.island.widget.*;
+import mindustry.*;
+import mindustry.graphics.*;
 import mindustry.ui.*;
 
 import static mi2u.MI2UVars.funcSetTextb;
@@ -40,6 +44,9 @@ public class IslandOverlayManager {
         leftBranchTable.onConfirm = isle -> setSelectedIsland(isle);
         leftBranchTable.setTarget(null);
 
+        cfgSubTable = new Table();
+        cfgSubTable.background(Styles.black3);
+
         root.setFillParent(true);
         root.touchable = Touchable.childrenOnly;
         Core.scene.add(root);
@@ -48,7 +55,6 @@ public class IslandOverlayManager {
 
     // 全量重建
     public void rebuildOverlay(){
-        rebuildWidgetShop();
         leftBranchTable.setTarget(leftBranchTable.target);
         rebuildIslandConfigureTableFor(selectedIsland);
         rebuildRoot();
@@ -57,10 +63,6 @@ public class IslandOverlayManager {
     // 重建布局树
     public void rebuildRoot(){
         root.clear();
-        root.fill(shell -> {
-            shell.bottom();
-            shell.add(widgetShop);
-        });
 
         root.fill(shell -> {
             shell.top();
@@ -73,8 +75,13 @@ public class IslandOverlayManager {
         });
     }
 
+    /**推荐添加方法
+     *
+     * @param island
+     * @param parent
+     */
     public void addIsland(Island island, @Nullable Island parent){
-        if(island == null) return;
+        removeIsland(island);// 尝试移除旧父级再添加
         if (parent != null && parent.content instanceof ChildrenContent cc) {
             island.setParentIsland(parent);
         }else{
@@ -96,16 +103,17 @@ public class IslandOverlayManager {
         rebuildIslandConfigureTableFor(island);
     }
 
-    // 重建小组件商城
-    public void rebuildWidgetShop(){
+    /** 重建组件商城
+     *
+     * @param islandCons 对创建的组件进行后处理和添加到指定位置
+     */
+    public void rebuildWidgetShop(Cons<Island> islandCons){
         widgetShop.clear();
         widgetShop.button("测试文本小组件", textb, () -> {
             var widget = new TextWidget();
             widget.name = "Cat Rin";
             var island = new Island("TestTextIsland", widget);
-            island.x = root.getWidth() / 2f;
-            island.y = root.getHeight() / 2f;
-            addIsland(island, null);
+            islandCons.get(island);
         }).with(funcSetTextb);
     }
 
@@ -132,24 +140,83 @@ public class IslandOverlayManager {
                 topt.add("已选中的控件：" + getIslandName(island)).left();
                 topt.row();
                 topt.table(t -> {
-                    t.button("设置岛屿", textb, () -> island.layout.buildSettingsTable(cfgSubTable)).disabled(b -> island == null).with(funcSetTextb);
-                    t.button("设置岛屿内容", textb, () -> island.content.buildSettingsTable(cfgSubTable)).disabled(b -> island == null).with(funcSetTextb);
-                    t.button("拖拽移动" , textb, null).disabled(b -> island == null || island.parent instanceof Island).with(funcSetTextb);
-                    t.button("调换父级", textb, null).disabled(b -> island == null).with(funcSetTextb);
-                    t.button("删除", textb, () -> {
-                        removeIsland(island);
-                    }).disabled(b -> island == null).with(funcSetTextb);
+
+                    if(island == null){
+                        t.button("添加子级组件", textb, () -> {
+                            rebuildWidgetShop(isle -> {
+                                isle.layout.x = root.getWidth() / 2f;
+                                isle.layout.y = root.getHeight() / 2f;
+                                addIsland(isle, null);
+                            });
+                            cfgSubTable.clear();
+                            cfgSubTable.add(widgetShop);
+                        }).with(funcSetTextb);
+
+                    }else{
+                        t.button("岛屿设置", textb, () -> island.layout.buildSettingsTable(cfgSubTable)).with(funcSetTextb);
+
+                        t.button("内容设置", textb, () -> island.content.buildSettingsTable(cfgSubTable, island)).with(funcSetTextb);
+
+                        t.button("更改父级", textb, null).with(funcSetTextb);
+
+                        if(island.content instanceof ChildrenContent){
+                            t.button("添加子级组件", textb, () -> {
+                                rebuildWidgetShop(isle -> {
+                                    addIsland(isle, island);
+                                });
+                                cfgSubTable.clear();
+                                cfgSubTable.add(widgetShop);
+                            });
+                        }
+
+                        if(!(island.parent instanceof Island)){
+                            t.add("拖拽移动").with(l -> {
+                                l.addListener(new InputListener(){
+                                    float touchDownX, touchDownY;
+                                    float originalX, originalY;
+
+                                    @Override
+                                    public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button) {
+                                        touchDownX = x;
+                                        touchDownY = y;
+                                        originalX = island.layout.x;
+                                        originalY = island.layout.y;
+                                        l.setColor(Pal.accent);
+                                        Core.graphics.cursor(Graphics.Cursor.SystemCursor.hand);
+                                        return true;
+                                    }
+
+                                    @Override
+                                    public void touchDragged(InputEvent event, float x, float y, int pointer) {
+                                        super.touchDragged(event, x, y, pointer);
+                                        island.layout.x = originalX + x - touchDownX;
+                                        island.layout.y = originalY + y - touchDownY;
+                                    }
+
+                                    @Override
+                                    public void touchUp(InputEvent event, float x, float y, int pointer, KeyCode button) {
+                                        super.touchUp(event, x, y, pointer, button);
+                                        l.setColor(Color.white);
+                                        Core.graphics.restoreCursor();
+                                    }
+                                });
+                            });
+                        }
+                    }
+
+                    if(island != null){
+                        t.spacerX(() -> 20f);   // 删除键视觉远离其他功能键
+                        t.button("[scarlet]删除", textb, () -> {
+                            Vars.ui.showConfirm("将移除该岛屿及其包含的所有内容，确定吗？", () -> removeIsland(island));
+                        }).with(funcSetTextb);
+                    }
+
                 });
             }).padBottom(10f);
 
             main.row();
 
-            main.pane(t -> {
-                cfgSubTable = t;
-                t.background(Styles.black3);
-                t.add("TODO").grow();
-                //TODO
-            }).grow().maxHeight(600f);
+            main.pane(cfgSubTable).grow().maxHeight(600f);
         });
 
         // 其他靠Popup承担
