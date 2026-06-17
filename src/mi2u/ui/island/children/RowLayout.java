@@ -10,33 +10,37 @@ import mi2u.ui.island.Island;
  * 水平行布局。children 从左到右排列。
  */
 public class RowLayout implements ChildrenLayout{
-    public boolean horizontalScrollable;
+    public boolean scrollable;
 
     public RowLayout(){
     }
 
-    public RowLayout(boolean horizontalScrollable){
-        this.horizontalScrollable = horizontalScrollable;
+    public RowLayout(boolean scrollable){
+        this.scrollable = scrollable;
     }
 
     @Override
-    public void apply(Table table, Seq<Island> children){
-        table.clear();
-        for(Island child : children){
-            table.add(child).growY();
+    public void applyRebuild(Table table, Seq<Island> children){
+        for(Island island : children){
+            island.rebuild();
         }
-        if(horizontalScrollable){
+
+        if(scrollable){
             // TODO: 包装 ScrollPane
+        }else{
+            for(Island child : children){
+                table.add(child).growY().row();
+            }
         }
     }
 
     @Override
     public void write(Json json){
-        json.writeValue("horizontalScrollable", horizontalScrollable);
+        json.writeValue("horizontalScrollable", scrollable);
     }
 
     @Override
     public void read(Json json, JsonValue jsonData){
-        horizontalScrollable = json.readValue("horizontalScrollable", boolean.class, false, jsonData);
+        scrollable = json.readValue("horizontalScrollable", boolean.class, false, jsonData);
     }
 }

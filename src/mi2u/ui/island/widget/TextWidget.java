@@ -11,7 +11,7 @@ public class TextWidget extends Table implements WidgetContent{
     }
 
     @Override
-    public void build(Island island) {
+    public void rebuild(Island island) {
         island.background(Styles.black3);
         island.add(name);
     }

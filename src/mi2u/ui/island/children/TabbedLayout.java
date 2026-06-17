@@ -24,12 +24,12 @@ public class TabbedLayout implements ChildrenLayout{
     }
 
     @Override
-    public void apply(Table table, Seq<Island> children){
-        table.clear();
+    public void applyRebuild(Table table, Seq<Island> children){
         if(children.size == 0) return;
 
         int idx = Mathf.clamp(currentIndex, 0, children.size - 1);
         Island selected = children.get(idx);
+        selected.rebuild();
         table.add(selected).grow();
     }
 

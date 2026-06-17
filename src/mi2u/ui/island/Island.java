@@ -1,9 +1,7 @@
 package mi2u.ui.island;
 
-import arc.func.*;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
-import arc.util.*;
 import arc.util.serialization.Json;
 import arc.util.serialization.Json.JsonSerializable;
 import arc.util.serialization.JsonValue;
@@ -15,7 +13,7 @@ import mi2u.ui.island.children.*;
  * 继承 Table，持有内容、布局和能力，是被选中、拖拽、缩放、序列化的基本单位。
  */
 public class Island extends Table implements JsonSerializable{
-    @Nullable private transient Island parentIsland;
+    private transient Island parentIsland;  // 仅根节点为null
 
     public IslandContent content;
     public IslandLayout layout;
@@ -43,14 +41,12 @@ public class Island extends Table implements JsonSerializable{
     public void act(float delta){
         actApplyIslandLayout();
         super.act(delta);
-        pack();
+        //pack();
     }
 
     protected void actApplyIslandLayout(){
-        if(parentIsland == null){
-            this.x = layout.x;
-            this.y = layout.y;
-        }
+        this.x = layout.x;
+        this.y = layout.y;
     }
 
     public boolean setParentIsland(Island isle){
@@ -71,14 +67,14 @@ public class Island extends Table implements JsonSerializable{
         }
     }
 
-    /** 委托给 content.build(this) 重建 UI。由调用方在适当时机触发。 */
+    /** 委托给 content.build(this) 轻操作重建岛屿。 */
     public void rebuild(){
         clear();
         for(ElementCapability cap : capabilities){
             addListener(cap);
         }
         if(content != null){
-            content.build(this);
+            content.rebuild(this);
         }
     }
 

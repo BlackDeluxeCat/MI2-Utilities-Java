@@ -11,9 +11,10 @@ public interface IslandContent extends JsonSerializable{
 
     /**
      * 将内容 UI 构建到 island 中。
+     * 只放轻操作
      * @param island 只读上下文，不应修改树结构。
      */
-    void build(Island island);
+    void rebuild(Island island);
 
     /** 是否有设置项。 */
     default boolean hasSetting(){

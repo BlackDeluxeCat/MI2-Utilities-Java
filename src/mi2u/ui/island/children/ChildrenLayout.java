@@ -14,10 +14,9 @@ import mi2u.ui.island.Island;
 public interface ChildrenLayout extends JsonSerializable{
 
     /**
-     * 将 children 按布局策略填充到 table 中。
-     * 此方法在 Island.rebuild() 或 content.build() 中被调用。
+     * rebuild所有children，将 children 按布局策略填充到 table 中。
      */
-    void apply(Table table, Seq<Island> children);
+    void applyRebuild(Table table, Seq<Island> children);
 
     /**
      * 将布局的设置 UI 构建到传入的 table 中。
