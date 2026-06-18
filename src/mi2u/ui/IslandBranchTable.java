@@ -54,7 +54,7 @@ public class IslandBranchTable extends Table {
         pack();
     }
 
-    public void rebuildMainColumn(Table t) {
+    protected void rebuildMainColumn(Table t) {
         t.clear();
         t.top();
         t.defaults().growX().width(100f);
@@ -74,7 +74,7 @@ public class IslandBranchTable extends Table {
         }
     }
 
-    public void rebuildSubColumnFor(Table t, Seq<Island> seq) {
+    protected void rebuildSubColumnFor(Table t, Seq<Island> seq) {
         t.clear();
         t.top();
         if (seq == null) return;
