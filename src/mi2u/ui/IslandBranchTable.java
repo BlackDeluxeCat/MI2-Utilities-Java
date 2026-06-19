@@ -19,7 +19,7 @@ public class IslandBranchTable extends Table {
     protected Island target;
     public Boolf<Island> canConfirmValidation;
     public Cons<Island> onConfirm;
-    public Func<Island, String> confirmTextProvider = island -> "切换到[accent]" + IslandOverlayManager.getIslandName(island);
+    public Func<Island, String> confirmTextProvider = island -> "切换到[accent]" + Island.getIslandName(island);
 
     Table mainColumn = new Table();
     Table subColumn = new Table();
@@ -74,7 +74,7 @@ public class IslandBranchTable extends Table {
         for (int i = seq.size - 1; i >= 0; i--) {
             var isle = seq.get(i);
             t.row();
-            t.button(IslandOverlayManager.getIslandName(isle) + " > ", textb, () -> setTarget(isle)).with(funcSetTextb).with(b -> b.getLabel().setAlignment(Align.left));
+            t.button(Island.getIslandName(isle) + " > ", textb, () -> setTarget(isle)).with(funcSetTextb).with(b -> b.getLabel().setAlignment(Align.left));
         }
     }
 
@@ -84,7 +84,7 @@ public class IslandBranchTable extends Table {
         if (seq == null) return;
         t.defaults().growX().width(80f);
         for (var isle : seq) {
-            t.button(IslandOverlayManager.getIslandName(isle), textb, () -> {
+            t.button(Island.getIslandName(isle), textb, () -> {
                 setTarget(isle);
             }).with(funcSetTextb).with(b -> b.getLabel().setAlignment(Align.left));
             t.row();

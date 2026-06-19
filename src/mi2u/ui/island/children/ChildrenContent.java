@@ -17,9 +17,6 @@ public class ChildrenContent implements IslandContent{
     public Seq<Island> children = new Seq<>();
     public ChildrenLayout childrenLayout;
 
-    public ChildrenContent(){
-    }
-
     public ChildrenContent(ChildrenLayout childrenLayout){
         this.childrenLayout = childrenLayout;
     }

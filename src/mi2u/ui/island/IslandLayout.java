@@ -19,6 +19,7 @@ public class IslandLayout implements JsonSerializable{
     public float widthWeight = 1f, heightWeight = 1f;
 
     /** 位置。独立保存，不要直接复用 Element.x / y。 */
+    public transient boolean positionManaged = false;
     public float x, y;
 
     /**

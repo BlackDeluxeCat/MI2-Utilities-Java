@@ -15,6 +15,7 @@ public class RootStackLayout implements ChildrenLayout{
     @Override
     public void applyRebuild(Table table, Seq<Island> children){
         for(Island child : children){
+            child.layout.positionManaged = false;
             child.rebuild();
             table.addChild(child);
         }

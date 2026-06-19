@@ -3,6 +3,7 @@ package mi2u.ui;
 import arc.func.*;
 import arc.scene.ui.layout.*;
 import mi2u.ui.island.*;
+import mi2u.ui.island.children.*;
 import mi2u.ui.island.widget.*;
 
 import static mi2u.MI2UVars.funcSetTextb;
@@ -26,10 +27,19 @@ public class IslandWidgetShop extends Table {
     /** 重建组件商城 */
     public void rebuild(){
         clear();
+        defaults().uniformX();
         button("测试文本", textb, () -> {
-            var widget = new TextWidget();
-            widget.name = "Cat Rin";
-            var island = new Island("TestText", widget);
+            var island = new Island("TestText", new TextWidget("Cat Rin"));
+            click(island);
+        }).with(funcSetTextb);
+
+        button("Column外壳", textb, () -> {
+            var island = new Island("Column", new ChildrenContent(new ColumnLayout()));
+            click(island);
+        }).with(funcSetTextb);
+
+        button("Row外壳", textb, () -> {
+            var island = new Island("Row", new ChildrenContent(new RowLayout()));
             click(island);
         }).with(funcSetTextb);
     }

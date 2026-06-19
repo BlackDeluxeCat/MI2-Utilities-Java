@@ -22,25 +22,30 @@ public class RowLayout implements ChildrenLayout{
     @Override
     public void applyRebuild(Table table, Seq<Island> children){
         for(Island island : children){
+            island.layout.positionManaged = true;
             island.rebuild();
+        }
+
+        if(children.isEmpty()){
+            table.add("<Row>");
         }
 
         if(scrollable){
             // TODO: 包装 ScrollPane
         }else{
             for(Island child : children){
-                table.add(child).growY().row();
+                table.add(child).growY();
             }
         }
     }
 
     @Override
     public void write(Json json){
-        json.writeValue("horizontalScrollable", scrollable);
+        json.writeValue("scrollable", scrollable);
     }
 
     @Override
     public void read(Json json, JsonValue jsonData){
-        scrollable = json.readValue("horizontalScrollable", boolean.class, false, jsonData);
+        scrollable = json.readValue("scrollable", boolean.class, false, jsonData);
     }
 }

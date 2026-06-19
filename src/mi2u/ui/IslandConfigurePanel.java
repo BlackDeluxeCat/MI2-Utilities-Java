@@ -26,10 +26,12 @@ public class IslandConfigurePanel extends Table {
     protected IslandWidgetShop widgetShop = new IslandWidgetShop();
     public Cons<Island> callDelete;
     public Cons2<Island, Island> callCreateChildInsideParent;
+    public Cons2<Island, Island> callChangeIslandParent;
 
-    public IslandConfigurePanel(Cons2<Island, Island> callCreateChildInsideParent, Cons<Island> callDelete) {
+    public IslandConfigurePanel(Cons2<Island, Island> callCreateChildInsideParent, Cons<Island> callDelete, Cons2<Island, Island> callChangeIslandParent) {
         this.callCreateChildInsideParent = callCreateChildInsideParent;
         this.callDelete = callDelete;
+        this.callChangeIslandParent = callChangeIslandParent;
         rebuild();
     }
 
@@ -56,7 +58,7 @@ public class IslandConfigurePanel extends Table {
         clear();
         add(infoTable).padBottom(10f);
         row();
-        add(configTable);
+        add(configTable).growX();
     }
 
     public void rebuildIslandInfo(Table table, Island island){
@@ -140,7 +142,7 @@ public class IslandConfigurePanel extends Table {
     public void rebuildConfigParentChange(Table t, Island island){
         parentSelectorTable.build();
         parentSelectorTable.setTarget(island);
-        parentSelectorTable.onConfirm = island::setParentIsland;
+        parentSelectorTable.onConfirm = parent -> callChangeIslandParent.get(island, parent);
         parentSelectorTable.canConfirmValidation = isle -> isle.content instanceof ChildrenContent cc && cc.canAddChild(island);
         t.clear();
         t.add(parentSelectorTable);

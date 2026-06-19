@@ -41,12 +41,13 @@ public class Island extends Table implements JsonSerializable{
     public void act(float delta){
         actApplyIslandLayout();
         super.act(delta);
-        //pack();
     }
 
     protected void actApplyIslandLayout(){
-        this.x = layout.x;
-        this.y = layout.y;
+        if(!layout.positionManaged){
+            this.x = layout.x;
+            this.y = layout.y;
+        }
     }
 
     public boolean setParentIsland(Island pare){
@@ -111,5 +112,9 @@ public class Island extends Table implements JsonSerializable{
         }
 
         // read 之后调用方应调用 rebuild() 重建 UI
+    }
+
+    public static String getIslandName(Island island){
+        return island == null || island.name == null || island.name.isEmpty() ? "<Invalid>" : island.name;
     }
 }

@@ -19,10 +19,20 @@ public class ColumnLayout implements ChildrenLayout{
         this.scrollable = scrollable;
     }
 
+    /**
+     *
+     * @param table an empty table, usually island
+     * @param children children list
+     */
     @Override
     public void applyRebuild(Table table, Seq<Island> children){
         for(Island island : children){
+            island.layout.positionManaged = true;
             island.rebuild();
+        }
+
+        if(children.isEmpty()){
+            table.add("<Column>");
         }
 
         if(scrollable){
@@ -31,16 +41,17 @@ public class ColumnLayout implements ChildrenLayout{
             for(Island child : children){
                 table.add(child).growX().row();
             }
+            table.pack();
         }
     }
 
     @Override
     public void write(Json json){
-        json.writeValue("verticalScrollable", scrollable);
+        json.writeValue("scrollable", scrollable);
     }
 
     @Override
     public void read(Json json, JsonValue jsonData){
-        scrollable = json.readValue("verticalScrollable", boolean.class, false, jsonData);
+        scrollable = json.readValue("scrollable", boolean.class, false, jsonData);
     }
 }

@@ -1,23 +1,18 @@
 package mi2u.ui;
 
 import arc.*;
-import arc.func.*;
 import arc.scene.event.*;
 import arc.scene.ui.layout.*;
-import arc.struct.*;
 import arc.util.*;
 import mi2u.ui.island.*;
 import mi2u.ui.island.children.*;
-import mi2u.ui.island.widget.*;
 import mindustry.ui.*;
 
-//TODO将root和islandConfigureContainer抽离为独立widgetisland
-//TODO将父子岛屿扁平化存储
+//TODO将islandConfigureContainer抽离为独立widgetisland
 public class IslandOverlayManager {
     public boolean editMode = true;
     // root不会被序列化
     public Island root;
-    public Seq<Island> rootIslands = new Seq<>();
     public Island selectedIsland;
 
     /** island设置面板 */
@@ -51,7 +46,8 @@ public class IslandOverlayManager {
 
         islandConfigurePanel = new IslandConfigurePanel(
                 this::addIsland,
-                this::removeIsland
+                this::removeIsland,
+                this::addIsland
         );
         islandConfigurePanel.setTarget(root);
 
@@ -75,16 +71,12 @@ public class IslandOverlayManager {
             // 尝试移除旧父级再添加
             island.setParentIsland(null);
             island.setParentIsland(parent);
-            if(!rootIslands.contains(island)){
-                rootIslands.add(island);
-            }
         }
         leftBranchTable.setTarget(leftBranchTable.getTarget());
     }
 
     public void removeIsland(Island island){
         island.setParentIsland(null);
-        rootIslands.remove(island);
         if(selectedIsland == island) setSelectedIsland(root);
     }
 
@@ -94,7 +86,4 @@ public class IslandOverlayManager {
         leftBranchTable.setTarget(selectedIsland);
     }
 
-    public static String getIslandName(Island island){
-        return island == null || island.name == null || island.name.isEmpty() ? "<Invalid>" : island.name;
-    }
 }
