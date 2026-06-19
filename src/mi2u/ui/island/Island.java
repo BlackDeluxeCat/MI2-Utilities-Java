@@ -49,17 +49,19 @@ public class Island extends Table implements JsonSerializable{
         this.y = layout.y;
     }
 
-    public boolean setParentIsland(Island isle){
-        if(isle == null){
+    public boolean setParentIsland(Island pare){
+        if(pare == null){
             if(parentIsland != null && parentIsland.content instanceof ChildrenContent cc){
                 cc.removeChild(this);
+                parentIsland.rebuild();
             }
-            this.parentIsland = null;
+            parentIsland = null;
             return true;
-        }else if(isle.content instanceof ChildrenContent cc){
+        }else if(pare.content instanceof ChildrenContent cc){
             boolean added = cc.addChild(this);
             if(added){
-                parentIsland = isle;
+                parentIsland = pare;
+                parentIsland.rebuild();
             }
             return added;
         }else{

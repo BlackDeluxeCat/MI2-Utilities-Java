@@ -10,24 +10,32 @@ import mi2u.ui.island.*;
 import mi2u.ui.island.children.*;
 import mindustry.*;
 import mindustry.graphics.*;
+import mindustry.ui.*;
 
 import static mi2u.MI2UVars.funcSetTextb;
 import static mi2u.MI2UVars.textb;
 
 public class IslandConfigurePanel extends Table {
-    public Island target;
+    protected Island target;
+    // 框架
     protected Table infoTable = new Table();
     protected Table configTable = new Table();
+
+    // 设置页
     protected IslandBranchTable parentSelectorTable = new IslandBranchTable();
     protected IslandWidgetShop widgetShop = new IslandWidgetShop();
-    public Cons<Island> callCreateChild, callDelete;
+    public Cons<Island> callDelete;
+    public Cons2<Island, Island> callCreateChildInsideParent;
 
-    public IslandConfigurePanel(Cons<Island> callCreateChild, Cons<Island> callDelete) {
-        this.callCreateChild = callCreateChild;
+    public IslandConfigurePanel(Cons2<Island, Island> callCreateChildInsideParent, Cons<Island> callDelete) {
+        this.callCreateChildInsideParent = callCreateChildInsideParent;
         this.callDelete = callDelete;
-        widgetShop.onCreate = callCreateChild;
+        rebuild();
     }
 
+    /**
+     * @param target 设置页所显示的目标岛屿
+     */
     public void setTarget(Island target){
         if(target != null && this.target != target){
             this.target = target;
@@ -40,9 +48,13 @@ public class IslandConfigurePanel extends Table {
         return target;
     }
 
+    // 以下是自构建相关方法
     public void rebuild(){
+        infoTable.background(Styles.black3);
+        configTable.background(Styles.black3);
+
         clear();
-        add(infoTable);
+        add(infoTable).padBottom(10f);
         row();
         add(configTable);
     }
@@ -64,18 +76,7 @@ public class IslandConfigurePanel extends Table {
             t.button("更改父级", textb, () -> rebuildConfigParentChange(configTable, target)).with(funcSetTextb);
 
             if(island.content instanceof ChildrenContent){
-                t.button("添加子级组件", textb, () -> {
-
-                    rebuildWidgetShop(isle -> {
-                        if(island == root){
-                            isle.layout.x = root.getWidth() / 2f;
-                            isle.layout.y = root.getHeight() / 2f;
-                        }
-                        addIsland(isle, island);
-                    });
-                    cfgSubTable.clear();
-                    cfgSubTable.add(widgetShop);
-                }).with(funcSetTextb);
+                t.button("添加子级组件", textb, () -> rebuildConfigAddChild(configTable, target)).with(funcSetTextb);
             }
 
             if(island.parent instanceof Island){
@@ -120,6 +121,12 @@ public class IslandConfigurePanel extends Table {
         });
     }
 
+    public void rebuildConfigAddChild(Table t, Island parent){
+        t.clear();
+        widgetShop.onCreate = child -> callCreateChildInsideParent.get(child, parent);
+        t.add(widgetShop);
+    }
+
     public void rebuildConfigLayout(Table t, Island island){
         t.clear();
         island.layout.buildSettingsTable(t);
@@ -133,6 +140,8 @@ public class IslandConfigurePanel extends Table {
     public void rebuildConfigParentChange(Table t, Island island){
         parentSelectorTable.build();
         parentSelectorTable.setTarget(island);
+        parentSelectorTable.onConfirm = island::setParentIsland;
+        parentSelectorTable.canConfirmValidation = isle -> isle.content instanceof ChildrenContent cc && cc.canAddChild(island);
         t.clear();
         t.add(parentSelectorTable);
     }

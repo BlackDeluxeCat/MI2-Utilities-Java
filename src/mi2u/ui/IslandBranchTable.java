@@ -17,6 +17,7 @@ import static mi2u.MI2UVars.textb;
  */
 public class IslandBranchTable extends Table {
     protected Island target;
+    public Boolf<Island> canConfirmValidation;
     public Cons<Island> onConfirm;
     public Func<Island, String> confirmTextProvider = island -> "切换到[accent]" + IslandOverlayManager.getIslandName(island);
 
@@ -36,7 +37,10 @@ public class IslandBranchTable extends Table {
 
         button("", textb, () -> {
             if (onConfirm != null) onConfirm.get(target);
-        }).with(funcSetTextb).wrapLabel(true).growX().update(b -> b.setText(confirmTextProvider.get(target)));
+        }).with(funcSetTextb).wrapLabel(true).growX().update(b -> b.setText(confirmTextProvider.get(target))).disabled(b -> {
+            if(canConfirmValidation != null) return !canConfirmValidation.get(target);
+            return false;
+        });
     }
 
     public Island getTarget(){
