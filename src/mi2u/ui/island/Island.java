@@ -1,11 +1,10 @@
 package mi2u.ui.island;
 
-import arc.scene.ui.layout.Table;
-import arc.struct.Seq;
-import arc.util.serialization.Json;
-import arc.util.serialization.Json.JsonSerializable;
-import arc.util.serialization.JsonValue;
-import mi2u.ui.capability.ElementCapability;
+import arc.scene.ui.layout.*;
+import arc.struct.*;
+import arc.util.serialization.*;
+import arc.util.serialization.Json.*;
+import mi2u.ui.capability.*;
 import mi2u.ui.island.children.*;
 
 /**
@@ -13,19 +12,17 @@ import mi2u.ui.island.children.*;
  * 继承 Table，持有内容、布局和能力，是被选中、拖拽、缩放、序列化的基本单位。
  */
 public class Island extends Table implements JsonSerializable{
-    private transient Island parentIsland;  // 仅根节点为null
+    public transient Island parentIsland;  // 仅根节点为null
 
     public IslandContent content;
     public IslandLayout layout;
     /** 能力列表。JSON 序列化由 write/read 手动处理。 */
     protected transient Seq<ElementCapability> capabilities = new Seq<>();
 
-    public Island(){
-    }
-
     public Island(String name, IslandContent content){
         this.name = name;
         this.content = content;
+        content.attach(this);
         this.layout = new IslandLayout(this);
     }
 
@@ -50,6 +47,7 @@ public class Island extends Table implements JsonSerializable{
         }
     }
 
+    @Deprecated
     public boolean setParentIsland(Island pare){
         if(pare == null){
             if(parentIsland != null && parentIsland.content instanceof ChildrenContent cc){
@@ -79,6 +77,7 @@ public class Island extends Table implements JsonSerializable{
         if(content != null){
             content.rebuild(this);
         }
+        pack();
     }
 
     // -- serialization ---------------------------------------------------

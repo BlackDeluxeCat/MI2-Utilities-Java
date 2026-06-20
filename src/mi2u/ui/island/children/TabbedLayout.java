@@ -1,11 +1,10 @@
 package mi2u.ui.island.children;
 
-import arc.math.Mathf;
-import arc.scene.ui.layout.Table;
-import arc.struct.Seq;
-import arc.util.serialization.Json;
-import arc.util.serialization.JsonValue;
-import mi2u.ui.island.Island;
+import arc.math.*;
+import arc.scene.ui.layout.*;
+import arc.struct.*;
+import arc.util.serialization.*;
+import mi2u.ui.island.*;
 
 /**
  * 标签页布局。每次只显示一个 child，通过 currentIndex 切换。

@@ -1,7 +1,7 @@
 package mi2u.ui.island.capability;
 
-import arc.scene.event.SceneEvent;
-import mi2u.ui.capability.ResizeCapabilityEvent;
+import arc.scene.event.*;
+import mi2u.ui.capability.*;
 
 /**
  * 监听响应调整尺寸动作的能力。

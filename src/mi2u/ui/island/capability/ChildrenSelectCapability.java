@@ -1,7 +1,7 @@
 package mi2u.ui.island.capability;
 
-import arc.scene.event.SceneEvent;
-import mi2u.ui.capability.ChildrenSelectCapabilityEvent;
+import arc.scene.event.*;
+import mi2u.ui.capability.*;
 
 /**
  * 监听响应"选中某个 child"动作的能力。

@@ -1,10 +1,9 @@
 package mi2u.ui.island.children;
 
-import arc.scene.ui.layout.Table;
-import arc.struct.Seq;
-import arc.util.serialization.Json;
-import arc.util.serialization.JsonValue;
-import mi2u.ui.island.Island;
+import arc.scene.ui.layout.*;
+import arc.struct.*;
+import arc.util.serialization.*;
+import mi2u.ui.island.*;
 
 /**
  * 垂直列布局。children 从上到下排列。

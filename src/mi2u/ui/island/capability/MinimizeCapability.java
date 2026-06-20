@@ -1,10 +1,10 @@
 package mi2u.ui.island.capability;
 
-import arc.scene.event.SceneEvent;
-import mi2u.ui.capability.MinimizeCapabilityEvent;
-import mi2u.ui.island.Island;
+import arc.scene.event.*;
+import mi2u.ui.capability.*;
+import mi2u.ui.island.*;
 
-import static mi2u.MI2UVars.textb;
+import static mi2u.MI2UVars.*;
 
 /**
  * 监听响应最小化动作的能力。

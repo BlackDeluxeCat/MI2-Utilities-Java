@@ -1,7 +1,7 @@
 package mi2u.ui.island.capability;
 
-import mi2u.ui.capability.ElementCapability;
-import mi2u.ui.island.Island;
+import mi2u.ui.capability.*;
+import mi2u.ui.island.*;
 
 /**
  * Island 能力基类。

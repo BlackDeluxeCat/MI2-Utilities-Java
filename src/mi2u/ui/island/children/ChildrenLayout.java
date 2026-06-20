@@ -1,9 +1,9 @@
 package mi2u.ui.island.children;
 
-import arc.scene.ui.layout.Table;
-import arc.struct.Seq;
-import arc.util.serialization.Json.JsonSerializable;
-import mi2u.ui.island.Island;
+import arc.scene.ui.layout.*;
+import arc.struct.*;
+import arc.util.serialization.Json.*;
+import mi2u.ui.island.*;
 
 /**
  * Children 布局策略接口。

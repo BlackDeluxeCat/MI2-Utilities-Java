@@ -1,11 +1,10 @@
 package mi2u.ui.island.children;
 
-import arc.scene.ui.layout.Table;
-import arc.struct.Seq;
-import arc.util.serialization.Json;
-import arc.util.serialization.JsonValue;
-import mi2u.ui.island.Island;
-import mi2u.ui.island.IslandContent;
+import arc.scene.ui.layout.*;
+import arc.struct.*;
+import arc.util.*;
+import arc.util.serialization.*;
+import mi2u.ui.island.*;
 
 /**
  * Children 内容实现。
@@ -14,31 +13,72 @@ import mi2u.ui.island.IslandContent;
  * Island 外壳保持统一，只是内容策略不同。
  */
 public class ChildrenContent implements IslandContent{
-    public Seq<Island> children = new Seq<>();
+    public transient Island owner;
+    protected Seq<Island> children = new Seq<>();
     public ChildrenLayout childrenLayout;
 
     public ChildrenContent(ChildrenLayout childrenLayout){
         this.childrenLayout = childrenLayout;
     }
 
-    public int childrenCount(){
-        return children.size;
+    public Seq<Island> getChildren() {
+        return children;
     }
 
     public boolean canAddChild(Island island){
+        return island.getParentIsland() != getOwner();
+    }
+
+    /**
+     * ChildrenContent的添加子级能力
+     * @param island
+     * @return 添加是否真实发生
+     */
+    public boolean addChild(Island island){
+        var oldParent = island.getParentIsland();
+        // 旧父级脱绑
+        if(oldParent != null){
+            if(oldParent.content instanceof ChildrenContent cc){
+                boolean removed = cc.removeChild(island);
+                if(!removed){
+                    Log.warn("An island can not be removed from its parent, please check out.");
+                    return false;
+                }
+            }else{
+                Log.warn("An island has an illegal parent, please check out.");
+                return false;
+            }
+        }
+        // 绑定新父级
+        island.parentIsland = owner;
+        children.add(island);
+        owner.rebuild();
+
         return true;
     }
 
-    public boolean addChild(Island island){
-        if(canAddChild(island)){
-            children.add(island);
-            return true;
-        }
-        return false;
+    /**
+     * ChildrenContent的删除子级能力
+     * @param island
+     * @return 删除是否真实发生
+     */
+    public boolean removeChild(Island island){
+        var oldParent = island.getParentIsland();
+        if(oldParent != owner) return false;
+        island.parentIsland = null;
+        children.remove(island);
+        oldParent.rebuild();
+        return true;
     }
 
-    public void removeChild(Island island){
-        children.remove(island);
+    @Override
+    public void attach(Island owner) {
+        this.owner = owner;
+    }
+
+    @Override
+    public Island getOwner() {
+        return owner;
     }
 
     @Override

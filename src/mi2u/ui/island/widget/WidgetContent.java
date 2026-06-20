@@ -1,7 +1,7 @@
 package mi2u.ui.island.widget;
 
 import arc.util.serialization.*;
-import mi2u.ui.island.IslandContent;
+import mi2u.ui.island.*;
 
 /**
  * 用户小组件接口。具体 widget 直接实现此接口。
@@ -9,6 +9,17 @@ import mi2u.ui.island.IslandContent;
  * Widget 默认应支持多实例，除非功能明确需要共享状态。
  */
 public interface WidgetContent extends IslandContent{
+
+    // owner island，按需自主实现
+    @Override
+    default void attach(Island owner){
+    }
+
+    @Override
+    default Island getOwner(){
+        return null;
+    }
+
     @Override
     default void read(Json json, JsonValue jsonData){
     }

@@ -28,9 +28,10 @@ public class IslandBranchTable extends Table {
         clear();
 
         table(t -> {
-            t.defaults().growY();
-            t.pane(mainColumn);
-            t.pane(subColumn);
+            t.defaults().growY().maxHeight(200f);
+            // TODO 这里的pane还是做不到subColumn无内容时尺寸自动最小化，
+            t.pane(mainColumn).with(p -> p.setFadeScrollBars(true));
+            t.pane(subColumn).with(p -> p.setFadeScrollBars(true));
         });
 
         row();
@@ -51,17 +52,17 @@ public class IslandBranchTable extends Table {
         target = island;
         rebuildMainColumn(mainColumn);
         if (island != null && island.content instanceof ChildrenContent cc) {
-            rebuildSubColumnFor(subColumn, cc.children);
+            rebuildSubColumnFor(subColumn, cc.getChildren());
         } else {
             rebuildSubColumnFor(subColumn, null);
         }
-        pack();
+        invalidateHierarchy();
     }
 
     protected void rebuildMainColumn(Table t) {
         t.clear();
         t.top();
-        t.defaults().growX().width(100f);
+        t.defaults().growX();
 
         if (target == null) return;
         var seq = new Seq<Island>();
