@@ -16,8 +16,8 @@ import static mi2u.MI2UVars.buttonSize;
 public class DragHandle implements WidgetContent{
     public Label handle;
     public boolean dragging = false;
-    final Vec2 vTouchDown = new Vec2();
-    final Vec2 vTouchDragging = new Vec2();
+    final Vec2 vTouchLast = new Vec2();
+    final Vec2 vTouchThis = new Vec2();
     public DragCapabilityEvent dragCapEvent = new DragCapabilityEvent();
 
     public DragHandle(){
@@ -25,10 +25,9 @@ public class DragHandle implements WidgetContent{
         handle.addListener(new InputListener(){
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button) {
-                handle.localToStageCoordinates(vTouchDown.set(x, y));
+                handle.localToStageCoordinates(vTouchLast.set(x, y));
                 handle.setColor(Pal.accent);
                 Core.graphics.cursor(Graphics.Cursor.SystemCursor.hand);
-                dragCapEvent.setOrigin(vTouchDown.x, vTouchDown.y);
                 dragging = true;
                 return true;
             }
@@ -36,8 +35,9 @@ public class DragHandle implements WidgetContent{
             @Override
             public void touchDragged(InputEvent event, float x, float y, int pointer) {
                 super.touchDragged(event, x, y, pointer);
-                handle.localToStageCoordinates(vTouchDragging.set(x, y));
-                dragCapEvent.setDelta(vTouchDragging.x - vTouchDown.x,  vTouchDragging.y - vTouchDown.y);
+                handle.localToStageCoordinates(vTouchThis.set(x, y));
+                dragCapEvent.setDelta(vTouchThis.x - vTouchLast.x,  vTouchThis.y - vTouchLast.y);
+                vTouchLast.set(vTouchThis);
                 handle.fire(dragCapEvent);
             }
 
