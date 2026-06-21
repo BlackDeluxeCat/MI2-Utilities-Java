@@ -16,10 +16,6 @@ public class IslandWidgetShop extends Table {
         rebuild();
     }
 
-    public void setOnCreate(Cons<Island> onCreate){
-        this.onCreate = onCreate;
-    }
-
     public void click(Island island){
         onCreate.get(island);
     }
@@ -40,6 +36,11 @@ public class IslandWidgetShop extends Table {
 
         button("Row外壳", textb, () -> {
             var island = new Island("Row", new ChildrenContent(new RowLayout()));
+            click(island);
+        }).with(funcSetTextb);
+
+        button("拖拽把手", textb, () -> {
+            var island = new Island("DragHandle", new DragHandle());
             click(island);
         }).with(funcSetTextb);
     }

@@ -5,6 +5,7 @@ import arc.scene.event.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import mi2u.ui.island.*;
+import mi2u.ui.island.capability.*;
 import mi2u.ui.island.children.*;
 import mi2u.ui.island.widget.*;
 import mindustry.ui.*;
@@ -30,6 +31,7 @@ public class IslandOverlayManager {
                 return root;
             }
         }));
+        islandConfigureIsland.capabilities().add(new DragCapability());
         islandConfigureIsland.layout.x = Core.graphics.getWidth() / 2f;
         islandConfigureIsland.layout.y = Core.graphics.getHeight() / 2f;
         IslandUtils.addChild(root, islandConfigureIsland);

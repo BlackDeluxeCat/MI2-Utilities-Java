@@ -16,11 +16,13 @@ public interface ElementCapability extends EventListener{
     @Override
     default boolean handle(SceneEvent event){
         if(event instanceof CapabilityEvent capEvent){
+            boolean handled;
             if(capEvent.isQuery){
-                return onQuery(event);
+                handled = onQuery(event);
             }else{
-                return onChange(event);
+                handled = onChange(event);
             }
+            return handled;
         }
         return false;
     }

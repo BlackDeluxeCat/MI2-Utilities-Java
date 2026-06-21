@@ -41,10 +41,14 @@ public class Island extends Table implements JsonSerializable{
     }
 
     protected void actApplyIslandLayout(){
+        boolean needsLayout = false;
         if(!layout.positionManaged){
             this.x = layout.x;
             this.y = layout.y;
+            needsLayout = true;
         }
+
+        if(needsLayout) pack();
     }
 
     @Deprecated

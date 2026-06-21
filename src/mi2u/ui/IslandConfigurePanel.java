@@ -7,14 +7,15 @@ import arc.input.*;
 import arc.math.geom.*;
 import arc.scene.event.*;
 import arc.scene.ui.layout.*;
+import arc.util.*;
 import mi2u.ui.island.*;
+import mi2u.ui.island.capability.*;
 import mi2u.ui.island.children.*;
 import mindustry.*;
 import mindustry.graphics.*;
 import mindustry.ui.*;
 
-import static mi2u.MI2UVars.funcSetTextb;
-import static mi2u.MI2UVars.textb;
+import static mi2u.MI2UVars.*;
 
 public class IslandConfigurePanel extends Table {
     protected Island target;
@@ -69,7 +70,7 @@ public class IslandConfigurePanel extends Table {
             return;
         }
 
-        table.add("名称: " + island.name).left();
+        table.add("名称: " + island.name).labelAlign(Align.left).growX();
         table.row();
         table.table(t -> {
             t.button("岛屿设置", textb, () -> rebuildConfigLayout(configTable, target)).with(funcSetTextb);
@@ -126,7 +127,7 @@ public class IslandConfigurePanel extends Table {
                 }).disabled(b -> island.getParentIsland() == null).with(funcSetTextb);
             }
 
-        });
+        }).growX();
     }
 
     public void rebuildConfigAddChild(Table t, Island parent){
@@ -137,7 +138,25 @@ public class IslandConfigurePanel extends Table {
 
     public void rebuildConfigLayout(Table t, Island island){
         t.clear();
-        island.layout.buildSettingsTable(t);
+        t.table(tt -> {
+            island.layout.buildSettingsTable(tt);   // 委托可能不是个好主意？
+        }).growX();
+
+        t.row();
+
+        t.table(tt -> {
+            tt.button("拖拽能力", textbtoggle, () -> {
+                var cap = island.capabilities().find(e -> e instanceof IslandCapability);
+                if(cap != null){
+                    island.capabilities().remove(cap);
+                }else{
+                    var newCap = new DragCapability();
+                    newCap.attach(island);
+                    island.capabilities().add(newCap);
+                }
+                island.rebuild();
+            }).checked(b -> island.capabilities().contains(cap -> cap instanceof DragCapability)).with(funcSetTextb);
+        }).growX().left();
     }
 
     public void rebuildConfigContent(Table t, Island island){

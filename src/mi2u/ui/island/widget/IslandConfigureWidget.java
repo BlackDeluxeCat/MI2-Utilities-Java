@@ -14,15 +14,15 @@ public class IslandConfigureWidget implements WidgetContent{
 
     protected IslandConfigurePanel islandConfigurePanel;
     /** island设置面板左侧分支导航面板 */
-    protected IslandBranchTable leftBranchTable;
+    protected IslandBranchTable branchTable;
 
     public IslandConfigureWidget(IslandOverlayAccess access){
         this.access = access;
-        leftBranchTable = new IslandBranchTable();
-        leftBranchTable.background(Styles.black3);
-        leftBranchTable.build();
-        leftBranchTable.canConfirmValidation = isle -> selectedIsland != isle;
-        leftBranchTable.onConfirm = isle -> setSelectedIsland(isle);
+        branchTable = new IslandBranchTable();
+        branchTable.background(Styles.black3);
+        branchTable.build();
+        branchTable.canConfirmValidation = isle -> selectedIsland != isle;
+        branchTable.onConfirm = isle -> setSelectedIsland(isle);
 
         islandConfigurePanel = new IslandConfigurePanel(
             (child, parent) -> {
@@ -38,8 +38,8 @@ public class IslandConfigureWidget implements WidgetContent{
     // 以下是自构建相关方法
     @Override
     public void rebuild(Island island){
-        island.add(leftBranchTable).top().padRight(10f).minWidth(100f);
-        island.add(islandConfigurePanel).top();
+        island.add(islandConfigurePanel).bottom();
+        island.add(branchTable).bottom().padLeft(10f).minWidth(100f);
     }
 
     public IslandOverlayAccess getAccess(){
@@ -49,14 +49,14 @@ public class IslandConfigureWidget implements WidgetContent{
     public void setSelectedIsland(@Nullable Island island){
         selectedIsland = island;
         islandConfigurePanel.setTarget(selectedIsland);
-        leftBranchTable.setTarget(selectedIsland);
+        branchTable.setTarget(selectedIsland);
     }
 
     public void addChild(Island island, Island parent){
         if (parent != null && parent.content instanceof ChildrenContent cc) {
             cc.addChild(island);
         }
-        leftBranchTable.setTarget(leftBranchTable.getTarget()); // 只刷新左侧分支导航器
+        branchTable.setTarget(branchTable.getTarget()); // 只刷新左侧分支导航器
     }
 
     public void removeChild(Island removed){

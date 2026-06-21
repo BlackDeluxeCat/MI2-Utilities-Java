@@ -1,6 +1,7 @@
 package mi2u.ui.capability;
 
 import arc.scene.event.*;
+import arc.util.pooling.*;
 
 /**
  * 能力事件基类。
@@ -20,5 +21,15 @@ public class CapabilityEvent extends SceneEvent{
 
     public CapabilityEvent(boolean isQuery){
         this.isQuery = isQuery;
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        isQuery = false;
+    }
+
+    public void free(){
+        Pools.free(this);
     }
 }
