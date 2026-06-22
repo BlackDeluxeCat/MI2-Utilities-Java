@@ -1,13 +1,10 @@
 package mi2u.ui.capability;
 
-import arc.util.pooling.*;
-
 /**
  * 吸附动作的能力事件。
+ * <p>
+ * 使用方自行持有单例实例，不复用池。
  */
 public class SnapCapabilityEvent extends CapabilityEvent{
 
-    public static SnapCapabilityEvent obtain(){
-        return Pools.get(SnapCapabilityEvent.class, SnapCapabilityEvent::new).obtain();
-    }
 }

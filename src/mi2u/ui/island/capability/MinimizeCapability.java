@@ -12,6 +12,7 @@ import static mi2u.MI2UVars.*;
  * 不持有持久化最小化状态——最小化状态由 TabbedLayout.currentIndex 推导。
  */
 public class MinimizeCapability extends IslandCapability{
+    private MinimizeCapabilityEvent minimizeEvent = new MinimizeCapabilityEvent();
 
     @Override
     public boolean onChange(SceneEvent event){
@@ -29,7 +30,7 @@ public class MinimizeCapability extends IslandCapability{
         if(minimized){
             island.clearChildren();
             island.button(island.name, textb, () -> {
-                island.fire(MinimizeCapabilityEvent.obtain().setMinimized(false));
+                island.fire(minimizeEvent.setMinimized(false));
             });
         }else {
             island.rebuild();
