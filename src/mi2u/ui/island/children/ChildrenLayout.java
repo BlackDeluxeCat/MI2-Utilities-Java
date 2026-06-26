@@ -16,12 +16,12 @@ public interface ChildrenLayout extends JsonSerializable{
     /**
      * rebuild所有children，将 children 按布局策略填充到 table 中。
      */
-    void applyRebuild(Table table, Seq<Island> children);
+    void applyRebuild(Table table, ChildrenContent content);
 
     /**
      * 将布局的设置 UI 构建到传入的 table 中。
      * 在编辑模式的配置面板中展示。
      */
-    default void buildSettingsTable(Table table){
+    default void buildSettingsTable(Table table, ChildrenContent content){
     }
 }

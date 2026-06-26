@@ -1,6 +1,7 @@
 package mi2u.ui.island.widget;
 
 import arc.scene.ui.layout.*;
+import arc.util.*;
 import mi2u.ui.island.*;
 import mindustry.ui.*;
 
@@ -14,7 +15,7 @@ public class TextWidget implements WidgetContent{
     @Override
     public void rebuild(Island island) {
         island.background(Styles.black3);
-        island.add(text);
+        island.add(text).labelAlign(Align.center);
     }
 
     @Override

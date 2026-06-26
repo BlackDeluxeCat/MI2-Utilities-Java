@@ -84,7 +84,7 @@ public class ChildrenContent implements IslandContent{
     @Override
     public void rebuild(Island island){
         if(childrenLayout != null){
-            childrenLayout.applyRebuild(island, children);
+            childrenLayout.applyRebuild(island, this);
         }
     }
 
@@ -96,7 +96,7 @@ public class ChildrenContent implements IslandContent{
     @Override
     public void buildSettingsTable(Table table, Island island){
         if(childrenLayout != null){
-            childrenLayout.buildSettingsTable(table);
+            childrenLayout.buildSettingsTable(table, this);
         }
     }
 

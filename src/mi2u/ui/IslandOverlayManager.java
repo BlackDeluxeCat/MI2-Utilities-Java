@@ -2,13 +2,10 @@ package mi2u.ui;
 
 import arc.*;
 import arc.scene.event.*;
-import arc.scene.ui.layout.*;
-import arc.util.*;
 import mi2u.ui.island.*;
 import mi2u.ui.island.capability.*;
 import mi2u.ui.island.children.*;
 import mi2u.ui.island.widget.*;
-import mindustry.ui.*;
 
 //TODO将islandConfigureContainer抽离为独立widgetisland
 public class IslandOverlayManager {
@@ -31,7 +28,7 @@ public class IslandOverlayManager {
                 return root;
             }
         }));
-        islandConfigureIsland.capabilities().add(new DragCapability());
+        islandConfigureIsland.addCapability(new DragCapability());
         islandConfigureIsland.layout.x = Core.graphics.getWidth() / 2f;
         islandConfigureIsland.layout.y = Core.graphics.getHeight() / 2f;
         IslandUtils.addChild(root, islandConfigureIsland);

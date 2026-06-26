@@ -5,6 +5,7 @@ import arc.struct.*;
 import arc.util.serialization.*;
 import arc.util.serialization.Json.*;
 import mi2u.ui.capability.*;
+import mi2u.ui.island.capability.*;
 import mi2u.ui.island.children.*;
 
 /**
@@ -17,7 +18,7 @@ public class Island extends Table implements JsonSerializable{
     public IslandContent content;
     public IslandLayout layout;
     /** 能力列表。JSON 序列化由 write/read 手动处理。 */
-    protected transient Seq<ElementCapability> capabilities = new Seq<>();
+    protected transient Seq<IslandCapability> capabilities = new Seq<>();
 
     public Island(String name, IslandContent content){
         this.name = name;
@@ -26,7 +27,13 @@ public class Island extends Table implements JsonSerializable{
         this.layout = new IslandLayout(this);
     }
 
-    public Seq<ElementCapability> capabilities(){
+    /** 添加能力。这个便捷方法对所添加的cap做了完整后处理。 */
+    public void addCapability(IslandCapability cap){
+        capabilities.add(cap);
+        cap.attach(this);
+    }
+
+    public Seq<IslandCapability> getCapabilities(){
         return capabilities;
     }
 
@@ -107,9 +114,9 @@ public class Island extends Table implements JsonSerializable{
         JsonValue capsJson = jsonData.get("capabilities");
         if(capsJson != null && capsJson.isArray()){
             for(JsonValue child = capsJson.child; child != null; child = child.next){
-                ElementCapability cap = json.readValue(ElementCapability.class, null, child);
+                IslandCapability cap = json.readValue(IslandCapability.class, null, child);
                 if(cap != null){
-                    capabilities.add(cap);
+                    addCapability(cap);
                 }
             }
         }

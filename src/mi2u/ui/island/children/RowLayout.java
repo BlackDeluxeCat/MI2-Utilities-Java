@@ -19,20 +19,20 @@ public class RowLayout implements ChildrenLayout{
     }
 
     @Override
-    public void applyRebuild(Table table, Seq<Island> children){
-        for(Island island : children){
+    public void applyRebuild(Table table, ChildrenContent content){
+        for(Island island : content.children){
             island.layout.positionManaged = true;
             island.rebuild();
         }
 
-        if(children.isEmpty()){
+        if(content.children.isEmpty()){
             table.add("<Row>");
         }
 
         if(scrollable){
             // TODO: 包装 ScrollPane
         }else{
-            for(Island child : children){
+            for(Island child : content.children){
                 table.add(child).growY();
             }
         }

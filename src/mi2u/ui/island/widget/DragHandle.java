@@ -6,10 +6,12 @@ import arc.input.*;
 import arc.math.geom.*;
 import arc.scene.event.*;
 import arc.scene.ui.*;
+import arc.util.*;
 import mi2u.ui.capability.*;
 import mi2u.ui.island.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
+import mindustry.ui.*;
 
 import static mi2u.MI2UVars.buttonSize;
 
@@ -22,6 +24,7 @@ public class DragHandle implements WidgetContent{
 
     public DragHandle(){
         handle = new Label("" + Iconc.move);
+        handle.setAlignment(Align.center);
         handle.addListener(new InputListener(){
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, KeyCode button) {
@@ -36,6 +39,7 @@ public class DragHandle implements WidgetContent{
             public void touchDragged(InputEvent event, float x, float y, int pointer) {
                 super.touchDragged(event, x, y, pointer);
                 handle.localToStageCoordinates(vTouchThis.set(x, y));
+                dragCapEvent.reset();
                 dragCapEvent.setDelta(vTouchThis.x - vTouchLast.x,  vTouchThis.y - vTouchLast.y);
                 vTouchLast.set(vTouchThis);
                 handle.fire(dragCapEvent);
@@ -54,6 +58,7 @@ public class DragHandle implements WidgetContent{
 
     @Override
     public void rebuild(Island island) {
+        island.background(Styles.black3);
         island.add(handle).minSize(buttonSize);
     }
 }

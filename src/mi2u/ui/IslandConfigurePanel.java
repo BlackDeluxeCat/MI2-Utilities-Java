@@ -146,16 +146,19 @@ public class IslandConfigurePanel extends Table {
 
         t.table(tt -> {
             tt.button("拖拽能力", textbtoggle, () -> {
-                var cap = island.capabilities().find(e -> e instanceof IslandCapability);
+                var cap = island.getCapabilities().find(e -> e instanceof DragCapability);
                 if(cap != null){
-                    island.capabilities().remove(cap);
+                    island.getCapabilities().remove(cap);
                 }else{
                     var newCap = new DragCapability();
-                    newCap.attach(island);
-                    island.capabilities().add(newCap);
+                    island.addCapability(newCap);
                 }
                 island.rebuild();
-            }).checked(b -> island.capabilities().contains(cap -> cap instanceof DragCapability)).with(funcSetTextb);
+            }).checked(b -> island.getCapabilities().contains(cap -> cap instanceof DragCapability)).with(funcSetTextb);
+
+            if(island.getCapabilities().contains(cap -> cap instanceof TabSelectCapability)){
+                tt.button("子级选中能力", textbtoggle, null).checked(true).with(funcSetTextb);
+            }
         }).growX().left();
     }
 

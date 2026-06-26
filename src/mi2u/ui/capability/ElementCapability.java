@@ -22,6 +22,9 @@ public interface ElementCapability extends EventListener{
             }else{
                 handled = onChange(event);
             }
+            if(handled){
+                event.stop();
+            }
             return handled;
         }
         return false;

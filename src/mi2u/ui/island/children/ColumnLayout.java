@@ -21,23 +21,23 @@ public class ColumnLayout implements ChildrenLayout{
     /**
      *
      * @param table an empty table, usually island
-     * @param children children list
+     * @param content
      */
     @Override
-    public void applyRebuild(Table table, Seq<Island> children){
-        for(Island island : children){
+    public void applyRebuild(Table table, ChildrenContent content){
+        for(Island island : content.children){
             island.layout.positionManaged = true;
             island.rebuild();
         }
 
-        if(children.isEmpty()){
+        if(content.children.isEmpty()){
             table.add("<Column>");
         }
 
         if(scrollable){
             // TODO: 包装 ScrollPane
         }else{
-            for(Island child : children){
+            for(Island child : content.children){
                 table.add(child).growX().row();
             }
             table.pack();
