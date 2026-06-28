@@ -13,18 +13,23 @@ import mi2u.ui.island.children.*;
  * 继承 Table，持有内容、布局和能力，是被选中、拖拽、缩放、序列化的基本单位。
  */
 public class Island extends Table implements JsonSerializable{
-    public transient Island parentIsland;  // 仅根节点为null
+    protected transient Island parentIsland;  // 仅根节点的此项为null
 
     public IslandContent content;
     public IslandLayout layout;
     /** 能力列表。JSON 序列化由 write/read 手动处理。 */
-    protected transient Seq<IslandCapability> capabilities = new Seq<>();
+    protected transient Seq<IslandCapability> capabilities;
+
+    protected Island(){
+        capabilities = new Seq<>();
+    }
 
     public Island(String name, IslandContent content){
+        this();
         this.name = name;
         this.content = content;
         content.attach(this);
-        this.layout = new IslandLayout(this);
+        this.layout = new IslandLayout();
     }
 
     /** 添加能力。这个便捷方法对所添加的cap做了完整后处理。 */
@@ -41,6 +46,10 @@ public class Island extends Table implements JsonSerializable{
         return parentIsland;
     }
 
+    public void setParentIsland(Island island){
+        this.parentIsland = island;
+    }
+
     @Override
     public void act(float delta){
         actApplyIslandLayout();
@@ -55,27 +64,9 @@ public class Island extends Table implements JsonSerializable{
             needsLayout = true;
         }
 
-        if(needsLayout) pack();
-    }
-
-    @Deprecated
-    public boolean setParentIsland(Island pare){
-        if(pare == null){
-            if(parentIsland != null && parentIsland.content instanceof ChildrenContent cc){
-                cc.removeChild(this);
-                parentIsland.rebuild();
-            }
-            parentIsland = null;
-            return true;
-        }else if(pare.content instanceof ChildrenContent cc){
-            boolean added = cc.addChild(this);
-            if(added){
-                parentIsland = pare;
-                parentIsland.rebuild();
-            }
-            return added;
-        }else{
-            return false;
+        if(needsLayout){
+            keepInStage();
+            pack();
         }
     }
 
@@ -97,7 +88,7 @@ public class Island extends Table implements JsonSerializable{
     public void write(Json json){
         json.writeValue("name", name);
         json.writeValue("content", content, IslandContent.class);
-        json.writeValue("layout", layout);
+        json.writeValue("layout", layout, IslandLayout.class);
         json.writeValue("capabilities", capabilities, Seq.class, ElementCapability.class);
     }
 

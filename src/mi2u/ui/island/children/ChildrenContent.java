@@ -17,6 +17,8 @@ public class ChildrenContent implements IslandContent{
     protected Seq<Island> children = new Seq<>();
     public ChildrenLayout childrenLayout;
 
+    public ChildrenContent(){}
+
     public ChildrenContent(ChildrenLayout childrenLayout){
         this.childrenLayout = childrenLayout;
     }
@@ -50,9 +52,9 @@ public class ChildrenContent implements IslandContent{
             }
         }
         // 绑定新父级
-        island.parentIsland = owner;
+        island.setParentIsland(getOwner());
         children.add(island);
-        owner.rebuild();
+        getOwner().rebuild();
 
         return true;
     }
@@ -65,10 +67,19 @@ public class ChildrenContent implements IslandContent{
     public boolean removeChild(Island island){
         var oldParent = island.getParentIsland();
         if(oldParent != owner) return false;
-        island.parentIsland = null;
+        island.setParentIsland(null);
         children.remove(island);
         oldParent.rebuild();
         return true;
+    }
+
+    public void replaceChild(Island oldChild, Island newChild){
+        int idx = children.indexOf(oldChild);
+        if(idx != -1){
+            children.set(idx, newChild);
+            newChild.setParentIsland(getOwner());
+        }
+        this.getOwner().rebuild();
     }
 
     @Override

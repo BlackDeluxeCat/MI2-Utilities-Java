@@ -8,8 +8,8 @@ import mi2u.ui.island.*;
  * 持有 owner 引用，子类通过 onChange/onQuery 响应特定 CapabilityEvent。
  */
 public class IslandCapability implements ElementCapability{
-    /** 运行时由 attach 注入.*/
-    public Island owner;
+    /** 运行时由 attach 注入。transient —— 序列化时不递归嵌入整棵树。 */
+    public transient Island owner;
 
     public IslandCapability(){
     }

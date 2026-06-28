@@ -25,4 +25,15 @@ public class IslandUtils {
     public static boolean hasSameRoot(Island i1, Island i2){
         return getRoot(i1) == getRoot(i2);
     }
+
+    public static boolean isAscendantOf(Island i1, Island i2){
+        int i = 0;
+        while(i++ < 1000){
+            var parent = i2.getParentIsland();
+            if(parent == null) return false;
+            if(parent == i1) return true;
+            i2 = parent;
+        }
+        throw new RuntimeException("Ascendant loop out of limit");
+    }
 }

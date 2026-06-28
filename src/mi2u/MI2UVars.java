@@ -14,6 +14,7 @@ import arc.util.*;
 import mi2u.ai.*;
 import mi2u.ui.*;
 import mi2u.ui.elements.*;
+import mi2u.ui.island.*;
 import mindustry.gen.*;
 import mindustry.ui.*;
 
@@ -55,6 +56,8 @@ public class MI2UVars{
     public static MonitorCanvas monitorCanvas;
 
     public static MapInfoDialog mapInfo;
+
+    public static IslandOverlayManager islandOverlayManager;
 
     public static void init(){
         var whiteui = (TextureRegionDrawable)Tex.whiteui;

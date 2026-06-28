@@ -77,7 +77,7 @@ public class IslandConfigurePanel extends Table {
 
             t.button("内容设置", textb, () -> rebuildConfigContent(configTable, target)).with(funcSetTextb);
 
-            if(island.parentIsland != null){
+            if(island.getParentIsland() != null){
                 t.button("更改父级", textb, () -> rebuildConfigParentChange(configTable, target)).with(funcSetTextb);
             }
 
@@ -120,7 +120,7 @@ public class IslandConfigurePanel extends Table {
                 });
             }
 
-            if(island.parentIsland != null){
+            if(island.getParentIsland() != null){
                 t.spacerX(() -> 20f);   // 删除键视觉远离其他功能键
                 t.button("[scarlet]删除", textb, () -> {
                     Vars.ui.showConfirm("将移除该岛屿及其包含的所有内容，确定吗？", () -> callDelete.get(island));

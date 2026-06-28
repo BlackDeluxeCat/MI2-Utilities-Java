@@ -19,6 +19,7 @@ public class MI2Utilities extends Mod{
 
     public MI2Utilities(){
         Events.on(ClientLoadEvent.class, e -> {
+            JsonUtils.init();
             MOD = mods.getMod(MI2Utilities.class);
             MOD.meta.subtitle = MOD.meta.version;
             MI2UVars.init();
@@ -50,8 +51,8 @@ public class MI2Utilities extends Mod{
 
 
             // reboot things
-            IslandOverlayManager overlayManager = new IslandOverlayManager();
-            overlayManager.onClientLoad();
+            islandOverlayManager = new IslandOverlayManager();
+            islandOverlayManager.onClientLoad();
         });
 
         Events.on(FileTreeInitEvent.class, e -> Core.app.post(MI2UShaders::load));
