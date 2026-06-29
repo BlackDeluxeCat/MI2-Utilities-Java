@@ -20,6 +20,8 @@ import static arc.Core.*;
 import static mi2u.MI2UVars.*;
 
 public class SettingHandler{
+    public static SettingHandler global = new SettingHandler("MI2U");
+
     public static boolean debug;
     public String prefix;
     public Seq<Setting> list = new Seq<>();

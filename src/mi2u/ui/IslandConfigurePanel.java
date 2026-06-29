@@ -70,7 +70,9 @@ public class IslandConfigurePanel extends Table {
             return;
         }
 
-        table.add("名称: " + island.name).labelAlign(Align.left).growX();
+        table.label(() -> "ID: " + island.id).labelAlign(Align.left).growX();
+        table.row();
+        table.label(() -> "名称: " + island.name).labelAlign(Align.left).growX();
         table.row();
         table.table(t -> {
             t.button("岛屿设置", textb, () -> rebuildConfigLayout(configTable, target)).with(funcSetTextb);

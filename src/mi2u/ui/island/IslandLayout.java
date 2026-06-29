@@ -34,7 +34,6 @@ public class IslandLayout implements JsonSerializable{
 
     protected IslandLayout(){}
 
-    /** 将布局设置 UI 构建到传入的 table 中。 */
     public void buildSettingsTable(Table table){
         table.clear();
         table.add("岛屿设置");

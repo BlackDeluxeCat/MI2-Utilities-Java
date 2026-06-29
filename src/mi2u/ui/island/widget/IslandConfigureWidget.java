@@ -1,13 +1,21 @@
 package mi2u.ui.island.widget;
 
 import arc.*;
+import arc.graphics.g2d.*;
+import arc.math.*;
+import arc.scene.*;
+import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
+import mi2u.*;
 import mi2u.io.*;
 import mi2u.ui.*;
+import mi2u.ui.elements.*;
 import mi2u.ui.island.*;
 import mi2u.ui.island.children.*;
 import mindustry.*;
+import mindustry.gen.*;
+import mindustry.graphics.*;
 import mindustry.ui.*;
 
 import static mi2u.MI2UVars.funcSetTextb;
@@ -31,21 +39,37 @@ public class IslandConfigureWidget implements WidgetContent{
     public IslandConfigureWidget(IslandOverlayAccess access){
         buttonsTable = new Table();
         buttonsTable.background(Styles.black3);
-        buttonsTable.button("从剪切板导入", textb, () -> {
-            try{
-                var root = JsonUtils.json.fromJson(Island.class, Core.app.getClipboardText());
-                if(root != null){
-                    getAccess().setRoot(root);
+        buttonsTable.stack(
+            new Element(){
+                {
+                    setFillParent(true);
                 }
-            }catch (Exception e){
-                Log.err("导入失败", e);
-                Vars.ui.showErrorMessage("导入失败: " + e.getMessage());
-            }
+                @Override
+                public void draw() {
+                    super.draw();
+                    float factor = getAccess().getAutoSaveCooldown();
+                    Draw.color(Pal.items, 0.3f + 0.5f * Interp.exp10In.apply(Interp.exp5In.apply(factor)));
+                    Fill.rect(MI2UTmp.r1.set(this.x, this.y, Interp.exp5In.apply(factor) * this.getWidth(), this.getHeight()));
+                }
+            },
+            new Table(tt -> {
+                tt.add(new CombinationIcon(t -> t.add("" + Iconc.save).pad(4f)).bottomRight(t -> t.add("" + Iconc.refresh).fontScale(0.5f)));
+            })
+            ).pad(4f).grow();
+        buttonsTable.row();
+        buttonsTable.button("从剪切板导入", textb, () -> {
+            getAccess().loadFromJson(Core.app.getClipboardText());
         }).with(funcSetTextb);
         buttonsTable.row();
         buttonsTable.button("导出到剪切板", textb, () -> {
             Core.app.setClipboardText(JsonUtils.json.prettyPrint(getAccess().getRoot()));
         }).with(funcSetTextb);
+//        buttonsTable.row();
+//        buttonsTable.button("DEBUG重建IDs", textb, () -> {
+//            IslandUtils.runRecursive(getAccess().getRoot(), island -> {
+//                island.id = Island.newId();
+//            });
+//        }).with(funcSetTextb);
 
         branchTable = new IslandBranchTable();
         branchTable.background(Styles.black3);
@@ -114,6 +138,8 @@ public class IslandConfigureWidget implements WidgetContent{
     public interface IslandOverlayAccess{
         Island getRoot();
 
-        void setRoot(Island root);
+        void loadFromJson(String json);
+
+        float getAutoSaveCooldown();
     }
 }

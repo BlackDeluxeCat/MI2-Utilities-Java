@@ -77,6 +77,7 @@ public class ChildrenContent implements IslandContent{
         int idx = children.indexOf(oldChild);
         if(idx != -1){
             children.set(idx, newChild);
+            oldChild.setParentIsland(null);
             newChild.setParentIsland(getOwner());
         }
         this.getOwner().rebuild();

@@ -27,4 +27,7 @@ public interface WidgetContent extends IslandContent{
     @Override
     default void write(Json json){
     }
+
+    default void onRebindReference(Island root){
+    }
 }

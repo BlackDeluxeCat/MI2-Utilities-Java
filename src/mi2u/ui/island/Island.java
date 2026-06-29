@@ -1,18 +1,20 @@
 package mi2u.ui.island;
 
+import arc.math.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
+import arc.util.*;
 import arc.util.serialization.*;
 import arc.util.serialization.Json.*;
 import mi2u.ui.capability.*;
 import mi2u.ui.island.capability.*;
-import mi2u.ui.island.children.*;
 
 /**
  * Island 是唯一的运行时 UI 外壳。
  * 继承 Table，持有内容、布局和能力，是被选中、拖拽、缩放、序列化的基本单位。
  */
 public class Island extends Table implements JsonSerializable{
+    public int id;
     protected transient Island parentIsland;  // 仅根节点的此项为null
 
     public IslandContent content;
@@ -21,6 +23,7 @@ public class Island extends Table implements JsonSerializable{
     protected transient Seq<IslandCapability> capabilities;
 
     protected Island(){
+        id = newId();
         capabilities = new Seq<>();
     }
 
@@ -86,19 +89,28 @@ public class Island extends Table implements JsonSerializable{
 
     @Override
     public void write(Json json){
+        json.writeValue("id", id);
         json.writeValue("name", name);
         json.writeValue("content", content, IslandContent.class);
         json.writeValue("layout", layout, IslandLayout.class);
-        json.writeValue("capabilities", capabilities, Seq.class, ElementCapability.class);
+        if(!capabilities.isEmpty()) json.writeValue("capabilities", capabilities, Seq.class, ElementCapability.class);
     }
 
     @Override
     public void read(Json json, JsonValue jsonData){
+        id = json.readValue("id", Integer.class, newId(), jsonData);
         name = json.readValue("name", String.class, "", jsonData);
 
         content = json.readValue("content", IslandContent.class, jsonData);
+        if(content != null){
+            content.attach(this);
+        }
 
         layout = json.readValue("layout", IslandLayout.class, jsonData);
+        if(layout == null){
+            Log.infoTag("MI2U", "Loading island layout null at island: " + id);
+            layout = new IslandLayout();
+        }
 
         // 手动反序列化 capabilities
         capabilities.clear();
@@ -117,5 +129,10 @@ public class Island extends Table implements JsonSerializable{
 
     public static String getIslandName(Island island){
         return island == null || island.name == null || island.name.isEmpty() ? "<Invalid>" : island.name;
+    }
+
+    // 有极小概率id碰撞
+    public static int newId(){
+        return Mathf.random(Integer.MAX_VALUE - 1);
     }
 }

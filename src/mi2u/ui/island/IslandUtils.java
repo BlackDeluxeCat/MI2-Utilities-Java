@@ -1,5 +1,6 @@
 package mi2u.ui.island;
 
+import arc.func.*;
 import mi2u.ui.island.children.*;
 
 public class IslandUtils {
@@ -34,6 +35,32 @@ public class IslandUtils {
             if(parent == i1) return true;
             i2 = parent;
         }
-        throw new RuntimeException("Ascendant loop out of limit");
+        throw new RuntimeException("Recursion out of limit");
+    }
+
+    public static Island findDescendant(Island parent, Boolf<Island> boolf){
+        if(parent == null) return null;
+        if(boolf.get(parent)) return parent;
+        if(parent.content instanceof ChildrenContent cc){
+            for(Island child : cc.getChildren()){
+                var result = findDescendant(child, boolf);
+                if(result != null) return result;
+            }
+        }
+        return null;
+    }
+
+    public static Island findIsland(Island root, int id){
+        return findDescendant(root, i -> i.id == id);
+    }
+
+    public static void runRecursive(Island island, Cons<Island> cons){
+        if(island == null) return;
+        cons.get(island);
+        if(island.content instanceof ChildrenContent cc){
+            for(Island child : cc.getChildren()){
+                runRecursive(child, cons);
+            }
+        }
     }
 }
