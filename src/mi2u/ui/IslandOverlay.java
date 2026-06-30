@@ -7,14 +7,12 @@ import arc.util.*;
 import mi2u.*;
 import mi2u.io.*;
 import mi2u.ui.island.*;
-import mi2u.ui.island.capability.*;
 import mi2u.ui.island.children.*;
 import mi2u.ui.island.widget.*;
-import mindustry.*;
 import mindustry.game.*;
 
-public class IslandOverlayManager {
-    public boolean editMode = true;
+public class IslandOverlay {
+    public final String name;
 
     /** 根节点，不被序列化 */
     public WidgetGroup backendGroup = new WidgetGroup();
@@ -49,72 +47,38 @@ public class IslandOverlayManager {
         }
     };
 
-    public IslandOverlayManager(){}
-
-    /** 必须在 onClientLoad 之前（或开头）调用。 */
-    public static void registerJsonClasses(){
-        // IslandContent
-        JsonUtils.registerClass("children", ChildrenContent.class);
-        JsonUtils.registerClass("text", TextWidget.class);
-        JsonUtils.registerClass("dragHandle", DragHandle.class);
-        JsonUtils.registerClass("tabHandle", TabHandle.class);
-
-        // ChildrenLayout
-        JsonUtils.registerClass("rootStack", RootStackLayout.class);
-        JsonUtils.registerClass("column", ColumnLayout.class);
-        JsonUtils.registerClass("row", RowLayout.class);
-        JsonUtils.registerClass("tabbed", TabbedLayout.class);
-
-        // IslandCapability
-        JsonUtils.registerClass("dragCap", DragCapability.class);
-        JsonUtils.registerClass("snapCap", SnapCapability.class);
-        JsonUtils.registerClass("resizeCap", ResizeCapability.class);
-        JsonUtils.registerClass("minimizeCap", MinimizeCapability.class);
-        JsonUtils.registerClass("tabSelectCap", TabSelectCapability.class);
-
-        // 容器元素类型
-        JsonUtils.json.setElementType(ChildrenContent.class, "children", Island.class);
+    public IslandOverlay(String name){
+        this.name = name;
     }
 
-    public void onClientLoad(){
-        registerJsonClasses();
-
+    public void load(){
         configurer = new IslandConfigurer();
         configurer.setAccess(access);
 
         Island savedRoot = null;
         try{
-            savedRoot = JsonUtils.json.fromJson(Island.class, SettingHandler.global.getStr("islandOverlay"));
+            savedRoot = JsonUtils.json.fromJson(Island.class, SettingHandler.global.getStr("islandOverlay." + name));
         }catch(Exception e){
-            Log.err("Island overlay JSON parse error.", e);
+            Log.err("Island overlay JSON parse error: " + name + ".", e);
         }
         if(savedRoot != null){
             loadOverlay(savedRoot);  // 注意：如果load失败，root回滚为null
         }
         if(root == null){
             // 重装为初始root
-            Log.infoTag("MI2U", "Create default overlay.");
+            Log.infoTag("MI2U", "Create default overlay for " + name);
             root = new Island("root", new ChildrenContent(new RootStackLayout()));
             RootStackLayout rootLayout = (RootStackLayout)((ChildrenContent)root.content).childrenLayout;
             rootLayout.setConfigurer(configurer);
             configurer.setPosition(Core.graphics.getWidth() / 2f - configurer.getPrefWidth() / 2f, Core.graphics.getHeight() / 2f - configurer.getPrefHeight() / 2f);
             rebuild();
         }
-
-        // auto save
-        Events.run(EventType.Trigger.update, () -> {
-            if(saveTimer.get(10000)){
-                saveOverlay();
-            }
-        });
     }
 
     public void rebuild(){
         backendGroup.clear();
         backendGroup.touchable = Touchable.childrenOnly;
         backendGroup.setFillParent(true);
-        Core.scene.add(backendGroup);
-
         configurer.selectRoot();
         root.setFillParent(true);
         root.touchable = Touchable.childrenOnly;
@@ -122,19 +86,25 @@ public class IslandOverlayManager {
         backendGroup.addChild(root);
     }
 
-    public void saveOverlay(){
+    public void save(){
+        if(saveTimer.get(10000)){
+            forceSave();
+        }
+    }
+
+    public void forceSave(){
         String current = JsonUtils.json.toJson(root);
         if(!current.equals(rootJson)){
-            SettingHandler.global.putString("islandOverlay", current);
+            SettingHandler.global.putString("islandOverlay." + name, current);
             rootJson = current;
-            Log.infoTag("MI2U", "Island overlay saved.");
+            Log.infoTag("MI2U", "Island overlay saved: " + name);
         }
     }
 
     public void loadOverlay(Island savedRoot){
         Island oldRoot = this.root; // 暂存旧根
         try {
-            IslandOverlayManager.this.root = savedRoot;
+            IslandOverlay.this.root = savedRoot;
             RootStackLayout rootLayout = (RootStackLayout)((ChildrenContent)root.content).childrenLayout;
             rootLayout.setConfigurer(configurer);
             rebuildLinks(root);
@@ -145,8 +115,8 @@ public class IslandOverlayManager {
             });
             rebuild();
         } catch (Exception e) {
-            IslandOverlayManager.this.root = oldRoot;   // 回滚
-            Log.err("Load overlay failed, rollback.", e);
+            IslandOverlay.this.root = oldRoot;   // 回滚
+            Log.err("Load overlay " + name + " failed, rollback.", e);
         }
     }
 

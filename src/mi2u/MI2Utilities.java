@@ -6,6 +6,7 @@ import mi2u.graphics.*;
 import mi2u.input.*;
 import mi2u.io.*;
 import mi2u.ui.*;
+import mi2u.ui.island.*;
 import mindustry.game.EventType.*;
 import mindustry.mod.*;
 
@@ -51,8 +52,7 @@ public class MI2Utilities extends Mod{
 
 
             // reboot things
-            islandOverlayManager = new IslandOverlayManager();
-            islandOverlayManager.onClientLoad();
+            IslandOverlays.init();
         });
 
         Events.on(FileTreeInitEvent.class, e -> Core.app.post(MI2UShaders::load));
