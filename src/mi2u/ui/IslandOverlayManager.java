@@ -23,8 +23,8 @@ public class IslandOverlayManager {
     protected MI2Utils.IntervalMillis saveTimer = new MI2Utils.IntervalMillis();
 
     /** island设置面板 */
-    public Island islandConfigureIsland;
-    public IslandConfigureWidget.IslandOverlayAccess access = new IslandConfigureWidget.IslandOverlayAccess() {
+    public IslandConfigurer configurer;
+    public IslandOverlayAccess access = new IslandOverlayAccess() {
         @Override
         public Island getRoot() {
             return root;
@@ -58,7 +58,6 @@ public class IslandOverlayManager {
         JsonUtils.registerClass("text", TextWidget.class);
         JsonUtils.registerClass("dragHandle", DragHandle.class);
         JsonUtils.registerClass("tabHandle", TabHandle.class);
-        JsonUtils.registerClass("configure", IslandConfigureWidget.class);
 
         // ChildrenLayout
         JsonUtils.registerClass("rootStack", RootStackLayout.class);
@@ -80,10 +79,8 @@ public class IslandOverlayManager {
     public void onClientLoad(){
         registerJsonClasses();
 
-        islandConfigureIsland = new Island("ConfigurePanel", new IslandConfigureWidget(access));
-        islandConfigureIsland.addCapability(new DragCapability());
-        islandConfigureIsland.layout.x = Core.graphics.getWidth() / 2f - islandConfigureIsland.getWidth() / 2f;
-        islandConfigureIsland.layout.y = Core.graphics.getHeight() / 2f - islandConfigureIsland.getHeight() / 2f;
+        configurer = new IslandConfigurer();
+        configurer.setAccess(access);
 
         Island savedRoot = null;
         try{
@@ -98,8 +95,9 @@ public class IslandOverlayManager {
             // 重装为初始root
             Log.infoTag("MI2U", "Create default overlay.");
             root = new Island("root", new ChildrenContent(new RootStackLayout()));
-            IslandUtils.addChild(root, islandConfigureIsland);
-            ((IslandConfigureWidget)islandConfigureIsland.content).setAccess(access);
+            RootStackLayout rootLayout = (RootStackLayout)((ChildrenContent)root.content).childrenLayout;
+            rootLayout.setConfigurer(configurer);
+            configurer.setPosition(Core.graphics.getWidth() / 2f - configurer.getPrefWidth() / 2f, Core.graphics.getHeight() / 2f - configurer.getPrefHeight() / 2f);
             rebuild();
         }
 
@@ -117,6 +115,7 @@ public class IslandOverlayManager {
         backendGroup.setFillParent(true);
         Core.scene.add(backendGroup);
 
+        configurer.selectRoot();
         root.setFillParent(true);
         root.touchable = Touchable.childrenOnly;
         root.rebuild();
@@ -136,8 +135,9 @@ public class IslandOverlayManager {
         Island oldRoot = this.root; // 暂存旧根
         try {
             IslandOverlayManager.this.root = savedRoot;
+            RootStackLayout rootLayout = (RootStackLayout)((ChildrenContent)root.content).childrenLayout;
+            rootLayout.setConfigurer(configurer);
             rebuildLinks(root);
-            replaceConfigureWidget(root);
             IslandUtils.runRecursive(root, island -> {
                 if(island.content instanceof WidgetContent wc){
                     wc.onRebindReference(root);
@@ -160,42 +160,6 @@ public class IslandOverlayManager {
         if(island.content instanceof ChildrenContent cc){
             for(Island child : cc.getChildren()){
                 rebuildLinksRecursive(child, island);
-            }
-        }
-    }
-
-    /**
-     * 将 savedRoot 树中的临时设置岛替换为硬编码的设置岛
-     * @param savedRoot 刚从 JSON 反序列化的树（全是临时实例）
-     */
-    public void replaceConfigureWidget(Island savedRoot){
-        // ── 递归遍历替换 ──
-        replaceConfigureWidgetRecursive(savedRoot);
-
-        // ── 未替换，强制挂到 root ──
-        if(!IslandUtils.isAscendantOf(root, islandConfigureIsland)){
-            IslandUtils.addChild(root, islandConfigureIsland);
-        }
-
-        ((IslandConfigureWidget)islandConfigureIsland.content).setAccess(access);
-    }
-
-    private void replaceConfigureWidgetRecursive(Island island){
-        if(island.content instanceof IslandConfigureWidget){
-            var parent = island.getParentIsland();
-
-            // 用硬编码实例替换保存树中的引用
-            if(parent != null && parent.content instanceof ChildrenContent cc){
-                islandConfigureIsland.id = island.id;
-                islandConfigureIsland.layout = island.layout;   // 迁移 layout （直接替换引用）
-                cc.replaceChild(island, islandConfigureIsland);
-            }
-        }
-
-        // 递归子岛
-        if(island.content instanceof ChildrenContent cc){
-            for(Island child : cc.getChildren()){
-                replaceConfigureWidgetRecursive(child);
             }
         }
     }
