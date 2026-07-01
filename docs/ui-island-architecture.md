@@ -39,7 +39,7 @@
 - `IslandLayout`
 - capabilities
 
-`Island` 是被选中、拖拽、缩放、最小化、序列化和编辑的基本单位。运行时不再拆出 `WidgetIsland` 和 `ChildrenIsland` 两套元素。
+`Island` 是被选中、拖拽、缩放、收起/展开、序列化和编辑的基本单位。运行时不再拆出 `WidgetIsland` 和 `ChildrenIsland` 两套元素。
 
 ### IslandContent
 
@@ -106,9 +106,10 @@ IslandCapability implements ElementCapability
 DragCapability extends IslandCapability
 SnapCapability extends IslandCapability
 ResizeCapability extends IslandCapability
-MinimizeCapability extends IslandCapability
 TabSelectCapability extends IslandCapability
 ```
+
+> 注：最小化能力已改为 `MinimizeHandle` (WidgetContent) 直接操控 `TabbedLayout.index` 实现，不走 Capability 路线。MinimizeCapability 已被删除。
 
 Capability event 复用 Arc `SceneEvent` 冒泡。子 Element，例如拖拽把手，发出 capability event；事件向上冒泡，直到某个祖先 Island 的 capability 接受它。
 
@@ -217,6 +218,8 @@ Arc `Json` 在实际运行类型与已知类型不同、或已知类型为空时
    - `IslandOverlay.forceSave()` 立即存盘
    - `IslandOverlays.saveAll()` / `loadAll()` 批量操作
    - 序列化 key 以 `islandOverlay.${name}` 隔离各 layer
+7. `TabHandle` widget 与 tab 弹窗选择器，tab 切换联动。 ✅
+8. `MinimizeHandle` widget：通过操控 `TabbedLayout.index`（0 ↔ 1）实现最小化/恢复。 ✅
 
 这是调试路径，不是永久产品路线图。
 
