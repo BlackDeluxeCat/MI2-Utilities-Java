@@ -85,6 +85,9 @@ Widget 默认应支持多实例。除非功能明确需要共享状态，否则 
 
 预期实现包括：
 
+- `RootStackLayout` —— 根节点专用布局。children 无布局约束直接堆叠，
+  同时持有 `configurer` 引用，在 child Island 后附加配置面板。
+  序列化 `savedX / savedY` 记忆配置面板位置。
 - `ColumnLayout`
 - `RowLayout`
 - `TabbedLayout`
@@ -122,22 +125,40 @@ drag handle Element
 
 Capability event 必须定义唯一响应者。向上冒泡时不能让多个祖先同时模糊处理同一条命令。
 
-## Overlay Manager 与编辑模式
+## Overlay Layer 与编辑模式
 
-`IslandOverlayManager` 是 overlay 地图的总管，职责重是设计预期。
+管理职责拆为两层。
 
-它拥有或协调：
+### IslandOverlays（静态管理器）
 
-- Arc `WidgetGroup` root
-- root 级 Islands
-- 保存/加载
-- 编辑模式
-- `WidgetShop`
-- `IslandConfigurePanel`
+位于 `mi2u.ui.island.IslandOverlays`。
 
-真实 root 是 Arc `WidgetGroup`，不是 mod 自定义的 Children Island。若实操中需要统一 root 和 children 容器的操作接口，可在实现阶段补一个适配层，不必现在硬定。
+- `registerJsonClasses()` —— 全局一次性 Json class tag 注册。
+- Layer 注册表 —— `addLayer()` / `getLayer(name)` / `getLayers()`。
+- 批量持久化 —— `saveAll()` / `loadAll()`。
+- `editMode` 全局开关，影响所有 layer。
+- `init()` —— 注册 class、创建默认 layer、挂载、加载存档、启动自动存盘。
 
-编辑器 UI 只在编辑模式可见，包括 widget shop、配置面板、岛屿树选择和其他树操作控件。
+### IslandOverlay（单 layer 实例）
+
+位于 `mi2u.ui.IslandOverlay`。每个实例对应一块独立的叠加层（如 hud、logic），
+拥有自己的：
+
+- `backendGroup: WidgetGroup` —— 视觉容器。由 `IslandOverlays.init()`
+  通过 `target.addChild(backendGroup)` 挂载到指定位置。
+- `root: Island` —— Island 树。
+- `configurer: IslandConfigurer` —— 配置面板（同级内嵌，非子 Island）。
+- `saveTimer` / `rootJson` —— 脏检查 + 定时存盘。
+
+多个 layer 各自独立，可挂载到不同目标（`Core.scene`、`ui.logic` 等）。
+
+### IslandConfigurer
+
+编辑器 UI 面板。继承 `Table`，不是 Island。由 `RootStackLayout` 在
+`applyRebuild()` 末尾 addChild 到 root table，位置由
+`savedX / savedY` 记忆并序列化。
+
+编辑器 UI 只在编辑模式可见。
 
 ## 岛屿树选择
 
@@ -178,6 +199,10 @@ Arc `Json` 在实际运行类型与已知类型不同、或已知类型为空时
 
 如果某个值只通过方法暴露，Arc 反射不会自动序列化它。这类状态必须由所属 `JsonSerializable` 手动写入。
 
+多 layer 场景下每个 layer 使用独立存储 key：
+`islandOverlay.${name}`。`IslandOverlay.forceSave()`
+在写入前做 JSON diff，仅在变化时落盘。
+
 ## 第一轮调试切片
 
 第一轮实现建议按下面顺序验证：
@@ -187,7 +212,11 @@ Arc `Json` 在实际运行类型与已知类型不同、或已知类型为空时
 3. 一个基于 `Table` 文本框的纯文本 widget。 ✅
 4. 岛屿树选择（`IslandBranchTable`）。 ✅
 5. 拖拽把手 widget 与 capability event 实验。 ✅
-6. 保存与恢复。 🔲 未实现（与 class tag 注册关联）
+6. 保存与恢复。 ✅
+   - `IslandOverlay.save()` 定时存盘（10s 间隔 + 脏检查）
+   - `IslandOverlay.forceSave()` 立即存盘
+   - `IslandOverlays.saveAll()` / `loadAll()` 批量操作
+   - 序列化 key 以 `islandOverlay.${name}` 隔离各 layer
 
 这是调试路径，不是永久产品路线图。
 

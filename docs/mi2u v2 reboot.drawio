@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.3.0 Chrome/140.0.7339.249 Electron/38.7.2 Safari/537.36" version="29.3.0">
   <diagram name="第 1 页" id="ugFPkzqr5IZJJfW5kb1o">
-    <mxGraphModel dx="2893" dy="937" grid="1" gridSize="10" guides="1" tooltips="1" connect="0" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="2815" dy="879" grid="1" gridSize="10" guides="1" tooltips="1" connect="0" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -48,7 +48,7 @@
         <mxCell id="XGk20LJQXmPGTgXszKcP-76" parent="XGk20LJQXmPGTgXszKcP-75" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;" value="mi2u.ui" vertex="1">
           <mxGeometry height="40" width="100" x="20" as="geometry" />
         </mxCell>
-        <mxCell id="x4VV83cT4qzIJcIFohZl-18" parent="XGk20LJQXmPGTgXszKcP-75" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;spacing=2;" value="&lt;p style=&quot;text-align: center; margin: 4px 0px 0px;&quot;&gt;&lt;span style=&quot;background-color: transparent; text-align: left;&quot;&gt;&lt;b&gt;IslandOverlay&lt;/b&gt;&lt;/span&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); text-align: left;&quot;&gt;Manager&lt;/b&gt;&lt;/p&gt;&lt;hr&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ root: WidgetGroup&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ islands: Seq&amp;lt;Island&amp;gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ saveOverlay(): JsonValue&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ loadOverlay(JsonValue)&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;&lt;hr&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;// 编辑模式单例对象&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;// 小组件点菜单&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ widgetShop: WidgetShop&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;// 一级菜单，自建。包含路径面包屑、各二级设置页入口、删除图表入口&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;// islandlayout设置、islandcontent设置、capabilities设置、layouttree设置&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ islandConfiguresPanel: Table&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&amp;nbsp;// 二级设置页，同时只显示一个二级页，委托给island处理&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ islandConfigureTable: Table&lt;/p&gt;&lt;hr&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;br&gt;&lt;/p&gt;&lt;/div&gt;" vertex="1">
+        <mxCell id="x4VV83cT4qzIJcIFohZl-18" parent="XGk20LJQXmPGTgXszKcP-75" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;spacing=2;" value="&lt;p style=&quot;text-align: center; margin: 4px 0px 0px;&quot;&gt;&lt;b&gt;IslandOverlay&lt;/b&gt;&lt;/p&gt;&lt;hr&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ name: String&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ backendGroup: WidgetGroup&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ root: Island&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ configurer: IslandConfigurer&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ load()&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ rebuild()&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ save() // 定时存盘&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ forceSave() // 立即存盘&lt;/div&gt;" vertex="1">
           <mxGeometry height="440" width="240" x="320" y="40" as="geometry" />
         </mxCell>
         <mxCell id="x4VV83cT4qzIJcIFohZl-64" parent="XGk20LJQXmPGTgXszKcP-75" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;text-align: center; margin: 4px 0px 0px;&quot;&gt;&lt;b style=&quot;background-color: transparent; text-align: left; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;WidgetShop&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;// TODO&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;小组件列表和添加器&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;添加单个Widget或者预制的Island&lt;/p&gt;" vertex="1">
@@ -60,20 +60,29 @@
             <mxPoint x="1220" y="290" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="XGk20LJQXmPGTgXszKcP-71" parent="XGk20LJQXmPGTgXszKcP-75" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;align=left;labelPosition=center;verticalLabelPosition=middle;verticalAlign=top;" value="静态的操纵器，依赖其他大部分组件" vertex="1">
-          <mxGeometry height="40" width="200" x="40" y="40" as="geometry" />
-        </mxCell>
-        <mxCell id="C4bwMTUnUg3LJpQlkqtF-1" parent="XGk20LJQXmPGTgXszKcP-75" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;align=left;" value="island在overlay中的拖拽行为&lt;div&gt;1.移动位置&lt;/div&gt;&lt;div&gt;2.设置吸附（如果有）：根据移动位置的结果判定&lt;/div&gt;&lt;div&gt;3.修改布局树（若移动到路径面包屑上）&lt;/div&gt;" vertex="1">
-          <mxGeometry height="120" width="200" x="40" y="120" as="geometry" />
-        </mxCell>
-        <mxCell id="C4bwMTUnUg3LJpQlkqtF-2" parent="XGk20LJQXmPGTgXszKcP-75" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;align=left;" value="&lt;div&gt;面包屑显示当前拖拽的island的路径，是单条的。路径上每个widget岛都展示为label，每个children岛除了label还有一个下拉菜单button，其中罗列了所有children的label并且有上下调序按钮。&lt;/div&gt;&lt;div&gt;widget岛的label不接受拖放。&lt;/div&gt;&lt;div&gt;用例1：路径为root-A-B-C，C想成为A的子级、和B同级，就拖拽到面包屑的A标签（追加到A.children末尾），再在A的下拉菜单中调整B、C顺序。&lt;/div&gt;&lt;div&gt;用例2：路径为root-A-B-C-D，想从widget shop添加island E，要成为C的子级、和D同级放置，将E从shop随意拖出，自动添加到root的子级，再次选中E，拖拽到root的下拉菜单的A标签进入A.children，再次选中E，拖拽到A的下拉菜单的B标签进入B.children，如此直到进入C.children，最后在C的下拉菜单调整D和E的顺序&lt;/div&gt;" vertex="1">
-          <mxGeometry height="280" width="240" x="40" y="280" as="geometry" />
+        <mxCell id="XGk20LJQXmPGTgXszKcP-71" parent="XGk20LJQXmPGTgXszKcP-75" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;spacing=2;" value="&lt;p style=&quot;text-align: center; margin: 4px 0px;&quot;&gt;&lt;b&gt;IslandOverlays&lt;/b&gt;&lt;/p&gt;&lt;hr&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;// 静态管理器&lt;br&gt;+ layers: Seq&amp;lt;IslandOverlay&amp;gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ editMode: boolean&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ init()&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ registerJsonClasses()&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ addLayer(IslandOverlay)&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ getLayer(name): IslandOverlay&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ saveAll()&lt;/div&gt;&lt;div style=&quot;margin-left: 4px;&quot;&gt;+ loadAll()&lt;/div&gt;" vertex="1">
+          <mxGeometry height="180" width="240" x="40" y="40" as="geometry" />
         </mxCell>
         <mxCell id="C4bwMTUnUg3LJpQlkqtF-3" parent="XGk20LJQXmPGTgXszKcP-75" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;RootCapability&lt;/b&gt;&lt;/p&gt;&lt;span style=&quot;text-align: center;&quot;&gt;implements&lt;/span&gt;&lt;b style=&quot;text-align: center;&quot;&gt;&amp;nbsp;ElementCapability&lt;/b&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style: solid;&quot;&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;// root兜底监听器，捕捉所有类型的&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Element&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Capability&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;，事件冒泡进入根层一般是空枪了，监听器负责打log&lt;/span&gt;&lt;/p&gt;" vertex="1">
           <mxGeometry height="160" width="200" x="640" y="400" as="geometry" />
         </mxCell>
+        <mxCell id="yOF8UReIFOzTizhC-6Yj-3" parent="XGk20LJQXmPGTgXszKcP-75" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin: 4px 0px 0px; text-align: center;&quot;&gt;&lt;b style=&quot;background-color: transparent; text-align: left; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;IslandConfigurer&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;// 小组件编辑器&lt;/p&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="640" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="yOF8UReIFOzTizhC-6Yj-4" edge="1" parent="XGk20LJQXmPGTgXszKcP-75" source="x4VV83cT4qzIJcIFohZl-18" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;" target="yOF8UReIFOzTizhC-6Yj-3" value="Use">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="1140" y="290" as="sourcePoint" />
+            <mxPoint x="1220" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yOF8UReIFOzTizhC-6Yj-6" edge="1" parent="XGk20LJQXmPGTgXszKcP-75" source="XGk20LJQXmPGTgXszKcP-71" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;" target="x4VV83cT4qzIJcIFohZl-18" value="Use">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="110" y="280" as="sourcePoint" />
+            <mxPoint x="190" y="275" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
         <mxCell id="x4VV83cT4qzIJcIFohZl-58" parent="1" style="swimlane;startSize=0;" value="" vertex="1">
-          <mxGeometry height="640" width="560" x="440" y="40" as="geometry" />
+          <mxGeometry height="760" width="560" x="440" y="40" as="geometry" />
         </mxCell>
         <mxCell id="x4VV83cT4qzIJcIFohZl-59" parent="x4VV83cT4qzIJcIFohZl-58" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;" value="mi2u.ui.island.children" vertex="1">
           <mxGeometry height="40" width="100" x="20" as="geometry" />
@@ -100,7 +109,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="x4VV83cT4qzIJcIFohZl-8" parent="x4VV83cT4qzIJcIFohZl-58" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;&lt;strike&gt;StackLayout&lt;/strike&gt;&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;div style=&quot;height:2px;&quot;&gt;// 目前暂未发现此布局的应用面&lt;/div&gt;" vertex="1">
-          <mxGeometry height="80" width="200" x="40" y="320" as="geometry" />
+          <mxGeometry height="80" width="200" x="320" y="320" as="geometry" />
         </mxCell>
         <mxCell id="x4VV83cT4qzIJcIFohZl-9" edge="1" parent="x4VV83cT4qzIJcIFohZl-58" source="x4VV83cT4qzIJcIFohZl-8" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;" target="XGk20LJQXmPGTgXszKcP-41" value="">
           <mxGeometry relative="1" width="160" as="geometry">
@@ -109,7 +118,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="x4VV83cT4qzIJcIFohZl-70" parent="x4VV83cT4qzIJcIFohZl-58" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;&lt;strike&gt;TableLayout&lt;/strike&gt;&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;div style=&quot;height:2px;&quot;&gt;// 用Column和Row组合代替&lt;/div&gt;" vertex="1">
-          <mxGeometry height="80" width="200" x="320" y="320" as="geometry" />
+          <mxGeometry height="80" width="200" x="320" y="440" as="geometry" />
         </mxCell>
         <mxCell id="x4VV83cT4qzIJcIFohZl-71" edge="1" parent="x4VV83cT4qzIJcIFohZl-58" source="x4VV83cT4qzIJcIFohZl-70" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;" target="XGk20LJQXmPGTgXszKcP-41" value="">
           <mxGeometry relative="1" width="160" as="geometry">
@@ -118,10 +127,10 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="x4VV83cT4qzIJcIFohZl-95" parent="x4VV83cT4qzIJcIFohZl-58" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;align=left;" value="问：Tabbed布局的接口不支持传入当前展示页码&lt;div&gt;页码状态也不适合放在ChildrenIsland&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;解法：childrenlayout有状态，可序列化&lt;/div&gt;" vertex="1">
-          <mxGeometry height="160" width="200" x="320" y="440" as="geometry" />
+          <mxGeometry height="160" width="200" x="320" y="560" as="geometry" />
         </mxCell>
         <mxCell id="XGk20LJQXmPGTgXszKcP-39" parent="x4VV83cT4qzIJcIFohZl-58" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;ChildrenContent&lt;/b&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;&amp;nbsp;&lt;/b&gt;implements&amp;nbsp;&lt;b&gt;arc.util.serialization.Json&lt;/b&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;b&gt;.JsonSerializable&lt;/b&gt;&lt;/span&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&amp;nbsp;// 统一的children序列数据模型+&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;可更换的布局模式&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ children:Seq&amp;lt;Island&amp;gt;&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ childrenCount(): int&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ childrenLayout: ChildrenLayout&lt;/span&gt;&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;+ depth: int &amp;lt;= 4 // 非必要不提升&lt;/span&gt;&lt;/p&gt;" vertex="1">
-          <mxGeometry height="160" width="200" x="40" y="440" as="geometry" />
+          <mxGeometry height="160" width="200" x="40" y="560" as="geometry" />
         </mxCell>
         <mxCell id="XGk20LJQXmPGTgXszKcP-42" edge="1" parent="x4VV83cT4qzIJcIFohZl-58" source="XGk20LJQXmPGTgXszKcP-39" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;edgeStyle=elbowEdgeStyle;" target="XGk20LJQXmPGTgXszKcP-41" value="Use">
           <mxGeometry relative="1" width="160" x="-0.3433" as="geometry">
@@ -137,6 +146,16 @@
           <mxGeometry height="80" width="200" x="320" y="160" as="geometry" />
         </mxCell>
         <mxCell id="x4VV83cT4qzIJcIFohZl-5" edge="1" parent="x4VV83cT4qzIJcIFohZl-58" source="x4VV83cT4qzIJcIFohZl-4" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;" target="XGk20LJQXmPGTgXszKcP-41" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <Array as="points" />
+            <mxPoint x="310" y="150" as="sourcePoint" />
+            <mxPoint x="590" y="146.25" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yOF8UReIFOzTizhC-6Yj-1" parent="x4VV83cT4qzIJcIFohZl-58" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;RootStackLayout&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style: solid;&quot;&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;// 根节点专用布局&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;// 持有 configurer 引用&lt;/p&gt;&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;+ savedX, savedY: int&lt;/p&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="40" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="yOF8UReIFOzTizhC-6Yj-2" edge="1" parent="x4VV83cT4qzIJcIFohZl-58" source="yOF8UReIFOzTizhC-6Yj-1" style="endArrow=block;dashed=1;endFill=0;endSize=12;html=1;rounded=0;" target="XGk20LJQXmPGTgXszKcP-41" value="">
           <mxGeometry relative="1" width="160" as="geometry">
             <Array as="points" />
             <mxPoint x="310" y="150" as="sourcePoint" />
@@ -427,6 +446,18 @@
             <mxGeometry height="800" width="550" x="-1640" y="1440" as="geometry" />
           </mxCell>
         </UserObject>
+        <mxCell id="C4bwMTUnUg3LJpQlkqtF-1" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;align=left;" value="island在overlay中的拖拽行为&lt;div&gt;1.移动位置&lt;/div&gt;&lt;div&gt;2.设置吸附（如果有）：根据移动位置的结果判定&lt;/div&gt;&lt;div&gt;3.修改布局树（若移动到路径面包屑上）&lt;/div&gt;" vertex="1">
+          <mxGeometry height="120" width="200" x="-960" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="C4bwMTUnUg3LJpQlkqtF-2" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;align=left;" value="&lt;div&gt;面包屑显示当前拖拽的island的路径，是单条的。路径上每个widget岛都展示为label，每个children岛除了label还有一个下拉菜单button，其中罗列了所有children的label并且有上下调序按钮。&lt;/div&gt;&lt;div&gt;widget岛的label不接受拖放。&lt;/div&gt;&lt;div&gt;用例1：路径为root-A-B-C，C想成为A的子级、和B同级，就拖拽到面包屑的A标签（追加到A.children末尾），再在A的下拉菜单中调整B、C顺序。&lt;/div&gt;&lt;div&gt;用例2：路径为root-A-B-C-D，想从widget shop添加island E，要成为C的子级、和D同级放置，将E从shop随意拖出，自动添加到root的子级，再次选中E，拖拽到root的下拉菜单的A标签进入A.children，再次选中E，拖拽到A的下拉菜单的B标签进入B.children，如此直到进入C.children，最后在C的下拉菜单调整D和E的顺序&lt;/div&gt;" vertex="1">
+          <mxGeometry height="280" width="240" x="-960" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="yOF8UReIFOzTizhC-6Yj-5" edge="1" parent="1" source="yOF8UReIFOzTizhC-6Yj-1" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;" target="yOF8UReIFOzTizhC-6Yj-3" value="Use">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="460" y="330" as="sourcePoint" />
+            <mxPoint x="540" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
