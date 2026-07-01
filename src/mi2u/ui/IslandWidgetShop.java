@@ -48,6 +48,8 @@ public class IslandWidgetShop extends Table {
             click(island);
         }).with(funcSetTextb);
 
+        row();
+
         button("拖拽把手", textb, () -> {
             var island = new Island("DragHandle", new DragHandle());
             click(island);
@@ -55,6 +57,11 @@ public class IslandWidgetShop extends Table {
 
         button("标签页把手", textb, () -> {
             var island = new Island("TabHandle", new TabHandle());
+            click(island);
+        }).with(funcSetTextb);
+
+        button("最小化把手", textb, () -> {
+            var island = new Island("MinimizeHandle", new MinimizeHandle());
             click(island);
         }).with(funcSetTextb);
     }

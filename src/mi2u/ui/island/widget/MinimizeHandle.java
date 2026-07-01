@@ -1,90 +1,53 @@
 package mi2u.ui.island.widget;
 
-import arc.scene.event.*;
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import arc.util.serialization.*;
 import mi2u.ui.*;
 import mi2u.ui.capability.*;
-import mi2u.ui.elements.*;
 import mi2u.ui.island.*;
 import mi2u.ui.island.children.*;
-import mindustry.gen.*;
 import mindustry.ui.*;
 
 import static mi2u.MI2UVars.*;
 
-public class TabHandle implements WidgetContent{
+public class MinimizeHandle implements WidgetContent{
     private Island owner;
     public Island target;
     private transient int tempTargetId; // 反序列化过程临时变量
-    public TextButton button;
-    public Label statMark;
-    public CombinationIcon handle;
+    public TextButton handle;
 
-    // 以下设置页均为懒初始化
-    public PopupTable selector;
     public IslandBranchTable targetSelector;
 
     private ChildrenSelectCapabilityEvent e = new ChildrenSelectCapabilityEvent();
 
-    public TabHandle(){
-        button = new TextButton("" + Iconc.list, textb);
-        button.changed(() -> popupSelector());
-        statMark = new Label(() -> {
-            var island = getListenerTabIsland();
-            if(island.content instanceof ChildrenContent cc && cc.childrenLayout instanceof TabbedLayout tl){
-                return (tl.index + 1) + "/" + cc.getChildren().size;
+    public MinimizeHandle(){
+        handle = new TextButton("-", textb);
+        handle.update(() -> {
+            var listener = getListenerTabIsland();
+            if(listener != null && listener.content instanceof ChildrenContent cc && cc.childrenLayout instanceof TabbedLayout tl){
+                handle.setText(tl.index == 0 ? "-" : "□");
             }
-            return "" + Iconc.none;
         });
-        statMark.touchable = Touchable.disabled;
-        statMark.setFontScale(0.5f);
-        handle = new CombinationIcon(t -> {
-            t.add(button).grow();
-        }).bottomRight(t -> {
-            t.add(statMark);
-        });
-    }
-
-    public void popupSelector(){
-        if(selector == null){
-            selector = new PopupTable();
-            selector.background(Styles.black3);
-            selector.margin(10f);
-            selector.update(() -> {
-                selector.snapTo(getOwner());
-            });
-        }
-        selector.clear();
-        selector.margin(10f);
-        selector.addCloseButton();
-        var listener = getListenerTabIsland();
-        if(listener != null){
-            if(listener.content instanceof ChildrenContent cc && cc.childrenLayout instanceof TabbedLayout tl){
-                var seq = cc.getChildren();
-                for(int i = 0; i < seq.size; i++){
-                    // 既然构建button需要读取layout.children详情，索性直接控制layout.index，不再发送事件了
-                    var child = seq.get(i);
-                    final int finalI = i;
-                    selector.add(String.valueOf(finalI + 1)).padRight(4f);
-                    selector.button(child.name, textb, () -> {
-                        tl.index = finalI;
-                        cc.getOwner().rebuild();
-                    }).with(funcSetTextb);
-                    selector.row();
+        handle.changed(() -> {
+            var listener = getListenerTabIsland();
+            if(listener != null){
+                if(listener.content instanceof ChildrenContent cc && cc.childrenLayout instanceof TabbedLayout tl){
+                    int size = cc.getChildren().size;
+                    if(size >= 1){
+                        if(tl.index != 0){
+                            tl.index = 0;
+                        }else{
+                            tl.index = 1;
+                        }
+                    }else{
+                        tl.index = 0;
+                    }
+                    cc.getOwner().rebuild();
                 }
-                selector.popup();
-                selector.pack();
-                return;
             }
-            selector.add("<响应者不是Tab框架>");
-            selector.popup();
-            return;
-        }
-        selector.add("<未发现Tab框架>");
-        selector.popup();
+        });
     }
 
     @Override
@@ -157,7 +120,7 @@ public class TabHandle implements WidgetContent{
         if(island != null){
             target = island;
         }else if(tempTargetId != -1){
-            Log.infoTag("MI2U", "TabHandle(ownerId=" + owner.id + ") lost reference to targetId=" + tempTargetId + ", fallback to self.");
+            Log.infoTag("MI2U", "MinimizeHandle(ownerId=" + owner.id + ") lost reference to targetId=" + tempTargetId + ", fallback to self.");
         }
     }
 }

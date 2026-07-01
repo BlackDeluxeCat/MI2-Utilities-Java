@@ -72,6 +72,7 @@ public class IslandOverlays{
         JsonUtils.registerClass("text", TextWidget.class);
         JsonUtils.registerClass("dragHandle", DragHandle.class);
         JsonUtils.registerClass("tabHandle", TabHandle.class);
+        JsonUtils.registerClass("minimizeHandle", MinimizeHandle.class);
 
         // ChildrenLayout
         JsonUtils.registerClass("rootStack", RootStackLayout.class);
@@ -83,7 +84,6 @@ public class IslandOverlays{
         JsonUtils.registerClass("dragCap", DragCapability.class);
         JsonUtils.registerClass("snapCap", SnapCapability.class);
         JsonUtils.registerClass("resizeCap", ResizeCapability.class);
-        JsonUtils.registerClass("minimizeCap", MinimizeCapability.class);
         JsonUtils.registerClass("tabSelectCap", TabSelectCapability.class);
 
         // 容器元素类型
