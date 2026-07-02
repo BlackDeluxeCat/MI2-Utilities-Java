@@ -83,10 +83,6 @@ public class IslandConfigurePanel extends Table {
                 t.button("更改父级", textb, () -> rebuildConfigParentChange(configTable, target)).with(funcSetTextb);
             }
 
-            if(island.content instanceof ChildrenContent){
-                t.button("添加子级组件", textb, () -> rebuildConfigAddChild(configTable, target)).with(funcSetTextb);
-            }
-
             if(island.parent instanceof Island){
                 t.add("拖拽移动").with(l -> {
                     l.addListener(new InputListener(){
@@ -120,6 +116,10 @@ public class IslandConfigurePanel extends Table {
                         }
                     });
                 });
+            }
+
+            if(island.content instanceof ChildrenContent){
+                t.button("子级商城", textb, () -> rebuildConfigAddChild(configTable, target)).with(funcSetTextb);
             }
 
             if(island.getParentIsland() != null){
@@ -173,7 +173,7 @@ public class IslandConfigurePanel extends Table {
         parentSelectorTable.build();
         parentSelectorTable.setTarget(island);
         parentSelectorTable.onConfirm = parent -> callSetChildParent.get(island, parent);
-        parentSelectorTable.canConfirmValidation = parent -> parent != island && parent.content instanceof ChildrenContent cc && cc.canAddChild(island);
+        parentSelectorTable.canConfirmValidation = parent -> parent != island && parent.content instanceof ChildrenContent cc && cc.canAddChild(island) && !IslandUtils.isAscendantOf(island, parent);
         t.clear();
         t.add(parentSelectorTable);
     }

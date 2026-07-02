@@ -124,7 +124,7 @@ public class Island extends Table implements JsonSerializable{
             }
         }
 
-        // read 之后调用方应调用 rebuild() 重建 UI
+        // json2Island 之后调用方应调用 rebuild() 重建 UI
     }
 
     public static String getIslandName(Island island){

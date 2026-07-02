@@ -1,15 +1,19 @@
 package mi2u.ui.island;
 
 import arc.func.*;
+import arc.struct.*;
+import arc.util.*;
+import mi2u.io.*;
 import mi2u.ui.island.children.*;
 
 public class IslandUtils {
-    // 便捷方法，减少instanceof样板代码
+    // 标准方法，减少instanceof样板代码
     public static boolean addChild(Island parent, Island child){
-        if(parent != null && child != null && parent.content instanceof ChildrenContent cc){
-            cc.addChild(child);
+        if(parent != null && child != null && parent != child && !isAscendantOf(child, parent) && parent.content instanceof ChildrenContent cc){
+            cc.unsafeAddChild(child);
             return true;
         }
+        Log.warn("Cannot add child.");
         return false;
     }
 
@@ -21,6 +25,10 @@ public class IslandUtils {
             island = island.getParentIsland();
         }while(i++ < 100);
         return null;
+    }
+
+    public static boolean isRoot(Island tree){
+        return tree.content instanceof ChildrenContent cc && cc.childrenLayout instanceof RootStackLayout;
     }
 
     public static boolean hasSameRoot(Island i1, Island i2){
@@ -54,12 +62,60 @@ public class IslandUtils {
         return findDescendant(root, i -> i.id == id);
     }
 
+    /** 反序列化一条island分支 */
+    public static Island json2Island(String json){
+        return JsonUtils.json.fromJson(Island.class, json);
+    }
+
+    /** 序列化一条island分支 */
+    public static String island2Json(Island island){
+        return JsonUtils.json.toJson(island);
+    }
+
+    public static void regenerateIdsRecursive(Island island){
+        runRecursive(island, isle -> isle.id = Island.newId());
+    }
+
     public static void runRecursive(Island island, Cons<Island> cons){
         if(island == null) return;
         cons.get(island);
         if(island.content instanceof ChildrenContent cc){
             for(Island child : cc.getChildren()){
                 runRecursive(child, cons);
+            }
+        }
+    }
+
+    /** 检查树拓扑是否无环 */
+    public static boolean isAcyclic(Island tree){
+        ObjectSet<Island> set = new ObjectSet<>();
+        return isAcyclicRecursive(tree, set);
+    }
+
+    private static boolean isAcyclicRecursive(Island tree, ObjectSet<Island> set){
+        // 自己有环
+        if(!set.add(tree)) return false;
+        // 子级有环
+        if(tree.content instanceof ChildrenContent cc){
+            for(Island child : cc.getChildren()){
+                if(!isAcyclicRecursive(child, set)){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public static void rebuildLinks(Island island){
+        rebuildLinksRecursive(island, null);
+    }
+
+    private static void rebuildLinksRecursive(Island island, Island parent){
+        island.setParentIsland(parent);
+
+        if(island.content instanceof ChildrenContent cc){
+            for(Island child : cc.getChildren()){
+                rebuildLinksRecursive(child, island);
             }
         }
     }

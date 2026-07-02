@@ -9,7 +9,6 @@ import mi2u.io.*;
 import mi2u.ui.island.*;
 import mi2u.ui.island.children.*;
 import mi2u.ui.island.widget.*;
-import mindustry.game.*;
 
 public class IslandOverlay {
     public final String name;
@@ -32,7 +31,7 @@ public class IslandOverlay {
         public void loadFromJson(String json) {
             Island jsonRoot = null;
             try{
-                jsonRoot = JsonUtils.json.fromJson(Island.class, json);
+                jsonRoot = IslandUtils.json2Island(json);
             }catch(Exception e){
                 Log.err("Island overlay JSON parse error.", e);
             }
@@ -57,7 +56,7 @@ public class IslandOverlay {
 
         Island savedRoot = null;
         try{
-            savedRoot = JsonUtils.json.fromJson(Island.class, SettingHandler.global.getStr("islandOverlay." + name));
+            savedRoot = IslandUtils.json2Island(SettingHandler.global.getStr("islandOverlay." + name));
         }catch(Exception e){
             Log.err("Island overlay JSON parse error: " + name + ".", e);
         }
@@ -93,7 +92,7 @@ public class IslandOverlay {
     }
 
     public void forceSave(){
-        String current = JsonUtils.json.toJson(root);
+        String current = IslandUtils.island2Json(root);
         if(!current.equals(rootJson)){
             SettingHandler.global.putString("islandOverlay." + name, current);
             rootJson = current;
@@ -105,9 +104,15 @@ public class IslandOverlay {
         Island oldRoot = this.root; // 暂存旧根
         try {
             IslandOverlay.this.root = savedRoot;
+            if(!IslandUtils.isRoot(savedRoot)){
+                throw new RuntimeException("Loading overlay is not root island.");
+            }
+            if(!IslandUtils.isAcyclic(savedRoot)){
+                throw new RuntimeException("Loading overlay is not acyclic.");
+            }
             RootStackLayout rootLayout = (RootStackLayout)((ChildrenContent)root.content).childrenLayout;
             rootLayout.setConfigurer(configurer);
-            rebuildLinks(root);
+            IslandUtils.rebuildLinks(root);
             IslandUtils.runRecursive(root, island -> {
                 if(island.content instanceof WidgetContent wc){
                     wc.onRebindReference(root);
@@ -117,20 +122,6 @@ public class IslandOverlay {
         } catch (Exception e) {
             IslandOverlay.this.root = oldRoot;   // 回滚
             Log.err("Load overlay " + name + " failed, rollback.", e);
-        }
-    }
-
-    public void rebuildLinks(Island island){
-        rebuildLinksRecursive(island, null);
-    }
-
-    private void rebuildLinksRecursive(Island island, Island parent){
-        island.setParentIsland(parent);
-
-        if(island.content instanceof ChildrenContent cc){
-            for(Island child : cc.getChildren()){
-                rebuildLinksRecursive(child, island);
-            }
         }
     }
 }

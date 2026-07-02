@@ -33,10 +33,11 @@ public class ChildrenContent implements IslandContent{
 
     /**
      * ChildrenContent的添加子级能力
+     * 但缺乏全局安全检查
      * @param island
      * @return 添加是否真实发生
      */
-    public boolean addChild(Island island){
+    public boolean unsafeAddChild(Island island){
         var oldParent = island.getParentIsland();
         // 旧父级脱绑
         if(oldParent != null){

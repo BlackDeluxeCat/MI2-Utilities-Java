@@ -15,6 +15,7 @@ import mi2u.io.*;
 import mi2u.ui.*;
 import mi2u.ui.elements.*;
 import mi2u.ui.island.children.*;
+import mindustry.*;
 import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.ui.*;
@@ -131,7 +132,7 @@ public class IslandConfigurer extends Table{
                     }
                 });
             });
-        }).expandX().right().pad(4f);
+        }).expandX().pad(4f);
         table.row();
         table.stack(
             new Element(){
@@ -151,18 +152,22 @@ public class IslandConfigurer extends Table{
             })
         ).pad(4f).grow();
         table.row();
-        table.button("从剪切板导入", textb, () -> {
+        table.button(Iconc.paste + "导入布局树", textb, () -> {
             getAccess().loadFromJson(Core.app.getClipboardText());
         }).with(funcSetTextb);
         table.row();
-        table.button("导出到剪切板", textb, () -> {
+        table.button(Iconc.copy + "导出布局树", textb, () -> {
             Core.app.setClipboardText(JsonUtils.json.prettyPrint(getAccess().getRoot()));
         }).with(funcSetTextb);
-//        table.row();
-//        table.button("DEBUG重建IDs", textb, () -> {
-//            IslandUtils.runRecursive(getAccess().getRoot(), island -> {
-//                island.id = Island.newId();
-//            });
-//        }).with(funcSetTextb);
+        table.row();
+        table.button(Iconc.copy + "导出选中的分支", textb, () -> {
+            Core.app.setClipboardText(IslandUtils.island2Json(islandConfigurePanel.getTarget()));
+        }).with(funcSetTextb);
+        table.row();
+        table.button("重新生成IDs", textb, () -> {
+            IslandUtils.runRecursive(getAccess().getRoot(), island -> {
+                island.id = Island.newId();
+            });
+        }).with(funcSetTextb);
     }
 }
