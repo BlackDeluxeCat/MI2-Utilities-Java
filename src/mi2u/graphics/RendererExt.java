@@ -47,7 +47,8 @@ public class RendererExt{
     public static Field itemBridgeBuffer = MI2Utils.getField(BufferedItemBridge.BufferedItemBridgeBuild.class, "buffer"),
             itemBridgeBufferBuffer = MI2Utils.getField(ItemBuffer.class, "buffer"), itemBridgeBufferIndex = MI2Utils.getField(ItemBuffer.class, "index"),
             unloaderBuilding = MI2Utils.getField(Unloader.ContainerStat.class, "building"),
-            lexecTimer = MI2Utils.getField(LExecutor.class, "unitTimeouts");
+            lexecTimer = MI2Utils.getField(LExecutor.class, "unitTimeouts"),
+            wallBuildHit = MI2Utils.getField(Wall.WallBuild.class, "hit");
 
     public static boolean animatedshields;
     public static boolean enPlayerCursor;
@@ -473,10 +474,18 @@ public class RendererExt{
 
         if(build.health < build.maxHealth){
             if(build instanceof Wall.WallBuild wb && ((Wall)wb.block).flashHit){
-                float hitTime = wb.hit;
+                float hitTime;
+                try {
+                    hitTime = wallBuildHit.getFloat(wb);
+                } catch (IllegalAccessException e) {
+                    hitTime = 0f;
+                }
                 if(hitTime > 0f){
                     Draw.color(Color.white, Mathf.lerp(0.1f, 1f, Mathf.clamp(hitTime)));
-                    barDrawer.fill(Align.top, 1f, lenMul, 2f + Mathf.lerp(0f, 2f, Mathf.clamp(hitTime)));
+                    float deltaWidth = Mathf.lerp(0f, 2f, Mathf.clamp(hitTime));
+                    barDrawer.box.width += deltaWidth;
+                    barDrawer.fill(Align.top, 1f, lenMul, 2f + deltaWidth);
+                    barDrawer.box.width -= deltaWidth;
                 }
             }
 

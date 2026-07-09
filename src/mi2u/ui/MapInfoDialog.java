@@ -66,7 +66,7 @@ public class MapInfoDialog extends BaseDialog{
                     tt.row();
                     tt.label(() -> Core.bundle.get("rules.dropzoneradius") + ": " + Strings.fixed(state.rules.dropZoneRadius / tilesize, 1)).pad(2f);
                     tt.row();
-                    addBoolString(() -> state.rules.showSpawns, "@mapInfo.showSpawns", tt);
+                    addBoolString(() -> state.rules.hideSpawns, "@mapInfo.showSpawns", tt);
                     tt.row();
                     addBoolString(() -> state.rules.randomWaveAI, "@rules.randomwaveai", tt);
                     tt.row();
