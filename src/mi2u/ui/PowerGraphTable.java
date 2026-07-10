@@ -34,7 +34,7 @@ public class PowerGraphTable extends Table{
     public final AlluvialDiagram diagram = new AlluvialDiagram();
     public boolean powerIOBars;
 
-    //n x 6 Element array with icons and labels from generator, consumer, storage.
+    // n x 6 Element array with cached icons and labels from generator, consumer, storage.
     static Element[][] blocksI = new Element[content.blocks().size][6];
 
     static Interval interval = new Interval(3);
@@ -42,6 +42,12 @@ public class PowerGraphTable extends Table{
     float totalCap = 0f, totalCons = 0f, totalGen = 0f;
 
     OrderedSet<PowerGraph> graphs = new OrderedSet<>();
+
+    static{
+        Events.on(EventType.ContentInitEvent.class, e -> {
+            blocksI = new Element[content.blocks().size][6];
+        });
+    }
 
     public PowerGraphTable(){
         super();
@@ -172,13 +178,13 @@ public class PowerGraphTable extends Table{
                         tt.defaults().left().width(ew);
                         tt.label(() -> Iconc.blockSolarPanel + "+" + Strings.fixed(info.totalgen, 1)).colspan(2).padBottom(5f).color(Color.green);
 
-                        for(int m = 0; m < info.blocks.length; m++){
+                        for(int m = 0; m < info.blocks.items.length; m++){
                             int i = m;
-                            if(!Mathf.zero(info.bgen[i], 0.001f)){
+                            if(!Mathf.zero(info.bgen.items[i], 0.001f)){
                                 tt.row();
                                 tt.add(getBlockImage(i, 0, () -> new Image(content.block(i).uiIcon))).size(16f).pad(2f);
                                 var l = getBlockImage(i, 3, () -> new Label(""));
-                                ((Label)l).setText(() -> "x" + info.blocks[i] + " [gray]+" + Strings.autoFixed(info.bgen[i], 1));
+                                ((Label)l).setText(() -> "x" + info.blocks.items[i] + " [gray]+" + Strings.autoFixed(info.bgen.items[i], 1));
                                 tt.add(l);
                             }
                         }
@@ -189,13 +195,13 @@ public class PowerGraphTable extends Table{
                     gas.table(tt -> {
                         tt.defaults().left().width(ew);
                         tt.labelWrap(() -> Iconc.blockBattery + "(" + Strings.fixed(100*info.pg.getBatteryStored()/info.totalcap, 1) + "%)\n" + (int)info.pg.getBatteryStored()).colspan(2).padBottom(5f).color(Pal.accent);
-                        for(int m = 0; m < info.blocks.length; m++){
+                        for(int m = 0; m < info.blocks.size; m++){
                             int i = m;
-                            if(!Mathf.zero(info.bstore[i], 0.001f)){
+                            if(!Mathf.zero(info.bstore.items[i], 0.001f)){
                                 tt.row();
                                 tt.add(getBlockImage(i, 2, () -> new Image(content.block(i).uiIcon))).size(16f).pad(2f);
                                 var l = getBlockImage(i, 5, () -> new Label(""));
-                                ((Label)l).setText(() -> "x" + info.blocks[i] + "  [gray]" + Strings.autoFixed(info.bstore[i], 1));
+                                ((Label)l).setText(() -> "x" + info.blocks.items[i] + "  [gray]" + Strings.autoFixed(info.bstore.items[i], 1));
                                 tt.add(l);
                             }
                         }
@@ -206,19 +212,19 @@ public class PowerGraphTable extends Table{
                     tt.defaults().left().width(ew);
                     tt.label(() -> Iconc.blockSiliconSmelter + "-" + Strings.fixed(info.totalcons, 1)).colspan(2).padBottom(5f).color(Color.scarlet);
                     int used = 0;
-                    for(int m = 0; m < info.blocks.length; m++){
-                        if(!Mathf.zero(info.bcons[m], 0.001f)) used++;
+                    for(int m = 0; m < info.blocks.size; m++){
+                        if(!Mathf.zero(info.bcons.items[m], 0.001f)) used++;
                     }
 
                     int columns = Mathf.ceil(used / (Mathf.maxZero(Core.graphics.getHeight() - 400f) + 1f) * 16f) * 2;
 
-                    for(int m = 0; m < info.blocks.length; m++){
+                    for(int m = 0; m < info.blocks.size; m++){
                         int i = m;
-                        if(!Mathf.zero(info.bcons[i], 0.001f)){
+                        if(!Mathf.zero(info.bcons.items[i], 0.001f)){
                             if(Mathf.mod((tt.getCells().size - 1), columns) == 0) tt.row();
                             tt.add(getBlockImage(i, 1, () -> new Image(content.block(i).uiIcon))).size(16f).pad(2f);
                             var l = getBlockImage(i, 4, () -> new Label(""));
-                            ((Label)l).setText(() -> "x" + info.blocks[i] + " [gray]-" + Strings.autoFixed(info.bcons[i], 1));
+                            ((Label)l).setText(() -> "x" + info.blocks.items[i] + " [gray]-" + Strings.autoFixed(info.bcons.items[i], 1));
                             tt.add(l);
                         }
                     }
@@ -401,8 +407,8 @@ public class PowerGraphTable extends Table{
         public FloatDataRecorder consG, genG, stG;
         public float totalcons, totalgen, totalcap;
         public float ltotalcons, ltotalgen, ltotalcap;
-        public float[] bcons = new float[blocksI.length], bgen = new float[blocksI.length], bstore = new float[blocksI.length];
-        public int[] blocks = new int[blocksI.length];
+        public FloatSeq bcons = new FloatSeq(), bgen = new FloatSeq(), bstore = new FloatSeq();
+        public IntSeq blocks = new IntSeq();
 
         MI2Bar barStore;
         MI2Bar barGen;
@@ -434,6 +440,10 @@ public class PowerGraphTable extends Table{
 
         public PGInfo renew(PowerGraph pg){
             this.pg = pg;
+            blocks.setSize(content.blocks().size);
+            bcons.setSize(content.blocks().size);
+            bgen.setSize(content.blocks().size);
+            bstore.setSize(content.blocks().size);
 
             barStore.set(() -> barStore.getWidth() <= 50f ? "" : UI.formatAmount((long)pg.getLastPowerStored()) + (barStore.getWidth() <= 100f ? "" : (" " + (pg.getPowerBalance() >= 0 ? "+" : "") + UI.formatAmount((long)(pg.getPowerBalance() * 60)))), () -> pg.getLastPowerStored() / totalcap, Pal.accent);
 
@@ -448,31 +458,31 @@ public class PowerGraphTable extends Table{
 
         public void update(){
             if(!vaild()) return;
-            Arrays.fill(blocks, 0);
-            Arrays.fill(bcons, 0);
-            Arrays.fill(bgen, 0);
-            Arrays.fill(bstore, 0);
+            Arrays.fill(blocks.items, 0);
+            Arrays.fill(bcons.items, 0);
+            Arrays.fill(bgen.items, 0);
+            Arrays.fill(bstore.items, 0);
             totalcons = totalcap = totalgen = 0;
 
-            pg.all.each(b -> blocks[b.block.id] += 1);
+            pg.all.each(b -> blocks.items[b.block.id] += 1);
             pg.batteries.each(b -> {
                 if(b.block.consPower == null) return;
-                bstore[b.block.id] += b.block.consPower.capacity;
+                bstore.items[b.block.id] += b.block.consPower.capacity;
             });
             pg.consumers.each(b -> {
                 if(b.block.consPower == null) return;
                 if(b.block.consPower instanceof ConsumePowerDynamic cons){
-                    bcons[b.block.id] += cons.requestedPower(b) * 60f;
+                    bcons.items[b.block.id] += cons.requestedPower(b) * 60f;
                 }else{
-                    bcons[b.block.id] += Mathf.zero(b.block.consPower.requestedPower(b)) ? 0f : b.block.consPower.usage * (b.shouldConsume() ? b.efficiency * b.timeScale() : 0f) * 60f;
+                    bcons.items[b.block.id] += Mathf.zero(b.block.consPower.requestedPower(b)) ? 0f : b.block.consPower.usage * (b.shouldConsume() ? b.efficiency * b.timeScale() : 0f) * 60f;
                 }
             });
-            pg.producers.each(b -> bgen[b.block.id] += b.getPowerProduction() * 60f * b.efficiency * b.timeScale());
+            pg.producers.each(b -> bgen.items[b.block.id] += b.getPowerProduction() * 60f * b.efficiency * b.timeScale());
 
-            for(int i = 0; i < blocks.length; i++){
-                totalcap += bstore[i];
-                totalcons += bcons[i];
-                totalgen += bgen[i];
+            for(int i = 0; i < blocks.size; i++){
+                totalcap += bstore.items[i];
+                totalcons += bcons.items[i];
+                totalgen += bgen.items[i];
             }
             ltotalcap = Mathf.lerp(ltotalcap, totalcap, 0.9f);
             ltotalgen = Mathf.lerp(ltotalgen, totalgen, 0.9f);
@@ -488,10 +498,10 @@ public class PowerGraphTable extends Table{
         @Override
         public void reset(){
             pg = null;
-            Arrays.fill(blocks, 0);
-            Arrays.fill(bcons, 0);
-            Arrays.fill(bgen, 0);
-            Arrays.fill(bstore, 0);
+            Arrays.fill(blocks.items, 0);
+            Arrays.fill(bcons.items, 0);
+            Arrays.fill(bgen.items, 0);
+            Arrays.fill(bstore.items, 0);
             totalcons = totalcap = totalgen = 0;
             genG.reset();
             genG.resize(90);
