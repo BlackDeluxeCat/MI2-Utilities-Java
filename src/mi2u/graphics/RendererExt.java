@@ -44,6 +44,9 @@ public class RendererExt{
     protected static ObjectMap<Unit, Vec2> players = new ObjectMap<>();
     protected static Seq<Unit> hiddenUnit = new Seq<>();
 
+    protected static Seq<Building> tileViewBuildingCollection = new Seq<>();
+    protected static Seq<Tile> removedFromCache = new Seq<>();
+
     public static Field itemBridgeBuffer = MI2Utils.getField(BufferedItemBridge.BufferedItemBridgeBuild.class, "buffer"),
             itemBridgeBufferBuffer = MI2Utils.getField(ItemBuffer.class, "buffer"), itemBridgeBufferIndex = MI2Utils.getField(ItemBuffer.class, "index"),
             unloaderBuilding = MI2Utils.getField(Unloader.ContainerStat.class, "building"),
@@ -107,6 +110,7 @@ public class RendererExt{
         Events.on(EventType.WorldLoadEvent.class, e -> {
             players.clear();
             hiddenUnit.clear();
+            removedFromCache.clear();
             TurretZoneDrawer.clear();
         });
 
@@ -193,25 +197,73 @@ public class RendererExt{
             }
         });
 
-        Seq<Tile> tiles = MI2Utils.getValue(renderer.blocks, "tileview");
+        tileViewBuildingCollection.clear();
+        Seq<Tile> tileview = MI2Utils.getValue(renderer.blocks, "tileview");
+        Seq<Building> tileExtraCachedView = MI2Utils.getValue(renderer.blocks, "tileExtraCachedView");
         BuildingInventory.ids.clear();
-        if(tiles != null){
-            if(disableBuilding){
-                tiles.removeAll(tile -> tile.build != null && filterDisableBuilding[tile.build.block.id]);
+        if(tileview != null && tileExtraCachedView != null){
+            for(Tile tile : tileview){
+                if(tile.build != null){
+                    tileViewBuildingCollection.add(tile.build);
+                }
             }
 
-            for(var tile : tiles){
-                if(tile.build == null) continue;
-                if(enBlockHpBar) drawBlockHpBar(tile.build);
-                if(enDistributionReveal){
-                    BuildingInventory.ids.add(tile.build.id);
-                    boolean transport = drawBlackboxBuilding(tile.build);
-                    if(drevealInventory && !transport) drawItemStack(tile.build);
+            // 未经细致筛选
+            for(Building building : tileExtraCachedView){
+                tileViewBuildingCollection.add(building);
+            }
+
+            if(removedFromCache.any()){
+                QuadTree<Tile> cachedTree = MI2Utils.getValue(renderer.blocks, "blockCachedTree");
+                if(cachedTree != null){
+                    var iter = removedFromCache.iterator();
+                    while(iter.hasNext()){
+                        Tile t = iter.next();
+                        if(t.build == null || !disableBuilding || !filterDisableBuilding[t.build.block.id]){
+                            cachedTree.insert(t);
+                            renderer.blocks.recacheBuilding(BuildingCacheLayer.normal, t);
+                            renderer.blocks.recacheBuilding(BuildingCacheLayer.under, t);
+                            iter.remove();
+                        }
+                    }
                 }
-                if(enTurretZone && tile.build instanceof BaseTurret.BaseTurretBuild btb && filterTurretRangeZone[tile.build.block.id]) drawTurretZone(btb);
-                if(enOverdriveZone && tile.build instanceof OverdriveProjector.OverdriveBuild odb) drawOverDriver(odb);
-                if(enMenderZone && tile.build instanceof MendProjector.MendBuild mb) drawMender(mb);
-                if(enMenderZone && tile.build instanceof RegenProjector.RegenProjectorBuild rb) drawRegen(rb);
+            }
+            // 从叠加队列移除
+            if(disableBuilding){
+                tileview.removeAll(tile -> {
+                    return tile.build != null && filterDisableBuilding[tile.build.block.id];
+                });
+                tileExtraCachedView.removeAll(b -> b != null && filterDisableBuilding[b.block.id]);
+
+                // 清除 SpriteCache 主纹理
+                QuadTree<Tile> cachedTree = MI2Utils.getValue(renderer.blocks, "blockCachedTree");
+                if(cachedTree != null){
+                    // 触发 chunk 重缓存
+                    for(var build : tileViewBuildingCollection){
+                        if(build.tile != null && filterDisableBuilding[build.block.id]){
+                            if(cachedTree.remove(build.tile)){
+                                removedFromCache.add(build.tile);
+                                renderer.blocks.recacheBuilding(/*mirrored from game*/ BuildingCacheLayer.normal, build.tile);
+                                renderer.blocks.recacheBuilding(/*mirrored from game*/ BuildingCacheLayer.under, build.tile);
+                            }
+                        }
+                    }
+                }
+                tileViewBuildingCollection.removeAll(b -> b != null && filterDisableBuilding[b.block.id]);
+            }
+
+            for(var build : tileViewBuildingCollection){
+                if(build == null) continue;
+                if(enBlockHpBar) drawBlockHpBar(build);
+                if(enDistributionReveal){
+                    BuildingInventory.ids.add(build.id);
+                    boolean transport = drawBlackboxBuilding(build);
+                    if(drevealInventory && !transport) drawItemStack(build);
+                }
+                if(enTurretZone && build instanceof BaseTurret.BaseTurretBuild btb && filterTurretRangeZone[build.block.id]) drawTurretZone(btb);
+                if(enOverdriveZone && build instanceof OverdriveProjector.OverdriveBuild odb) drawOverDriver(odb);
+                if(enMenderZone && build instanceof MendProjector.MendBuild mb) drawMender(mb);
+                if(enMenderZone && build instanceof RegenProjector.RegenProjectorBuild rb) drawRegen(rb);
                 Draw.reset();
             }
         }
