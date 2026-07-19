@@ -131,6 +131,14 @@ public class RendererExt{
         });
     }
 
+    public static boolean getFilterDisableBuilding(int id){
+        return id >= filterDisableBuilding.length || filterDisableBuilding[id];
+    }
+
+    public static boolean getFilterDisableUnit(int id){
+        return id >= filterDisableUnit.length || filterDisableUnit[id];
+    }
+
     public static void updateSettings(){
         animatedshields = Core.settings.getBool("animatedshields");
 
@@ -183,7 +191,7 @@ public class RendererExt{
                 dd.setIndex__draw(-1);
             }
             if(d instanceof Unit u){
-                if(disableUnit && filterDisableUnit[u.type.id]){
+                if(disableUnit && getFilterDisableUnit(u.type.id)){
                     Groups.draw.removeIndex(u, MI2Utils.getValue(drawIndexUnit, u));
                     u.setIndex__draw(-1);
                     hiddenUnit.add(u);
@@ -219,7 +227,7 @@ public class RendererExt{
                     var iter = removedFromCache.iterator();
                     while(iter.hasNext()){
                         Tile t = iter.next();
-                        if(t.build == null || !disableBuilding || !filterDisableBuilding[t.build.block.id]){
+                        if(t.build == null || !disableBuilding || !getFilterDisableBuilding(t.build.block.id)){
                             cachedTree.insert(t);
                             renderer.blocks.recacheBuilding(BuildingCacheLayer.normal, t);
                             renderer.blocks.recacheBuilding(BuildingCacheLayer.under, t);
@@ -231,16 +239,16 @@ public class RendererExt{
             // 从叠加队列移除
             if(disableBuilding){
                 tileview.removeAll(tile -> {
-                    return tile.build != null && filterDisableBuilding[tile.build.block.id];
+                    return tile.build != null && getFilterDisableBuilding(tile.build.block.id);
                 });
-                tileExtraCachedView.removeAll(b -> b != null && filterDisableBuilding[b.block.id]);
+                tileExtraCachedView.removeAll(b -> b != null && getFilterDisableBuilding(b.block.id));
 
                 // 清除 SpriteCache 主纹理
                 QuadTree<Tile> cachedTree = MI2Utils.getValue(renderer.blocks, "blockCachedTree");
                 if(cachedTree != null){
                     // 触发 chunk 重缓存
                     for(var build : tileViewBuildingCollection){
-                        if(build.tile != null && filterDisableBuilding[build.block.id]){
+                        if(build.tile != null && getFilterDisableBuilding(build.block.id)){
                             if(cachedTree.remove(build.tile)){
                                 removedFromCache.add(build.tile);
                                 renderer.blocks.recacheBuilding(/*mirrored from game*/ BuildingCacheLayer.normal, build.tile);
@@ -249,7 +257,7 @@ public class RendererExt{
                         }
                     }
                 }
-                tileViewBuildingCollection.removeAll(b -> b != null && filterDisableBuilding[b.block.id]);
+                tileViewBuildingCollection.removeAll(b -> b != null && getFilterDisableBuilding(b.block.id));
             }
 
             for(var build : tileViewBuildingCollection){
@@ -260,7 +268,7 @@ public class RendererExt{
                     boolean transport = drawBlackboxBuilding(build);
                     if(drevealInventory && !transport) drawItemStack(build);
                 }
-                if(enTurretZone && build instanceof BaseTurret.BaseTurretBuild btb && filterTurretRangeZone[build.block.id]) drawTurretZone(btb);
+                if(enTurretZone && build instanceof BaseTurret.BaseTurretBuild btb && build.block.id < filterTurretRangeZone.length && filterTurretRangeZone[build.block.id]) drawTurretZone(btb);
                 if(enOverdriveZone && build instanceof OverdriveProjector.OverdriveBuild odb) drawOverDriver(odb);
                 if(enMenderZone && build instanceof MendProjector.MendBuild mb) drawMender(mb);
                 if(enMenderZone && build instanceof RegenProjector.RegenProjectorBuild rb) drawRegen(rb);
@@ -368,7 +376,7 @@ public class RendererExt{
                 Lines.endLine();
             }
 
-            if(enUnitRangeZone && filterUnitRangeZone[unit.type.id]){
+            if(enUnitRangeZone && unit.type.id < filterUnitRangeZone.length && filterUnitRangeZone[unit.type.id]){
                 Draw.z(TurretZoneDrawer.getLayer(unit.team.id));
 
                 drawRangeZone(unit.x, unit.y, unit.range(),
