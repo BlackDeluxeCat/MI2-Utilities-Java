@@ -88,16 +88,21 @@ public class CoreInfoMindow extends Mindow2{
         });
 
         Events.on(EventType.ContentInitEvent.class, e -> {
+            itemRecoders = new FloatDataRecorder[content.items().size];
             itemCharts = new PopupTable[content.items().size];
             content.items().each(item -> {
+                itemRecoders[item.id] = new FloatDataRecorder(120);
                 itemRecoders[item.id].getter = () -> core == null ? 0 : core.items.get(item);
+                itemRecoders[item.id].titleGetter = () -> item.localizedName + ": ";
                 itemCharts[item.id] = getItemChart(item);
             });
         });
 
         Events.on(EventType.WorldLoadEvent.class, e -> {
             content.items().each(item -> {
-                itemRecoders[item.id].reset();
+                if(item.id < itemRecoders.length){
+                    itemRecoders[item.id].reset();
+                }
             });
         });
 
@@ -176,7 +181,7 @@ public class CoreInfoMindow extends Mindow2{
                                 chart.hide();
                             }
                         });
-                    });
+                    }).width(80f);
 
                     if(++i % columns == 0) iut.row();
                 }
