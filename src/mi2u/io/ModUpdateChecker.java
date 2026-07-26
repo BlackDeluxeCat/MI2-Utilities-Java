@@ -221,7 +221,7 @@ public class ModUpdateChecker {
                 (asset.releaseBody.length() > 200 ? asset.releaseBody.substring(0, 200) + "..." : asset.releaseBody)),
             () -> {
                 // 调用mod安装方法
-                ui.mods.githubImportMod(REPO_NAME, true, asset.releaseUrl.substring(asset.releaseUrl.lastIndexOf("/") + 1));
+                ui.mods.githubImportMod(REPO_NAME, true, asset.releaseUrl.substring(asset.releaseUrl.lastIndexOf("/") + 1), false);
                 dialog.hide();
             });
     }

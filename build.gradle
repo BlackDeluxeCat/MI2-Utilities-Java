@@ -17,7 +17,7 @@ repositories{
 
 ext{
     //the build number that this mod is made for
-    mindustryVersion = 'v159.2'
+    mindustryVersion = 'v159.7'
     jabelVersion = "0.7.0"
     sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
 }
