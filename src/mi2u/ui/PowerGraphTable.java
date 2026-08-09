@@ -194,7 +194,7 @@ public class PowerGraphTable extends Table{
 
                     gas.table(tt -> {
                         tt.defaults().left().width(ew);
-                        tt.labelWrap(() -> Iconc.blockBattery + "(" + Strings.fixed(100*info.pg.getBatteryStored()/info.totalcap, 1) + "%)\n" + (int)info.pg.getBatteryStored()).colspan(2).padBottom(5f).color(Pal.accent);
+                        tt.labelWrap(() -> Iconc.blockBattery + "(" + Strings.fixed(100*info.getBatteryStored()/info.totalcap, 1) + "%)\n" + (int)info.getBatteryStored()).colspan(2).padBottom(5f).color(Pal.accent);
                         for(int m = 0; m < info.blocks.size; m++){
                             int i = m;
                             if(!Mathf.zero(info.bstore.items[i], 0.001f)){
@@ -448,7 +448,7 @@ public class PowerGraphTable extends Table{
             barStore.set(() -> barStore.getWidth() <= 50f ? "" : UI.formatAmount((long)pg.getLastPowerStored()) + (barStore.getWidth() <= 100f ? "" : (" " + (pg.getPowerBalance() >= 0 ? "+" : "") + UI.formatAmount((long)(pg.getPowerBalance() * 60)))), () -> pg.getLastPowerStored() / totalcap, Pal.accent);
 
             update();
-            stG.getter = pg::getBatteryStored;
+            stG.getter = this::getBatteryStored;
             return this;
         }
 
@@ -509,6 +509,22 @@ public class PowerGraphTable extends Table{
             consG.resize(90);
             stG.reset();
             stG.resize(90);
+        }
+
+        /**
+         * 相比直接{@code PowerGraph.getBatteryStored()}，这个方法带有更多空检查
+         */
+        protected float getBatteryStored(){
+            if(pg == null) return 0f;
+            float totalAccumulator = 0f;
+            var items = pg.batteries.items;
+            for(int i = 0; i < pg.batteries.size; i++){
+                var battery = items[i];
+                if(battery.enabled && battery.block != null && battery.block.consPower != null){
+                    totalAccumulator += battery.power.status * battery.block.consPower.capacity;
+                }
+            }
+            return totalAccumulator;
         }
     }
 }
