@@ -63,6 +63,8 @@ public class BuildingInventory extends Element{
     public void setBuilding(Building b){
         this.build = b;
         size = b.block.size;
+        itemused.resize(content.items().size);
+        liquidused.resize(content.liquids().size);
         group.addChild(this);
     }
 

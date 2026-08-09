@@ -83,6 +83,10 @@ public class MI2Utils{
             return get(0, time);
         }
 
+        public void resize(int capacity){
+            if(capacity > times.length) times = Arrays.copyOf(times, capacity);
+        }
+
         public boolean get(int id, long time){
             if(id >= times.length) throw new RuntimeException("Out of bounds! Max timer size is " + times.length + "!");
 
