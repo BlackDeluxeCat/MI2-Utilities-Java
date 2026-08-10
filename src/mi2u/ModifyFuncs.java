@@ -33,7 +33,7 @@ public class ModifyFuncs{
 
     public static void modifyVanilla(){
         modifyVanillaBlockBars();
-        Events.on(EventType.ContentInitEvent.class, e2 -> modifyVanillaBlockBars());
+        Events.on(EventType.WorldLoadEvent.class, e2 -> modifyVanillaBlockBars());
         initBetterTopTable();
         settingsMenuDialog();
     }
