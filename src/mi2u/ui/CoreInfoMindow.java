@@ -87,28 +87,21 @@ public class CoreInfoMindow extends Mindow2{
             itemCharts[item.id] = getItemChart(item);
         });
 
-        Events.on(EventType.ContentInitEvent.class, e -> {
+        Events.on(EventType.WorldLoadEvent.class, e -> {
             itemRecoders = new FloatDataRecorder[content.items().size];
             itemCharts = new PopupTable[content.items().size];
             content.items().each(item -> {
                 itemRecoders[item.id] = new FloatDataRecorder(120);
-                itemRecoders[item.id].getter = () -> core == null ? 0 : core.items.get(item);
+                itemRecoders[item.id].getter = () -> core == null || (item.id >= core.items.length()) ? 0  : core.items.get(item);
                 itemRecoders[item.id].titleGetter = () -> item.localizedName + ": ";
                 itemCharts[item.id] = getItemChart(item);
-            });
-        });
-
-        Events.on(EventType.WorldLoadEvent.class, e -> {
-            content.items().each(item -> {
-                if(item.id < itemRecoders.length){
-                    itemRecoders[item.id].reset();
-                }
             });
         });
 
         Events.on(EventType.ResetEvent.class, e -> {
             usedItems.clear();
             usedUnits.clear();
+            rebuild();
         });
 
         Events.run(EventType.Trigger.update, () -> {
