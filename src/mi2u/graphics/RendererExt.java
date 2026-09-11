@@ -119,10 +119,8 @@ public class RendererExt{
             players.each((u, v) -> {if(u == null) return; if(!u.isPlayer()||!u.isValid()) players.remove(u);});
             drawBase();
 
-            for(var marker : FullAI.LogicMode.markers){
-                if(marker.world){
-                    marker.draw(marker.autoscale ? 4f / renderer.getDisplayScale() : 1);
-                }
+            for(var marker : FullAI.LogicMode.markers.worldMarkers){
+                marker.draw(marker.autoscale ? 4f / renderer.getDisplayScale() : 1);
             }
         });
 
