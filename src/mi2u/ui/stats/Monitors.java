@@ -6,10 +6,10 @@ import arc.struct.*;
 public class Monitors{
     public static Seq<MonitorMeta> all = new Seq<>();
 
-    public static MonitorMeta health = new MonitorMeta("health", HealthBM::new, Type.building),
-    itemChart = new MonitorMeta("itemchart", ItemChartBM::new, Type.building),
-    logicProcessor = new MonitorMeta("logicprocessor", BaseLogicMonitor.ProcessorMonitor::new, Type.building),
-    logicMemory = new MonitorMeta("logicmemory", BaseLogicMonitor.MemoryMonitor::new, Type.building);
+    public static MonitorMeta health = new MonitorMeta("health", HealthBM::new, Type.building);
+    public static MonitorMeta itemChart = new MonitorMeta("itemchart", ItemChartBM::new, Type.building);
+    public static MonitorMeta logicProcessor = new MonitorMeta("logicprocessor", BaseLogicMonitor.ProcessorMonitor::new, Type.building);
+    //logicMemory = new MonitorMeta("logicmemory", BaseLogicMonitor.MemoryMonitor::new, Type.building);
 
     public static class MonitorMeta{
         public String name;

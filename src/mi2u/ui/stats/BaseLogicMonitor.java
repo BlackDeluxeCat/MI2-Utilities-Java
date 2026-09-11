@@ -106,6 +106,7 @@ public class BaseLogicMonitor extends BuildingMonitor{
         }
     }
 
+    @Deprecated
     public static class MemoryMonitor extends BaseLogicMonitor{
         public transient double[] memory;
         public transient Seq<Runnable> updaters = new Seq<>();
@@ -131,22 +132,22 @@ public class BaseLogicMonitor extends BuildingMonitor{
                     }
                 });
 
-                if(b instanceof MemoryBlock.MemoryBuild mb){
-                    for(int i = 0; i < mb.memory.length; i++){
-                        final int id = i;
-                        if(i % Math.max(Mathf.floor(w / 2 / unitSize), 1) == 0) t.row();
-                        t.add(new CombinationIcon(c -> c.add("").labelAlign(Align.right).grow().with(l -> {
-                            updaters.add(() -> {
-                                String num = Strings.autoFixed((float)mb.memory[id], 3);
-                                l.setColor(Color.white);
-                                if(!l.textEquals(num)){
-                                    l.setText(num);
-                                    l.setColor(Color.acid);
-                                }
-                            });
-                        })).bottomRight(c -> c.add(String.valueOf(id)).color(Pal.accent).fontScale(0.6f))).size(unitSize * 2, unitSize);
-                    }
-                }
+//                if(b instanceof MemoryBlock.MemoryBuild mb){
+//                    for(int i = 0; i < mb.memory.length; i++){
+//                        final int id = i;
+//                        if(i % Math.max(Mathf.floor(w / 2 / unitSize), 1) == 0) t.row();
+//                        t.add(new CombinationIcon(c -> c.add("").labelAlign(Align.right).grow().with(l -> {
+//                            updaters.add(() -> {
+//                                String num = Strings.autoFixed((float)mb.memory[id], 3);
+//                                l.setColor(Color.white);
+//                                if(!l.textEquals(num)){
+//                                    l.setText(num);
+//                                    l.setColor(Color.acid);
+//                                }
+//                            });
+//                        })).bottomRight(c -> c.add(String.valueOf(id)).color(Pal.accent).fontScale(0.6f))).size(unitSize * 2, unitSize);
+//                    }
+//                }
             }).grow().with(p -> {
                 p.setFadeScrollBars(true);
                 p.setupFadeScrollBars(0.3f, 0);
@@ -157,20 +158,20 @@ public class BaseLogicMonitor extends BuildingMonitor{
         public void validate(){
             super.validate();
             var mb = b instanceof MemoryBlock.MemoryBuild tm ? tm : null;
-            if(memory == null && mb != null){
-                memory = mb.memory;
-                shouldRebuild = true;
-            }
-
-            if(memory != null){
-                if(mb == null){
-                    memory = null;
-                    shouldRebuild = true;
-                }else if(memory.length != mb.memory.length){
-                    memory = mb.memory;
-                    shouldRebuild = true;
-                }
-            }
+//            if(memory == null && mb != null){
+//                memory = mb.memory;
+//                shouldRebuild = true;
+//            }
+//
+//            if(memory != null){
+//                if(mb == null){
+//                    memory = null;
+//                    shouldRebuild = true;
+//                }else if(memory.length != mb.memory.length){
+//                    memory = mb.memory;
+//                    shouldRebuild = true;
+//                }
+//            }
         }
     }
 }
