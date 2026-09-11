@@ -43,12 +43,6 @@ public class PowerGraphTable extends Table{
 
     OrderedSet<PowerGraph> graphs = new OrderedSet<>();
 
-    static{
-        Events.on(EventType.ContentInitEvent.class, e -> {
-            blocksI = new Element[content.blocks().size][6];
-        });
-    }
-
     public PowerGraphTable(){
         super();
         detailTable.touchable = Touchable.disabled;
@@ -235,6 +229,10 @@ public class PowerGraphTable extends Table{
 
     public static Element getBlockImage(int id, int i3, Prov<Element> getter){
         return blocksI[id][i3] != null ? blocksI[id][i3] : (blocksI[id][i3] = getter.get());
+    }
+
+    public static void rebuildBlockImageCache(){
+        blocksI = new Element[content.blocks().size][6];
     }
 
     public class AlluvialDiagram extends WidgetGroup{

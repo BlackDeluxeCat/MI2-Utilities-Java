@@ -90,6 +90,7 @@ public class CoreInfoMindow extends Mindow2{
         Events.on(EventType.WorldLoadEvent.class, e -> {
             itemRecoders = new FloatDataRecorder[content.items().size];
             itemCharts = new PopupTable[content.items().size];
+            PowerGraphTable.rebuildBlockImageCache();
             content.items().each(item -> {
                 itemRecoders[item.id] = new FloatDataRecorder(120);
                 itemRecoders[item.id].getter = () -> core == null || (item.id >= core.items.length()) ? 0  : core.items.get(item);
