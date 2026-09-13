@@ -12,6 +12,7 @@ import arc.util.pooling.*;
 import mi2u.*;
 import mi2u.ai.*;
 import mi2u.ui.*;
+import mindustry.*;
 import mindustry.ai.*;
 import mindustry.ai.types.*;
 import mindustry.content.*;
@@ -138,7 +139,7 @@ public class RendererExt{
     }
 
     public static void updateSettings(){
-        animatedshields = Core.settings.getBool("animatedshields");
+        animatedshields = renderer.animateWater;    // !anuke may rename it later
 
         enPlayerCursor = mi2ui.settings.getBool("enPlayerCursor");
         enUnitHitbox = mi2ui.settings.getBool("enUnitHitbox");
@@ -694,7 +695,7 @@ public class RendererExt{
     public static void drawRangeZone(float x, float y, float range, Color border, Color fill){
         Draw.color(border);
         Lines.stroke(3f);
-        Draw.alpha(animatedshields ? 1f : (0.4f * rangeZoneTransparency));
+        Draw.alpha(animatedshields ? 1f : (0.8f * rangeZoneTransparency));
         Lines.circle(x, y, range + 1);
 
         Draw.color(fill);
